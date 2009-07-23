@@ -1,0 +1,112 @@
+RELEASE NOTES for omniORB 4.0.7
+===============================
+
+This is omniORB 4.0.7. It is a stable release.
+
+See README.unix or README.win32.txt for building instructions.
+
+New features since omniORB 4.0.6
+--------------------------------
+
+ - Bug fixes.
+ - New configuration parameters. See sample.cfg for documentation:
+
+     traceFile
+     maxSocketSend
+     maxSocketRecv
+     connectionWatchPeriod
+     connectionWatchImmediate
+     abortOnNativeException
+     sslCAFile
+     sslKeyFile
+     sslKeyPassword
+     sslVerifyMode
+
+ - -ORBconfigFile command line parameter.
+
+
+New features since omniORB 4.0.5
+--------------------------------
+
+ - Bug fixes.
+ - Ability to watch connections from more than one thread in thread
+   pool mode.
+ - New omniORB::versionString() and versionHex() functions.
+
+
+New features since omniORB 4.0.4
+--------------------------------
+
+ - Bug fixes.
+ - New makedeffile.py script to help build Windows DLLs.
+ - Instructions on packaging stubs into DLLs (chapter 12 in the manual).
+ - OpenVMS is supported again.
+
+
+New features since omniORB 4.0.3
+--------------------------------
+
+ - Bug fixes.
+ - Minor new features: persistent server identifiers, support for
+   unloadable stubs, traceExceptions parameter.
+ - Platform additions and fixes.
+
+
+New features since omniORB 4.0.2
+--------------------------------
+
+ - Bug fixes.
+ - omniunix corbaloc scheme.
+ - Small scalability improvements.
+
+
+New features since omniORB 4.0.1
+--------------------------------
+
+ - Bug fixes.
+ - Use of standard iostreams in omniNames etc., if available.
+ - Performance improvements.
+
+
+New features since omniORB 4.0.0
+--------------------------------
+
+ - Bug fixes.
+ - Per object reference and per-thread timeouts.
+ - Complete interceptors.
+ - Support for new platforms: MacOS, VxWorks, Digital Mars C++
+ - Small performance improvements.
+
+
+Major new features since omniORB 3.0.x
+--------------------------------------
+
+ - Updated to CORBA 2.6.
+ - Support for GIOP 1.1 and 1.2.
+ - Wide string and codeset negotiation.
+ - Unix domain and SSL transports.
+ - Bidirectional GIOP.
+ - Flexible thread pool mode.
+ - PortableServer::Current.
+ - Interceptors.
+ - Fixed point.
+ - Complete freeing of all heap allocations.
+ - New comprehensive configuration mechanism.
+ - Commercial support. See http://www.omniorb-support.com/
+
+And many other improvements.
+
+
+Known issues
+------------
+
+This release has the following known issues and omissions. They are
+planned for the 4.1 series.
+
+ - valuetype is not supported.
+
+ - local interfaces are not supported.
+
+ - iostream insertion and extraction operators for CORBA types are not
+   implemented.
+

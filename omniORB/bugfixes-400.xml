@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORB 4.0.0     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="4.0.0">
+
+<bug id="9" date="Tue Jan 28 12:05:54 GMT 2003" user="dgrisby">
+  <summary>Incorrect threading behaviour with multiple requests</summary>
+  <reported>Michael Sturm, Ulf Stoermer</reported>
+  <text>
+  If a client sent multiple requests in a single transfer (e.g. a
+  collection of oneways), the select loop could fail to notice them,
+  causing them to be serialised, rather than dispatched to separate
+  threads.
+  </text>
+</bug>
+
+<bug id="8" date="Thu Dec  5 12:16:33 GMT 2002" user="dgrisby">
+  <summary>Various problems with recursive TypeCodes</summary>
+  <reported>Clemens Fischer</reported>
+  <text>
+  Some things would fail when using recursive TypeCodes generated with
+  orb->create_recursive_tc().
+  </text>
+</bug>
+
+<bug id="7" date="Thu Nov 21 15:48:26 GMT 2002" user="dgrisby">
+  <summary>Call descriptor clash with oneways</summary>
+  <reported>Ilya Kreyer</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2002-November/022299.html"/>
+  <text>
+  Functions with identical signatures except for onewayness would
+  incorrectly share call descriptor classes.
+  </text>
+</bug>
+
+<bug id="6" date="Fri Nov  8 17:17:14 GMT 2002" user="dgrisby">
+  <summary>Hang on shutdown</summary>
+  <reported>Norrie Quinn</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2002-November/022208.html"/>
+  <text>
+  In some circumstances, shutdown could hang if servant locators were
+  in use.
+  </text>
+</bug>
+
+<bug id="5" date="Wed Oct 30 16:41:56 GMT 2002" user="dgrisby">
+  <summary>Log flush bug</summary>
+  <reported>John Fardo</reported>
+  <text>
+  The omniORB logger's flush function did not use the application
+  supplied log function.
+  </text>
+</bug>
+
+<bug id="4" date="Mon Oct 14 15:48:35 BST 2002" user="dgrisby">
+  <summary>Object ids not unique in PERSISTENT SYSTEM_ID POAs</summary>
+  <reported>Bjorn Rohde Jensen</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2002-October/021993.html"/>
+  <text>
+  A POA with the PERSISTENT and SYSTEM_ID policies should generate
+  object ids that are unique across all runs. omniORB failed to do
+  that. See the new poaUniquePersistentSystemIds configuration
+  parameter if you need the old behaviour.
+  </text>
+</bug>
+
+<bug id="3" date="Mon Oct 14 15:48:35 BST 2002" user="dgrisby">
+  <summary>Deadlock race condition in create_POA / destroy</summary>
+  <reported>Teemu Torma</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2002-October/021987.html"/>
+  <text>
+  If a thread destroying a POA raced with another thread trying to
+  create the same POA, a deadlock could occur.
+  </text>
+</bug>
+
+<bug id="2" date="Fri Oct  4 12:01:31 BST 2002" user="dgrisby">
+  <summary>Random endpoint errors on Windows</summary>
+  <reported>Norrie Quinn</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2002-September/021849.html"/>
+</bug>
+
+<bug id="1" date="Wed Oct  2 21:06:51 BST 2002" user="dgrisby">
+  <summary>Broken .mak files for Windows</summary>
+  <reported>Jonathan Shaw</reported>
+  <text>
+  The .mak files for use with Windows nmake were broken. The Windows
+  binary distribution has been patched.
+  </text>
+</bug>
+
+</buglist>

@@ -1,0 +1,79 @@
+RELEASE NOTES for omniORBpy 2.7
+===============================
+
+This is omniORBpy 2.7. It is a stable release.
+
+See README for building instructions.
+
+
+New features since omniORBpy 2.6
+--------------------------------
+
+ - Bug fixes.
+ - Minor performance improvements.
+ - __repr__ methods for most generated classes.
+ - _tuple() method on structs.
+
+
+New features since omniORBpy 2.5
+--------------------------------
+
+ - Bug fixes.
+ - cdrMarshal and cdrUnmarshal take an option endian parameter to
+   create raw marshalled data rather than GIOP encapsulations.
+
+
+New features since omniORBpy 2.4
+--------------------------------
+
+ - Bug fixes.
+
+
+New features since omniORBpy 2.3
+--------------------------------
+
+ - Bug fixes.
+ - Minor new functions.
+
+
+New features since omniORBpy 2.2
+--------------------------------
+
+ - Bug fixes.
+ - Minor new functions.
+
+
+New features since omniORBpy 2.1
+--------------------------------
+
+ - Rudimentary interceptor support.
+ - Support for Python 2.3.
+ - Bug fixes.
+
+
+New features since omniORBpy 2.0
+--------------------------------
+
+ - Per thread and per object reference timeouts.
+ - Generation of stubs for all COS IDL.
+ - New omniORB.any module to help convert to and from Anys.
+ - Minor bug fixes.
+
+
+Major new features since omniORBpy 1.x
+--------------------------------------
+
+ - Updated to CORBA 2.6.
+ - Support for GIOP 1.1 and 1.2.
+ - Wide string and codeset negotiation.
+ - Unix domain and SSL transports.
+ - Bidirectional GIOP.
+ - Flexible thread pool mode.
+ - PortableServer::Current.
+ - Efficient in-process calls between C++ and Python.
+ - Python / C++ object reference translation API.
+ - Fixed point.
+ - New comprehensive configuration mechanism.
+ - Commercial support. See http://www.omniorb-support.com/
+
+And many other improvements.

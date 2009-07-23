@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORB 4.0.0     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="4.0.1">
+
+<bug id="8" date="Fri Jul 25 15:48:26 BST 2003" user="dgrisby">
+  <summary>COMM_FAILURE after orderly connection closure</summary>
+  <reported>Daniel Bell</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2003-July/023924.html"/>
+  <text>
+  Clients using GIOP 1.0 or 1.1 would report a COMM_FAILURE when a
+  server closed a connection with a GIOP 1.2 CloseConnection message.
+  </text>
+</bug>
+
+<bug id="7" date="Wed Jul  2 11:54:20 BST 2003" user="dgrisby">
+  <summary>Race condition in POA destruction</summary>
+  <reported>Emmanuel Taurel</reported>
+  <text>
+  If a call happened in the middle of POA destruction, the servant was
+  sometimes etherealised twice, leading to an assertion failure.
+  </text>
+</bug>
+
+<bug id="6" date="Fri Jun 27 10:26:37 BST 2003" user="dgrisby">
+  <summary>Deadlock after POA exception</summary>
+  <reported>Vladimir Panov</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2003-June/023803.html"/>
+  <text>
+  Calling deactivate_object on a destroyed POA would leave a mutex
+  locked after throwing an exception.
+  </text>
+</bug>
+
+<bug id="5" date="Tue May 27 12:15:31 BST 2003" user="dgrisby">
+  <summary>Deferred DII requests fail on Windows</summary>
+  <reported>Emmanuel Taurel</reported>
+  <text>
+  The ORB invoker object was not exported from the core DLL, so use of
+  it from the dynamic DLL failed.
+  </text>
+</bug>
+
+<bug id="4" date="Thu May 22 15:47:16 BST 2003" user="dgrisby">
+  <summary>Crash in registry reading code</summary>
+  <reported>Titus von Boxberg</reported>
+  <text>
+  A misplaced allocation caused a crash when there were no keys in the
+  omniORB key.
+  </text>
+</bug>
+
+<bug id="3" date="Thu May 22 14:30:47 BST 2003" user="dgrisby">
+  <summary>Connections ignored after exceptions in thread pool
+  mode.</summary>
+  <reported>Malge Nishant</reported>
+  <listlink
+  href="http://www.omniorb-support.com/pipermail/omniorb-list/2003-May/023631.html"/>
+  <text>
+  In some circumstances, a connections were not marked selectable
+  after an exception, meaning future requests on them were not noticed
+  in thread pool mode.
+  </text>
+</bug>
+
+<bug id="2" date="Tue Apr 15 11:33:05 BST 2003" user="dgrisby">
+  <summary>Timeouts sometimes ignored when scan granularity is
+  zero</summary>
+  <reported>Clemens Fischer</reported>
+  <listlink href="http://www.omniorb-support.com/pipermail/omniorb-list/2003-April/023477.html"/>
+  <text>
+  A bug in connection handling meant that integer timeouts could be
+  ignored if the scan granularity was set to zero.
+  </text>
+</bug>
+
+<bug id="1" date="Sun Mar 23 20:36:13 GMT 2003" user="dgrisby">
+  <summary>Deallocation bug assigning an Any to itself</summary>
+  <reported>Vasily Tchekalkin</reported>
+  <text>
+  Assigning an Any to itself would cause it to be incorrectly
+  deallocated.
+  </text>
+</bug>
+
+</buglist>
