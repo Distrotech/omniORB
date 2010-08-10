@@ -29,102 +29,6 @@
 //	*** PROPRIETARY INTERFACE ***
 //      
 
-// $Log$
-// Revision 1.4.2.6  2006/09/17 23:24:18  dgrisby
-// Remove hard-coded hostname length.
-//
-// Revision 1.4.2.5  2006/03/25 18:54:03  dgrisby
-// Initial IPv6 support.
-//
-// Revision 1.4.2.4  2005/11/09 12:22:17  dgrisby
-// Local interfaces support.
-//
-// Revision 1.4.2.3  2005/07/22 17:18:36  dgrisby
-// Another merge from omni4_0_develop.
-//
-// Revision 1.4.2.2  2005/01/06 23:10:41  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.4.2.1  2003/03/23 21:02:00  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.2.2.16  2003/02/17 02:03:09  dgrisby
-// vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-//
-// Revision 1.2.2.15  2002/02/13 16:03:17  dpg1
-// Memory leak due to missing virtual destructor.
-//
-// Revision 1.2.2.14  2002/02/01 11:20:40  dpg1
-// Silly bug in string_to_object wil nil objref.
-//
-// Revision 1.2.2.13  2001/12/04 14:32:27  dpg1
-// Minor corbaloc bugs.
-//
-// Revision 1.2.2.12  2001/08/18 17:28:38  sll
-// Fixed minor bug introduced by the previous update.
-//
-// Revision 1.2.2.11  2001/08/17 17:14:54  sll
-// Moved handler initialisation into static initialisers.
-//
-// Revision 1.2.2.10  2001/08/03 17:41:25  sll
-// System exception minor code overhaul. When a system exeception is raised,
-// a meaning minor code is provided.
-//
-// Revision 1.2.2.9  2001/07/31 17:42:11  sll
-// Cleanup String_var usage.
-//
-// Revision 1.2.2.8  2001/06/11 17:53:22  sll
-//  The omniIOR ctor used by genior and corbaloc now has the option to
-//  select whether to call interceptors and what set of interceptors to call.
-//
-// Revision 1.2.2.7  2001/06/08 17:12:22  dpg1
-// Merge all the bug fixes from omni3_develop.
-//
-// Revision 1.2.2.6  2001/04/18 18:18:04  sll
-// Big checkin with the brand new internal APIs.
-//
-// Revision 1.2.2.5  2000/11/22 14:39:55  dpg1
-// Treat empty host name in corbaloc: as localhost, as per 2.4 spec.
-//
-// Revision 1.2.2.4  2000/11/20 11:58:39  dpg1
-// No need to initialise omniIOR module before uri module.
-//
-// Revision 1.2.2.3  2000/11/09 12:27:59  dpg1
-// Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-//
-// Revision 1.2.2.2  2000/09/27 18:24:14  sll
-// Use omniObjRef::_toString and _fromString. Use the new omniIOR class and
-// createObjRef().
-//
-// Revision 1.2.2.1  2000/07/17 10:36:00  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.3  2000/07/13 15:25:54  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.1.2.6  2000/06/30 14:12:07  dpg1
-// Minor fixes for FreeBSD.
-//
-// Revision 1.1.2.5  2000/06/27 15:40:58  sll
-// Workaround for Cygnus gcc's inability to recognise _CORBA_Octet*& and
-// CORBA::Octet*& are the same type.
-//
-// Revision 1.1.2.4  2000/06/22 10:40:17  dpg1
-// exception.h renamed to exceptiondefs.h to avoid name clash on some
-// platforms.
-//
-// Revision 1.1.2.3  2000/06/19 14:18:33  dpg1
-// Explicit cast to (const char*) when using String_var with logger.
-//
-// Revision 1.1.2.2  2000/05/24 17:18:11  dpg1
-// Rename IIOP::DEFAULT_PORT IIOP::DEFAULT_CORBALOC_PORT
-//
-// Revision 1.1.2.1  2000/04/27 10:52:29  dpg1
-// Interoperable Naming Service
-//
-// Implementation of URI functions.
-//
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <omniORB4/CORBA.h>
@@ -150,8 +54,8 @@ static omnivector<omniURI::URIHandler*> handlers;
 char*
 omniURI::buildURI(const char* prefix, const char* host, CORBA::UShort port)
 {
-  const char* ip4format = "%s%s:%d";
-  const char* ip6format = "%s[%s]:%d";
+  const char* ip4format = "%s:%s:%d";
+  const char* ip6format = "%s:[%s]:%d";
 
   const char* format = ip4format;
   CORBA::ULong len = strlen(prefix);
@@ -161,9 +65,13 @@ omniURI::buildURI(const char* prefix, const char* host, CORBA::UShort port)
   }
 
   if (len == 0) return 0;
-  len += strlen(format) + 6;
+  len += strlen(format) + 7;
   CORBA::String_var addrstr(CORBA::string_alloc(len));
-  sprintf((char*)addrstr, format, prefix, host, port);
+
+  if (*prefix)
+    sprintf((char*)addrstr, format, prefix, host, port);
+  else
+    sprintf((char*)addrstr, format + 3, host, port);
 
   return addrstr._retn();
 }
@@ -209,14 +117,55 @@ omniURI::extractHostPort(const char*    addr,
     port = 0;
   }
 
-  if (rest)
+  if (rest) {
     *rest = p + n;
+  }
+  else if (*(p+n)) {
+    // Trailing characters
+    return 0;
+  }
+  return host._retn();
+}
+
+char*
+omniURI::extractHostPortRange(const char*    addr,
+			      CORBA::UShort& port_min,
+			      CORBA::UShort& port_max)
+{
+  const char* rest = 0;
+
+  CORBA::String_var host = extractHostPort(addr, port_min, &rest);
+  if (!host)
+    return 0;
+
+  if (*rest == '-') {
+    int v, n;
+    if (sscanf(++rest, "%d%n", &v, &n) == 0)
+      return 0;
+    if (v < 0 || v > 65536)
+      return 0;
+
+    port_max = v;
+
+    if (port_max < port_min)
+      return 0;
+
+    rest += n;
+  }
+  else {
+    port_max = port_min;
+  }
+
+  if (*rest)
+    return 0;
 
   return host._retn();
 }
 
+
+static inline
 CORBA::Boolean
-omniURI::validHostPort(const char* addr)
+validHostPortOptRange(const char* addr, CORBA::Boolean range_ok)
 {
   const char* p;
   if (*addr == '[') {
@@ -231,13 +180,46 @@ omniURI::validHostPort(const char* addr)
   else {
     // IPv4 or hostname
     p = strchr(addr,':');
-    if (!p || addr == p || *p == '\0') return 0;
+    if (!p) return 0;
     ++p;
   }
-  int v;
-  if (sscanf(p,"%d",&v) != 1) return 0;
-  if (v < 0 || v > 65536) return 0;
-  return 1;
+  int v1, v2, n;
+
+  // Port
+  if (*p == '\0') return 1;
+
+  if (sscanf(p, "%d%n", &v1, &n) == 0) return 0;
+  if (v1 < 0 || v1 > 65536) return 0;
+  
+  p += n;
+
+  if (*p == '\0') return 1;
+  if (*p != '-' || !range_ok) return 0;
+
+  ++p;
+
+  if (sscanf(p, "%d%n", &v2, &n) == 0) return 0;
+  if (v2 < 0 || v2 > 65536 || v2 < v1) return 0;
+
+  p += n;
+
+  if (*p == '\0') return 1;
+
+  return 0;
+}
+
+
+CORBA::Boolean
+omniURI::validHostPort(const char* addr)
+{
+  return validHostPortOptRange(addr, 0);
+}
+
+
+CORBA::Boolean
+omniURI::validHostPortRange(const char* addr)
+{
+  return validHostPortOptRange(addr, 1);
 }
 
 

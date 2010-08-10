@@ -25,83 +25,15 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.8  2006/10/09 13:08:58  dgrisby
-  Rename SOCKADDR_STORAGE define to OMNI_SOCKADDR_STORAGE, to avoid
-  clash on Win32 2003 SDK.
-
-  Revision 1.1.4.7  2006/03/25 18:54:03  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.4.6  2005/09/01 14:52:12  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.5  2005/03/02 12:39:17  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.4  2005/03/02 12:10:48  dgrisby
-  setSelectable / Peek fixes.
-
-  Revision 1.1.4.3  2005/01/13 21:10:03  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.2  2005/01/06 23:10:55  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:58  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.11  2003/01/06 11:11:55  dgrisby
-  New AddrInfo instead of gethostbyname.
-
-  Revision 1.1.2.10  2001/12/03 13:39:55  dpg1
-  Explicit socket shutdown flag for Windows.
-
-  Revision 1.1.2.9  2001/11/26 10:51:04  dpg1
-  Wrong endpoint address when getsockname() fails.
-
-  Revision 1.1.2.8  2001/08/24 15:56:44  sll
-  Fixed code which made the wrong assumption about the semantics of
-  do { ...; continue; } while(0)
-
-  Revision 1.1.2.7  2001/08/23 16:47:01  sll
-  Fixed missing cleanup in the switch to use orbParameters to store all
-   configuration parameters.
-
-  Revision 1.1.2.6  2001/07/31 16:16:17  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.2.5  2001/07/13 15:32:50  sll
-  Enter a mapping from a socket to a giopConnection in the endpoint's hash
-  table.
-
-  Revision 1.1.2.4  2001/06/29 16:26:01  dpg1
-  Reinstate tracing messages for new connections and handling locate
-  requests.
-
-  Revision 1.1.2.3  2001/06/20 18:35:16  sll
-  Upper case send,recv,connect,shutdown to avoid silly substutition by
-  macros defined in socket.h to rename these socket functions
-  to something else.
-
-  Revision 1.1.2.2  2001/06/13 20:13:49  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.1.2.1  2001/04/18 18:10:44  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/giopEndpoint.h>
 #include <omniORB4/omniURI.h>
 #include <orbParameters.h>
 #include <SocketCollection.h>
+#include <tcpSocket.h>
 #include <tcp/tcpConnection.h>
 #include <stdio.h>
 #include <omniORB4/linkHacks.h>
@@ -118,166 +50,6 @@ OMNI_EXPORT_LINK_FORCE_SYMBOL(tcpConnection);
 
 OMNI_NAMESPACE_BEGIN(omni)
 
-/////////////////////////////////////////////////////////////////////////
-char*
-tcpConnection::addrToString(sockaddr* addr)
-{
-#if defined(HAVE_INET_NTOP)
-
-  char dest[80];
-  const char* addrstr;
-
-  if (addr->sa_family == AF_INET) {
-    sockaddr_in* addr_in = (sockaddr_in*)addr;
-    addrstr = inet_ntop(AF_INET, &addr_in->sin_addr, dest, sizeof(dest));
-  }
-#if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
-    sockaddr_in6* addr_in6 = (sockaddr_in6*)addr;
-    addrstr = inet_ntop(AF_INET6, &addr_in6->sin6_addr, dest, sizeof(dest));
-  }
-#endif
-  OMNIORB_ASSERT(addrstr);
-
-  return CORBA::string_dup(addrstr);
-
-#elif defined (HAVE_GETNAMEINFO)
-
-  char dest[80];
-  socklen_t addrlen = 0;
-
-  if (addr->sa_family == AF_INET) {
-    addrlen = sizeof(sockaddr_in);
-  }
-#if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
-    addrlen = sizeof(sockaddr_in6);
-  }
-#endif
-  OMNIORB_ASSERT(addrlen);
-
-  int result = getnameinfo(addr, addrlen, dest, sizeof(dest), 0, 0,
-			   NI_NUMERICHOST);
-  if (result != 0) {
-    omniORB::logs(1, "Unable to convert IP address to a string!");
-    return CORBA::string_dup("**invalid**");
-  }
-  return CORBA::string_dup(dest);
-
-#else
-
-  OMNIORB_ASSERT(addr->sa_family == AF_INET);
-  CORBA::ULong ipv4 = ((sockaddr_in*)addr)->sin_addr.s_addr;
-  CORBA::ULong hipv4 = ntohl(ipv4);
-  int ip1 = (int)((hipv4 & 0xff000000) >> 24);
-  int ip2 = (int)((hipv4 & 0x00ff0000) >> 16);
-  int ip3 = (int)((hipv4 & 0x0000ff00) >> 8);
-  int ip4 = (int)((hipv4 & 0x000000ff));
-
-  char* result = CORBA::string_alloc(16);
-  sprintf(result,"%d.%d.%d.%d",ip1,ip2,ip3,ip4);
-  return result;
-
-#endif
-}
-
-/////////////////////////////////////////////////////////////////////////
-char*
-tcpConnection::addrToURI(sockaddr* addr, const char* prefix)
-{
-#if defined(HAVE_INET_NTOP)
-
-  char dest[80];
-  int port;
-  const char* addrstr;
-
-  if (addr->sa_family == AF_INET) {
-    sockaddr_in* addr_in = (sockaddr_in*)addr;
-    port = ntohs(addr_in->sin_port);
-    addrstr = inet_ntop(AF_INET, &addr_in->sin_addr, dest, sizeof(dest));
-  }
-#if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
-    sockaddr_in6* addr_in6 = (sockaddr_in6*)addr;
-    port = ntohs(addr_in6->sin6_port);
-    addrstr = inet_ntop(AF_INET6, &addr_in6->sin6_addr, dest, sizeof(dest));
-  }
-#endif
-  OMNIORB_ASSERT(addrstr);
-
-  return omniURI::buildURI(prefix, addrstr, port);
-
-#elif defined (HAVE_GETNAMEINFO)
-
-  char dest[80];
-  int port;
-  socklen_t addrlen = 0;
-
-  if (addr->sa_family == AF_INET) {
-    addrlen = sizeof(sockaddr_in);
-    sockaddr_in* addr_in = (sockaddr_in*)addr;
-    port = ntohs(addr_in->sin_port);
-  }
-#if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
-    addrlen = sizeof(sockaddr_in6);
-    sockaddr_in6* addr_in6 = (sockaddr_in6*)addr;
-    port = ntohs(addr_in6->sin6_port);
-  }
-#endif
-  OMNIORB_ASSERT(addrlen);
-
-  int result = getnameinfo(addr, addrlen, dest, sizeof(dest), 0, 0,
-			   NI_NUMERICHOST);
-  if (result != 0) {
-    omniORB::logs(1, "Unable to convert IP address to a string!");
-    return CORBA::string_dup("**invalid**");
-  }
-  return omniURI::buildURI(prefix, dest, port);
-
-#else
-
-  OMNIORB_ASSERT(addr->sa_family == AF_INET);
-  sockaddr_in* addr_in = (sockaddr_in*)addr;
-
-  CORBA::ULong ipv4 = addr_in->sin_addr.s_addr;
-  CORBA::ULong hipv4 = ntohl(ipv4);
-  int ip1 = (int)((hipv4 & 0xff000000) >> 24);
-  int ip2 = (int)((hipv4 & 0x00ff0000) >> 16);
-  int ip3 = (int)((hipv4 & 0x0000ff00) >> 8);
-  int ip4 = (int)((hipv4 & 0x000000ff));
-  int port = ntohs(addr_in->sin_port);
-
-  char* result = CORBA::string_alloc(strlen(prefix) + 24);
-  sprintf(result,"%s%d.%d.%d.%d:%d",prefix, ip1, ip2, ip3, ip4, port);
-  return result;
-
-#endif
-}
-
-/////////////////////////////////////////////////////////////////////////
-CORBA::UShort
-tcpConnection::addrToPort(sockaddr* addr)
-{
-  if (addr->sa_family == AF_INET) {
-    sockaddr_in* addr_in = (sockaddr_in*)addr;
-    return ntohs(addr_in->sin_port);
-  }
-#if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
-    sockaddr_in6* addr_in6 = (sockaddr_in6*)addr;
-    return ntohs(addr_in6->sin6_port);
-  }
-#else
-  OMNIORB_ASSERT(0);
-  return 0;
-#endif
-}
 
 /////////////////////////////////////////////////////////////////////////
 int
@@ -469,7 +241,7 @@ tcpConnection::tcpConnection(SocketHandle_t sock,
     pd_myaddress = (const char*)"giop:tcp:255.255.255.255:65535";
   }
   else {
-    pd_myaddress = addrToURI((sockaddr*)&addr, "giop:tcp:");
+    pd_myaddress = tcpSocket::addrToURI((sockaddr*)&addr, "giop:tcp");
   }
 
   l = sizeof(OMNI_SOCKADDR_STORAGE);
@@ -478,7 +250,7 @@ tcpConnection::tcpConnection(SocketHandle_t sock,
     pd_peeraddress = (const char*)"giop:tcp:255.255.255.255:65535";
   }
   else {
-    pd_peeraddress = addrToURI((sockaddr*)&addr, "giop:tcp:");
+    pd_peeraddress = tcpSocket::addrToURI((sockaddr*)&addr, "giop:tcp");
   }
 
   SocketSetCloseOnExec(sock);

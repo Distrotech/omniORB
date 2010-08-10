@@ -74,7 +74,7 @@ class sslEndpoint : public giopEndpoint,
 		    public SocketHolder {
 public:
 
-  sslEndpoint(const IIOP::Address& address, sslContext* ctx);
+  sslEndpoint(const char* param, sslContext* ctx);
   const char* type() const;
   const char* address() const;
   const orbServer::EndpointList* addresses() const;
@@ -94,6 +94,7 @@ protected:
   // implement SocketCollection::notifyReadable
 
  private:
+  const char*          		   pd_address_param;
   IIOP::Address                    pd_address;
   orbServer::EndpointList          pd_addresses;
   sslContext*                      pd_ctx;

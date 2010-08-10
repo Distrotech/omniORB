@@ -11812,7 +11812,8 @@ done
 
 
 
-for ac_func in isinf insinff isinfl localtime nanosleep poll sigaction
+
+for ac_func in isinf insinff isinfl localtime nanosleep poll rand_r sigaction
 do
 as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { $as_echo "$as_me:$LINENO: checking for $ac_func" >&5

@@ -25,109 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.15  2009/05/06 16:14:46  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.14  2009/01/09 11:39:28  dgrisby
-  Log if OMNIORB_USEHOSTNAME environment variable is used.
-
-  Revision 1.1.4.13  2008/10/24 16:52:22  dgrisby
-  On Unix platforms, ignore IPv6 addresses on the loopback interface.
-
-  Revision 1.1.4.12  2008/07/18 17:02:35  dgrisby
-  VC++ 8 plays interesting const tricks with strchr().
-
-  Revision 1.1.4.11  2008/07/15 11:03:48  dgrisby
-  Windows sometimes includes network adapter details in site local IPv6
-  addresses.
-
-  Revision 1.1.4.10  2007/07/06 20:12:14  dgrisby
-  Better error handling getting IPv6 interfaces on Windows.
-
-  Revision 1.1.4.9  2007/04/03 20:02:06  dgrisby
-  Bug in VxWorks interface enumeration.
-
-  Revision 1.1.4.8  2006/11/16 11:04:35  dgrisby
-  Support for Solaris 9 IPv6. Thanks Teemu Torma.
-
-  Revision 1.1.4.7  2006/09/28 22:18:52  dgrisby
-  Small memory leak in tcp endpoint initialisation. Thanks Teemu Torma.
-
-  Revision 1.1.4.6  2006/08/25 22:18:38  dgrisby
-  VxWorks support was broken by IPv6 changes.
-
-  Revision 1.1.4.5  2006/03/25 19:18:28  dgrisby
-  Only use interfaces that are up.
-
-  Revision 1.1.4.4  2006/03/25 18:54:03  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.4.3  2005/05/10 22:07:32  dgrisby
-  Merge again.
-
-  Revision 1.1.4.2  2005/01/06 23:10:56  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:58  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.16  2003/02/17 02:03:11  dgrisby
-  vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-
-  Revision 1.1.2.15  2002/11/06 11:31:21  dgrisby
-  Old ETS patches that got lost; updates patches README.
-
-  Revision 1.1.2.14  2002/10/28 13:48:50  dgrisby
-  Work around Windows ME 0.0.0.0 interface problem.
-
-  Revision 1.1.2.13  2002/04/29 18:22:02  dgrisby
-  Yet another Windows fix.
-
-  Revision 1.1.2.12  2002/04/29 11:52:51  dgrisby
-  More fixes for FreeBSD, Darwin, Windows.
-
-  Revision 1.1.2.11  2002/04/28 20:43:25  dgrisby
-  Windows, FreeBSD, ETS fixes.
-
-  Revision 1.1.2.10  2002/03/28 17:44:35  dpg1
-  return in wrong place.
-
-  Revision 1.1.2.9  2002/03/13 16:05:40  dpg1
-  Transport shutdown fixes. Reference count SocketCollections to avoid
-  connections using them after they are deleted. Properly close
-  connections when in thread pool mode.
-
-  Revision 1.1.2.8  2002/03/11 12:21:07  dpg1
-  ETS things.
-
-  Revision 1.1.2.7  2002/01/09 11:37:46  dpg1
-  Platform, constness fixes.
-
-  Revision 1.1.2.6  2001/08/24 16:46:36  sll
-  Use WSAIoctl SIO_ADDRESS_LIST_QUERY to get the address of the
-  IP address of all network interfaces.
-
-  Revision 1.1.2.5  2001/08/23 16:02:58  sll
-  Implement getInterfaceAddress().
-
-  Revision 1.1.2.4  2001/07/31 16:16:16  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.2.3  2001/07/26 16:37:22  dpg1
-  Make sure static initialisers always run.
-
-  Revision 1.1.2.2  2001/06/13 20:13:50  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.1.2.1  2001/04/18 18:10:43  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -136,6 +35,7 @@
 #include <omniORB4/omniURI.h>
 #include <objectAdapter.h>
 #include <SocketCollection.h>
+#include <tcpSocket.h>
 #include <tcp/tcpConnection.h>
 #include <tcp/tcpAddress.h>
 #include <tcp/tcpEndpoint.h>
@@ -184,38 +84,19 @@ tcpTransportImpl::~tcpTransportImpl() {
 
 /////////////////////////////////////////////////////////////////////////
 giopEndpoint*
-tcpTransportImpl::toEndpoint(const char* param) {
-
-  IIOP::Address address;
-
-  char* host = omniURI::extractHostPort(param, address.port);
-  if (!host)
+tcpTransportImpl::toEndpoint(const char* param)
+{
+  if (!omniURI::validHostPortRange(param))
     return 0;
 
-  if (*host == '\0') {
-    // No name in param -- try environment variable.
-    const char* hostname = getenv(OMNIORB_USEHOSTNAME_VAR);
-    if (hostname) {
-      if (omniORB::trace(5)) {
-	omniORB::logger log;
-	log << "Use hostname '" << hostname << "' from "
-	    << OMNIORB_USEHOSTNAME_VAR << " environment variable.\n";
-      }
-      address.host = hostname;
-    }
-    CORBA::string_free(host);
-  }
-  else {
-    address.host = host;
-  }
-  return (giopEndpoint*)(new tcpEndpoint(address));
+  return (giopEndpoint*)(new tcpEndpoint(param));
 }
 
 /////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
 tcpTransportImpl::isValid(const char* param) {
 
-  return omniURI::validHostPort(param);
+  return omniURI::validHostPortRange(param);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -342,7 +223,7 @@ void ifaddrs_get_ifinfo(omnivector<const char*>& addrs)
   for (p = ifa_list; p != 0; p = p->ifa_next) {
     if (p->ifa_addr && p->ifa_flags & IFF_UP) {
       if (p->ifa_addr->sa_family == AF_INET) {
-        CORBA::String_var s = tcpConnection::addrToString(p->ifa_addr);
+        CORBA::String_var s = tcpSocket::addrToString(p->ifa_addr);
         addrs.push_back(s._retn());
       }
 #if defined(OMNI_SUPPORT_IPV6)
@@ -351,7 +232,7 @@ void ifaddrs_get_ifinfo(omnivector<const char*>& addrs)
         if (IN6_IS_ADDR_LINKLOCAL(&((sockaddr_in6*)p->ifa_addr)->sin6_addr)) {
 	  if (orbParameters::dumpConfiguration || omniORB::trace(20)) {
 	    omniORB::logger log;
-	    CORBA::String_var ls = tcpConnection::addrToString(p->ifa_addr);
+	    CORBA::String_var ls = tcpSocket::addrToString(p->ifa_addr);
 	    log << "Skip link local address " << ls
 		<< " on interface " << p->ifa_name << ".\n";
 	  }
@@ -364,14 +245,14 @@ void ifaddrs_get_ifinfo(omnivector<const char*>& addrs)
 	  if (!IN6_IS_ADDR_LOOPBACK(&((sockaddr_in6*)p->ifa_addr)->sin6_addr)){
 	    if (orbParameters::dumpConfiguration || omniORB::trace(20)) {
 	      omniORB::logger log;
-	      CORBA::String_var ls = tcpConnection::addrToString(p->ifa_addr);
+	      CORBA::String_var ls = tcpSocket::addrToString(p->ifa_addr);
 	      log << "Skip address " << ls << " on loopback interface "
 		  << ip6_loopback_if << ".\n";
 	    }
 	    continue;
 	  }
 	}
-        CORBA::String_var s = tcpConnection::addrToString(p->ifa_addr);
+        CORBA::String_var s = tcpSocket::addrToString(p->ifa_addr);
         addrs.push_back(s._retn());
       }
 #endif
@@ -471,7 +352,7 @@ void unix_get_ifinfo(omnivector<const char*>& addrs)
       struct sockaddr_in* iaddr = (struct sockaddr_in*)&ifr[i].ifr_addr;
 
       if ( iaddr->sin_addr.s_addr != 0 ) {
-	CORBA::String_var s = tcpConnection::addrToString((sockaddr*)iaddr);
+	CORBA::String_var s = tcpSocket::addrToString((sockaddr*)iaddr);
 	addrs.push_back(s._retn());
       }
     }
@@ -486,7 +367,7 @@ void unix_get_ifinfo(omnivector<const char*>& addrs)
 	if (orbParameters::dumpConfiguration || omniORB::trace(20)) {
 	  omniORB::logger log;
 	  CORBA::String_var ls;
-	  ls = tcpConnection::addrToString((sockaddr*)iaddr6);
+	  ls = tcpSocket::addrToString((sockaddr*)iaddr6);
 	  log << "Skip link local address " << ls
 	      << " on interface " << ifr[i].ifr_name << ".\n";
 	}
@@ -500,14 +381,14 @@ void unix_get_ifinfo(omnivector<const char*>& addrs)
 	  if (orbParameters::dumpConfiguration || omniORB::trace(20)) {
 	    omniORB::logger log;
 	    CORBA::String_var ls;
-	    ls = tcpConnection::addrToString((sockaddr*)iaddr6);
+	    ls = tcpSocket::addrToString((sockaddr*)iaddr6);
 	    log << "Skip address " << ls << " on loopback interface "
 		<< ip6_loopback_if << ".\n";
 	  }
 	  continue;
 	}
       }
-      CORBA::String_var s = tcpConnection::addrToString((sockaddr*)iaddr6);
+      CORBA::String_var s = tcpSocket::addrToString((sockaddr*)iaddr6);
       addrs.push_back(s._retn());
     }
 #endif
@@ -591,7 +472,7 @@ void vxworks_get_ifinfo(omnivector<const char*>& ifaddrs)
 	// AF_INET entries are of type sockaddr_in = 16 bytes
 	struct sockaddr_in* iaddr = (struct sockaddr_in*) &(ifr->ifr_addr);
 	CORBA::String_var s;
-	s = tcpConnection::addrToString((sockaddr*)iaddr);
+	s = tcpSocket::addrToString((sockaddr*)iaddr);
 	ifaddrs.push_back(s._retn());
       }
     }      
@@ -662,7 +543,7 @@ void win32_get_ifinfo4(omnivector<const char*>& ifaddrs)
     if (info[i].iiFlags & IFF_UP) {
       if (info[i].iiAddress.Address.sa_family == INETSOCKET) {
 	struct sockaddr* addr = (struct sockaddr*)&info[i].iiAddress.AddressIn;
-	CORBA::String_var s = tcpConnection::addrToString(addr);
+	CORBA::String_var s = tcpSocket::addrToString(addr);
 
 	// Just to catch us out, Windows ME apparently sometimes
 	// returns 0.0.0.0 as one of its interfaces...
@@ -728,7 +609,7 @@ void win32_get_ifinfo6(omnivector<const char*>& ifaddrs)
       if (IN6_IS_ADDR_LINKLOCAL(&((sockaddr_in6*)addr)->sin6_addr))
 	continue;
 
-      CORBA::String_var s = tcpConnection::addrToString(addr);
+      CORBA::String_var s = tcpSocket::addrToString(addr);
 
       // Windows appends interface details to site local addresses.
       // Strip anything starting with a % sign.

@@ -27,116 +27,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.6.8  2009/05/05 14:44:39  dgrisby
-  Ropes rememeber the bidir configuration set at the time of their
-  creation, meaning it can safely be changed at run time.
-
-  Revision 1.1.6.7  2007/01/19 10:57:21  dgrisby
-  Better logging if ropes fail unexpectedly.
-
-  Revision 1.1.6.6  2006/06/02 12:48:32  dgrisby
-  Small code cleanups.
-
-  Revision 1.1.6.5  2006/03/26 20:59:28  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.4  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.3  2005/09/01 14:52:12  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.2  2005/01/06 23:10:27  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:02:15  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.23  2003/02/17 01:20:00  dgrisby
-  Avoid deadlock with bidir connection shutdown.
-
-  Revision 1.1.4.22  2002/09/08 21:12:38  dgrisby
-  Properly handle IORs with no usable profiles.
-
-  Revision 1.1.4.21  2002/08/23 14:15:02  dgrisby
-  Avoid exception with bidir when no POA.
-
-  Revision 1.1.4.20  2002/03/18 15:13:08  dpg1
-  Fix bug with old-style ORBInitRef in config file; look for
-  -ORBtraceLevel arg before anything else; update Windows registry
-  key. Correct error message.
-
-  Revision 1.1.4.19  2001/09/19 17:26:49  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.18  2001/09/10 17:47:17  sll
-  startIdleCounter when the strand is definitely idle.
-
-  Revision 1.1.4.17  2001/09/04 14:40:30  sll
-  Added the boolean argument to notifyCommFailure to indicate if
-  omniTransportLock is held by the caller.
-
-  Revision 1.1.4.16  2001/09/03 17:31:52  sll
-  Make sure that acquireClient honours the deadline set in the calldescriptor.
-
-  Revision 1.1.4.15  2001/09/03 13:31:45  sll
-  Removed debug trace.
-
-  Revision 1.1.4.14  2001/09/03 13:26:35  sll
-  In filterAndSortAddressList, change to use the lowest value to represent
-  the highest priority.
-
-  Revision 1.1.4.13  2001/08/31 11:57:16  sll
-  Client side transport selection is now determined by the clientTransportRules.
-
-  Revision 1.1.4.12  2001/08/21 11:02:14  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.1.4.11  2001/08/17 17:12:37  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.10  2001/08/06 15:50:27  sll
-  In filterAndSortAddressList, make unix transport as the first choice if
-  available. This is just a temporary solution until we have table driven
-  transport selection.
-
-  Revision 1.1.4.9  2001/08/03 17:41:21  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.4.8  2001/08/01 18:12:54  sll
-  In filterAndSortAddressList, use_bidir could be left uninitialised.
-
-  Revision 1.1.4.7  2001/07/31 16:24:23  sll
-  Moved filtering and sorting of available addresses into a separate
-  function. Make acquireClient, decrRefCount and notifyCommFailure virtual.
-
-  Revision 1.1.4.6  2001/07/13 15:26:58  sll
-  Use safeDelete to remove a strand.
-
-  Revision 1.1.4.5  2001/06/13 20:13:15  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.4  2001/06/11 18:01:58  sll
-  Temporarily hardwared to choose ssl over tcp transport if the IOR has both.
-
-  Revision 1.1.4.3  2001/05/31 16:18:13  dpg1
-  inline string matching functions, re-ordered string matching in
-  _ptrToInterface/_ptrToObjRef
-
-  Revision 1.1.4.2  2001/05/08 17:06:53  sll
-  Client side now closes the connection if it encounters any error in
-  processing a call.
-
-  Revision 1.1.4.1  2001/04/18 18:10:49  sll
-  Big checkin with the brand new internal APIs.
-
-  */
-
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/IOP_C.h>
 #include <giopRope.h>
@@ -153,6 +43,7 @@
 #include <orbParameters.h>
 #include <transportRules.h>
 #include <omniORB4/callDescriptor.h>
+#include <libcWrapper.h>
 
 #include <stdlib.h>
 
@@ -369,7 +260,7 @@ giopRope::acquireClient(const omniIOR* ior,
     // Pick a random non-dying strand.
     OMNIORB_ASSERT(nbusy);  // There must be a non-dying strand that can
                             // serve this GIOP version
-    int n = rand() % nbusy;
+    int n = LibcWrapper::Rand() % nbusy;
     // Pick a random and non-dying strand
     RopeLink* p = pd_strands.next;
     giopStrand* q = 0;

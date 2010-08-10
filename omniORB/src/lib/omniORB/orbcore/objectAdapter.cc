@@ -418,7 +418,7 @@ omniObjAdapter::initialise()
       const char* hostname = getenv(OMNIORB_USEHOSTNAME_VAR);
       if( !hostname )  hostname = "";
 
-      CORBA::String_var estr = omniURI::buildURI("giop:tcp:", hostname, 0);
+      CORBA::String_var estr = omniURI::buildURI("giop:tcp", hostname, 0);
 
       CORBA::Boolean ok = instantiate_endpoint(estr, 0, listening_endpoints);
 
@@ -914,6 +914,17 @@ public:
   }
 
   void attach() { 
+
+    //
+    // Initialise random seed
+    {
+      unsigned long s, ns;
+      omni_thread::get_time(&s, &ns);
+      LibcWrapper::SRand(s);
+    }
+
+    //
+    // endPoint publishing options
 
     if ((const char*)omniObjAdapter::options.publish == 0 ||
 	strlen(omniObjAdapter::options.publish) == 0) {

@@ -25,66 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.6.8  2006/06/22 13:53:49  dgrisby
-  Add flags to strand.
-
-  Revision 1.1.6.7  2006/06/05 13:34:31  dgrisby
-  Make connection thread limit a per-connection value.
-
-  Revision 1.1.6.6  2006/04/09 19:52:31  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.1.6.5  2005/09/05 17:12:20  dgrisby
-  Merge again. Mainly SSL transport changes.
-
-  Revision 1.1.6.4  2005/03/02 12:10:50  dgrisby
-  setSelectable / Peek fixes.
-
-  Revision 1.1.6.3  2005/01/13 21:09:57  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.6.2  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:04:16  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.8  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.4.7  2002/03/19 15:42:03  dpg1
-  Use list of IP addresses to pick a non-loopback interface if there is one.
-
-  Revision 1.1.4.6  2001/12/03 13:39:54  dpg1
-  Explicit socket shutdown flag for Windows.
-
-  Revision 1.1.4.5  2001/08/23 16:00:34  sll
-  Added method in giopTransportImpl to return the addresses of the host
-  interfaces.
-
-  Revision 1.1.4.4  2001/07/31 16:16:27  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.4.3  2001/07/13 15:15:04  sll
-  Replaced giopEndpoint::Accept with giopEndpoint::AcceptAndMonitor.
-  giopConnection is now reference counted.
-  Added setSelectable, clearSelectable and Peek to giopConnection.
-
-  Revision 1.1.4.2  2001/06/20 18:35:18  sll
-  Upper case send,recv,connect,shutdown to avoid silly substutition by
-  macros defined in socket.h to rename these socket functions
-  to something else.
-
-  Revision 1.1.4.1  2001/04/18 17:26:29  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #ifndef __GIOPENDPOINT_H__
 #define __GIOPENDPOINT_H__
@@ -122,6 +64,15 @@ public:
   // Return a string identifying the peer, if appropriate for the
   // connection type. By default returns zero to indicate no peer
   // identification is possible.
+
+  _CORBA_Boolean gatekeeperCheck();
+  // For a passive connection, check if the peer is permitted to
+  // connect. Returns true if permitted; false if not.
+
+  virtual _CORBA_Boolean gatekeeperCheckSpecific();
+  // Transport-specific additional gatekeeper check. Called by
+  // gatekeeperCheck().
+
 
   virtual void setSelectable(int now = 0,
 			     _CORBA_Boolean data_in_buffer = 0) = 0;

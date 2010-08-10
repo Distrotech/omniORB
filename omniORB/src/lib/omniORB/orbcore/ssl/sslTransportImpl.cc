@@ -126,26 +126,12 @@ sslTransportImpl::~sslTransportImpl() {
 
 /////////////////////////////////////////////////////////////////////////
 giopEndpoint*
-sslTransportImpl::toEndpoint(const char* param) {
-
-  IIOP::Address address;
-
-  char* host = omniURI::extractHostPort(param, address.port);
-  if (!host)
+sslTransportImpl::toEndpoint(const char* param)
+{
+  if (!omniURI::validHostPortRange(param))
     return 0;
 
-  if (*host == '\0') {
-    // No name in param -- try environment variable.
-    const char* hostname = getenv(OMNIORB_USEHOSTNAME_VAR);
-    if (hostname)
-      address.host = hostname;
-
-    CORBA::string_free(host);
-  }
-  else {
-    address.host = host;
-  }
-  return (giopEndpoint*)(new sslEndpoint(address, pd_ctx));
+  return (giopEndpoint*)(new sslEndpoint(param, pd_ctx));
 }
 
 /////////////////////////////////////////////////////////////////////////
