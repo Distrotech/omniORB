@@ -105,7 +105,7 @@ sslAddress::Connect(unsigned long deadline_secs,
   while (1) {
 
     if (tcpSocket::setAndCheckTimeout(deadline_secs, deadline_nanosecs, t)) {
-      // Already timeout.
+      // Already timed out.
       tcpSocket::logConnectFailure("Timed out before SSL handshake",
 				   pd_address.host);
       SSL_free(ssl);

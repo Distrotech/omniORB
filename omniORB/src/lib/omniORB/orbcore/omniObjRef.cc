@@ -412,13 +412,12 @@ omniObjRef::_assertExistsAndTypeVerified()
   if( !pd_flags.type_verified ) {
 
     if( !_remote_is_a(pd_intfRepoId) ) {
-      if( omniORB::traceLevel > 1 ) {
+      if( omniORB::trace(1) ) {
 	omniORB::logger log;
-	log <<
-	  "omniORB: The object with the IR repository ID: " <<
-	  pd_mostDerivedRepoId << "\n"
-	  " returns FALSE to the query _is_a(\"" << pd_intfRepoId << "\").\n"
-	  " A CORBA::INV_OBJREF is raised.\n";
+	log << "The object with the repository ID: "
+	    << pd_mostDerivedRepoId
+	    << " returns FALSE to the query _is_a(\""
+	    << pd_intfRepoId << "\"). A CORBA::INV_OBJREF is raised.\n";
       }
       OMNIORB_THROW(INV_OBJREF,INV_OBJREF_InterfaceMisMatch,
 		    CORBA::COMPLETED_NO);
@@ -590,12 +589,8 @@ omniObjRef::_systemExceptionHandler(void* new_handler,void* cookie)
 omniObjRef::~omniObjRef()
 {
   if( pd_refCount ) {
-    if( omniORB::traceLevel > 0 ) {
-      omniORB::logger log;
-      log <<
-	"omniORB: ERROR -- an object reference has been explicity deleted.\n"
-	" This is not legal, and will probably lead to a crash. Good luck!\n";
-    }
+    omniORB::logs(1, "ERROR -- an object reference has "
+		  "been explicity deleted.");
   }
 
   if (!pd_ior) return; // Nil

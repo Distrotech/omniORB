@@ -3,7 +3,7 @@
 // sslConnection.cc           Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005-2009 Apasphere Ltd
+//    Copyright (C) 2005-2010 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -36,6 +36,8 @@
 #include <omniORB4/sslContext.h>
 #include <ssl/sslConnection.h>
 #include <ssl/sslEndpoint.h>
+#include <ssl/sslTransportImpl.h>
+#include <openssl/err.h>
 #include <stdio.h>
 #include <giopStreamImpl.h>
 #include <omniORB4/linkHacks.h>
@@ -49,6 +51,11 @@ int
 sslConnection::Send(void* buf, size_t sz,
 		    unsigned long deadline_secs,
 		    unsigned long deadline_nanosecs) {
+
+  if (!pd_handshake_ok) {
+    omniORB::logs(25, "Send failed because SSL handshake not yet completed.");
+    return -1;
+  }
 
   if (sz > orbParameters::maxSocketSend)
     sz = orbParameters::maxSocketSend;
@@ -139,6 +146,11 @@ int
 sslConnection::Recv(void* buf, size_t sz,
 		    unsigned long deadline_secs,
 		    unsigned long deadline_nanosecs) {
+
+  if (!pd_handshake_ok) {
+    omniORB::logs(25, "Send failed because SSL handshake not yet completed.");
+    return -1;
+  }
 
   if (sz > orbParameters::maxSocketRecv)
     sz = orbParameters::maxSocketRecv;
@@ -277,14 +289,92 @@ sslConnection::peeridentity() {
 _CORBA_Boolean
 sslConnection::gatekeeperCheckSpecific()
 {
-  // *** HERE: perform SSL accept
-  return 1;
+  // Perform SSL accept
+
+  if (omniORB::trace(25)) {
+    omniORB::logger log;
+    CORBA::String_var peer = tcpSocket::peerToURI(pd_socket, "giop:ssl");
+    log << "Perform SSL accept for new incoming connection " << peer << "\n";
+  }
+
+  unsigned long deadline_secs, deadline_nanosecs;
+  struct timeval tv;
+
+  if (sslTransportImpl::sslAcceptTimeOut.secs ||
+      sslTransportImpl::sslAcceptTimeOut.nanosecs) {
+
+    SocketSetnonblocking(pd_socket);
+    omni_thread::get_time(&deadline_secs, &deadline_nanosecs,
+			  sslTransportImpl::sslAcceptTimeOut.secs,
+			  sslTransportImpl::sslAcceptTimeOut.nanosecs);
+  }
+
+  int timeout = 0;
+  int go = 1;
+
+  while(go && !pd_shutdown) {
+    if (tcpSocket::setAndCheckTimeout(deadline_secs, deadline_nanosecs, tv)) {
+      // Timed out
+      timeout = 1;
+      break;
+    }
+
+    int result = SSL_accept(pd_ssl);
+    int code   = SSL_get_error(pd_ssl, result);
+
+    switch(code) {
+    case SSL_ERROR_NONE:
+      SocketSetblocking(pd_socket);
+      pd_handshake_ok = 1;
+      return 1;
+
+    case SSL_ERROR_WANT_READ:
+      if (tcpSocket::waitRead(pd_socket, tv) == 0) {
+	timeout = 1;
+	go = 0;
+      }
+      continue;
+
+    case SSL_ERROR_WANT_WRITE:
+      if (tcpSocket::waitWrite(pd_socket, tv) == 0) {
+	timeout = 1;
+	go = 0;
+      }
+      continue;
+
+    case SSL_ERROR_SYSCALL:
+      {
+	if (ERRNO == RC_EINTR)
+	  continue;
+      }
+      // otherwise falls through
+    case SSL_ERROR_SSL:
+    case SSL_ERROR_ZERO_RETURN:
+      {
+	if (omniORB::trace(10)) {
+	  omniORB::logger log;
+	  char buf[128];
+	  ERR_error_string_n(ERR_get_error(), buf, 128);
+	  CORBA::String_var peer = tcpSocket::peerToURI(pd_socket, "giop:ssl");
+	  log << "openSSL error detected in SSL accept from "
+	      << peer << " : " << (const char*) buf << "\n";
+	}
+	go = 0;
+      }
+    }
+  }
+  if (timeout && omniORB::trace(10)) {
+    omniORB::logger log;
+    CORBA::String_var peer = tcpSocket::peerToURI(pd_socket, "giop:ssl");
+    log << "Timeout in SSL accept from " << peer << "\n";
+  }
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////
 sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl, 
 			     SocketCollection* belong_to) : 
-  SocketHolder(sock), pd_ssl(ssl) {
+  SocketHolder(sock), pd_ssl(ssl), pd_handshake_ok(0) {
 
   OMNI_SOCKADDR_STORAGE addr;
   SOCKNAME_SIZE_T l;

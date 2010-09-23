@@ -27,115 +27,6 @@
 // Description:
 //	
 
-/*
-  $Log$
-  Revision 1.1.6.10  2006/09/20 13:36:31  dgrisby
-  Descriptive logging for connection and GIOP errors.
-
-  Revision 1.1.6.9  2006/08/17 16:22:46  dgrisby
-  Cast size_t to int in log message so it works on 64 bit Windows.
-
-  Revision 1.1.6.8  2006/06/22 13:53:49  dgrisby
-  Add flags to strand.
-
-  Revision 1.1.6.7  2006/03/26 20:59:28  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.6  2006/01/10 13:59:37  dgrisby
-  New clientConnectTimeOutPeriod configuration parameter.
-
-  Revision 1.1.6.5  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.4  2005/03/30 23:36:09  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.6.3  2005/01/13 21:10:00  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.6.2  2005/01/06 23:10:29  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:02:14  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.24  2003/01/28 13:37:06  dgrisby
-  Send GIOP dumps to logger. Thanks Matej Kenda.
-
-  Revision 1.1.4.23  2002/11/12 16:40:11  dgrisby
-  Fix incorrect delete.
-
-  Revision 1.1.4.22  2002/02/25 11:17:13  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.1.4.21  2002/02/13 16:02:39  dpg1
-  Stability fixes thanks to Bastiaan Bakker, plus threading
-  optimisations inspired by investigating Bastiaan's bug reports.
-
-  Revision 1.1.4.20  2001/10/17 16:33:28  dpg1
-  New downcast mechanism for cdrStreams.
-
-  Revision 1.1.4.19  2001/09/26 10:48:11  sll
-  Fixed a bug which causes problems when, in a single recv(), the ORB read
-  more than one GIOP messages into its buffer and the last of these messages
-  is only partially read.
-
-  Revision 1.1.4.18  2001/09/10 17:53:07  sll
-  In inputMessage, if a strand is dying and has been orderly_closed, i.e. a
-  GIOP CloseConnection has been received, set the retry flag in the
-  CommFailure exception.
-
-  Revision 1.1.4.17  2001/09/04 14:44:25  sll
-  Added the boolean argument to notifyCommFailure to indicate if
-  omniTransportLock is held by the caller.
-  Make sure reference count rd_nwaiting and wr_nwaiting are correct when a
-  timeout has occurred.
-
-  Revision 1.1.4.16  2001/09/03 16:51:01  sll
-  Added the deadline parameter and access functions. All member functions
-  that previously had deadline arguments now use the per-object deadline
-  implicitly.
-
-  Revision 1.1.4.15  2001/08/06 15:51:28  sll
-  In errorOnSend, make sure that the retry flag returns by notifyCommFailure
-  is not overwritten if the send failed on TRANSIENT_ConnectFailed.
-
-  Revision 1.1.4.14  2001/08/03 17:41:21  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.4.13  2001/07/31 16:20:29  sll
-  New primitives to acquire read lock on a connection.
-
-  Revision 1.1.4.12  2001/07/13 15:28:36  sll
-  Added more tracing messages.
-
-  Revision 1.1.4.11  2001/07/03 12:01:16  dpg1
-  Minor correction to log message for platforms without C++ bool.
-
-  Revision 1.1.4.10  2001/06/20 18:35:17  sll
-  Upper case send,recv,connect,shutdown to avoid silly substutition by
-  macros defined in socket.h to rename these socket functions
-  to something else.
-
-  Revision 1.1.4.9  2001/05/11 14:25:53  sll
-  Added operator for omniORB::logger to report system exception status and
-  minor code.
-
-  Revision 1.1.4.8  2001/05/01 17:15:17  sll
-  Non-copy input now works correctly.
-
-  Revision 1.1.4.7  2001/05/01 16:07:31  sll
-  All GIOP implementations should now work with fragmentation and abitrary
-  sizes non-copy transfer.
-
-  Revision 1.1.4.6  2001/04/18 18:10:48  sll
-  Big checkin with the brand new internal APIs.
-
-
-  */
-
 #include <omniORB4/CORBA.h>
 #include <exceptiondefs.h>
 #include <giopStream.h>
@@ -763,17 +654,10 @@ giopStream::errorOnReceive(int rc, const char* filename, CORBA::ULong lineno,
   if (rc == 0) {
     // Timeout.
     // We do not use the return code from the function.
-    if (buf && buf->end != buf->start) {
-      // partially received a buffer, we assume the other end
-      // is in serious trouble.
-      pd_strand->state(giopStrand::DYING);
-    }
     retry = 0;
     minor = TRANSIENT_CallTimedout;
   }
-  else {
-    pd_strand->state(giopStrand::DYING);
-  }
+  pd_strand->state(giopStrand::DYING);
   if (buf) giopStream_Buffer::deleteBuffer(buf);
 
   CommFailure::_raise(minor,(CORBA::CompletionStatus)completion(),retry,

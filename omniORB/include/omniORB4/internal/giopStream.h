@@ -374,7 +374,8 @@ public:
   //   static void deleteBuffer(inputBuffer*);
   // };
   giopStream_Buffer* newInputBuffer(CORBA::ULong sz=0);
-  // Return a giopStream_Buffer. Should be deleted by calling
+  // Return a giopStream_Buffer. Should be deleted by calling its
+  // deleteBuffer() method.
 private:
 
   // The following variables must be initialised to 0 by reset().

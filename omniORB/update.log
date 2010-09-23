@@ -1,3 +1,22 @@
+Thu Sep 23 13:57:37 BST 2010 dgrisby
+====================================
+
+- Continued connection management refactor; no longer perform SSL
+  accept in rendezvouser thread.
+
+include/omniORB4/internal/giopStream.h
+src/lib/omniORB/orbcore/callHandle.cc
+src/lib/omniORB/orbcore/giopStrand.cc
+src/lib/omniORB/orbcore/giopStream.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/lib/omniORB/orbcore/ssl/sslActive.cc
+src/lib/omniORB/orbcore/ssl/sslAddress.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.h
+src/lib/omniORB/orbcore/ssl/sslEndpoint.cc
+src/lib/omniORB/orbcore/tcp/tcpEndpoint.cc
+
+
 Tue Aug 10 18:16:25 BST 2010 dgrisby
 ====================================
 

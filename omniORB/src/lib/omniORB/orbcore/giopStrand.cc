@@ -3,7 +3,7 @@
 // giopStrand.cc              Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2010 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -23,115 +23,6 @@
 //    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //    02111-1307, USA
 //
-//
-// Description:
-//
-
-/*
-  $Log$
-  Revision 1.1.6.12  2008/12/29 17:31:16  dgrisby
-  Properly handle message size being exceeded in request header.
-
-  Revision 1.1.6.11  2008/07/15 10:59:39  dgrisby
-  Clarity of behaviour if inConScanPeriod / outConScanPeriod are <=
-  scanGranularity.
-
-  Revision 1.1.6.10  2007/02/05 18:39:53  dgrisby
-  Log scavenger connections closures at traceLevel 25 instead of 30.
-
-  Revision 1.1.6.9  2007/02/05 17:38:13  dgrisby
-  Scavenger did not cope with client strands with no connection. This
-  can happen if a Python client uses invalid argument types, for
-  example.
-
-  Revision 1.1.6.8  2006/07/18 16:21:21  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.7  2006/07/02 22:52:05  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.6.6  2006/06/22 13:53:49  dgrisby
-  Add flags to strand.
-
-  Revision 1.1.6.5  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.4  2005/04/11 12:09:41  dgrisby
-  Another merge.
-
-  Revision 1.1.6.3  2005/03/30 23:36:10  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.6.2  2005/01/06 23:10:29  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:02:14  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.18  2002/09/04 23:29:30  dgrisby
-  Avoid memory corruption with multiple list removals.
-
-  Revision 1.1.4.17  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.4.16  2002/03/18 15:13:08  dpg1
-  Fix bug with old-style ORBInitRef in config file; look for
-  -ORBtraceLevel arg before anything else; update Windows registry
-  key. Correct error message.
-
-  Revision 1.1.4.15  2002/03/14 14:40:46  dpg1
-  Scavenger locking bug.
-
-  Revision 1.1.4.14  2002/03/14 12:21:49  dpg1
-  Undo accidental scavenger period change, remove invalid assertion.
-
-  Revision 1.1.4.13  2002/03/13 16:05:39  dpg1
-  Transport shutdown fixes. Reference count SocketCollections to avoid
-  connections using them after they are deleted. Properly close
-  connections when in thread pool mode.
-
-  Revision 1.1.4.12  2001/09/19 17:26:49  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.11  2001/09/10 17:51:46  sll
-  Scavenger now manages passive connections as well.
-  Send CloseConnection message when a scavenger close a connection.
-
-  Revision 1.1.4.10  2001/09/03 16:56:09  sll
-  Make sure that the deadline is set to 0.
-
-  Revision 1.1.4.9  2001/08/29 17:52:34  sll
-  Make sure that the invariant of the dtor is satisfied in safeDelete.
-
-  Revision 1.1.4.8  2001/08/24 15:21:13  sll
-  Corrected a bug in the conversion from {in,out}ConScanPeriod to idleclicks.
-
-  Revision 1.1.4.7  2001/08/21 11:02:15  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.1.4.6  2001/08/17 17:12:38  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.5  2001/07/31 16:27:59  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.4.4  2001/07/13 15:28:17  sll
-  Use safeDelete to manage the lifecycle of a strand.
-
-  Revision 1.1.4.3  2001/06/13 20:13:15  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.2  2001/05/09 19:36:54  sll
-  Client side idle connection cleanup now works
-
-  Revision 1.1.4.1  2001/04/18 18:10:49  sll
-  Big checkin with the brand new internal APIs.
-
-
-  */
 
 #include <omniORB4/CORBA.h>
 #include <giopStream.h>
@@ -220,7 +111,21 @@ sendCloseConnection(giopStrand* s)
   if (omniORB::trace(30))
     giopStream::dumpbuf((unsigned char*)hdr, 12);
 
-  s->connection->Send(hdr,12);
+  CORBA::ULong timeout = orbParameters::scanGranularity;
+  if (timeout < 5)
+    timeout = 5;
+
+  unsigned long deadline_secs, deadline_nanosecs;
+  omni_thread::get_time(&deadline_secs, &deadline_nanosecs, timeout);
+
+  int tx = s->connection->Send(hdr, 12, deadline_secs, deadline_nanosecs);
+  if (tx <= 0 && omniORB::trace(25)) {
+    omniORB::logger log;
+    const char* err = (tx == 0 ? "Timed out" : "Error");
+
+    log << err << " sending CloseConnection to "
+	<< s->connection->peeraddress() << "\n";
+  }
 }
 
 
@@ -355,7 +260,7 @@ giopStrand::deleteStrandAndConnection(CORBA::Boolean forced)
       if (omniORB::trace(25)) {
 	omniORB::logger log;
 	log << (isClient() ? "Client" : "Server")
-	    << " connection refcount = " << count << "\n"; 
+	    << " connection " << peeraddr << " refcount = " << count << "\n"; 
       }
       OMNIORB_ASSERT(count >= 0);
       if (count != 0)
@@ -366,7 +271,8 @@ giopStrand::deleteStrandAndConnection(CORBA::Boolean forced)
       if (omniORB::trace(25)) {
 	omniORB::logger log;
 	log << (isClient() ? "Client" : "Server")
-	    << " connection refcount (forced) = " << count << "\n"; 
+	    << " connection " << peeraddr
+	    << " refcount (forced) = " << count << "\n"; 
       }
       if (count) {
 	// The only condition when this happen is when the connection

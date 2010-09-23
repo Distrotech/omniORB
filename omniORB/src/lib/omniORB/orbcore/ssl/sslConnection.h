@@ -39,7 +39,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 class sslEndpoint;
 
 class sslConnection : public giopConnection, public SocketHolder {
- public:
+public:
 
   int Send(void* buf, size_t sz,
 	   unsigned long deadline_secs = 0,
@@ -75,11 +75,14 @@ class sslConnection : public giopConnection, public SocketHolder {
   ~sslConnection();
 
 
- private:
+private:
   ::SSL*            pd_ssl;
   CORBA::String_var pd_myaddress;
   CORBA::String_var pd_peeraddress;
   CORBA::String_var pd_peeridentity;
+
+protected:
+  _CORBA_Boolean    pd_handshake_ok;
 };
 
 

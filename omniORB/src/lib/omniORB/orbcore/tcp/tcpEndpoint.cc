@@ -315,7 +315,7 @@ tcpEndpoint::AcceptAndMonitor(giopConnection::notifyReadable_t func,
     pd_new_conn_socket = RC_INVALID_SOCKET;
     if (!Select()) break;
     if (pd_new_conn_socket != RC_INVALID_SOCKET) {
-      return  new tcpConnection(pd_new_conn_socket,this);
+      return new tcpConnection(pd_new_conn_socket, this);
     }
     if (pd_poked)
       return 0;
