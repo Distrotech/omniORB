@@ -3,7 +3,7 @@
 // callDescriptor.cc          Created on: 18/6/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2008 Apasphere Ltd
+//    Copyright (C) 2008-2010 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -25,64 +25,8 @@
 //
 //
 // Description:
-//    Implementation of pre-defined call descriptors.
+//    Call descriptor implementation
 //
-
-/*
- $Log$
- Revision 1.4.2.2  2008/10/28 15:33:42  dgrisby
- Undeclared user exceptions not caught in local calls.
-
- Revision 1.4.2.1  2003/03/23 21:02:30  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.9  2001/08/17 17:07:05  sll
- Remove the use of omniORB::logStream.
-
- Revision 1.2.2.8  2001/08/15 10:26:11  dpg1
- New object table behaviour, correct POA semantics.
-
- Revision 1.2.2.7  2001/08/03 17:41:17  sll
- System exception minor code overhaul. When a system exeception is raised,
- a meaning minor code is provided.
-
- Revision 1.2.2.6  2001/06/07 16:24:09  dpg1
- PortableServer::Current support.
-
- Revision 1.2.2.5  2001/04/18 18:18:11  sll
- Big checkin with the brand new internal APIs.
-
- Revision 1.2.2.4  2000/11/03 18:46:19  sll
- Moved string marshal functions into cdrStream.
-
- Revision 1.2.2.3  2000/10/06 16:36:51  sll
- Removed inline definition of the marshal method in the client and server
- marshallers.
-
- Revision 1.2.2.2  2000/09/27 17:50:28  sll
- Updated to use the new cdrStream abstraction.
- Added extra members for use in the upcalls on the server side.
-
- Revision 1.2.2.1  2000/07/17 10:35:50  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:25:59  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.4  2000/06/22 10:40:13  dpg1
- exception.h renamed to exceptiondefs.h to avoid name clash on some
- platforms.
-
- Revision 1.1.2.3  1999/10/14 16:22:05  djr
- Implemented logging when system exceptions are thrown.
-
- Revision 1.1.2.2  1999/10/04 17:08:31  djr
- Some more fixes/MSVC work-arounds.
-
- Revision 1.1.2.1  1999/09/22 14:26:43  djr
- Major rewrite of orbcore to support POA.
-
-*/
 
 #include <omniORB4/CORBA.h>
 
@@ -102,6 +46,10 @@ OMNI_USING_NAMESPACE(omni)
 //////////////////////////////////////////////////////////////////////
 ///////////////////////// omniCallDescriptor /////////////////////////
 //////////////////////////////////////////////////////////////////////
+
+omniCallDescriptor::LocalCallFn    omniCallDescriptor::sd_interceptor_call  = 0;
+omniCallDescriptor::InterceptorFn* omniCallDescriptor::sd_interceptor_stack = 0;
+
 
 void
 omniCallDescriptor::initialiseCall(cdrStream&)
@@ -131,7 +79,7 @@ omniCallDescriptor::userException(cdrStream& stream, IOP_C* iop_c,
   // to think the operation has none.  The IDL used on each side
   // probably differs.
 
-  if( omniORB::trace(1) ) {
+  if (omniORB::trace(1)) {
     omniORB::logger l;
     l << "WARNING -- server returned user-defined exception for an\n"
       " operation which the client thinks has none declared.  Could the\n"
@@ -142,7 +90,7 @@ omniCallDescriptor::userException(cdrStream& stream, IOP_C* iop_c,
 
   if (iop_c) iop_c->RequestCompleted(1);
 
-  OMNIORB_THROW(UNKNOWN,UNKNOWN_UserException,
+  OMNIORB_THROW(UNKNOWN, UNKNOWN_UserException,
 		(CORBA::CompletionStatus)stream.completion());
 }
 
@@ -164,7 +112,7 @@ omniCallDescriptor::validateUserException(const CORBA::UserException& ex)
       log << "WARNING -- local call raised unexpected user exception '"
 	  << repoId << "'.\n";
 
-      OMNIORB_THROW(UNKNOWN,UNKNOWN_UserException, CORBA::COMPLETED_MAYBE);
+      OMNIORB_THROW(UNKNOWN, UNKNOWN_UserException, CORBA::COMPLETED_MAYBE);
     }
   }
 }
@@ -184,6 +132,43 @@ omniCallDescriptor::marshalReturnedValues(cdrStream&)
 }
 
 
+void
+omniCallDescriptor::setupInterception(omniCallDescriptor* cd,
+				      omniServant* servant)
+{
+  cd->pd_interceptor_stack = sd_interceptor_stack;
+  cd->interceptedCall(servant);
+}
+
+
+void
+omniCallDescriptor::addInterceptor(omniCallDescriptor::LocalCallFn fn)
+{
+  sd_interceptor_call = setupInterception;
+  InterceptorFn* entry = new InterceptorFn;
+  entry->fn = fn;
+  entry->next = sd_interceptor_stack;
+  sd_interceptor_stack = entry;
+}
+
+
+void
+omniCallDescriptor::removeInterceptor(omniCallDescriptor::LocalCallFn fn)
+{
+  InterceptorFn** prev  = &sd_interceptor_stack;
+  InterceptorFn*  entry = sd_interceptor_stack;
+
+  while (entry) {
+    if (entry->fn == fn) {
+      *prev = entry->next;
+      delete entry;
+      return;
+    }
+    prev  = &entry->next;
+    entry = entry->next;
+  }
+}
+  
 
 //////////////////////////////////////////////////////////////////////
 ///////////// omniStdCallDesc::_cCORBA_mObject_i_cstring /////////////

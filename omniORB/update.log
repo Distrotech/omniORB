@@ -1,3 +1,14 @@
+Thu Sep 23 15:10:27 BST 2010 dgrisby
+====================================
+
+- Call wrapper interceptor.
+
+include/omniORB4/callDescriptor.h
+include/omniORB4/omniInterceptors.h
+src/lib/omniORB/orbcore/callDescriptor.cc
+src/lib/omniORB/orbcore/interceptors.cc
+
+
 Thu Sep 23 13:57:37 BST 2010 dgrisby
 ====================================
 

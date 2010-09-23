@@ -3,7 +3,7 @@
 // callDescriptor.h           Created on: 12/98
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2003-2008 Apasphere Ltd
+//    Copyright (C) 2003-2010 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -24,84 +24,8 @@
 //    02111-1307, USA
 //
 //
-// Description:
+//    Object that encapsulates a call to be performed
 //
-
-/*
- $Log$
- Revision 1.4.2.5  2008/10/28 15:33:42  dgrisby
- Undeclared user exceptions not caught in local calls.
-
- Revision 1.4.2.4  2006/07/02 22:52:05  dgrisby
- Store self thread in task objects to avoid calls to self(), speeding
- up Current. Other minor performance tweaks.
-
- Revision 1.4.2.3  2006/06/05 11:27:01  dgrisby
- Accessor method to change oneway-ness of a call descriptor.
-
- Revision 1.4.2.2  2003/11/06 11:56:55  dgrisby
- Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
- Revision 1.4.2.1  2003/03/23 21:04:17  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.15  2003/01/16 12:47:08  dgrisby
- Const cast macro. Thanks Matej Kenda.
-
- Revision 1.2.2.14  2003/01/14 11:48:15  dgrisby
- Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
- Revision 1.2.2.13  2001/11/06 15:41:35  dpg1
- Reimplement Context. Remove CORBA::Status. Tidying up.
-
- Revision 1.2.2.12  2001/09/03 16:49:43  sll
- Added the deadline parameter and access functions.
-
- Revision 1.2.2.11  2001/09/03 13:28:09  sll
- In the calldescriptor, in addition to the first address, record the current
- address in use.
-
- Revision 1.2.2.10  2001/08/17 17:01:16  sll
- Removed assert existent flag in the call descriptor.
-
- Revision 1.2.2.9  2001/08/17 13:42:48  dpg1
- callDescriptor::userException() no longer has to throw an exception.
-
- Revision 1.2.2.8  2001/08/15 10:26:07  dpg1
- New object table behaviour, correct POA semantics.
-
- Revision 1.2.2.7  2001/06/07 16:24:07  dpg1
- PortableServer::Current support.
-
- Revision 1.2.2.6  2001/05/29 17:03:47  dpg1
- In process identity.
-
- Revision 1.2.2.5  2001/04/18 17:50:44  sll
- Big checkin with the brand new internal APIs.
- Scoped where appropriate with the omni namespace.
-
- Revision 1.2.2.4  2000/11/03 19:00:26  sll
- Removed Suppress_Spurious_gcc_Warnings cpp macro.
-
- Revision 1.2.2.3  2000/10/06 16:47:26  sll
- Removed inline marshal function from the client and server marshaller.
-
- Revision 1.2.2.2  2000/09/27 17:18:35  sll
- Updated to use the new cdrStream abstraction.
- Added new member unmarshalArguments(), marshalReturnedValues() and modified
- the ctor arguments to make the omniCallDescriptor class suitable for use in
- the upcalls on the server side.
-
- Revision 1.2.2.1  2000/07/17 10:35:34  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:26:05  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.1  1999/09/24 09:51:43  djr
- Moved from omniORB2 + some new files.
-
-*/
 
 #ifndef __OMNIORB_CALLDESCRIPTOR_H__
 #define __OMNIORB_CALLDESCRIPTOR_H__
@@ -123,12 +47,18 @@ class omniCallDescriptor {
 public:
   typedef void (*LocalCallFn)(omniCallDescriptor*, omniServant*);
 
+  struct InterceptorFn {
+    LocalCallFn    fn;
+    InterceptorFn* next;
+  };
+
   inline omniCallDescriptor(LocalCallFn lcfn, const char* op_,
-			    int op_len_, _CORBA_Boolean oneway,
+			    size_t op_len_, _CORBA_Boolean oneway,
 			    const char*const* user_excns_,
 			    int n_user_excns_,
                             _CORBA_Boolean is_upcall_)
-    : pd_localCall(lcfn),
+    : pd_do_call(sd_interceptor_call ? sd_interceptor_call : lcfn),
+      pd_local_call(lcfn),
       pd_op(op_), pd_oplen(op_len_),
       pd_user_excns(user_excns_),
       pd_n_user_excns(n_user_excns_),
@@ -172,33 +102,54 @@ public:
   // CORBA::UNKNOWN. If the exception is valid, or the call descriptor
   // does not know, returns.
 
-
   //////////////////////////////////////////////////
   // Methods to implement call on the server side //
   //////////////////////////////////////////////////
+
   virtual void unmarshalArguments(cdrStream&);
   // Defaults to no arguments.
 
   virtual void marshalReturnedValues(cdrStream&);
   // Defaults to no arguments and returns void.
 
+  ////////////////
+  // Invocation //
+  ////////////////
+
+  // Called by stub code to perform a local call.
+  inline void doLocalCall(omniServant* servant) {
+    pd_do_call(this, servant);
+  }
+
+  // Interceptor functions *must* call this to continue the call.
+  inline void interceptedCall(omniServant* servant) {
+    LocalCallFn lcfn;
+    if (pd_interceptor_stack) {
+      lcfn = pd_interceptor_stack->fn;
+      pd_interceptor_stack = pd_interceptor_stack->next;
+    }
+    else
+      lcfn = pd_local_call;
+
+    lcfn(this, servant);
+  }
+
   ///////////////
   // Accessors //
   ///////////////
 
-  inline const char* op() const           { return pd_op;        }
-  inline size_t op_len() const            { return pd_oplen;     }
-  inline _CORBA_Boolean is_oneway() const { return pd_is_oneway; }
+  inline const char* op() const            { return pd_op;           }
+  inline size_t op_len() const             { return pd_oplen;        }
+  inline _CORBA_Boolean is_oneway() const  { return pd_is_oneway;    }
+  inline void set_oneway(_CORBA_Boolean o) { pd_is_oneway = o;       }
+  inline const char* const* user_excns()   { return pd_user_excns;   }
+  inline int n_user_excns()                { return pd_n_user_excns; }
+  inline _CORBA_Boolean is_upcall() const  { return pd_is_upcall;    }
 
-  inline void set_oneway(_CORBA_Boolean o) { pd_is_oneway = o; }
-
-  inline void doLocalCall(omniServant* servant) {
-    pd_localCall(this, servant);
+  inline _CORBA_Boolean haslocalCallFn() const {
+    return (pd_local_call) ? 1 : 0;
   }
-  inline const char*const* user_excns() { return pd_user_excns; }
-  inline int n_user_excns() { return pd_n_user_excns; }
-  inline _CORBA_Boolean is_upcall() const { return pd_is_upcall; }
-  inline _CORBA_Boolean haslocalCallFn() const { return (pd_localCall)?1:0; }
+
   inline const _OMNI_NS(giopAddress)* firstAddressUsed() { 
     return pd_first_address_used;
   }
@@ -251,8 +202,18 @@ public:
   inline void localId(omniLocalIdentity* lid) { pd_localId = lid; }
   inline omniLocalIdentity* localId()         { return pd_localId; }
 
+
+  //////////////////////////////
+  // Interceptor registration //
+  //////////////////////////////
+
+  static void addInterceptor(LocalCallFn func);
+  static void removeInterceptor(LocalCallFn func);
+
+
 private:
-  LocalCallFn                  pd_localCall;
+  LocalCallFn                  pd_do_call;
+  LocalCallFn                  pd_local_call;
   const char*                  pd_op;
   size_t                       pd_oplen;
   const char*const*            pd_user_excns;
@@ -293,10 +254,33 @@ private:
   ////////////////////////////
   // Deadline for this call //
   ////////////////////////////
+
   // This is a state holder for the call. Not manipulated by this class
   // other than the access functions. Initialised to 0 in ctor.
   unsigned long                pd_deadline_secs;
   unsigned long                pd_deadline_nanosecs;
+
+
+  ///////////////////////
+  // Call interceptors //
+  ///////////////////////
+
+  static LocalCallFn           sd_interceptor_call;
+  // Function used in place of the normal local call function if
+  // interceptors are registered. Initialises the interceptor stack
+  // and calls the first interceptor in the stack.
+
+  static void setupInterception(omniCallDescriptor* cd, omniServant* servant);
+  // Function assigned to sd_interceptor_call when interceptors are registered.
+
+  static InterceptorFn*        sd_interceptor_stack;
+  InterceptorFn*               pd_interceptor_stack;
+  // Global interceptor stack and this call descriptor's pointer into it.
+
+
+  /////////////////////
+  // Not implemented //
+  /////////////////////
 
   omniCallDescriptor(const omniCallDescriptor&);
   omniCallDescriptor& operator = (const omniCallDescriptor&);
@@ -349,14 +333,14 @@ public:
 ///////////////////// omniLocalOnlyCallDescriptor ////////////////////
 //////////////////////////////////////////////////////////////////////
 
-//  This class is needed to support calls to objects which
-// may only reside in the local address space.
-// eg. ServantLocator, ServantActivator, AdapterActivator.
+// This class is needed to support calls to objects which may only
+// reside in the local address space.  eg. ServantLocator,
+// ServantActivator, AdapterActivator.
 
 class omniLocalOnlyCallDescriptor : public omniCallDescriptor {
 public:
   omniLocalOnlyCallDescriptor(LocalCallFn lcfn, const char* op_,
-			      int op_len_, _CORBA_Boolean is_oneway_ = 0)
+			      size_t op_len_, _CORBA_Boolean is_oneway_ = 0)
     : omniCallDescriptor(lcfn, op_, op_len_, is_oneway_, 0, 0, 0) {}
 
   // Only useful as client side descriptor. No set up for server side upcall.
