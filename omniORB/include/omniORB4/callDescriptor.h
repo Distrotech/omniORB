@@ -52,6 +52,17 @@ public:
     InterceptorFn* next;
   };
 
+  // Call descriptor constructor.
+  //
+  // lcfn         -- function used to perform a local call on a servant
+  // op           -- operation name. Null represents a LocateRequest
+  //                 rather than a normal call
+  // op_len       -- length of operation name
+  // oneway       -- true if a oneway call
+  // user_excns   -- set of valid user exceptions or null if not known
+  // n_user_excns -- number of user exceptions
+  // is_upcall    -- true if this is an upcall to a servant
+
   inline omniCallDescriptor(LocalCallFn lcfn, const char* op_,
 			    size_t op_len_, _CORBA_Boolean oneway,
 			    const char*const* user_excns_,
