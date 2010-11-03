@@ -270,7 +270,7 @@ do { \
 } while(0)
 
 
-omni_tracedmutex DynAnyImplBase::refCountLock;
+omni_tracedmutex DynAnyImplBase::refCountLock("DynAnyImplBase::refCountLock");
 
 
 DynAnyImplBase::~DynAnyImplBase()

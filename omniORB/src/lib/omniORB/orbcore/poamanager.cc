@@ -170,8 +170,8 @@ const char* PortableServer::POAManager::_PD_repoId =
   if( _NP_is_nil() )  _CORBA_invoked_nil_pseudo_ref()
 
 
-static omni_tracedmutex     pm_lock;
-static omni_tracedcondition pm_cond(&pm_lock);
+static omni_tracedmutex     pm_lock("pm_lock");
+static omni_tracedcondition pm_cond(&pm_lock, "pm_cond");
 // Condition variable used to signal deactivations
 
 omniOrbPOAManager::~omniOrbPOAManager() {}

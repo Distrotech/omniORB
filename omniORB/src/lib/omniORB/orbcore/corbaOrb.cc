@@ -383,13 +383,13 @@ static const char* orb_ids[] = { ORB_ID_STRING,
 
 static omniOrbORB*          the_orb                   = 0;
 static int                  orb_count                 = 0;
-static omni_tracedmutex     orb_lock;
-static omni_tracedcondition orb_signal(&orb_lock);
+static omni_tracedmutex     orb_lock("orb_lock");
+static omni_tracedcondition orb_signal(&orb_lock, "orb_signal");
 static volatile int         orb_n_blocked_in_run      = 0;
 
 // For the main thread AsyncInvoker:
 static volatile int         invoker_threads           = 0;
-static omni_tracedcondition invoker_signal(&orb_lock);
+static omni_tracedcondition invoker_signal(&orb_lock, "invoker_signal");
 static omniTaskLink         invoker_dedicated_tq;
 static CORBA::Boolean       invoker_shutting_down     = 0;
 

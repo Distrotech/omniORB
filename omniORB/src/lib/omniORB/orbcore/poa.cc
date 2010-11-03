@@ -392,7 +392,9 @@ omniServantActivatorTaskQueue::~omniServantActivatorTaskQueue() {}
 
 
 omniServantActivatorTaskQueue::omniServantActivatorTaskQueue()
-  : pd_cond(&pd_queue_lock),
+  : pd_queue_lock("omniServantActivatorTaskQueue::pd_queue_lock"),
+    pd_task_lock("omniServantActivatorTaskQueue::pd_task_lock"),
+    pd_cond(&pd_queue_lock, "omniServantActivatorTaskQueue::pd_cond"),
     pd_taskq(0),
     pd_taskqtail(0),
     pd_dying(0)
@@ -648,9 +650,10 @@ static void transfer_and_check_policies(omniOrbPOA::Policies& pout,
 					const CORBA::PolicyList& pin);
 
 
-static omni_tracedmutex     poa_lock;
+static omni_tracedmutex     poa_lock("poa_lock");
 
-static omni_tracedcondition adapteractivator_signal(&poa_lock);
+static omni_tracedcondition adapteractivator_signal(&poa_lock,
+						    "adapteractivator_signal");
 // Used to signal between threads when using an AdapterActivator
 // to create a child POA.
 
@@ -2102,7 +2105,8 @@ namespace {
     inline RemoveRefTask(PortableServer::Servant servant)
       : omniTask(omniTask::DedicatedThread),
 	pd_servant(servant),
-	pd_cond(&pd_mu)
+	pd_mu("RemoveRefTask::pd_mu"),
+	pd_cond(&pd_mu, "RemoveRefTask::pd_cond")
     {
       if (omniORB::trace(25)) {
 	omniORB::logger l;
@@ -2289,7 +2293,8 @@ omniOrbPOA::omniOrbPOA(const char* name,
     pd_defaultServant(0),
     pd_rq_state(PortableServer::POAManager::HOLDING),
     pd_policy_list(policy_list),
-    pd_deathSignal(&pd_lock),
+    pd_lock("omniOrbPOA::pd_lock"),
+    pd_deathSignal(&pd_lock, "omniOrbPOA::pd_deathSignal"),
     pd_oidIndex(0),
     pd_activeObjList(0),
     pd_oidPrefix(0),
@@ -2355,8 +2360,10 @@ omniOrbPOA::omniOrbPOA(const char* name,
     pd_call_lock = new omni_rmutex();
     break;
   case TP_MAIN_THREAD:
-    pd_main_thread_sync.mu  = new omni_tracedmutex();
-    pd_main_thread_sync.cond= new omni_tracedcondition(pd_main_thread_sync.mu);
+    pd_main_thread_sync.mu  = new omni_tracedmutex(
+				"omniOrbPOA::pd_main_thread_sync.mu");
+    pd_main_thread_sync.cond= new omni_tracedcondition(pd_main_thread_sync.mu,
+				"omniOrbPOA::pd_main_thread_sync.cond");
     break;
   }
 
@@ -2380,7 +2387,8 @@ omniOrbPOA::omniOrbPOA()  // nil constructor
     pd_defaultServant(0),
     pd_rq_state(PortableServer::POAManager::INACTIVE),
     pd_poaIdSize(0),
-    pd_deathSignal(&pd_lock),
+    pd_lock("omniOrbPOA::pd_lock [nil]"),
+    pd_deathSignal(&pd_lock, "omniOrbPOA::pd_deathSignal [nil]"),
     pd_oidIndex(0),
     pd_activeObjList(0),
     pd_oidPrefix(0),
@@ -4063,7 +4071,7 @@ generateUniqueId(CORBA::Octet* k)
 {
   OMNIORB_ASSERT(k);
 
-  static omni_tracedmutex lock;
+  static omni_tracedmutex lock("generateUniqueId");
   omni_tracedmutex_lock sync(lock);
 
   static CORBA::ULong hi = 0;

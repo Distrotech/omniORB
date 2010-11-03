@@ -183,7 +183,7 @@ static const char* boa_ids[] = { "omniORB4_BOA",
 				 0 };
 
 static omniOrbBOA*                       the_boa = 0;
-static omni_tracedmutex                  boa_lock;
+static omni_tracedmutex                  boa_lock("boa_lock");
 static omniORB::loader::mapKeyToObject_t MapKeyToObjectFunction = 0;
 
 
@@ -307,7 +307,8 @@ omniOrbBOA::omniOrbBOA(int nil)
     pd_state_signal(0)
 {
   if (!nil)
-    pd_state_signal = new omni_tracedcondition(omni::internalLock);
+    pd_state_signal = new omni_tracedcondition(omni::internalLock,
+					       "omniOrbBOA::pd_state_signal");
 
   // NB. If nil, then omni::internalLock may be zero, so we cannot use
   // it to initialise the condition variable. However, since the
@@ -1230,7 +1231,7 @@ omniORB::loader::set(omniORB::loader::mapKeyToObject_t NewMapKeyToObject)
 ///////////////////////// omniORB::objectKey /////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-static omni_tracedmutex key_lock;
+static omni_tracedmutex key_lock("key_lock");
 static omniORB::objectKey omniORB_seed;
 
 

@@ -85,7 +85,7 @@ void LibcWrapper::SRand(unsigned int s)
 }
 
 #else
-static omni_tracedmutex rand_lock;
+static omni_tracedmutex rand_lock("rand_lock");
 
 unsigned int LibcWrapper::Rand()
 {
@@ -436,7 +436,7 @@ FullAddrInfo::next()
 // AddrInfo without getaddrinfo()
 //
 
-static omni_tracedmutex non_reentrant;
+static omni_tracedmutex non_reentrant("non_reentrant");
 
 class IP4AddrInfo : public LibcWrapper::AddrInfo
 {

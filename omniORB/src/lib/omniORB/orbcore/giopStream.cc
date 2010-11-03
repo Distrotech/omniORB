@@ -1201,7 +1201,7 @@ static inline char printable_char(char c) {
 void 
 giopStream::dumpbuf(unsigned char* buf, size_t sz)
 {
-  static omni_tracedmutex lock;
+  static omni_tracedmutex lock("giopStream::dumpbuf::lock");
   omni_tracedmutex_lock sync(lock);
   unsigned i;
   char row[80];

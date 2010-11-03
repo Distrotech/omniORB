@@ -52,10 +52,10 @@ static RequestLink* incoming_q_tail = 0;  // undefined if incoming_q == 0
 static unsigned queue_waiters = 0;
 // The number of threads waiting for responses.
 
-static omni_tracedmutex q_lock;
+static omni_tracedmutex q_lock("orbMultiRequest::q_lock");
 // Lock for accessing the above data.
 
-static omni_tracedcondition q_cv(&q_lock);
+static omni_tracedcondition q_cv(&q_lock, "orbMultiRequest::q_cv");
 // This is signalled if( queue_waiters > 0 ) and there might be
 // something to receive now.                           =====
 

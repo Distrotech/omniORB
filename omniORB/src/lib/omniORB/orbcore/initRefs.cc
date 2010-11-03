@@ -189,7 +189,7 @@ CORBA::UShort  orbParameters::bootstrapAgentPort = 900;
 
 ////////////////////////////////////////////////////////////////////////////
 static CORBA_InitialReferences_i*  the_bootagentImpl = 0;
-static omni_tracedmutex ba_lock;
+static omni_tracedmutex ba_lock("ba_lock");
 
 
 // When initial references are first set, they contain an id and a
@@ -207,7 +207,7 @@ static char*                                      the_argsDefaultInitRef = 0;
 static char*                                      the_fileDefaultInitRef = 0;
 static CORBA_InitialReferences_ptr                the_bootagent          = 0;
 
-static omni_tracedmutex sl_lock;
+static omni_tracedmutex sl_lock("sl_lock");
 
 
 //////////////////////////////////////////////////////////////////////

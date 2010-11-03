@@ -182,13 +182,16 @@ OMNI_NAMESPACE_BEGIN(omni)
 
 static char                             initialised = 0;
 static int                              num_active_oas = 0;
-static omni_tracedmutex                 oa_lock;
+static omni_tracedmutex                 oa_lock("oa_lock");
 static omnivector<_OMNI_NS(orbServer)*> oa_servers;
 static orbServer::EndpointList          oa_endpoints;
 
-omni_tracedmutex     omniObjAdapter::sd_detachedObjectLock;
+omni_tracedmutex omniObjAdapter::sd_detachedObjectLock(
+  "omniObjAdapter::sd_detachedObjectLock");
+
 omni_tracedcondition omniObjAdapter::sd_detachedObjectSignal(
-				&omniObjAdapter::sd_detachedObjectLock);
+  &omniObjAdapter::sd_detachedObjectLock,
+  "omniObjAdapter::sd_detachedObjectSignal");
 
 omniObjAdapter::Options omniObjAdapter::options;
 
@@ -691,7 +694,8 @@ omniObjAdapter::omniObjAdapter(int nil)
     pd_signalOnZeroDetachedObjects(0),
     pd_isActive(0)
 {
-  if (!nil) pd_signal = new omni_tracedcondition(omni::internalLock);
+  if (!nil) pd_signal = new omni_tracedcondition(omni::internalLock,
+						 "omniObjAdapter::pd_signal");
 }
 
 //////////////////////////////////////////////////////////////////////

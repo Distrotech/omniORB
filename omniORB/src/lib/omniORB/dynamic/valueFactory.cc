@@ -101,7 +101,7 @@ static inline void init_table()
 valueFactoryTableTracker::
 valueFactoryTableTracker()
 {
-  vf_lock = new omni_tracedmutex();
+  vf_lock = new omni_tracedmutex("valueFactoryTableTracker::vf_lock");
 
   omniORB::logs(25, "Initialise value factory table.");
   vf_table = new ValueFactoryTableEntry*[vf_tablesize];

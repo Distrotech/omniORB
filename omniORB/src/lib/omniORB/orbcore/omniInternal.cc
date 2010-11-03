@@ -103,6 +103,11 @@ CORBA::Boolean  omniORB::traceTime = 1;
 //
 //    Valid values = 0 or 1
 
+CORBA::Boolean  omniORB::traceLocking = 0;
+//    If true, trace lock operations.
+//
+//    Valid values = 0 or 1
+
 
 
 const CORBA::Char                omni::myByteOrder = _OMNIORB_HOST_BYTE_ORDER_;
@@ -283,7 +288,7 @@ omni::nilRefLock()
 
   static omni_tracedmutex* nil_ref_lock = 0;
 
-  if( !nil_ref_lock )  nil_ref_lock = new omni_tracedmutex;
+  if( !nil_ref_lock )  nil_ref_lock = new omni_tracedmutex("nil_ref_lock");
   return *nil_ref_lock;
 }
 
@@ -582,7 +587,9 @@ omniObjTableEntry::wait(_CORBA_ULong set)
 
   if (pd_state & set) return pd_state;
 
-  if (!pd_cond) pd_cond = new omni_tracedcondition(omni::internalLock);
+  if (!pd_cond)
+    pd_cond = new omni_tracedcondition(omni::internalLock,
+				       "omniObjTableEntry::pd_cond");
 
   gainRef();
   ++pd_waiters;
@@ -1298,6 +1305,35 @@ public:
 static traceTimeHandler traceTimeHandler_;
 
 /////////////////////////////////////////////////////////////////////////////
+class traceLockingHandler : public orbOptions::Handler {
+public:
+
+  traceLockingHandler() : 
+    orbOptions::Handler("traceLocking",
+			"traceLocking = 0 or 1",
+			1,
+			"-ORBtraceLocking < 0 | 1 >") {}
+
+
+  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
+
+    CORBA::Boolean v;
+    if (!orbOptions::getBoolean(value,v)) {
+      throw orbOptions::BadParam(key(),value,
+				 orbOptions::expect_boolean_msg);
+    }
+    omniORB::traceLocking = v;
+  }
+
+  void dump(orbOptions::sequenceString& result) {
+    orbOptions::addKVBoolean(key(),omniORB::traceLocking,
+			     result);
+  }
+};
+
+static traceLockingHandler traceLockingHandler_;
+
+/////////////////////////////////////////////////////////////////////////////
 class traceFileHandler : public orbOptions::Handler {
 public:
 
@@ -1436,6 +1472,7 @@ public:
     orbOptions::singleton().registerHandler(traceInvocationReturnsHandler_);
     orbOptions::singleton().registerHandler(traceThreadIdHandler_);
     orbOptions::singleton().registerHandler(traceTimeHandler_);
+    orbOptions::singleton().registerHandler(traceLockingHandler_);
     orbOptions::singleton().registerHandler(traceFileHandler_);
     orbOptions::singleton().registerHandler(objectTableSizeHandler_);
     orbOptions::singleton().registerHandler(abortOnInternalErrorHandler_);
@@ -1443,9 +1480,14 @@ public:
   }
 
   void attach() {
-    if (!omni::internalLock)   omni::internalLock   = new omni_tracedmutex;
-    if (!omni::poRcLock)       omni::poRcLock       = new omni_tracedmutex;
-    if (!omni::objref_rc_lock) omni::objref_rc_lock = new omni_tracedmutex;
+    if (!omni::internalLock)
+      omni::internalLock   = new omni_tracedmutex("omni::internalLock");
+
+    if (!omni::poRcLock)
+      omni::poRcLock       = new omni_tracedmutex("omni::poRcLock");
+
+    if (!omni::objref_rc_lock)
+      omni::objref_rc_lock = new omni_tracedmutex("omni::objref_rc_lock");
 
     numObjectsInTable = 0;
     minNumObjects = 0;

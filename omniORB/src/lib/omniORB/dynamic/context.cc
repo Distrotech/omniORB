@@ -137,6 +137,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 static ContextImpl* default_context = 0;
 
 ContextImpl::ContextImpl(const char* name, CORBA::Context_ptr parent)
+  : pd_lock("ContextImpl::pd_lock")
 {
   if( !name )  name = "";
   else if( *name )  check_context_name(name);

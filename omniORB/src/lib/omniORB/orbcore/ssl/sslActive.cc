@@ -64,7 +64,9 @@ OMNI_NAMESPACE_BEGIN(omni)
 static sslActiveCollection myCollection;
 
 /////////////////////////////////////////////////////////////////////////
-sslActiveCollection::sslActiveCollection() : pd_n_sockets(0), pd_shutdown(0) {}
+sslActiveCollection::sslActiveCollection()
+  : pd_n_sockets(0), pd_shutdown(0), pd_lock("sslActiveCollection::pd_lock")
+{}
 
 /////////////////////////////////////////////////////////////////////////
 sslActiveCollection::~sslActiveCollection() {}

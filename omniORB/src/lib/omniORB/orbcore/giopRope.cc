@@ -80,7 +80,7 @@ giopRope::giopRope(const giopAddressList& addrlist,
   pd_maxStrands(orbParameters::maxGIOPConnectionPerServer),
   pd_oneCallPerConnection(orbParameters::oneCallPerConnection),
   pd_nwaiting(0),
-  pd_cond(omniTransportLock),
+  pd_cond(omniTransportLock, "giopRope::pd_cond"),
   pd_offerBiDir(orbParameters::offerBiDirectionalGIOP)
 {
   {
@@ -111,7 +111,7 @@ giopRope::giopRope(giopAddress* addr,int initialRefCount) :
   pd_maxStrands(orbParameters::maxGIOPConnectionPerServer),
   pd_oneCallPerConnection(orbParameters::oneCallPerConnection),
   pd_nwaiting(0),
-  pd_cond(omniTransportLock)
+  pd_cond(omniTransportLock, "giopRope::pd_cond")
 {
   pd_addresses.push_back(addr);
   pd_addresses_order.push_back(0);

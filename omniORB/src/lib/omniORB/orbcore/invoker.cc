@@ -133,7 +133,8 @@ public:
   omniAsyncWorker(omniAsyncInvoker* pool, omniTask* task) :
     pd_pool(pool), pd_task(task), pd_next(0), pd_id(id()), pd_in_idle_queue(0)
   {
-    pd_cond = new omni_tracedcondition(pool->pd_lock);
+    pd_cond = new omni_tracedcondition(pool->pd_lock,
+				       "omniAsyncWorker::pd_cond");
     start();
   }
 
@@ -286,8 +287,8 @@ omniAsyncWorkerInfo::run()
 ///////////////////////////////////////////////////////////////////////////
 omniAsyncInvoker::omniAsyncInvoker(unsigned int max) {
   pd_keep_working = 1;
-  pd_lock  = new omni_tracedmutex();
-  pd_cond  = new omni_tracedcondition(pd_lock);
+  pd_lock  = new omni_tracedmutex("omniAsyncInvoker::pd_lock");
+  pd_cond  = new omni_tracedcondition(pd_lock, "omniAsyncInvoker::pd_cond");
   pd_idle_threads = 0;
   pd_nthreads = 0;
   pd_maxthreads = max;

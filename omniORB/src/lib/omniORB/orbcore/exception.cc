@@ -157,7 +157,7 @@ static void* omni_globalSystemExcHandlerCookie = 0;
 
 
 omniExHandlers** omniExHandlers::Table = 0;
-omni_tracedmutex omniExHandlers::TableLock;
+omni_tracedmutex omniExHandlers::TableLock("omniExHandlers::TableLock");
 
 
 static CORBA::Boolean

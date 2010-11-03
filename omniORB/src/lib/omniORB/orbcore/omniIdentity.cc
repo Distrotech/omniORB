@@ -65,7 +65,7 @@ omniIdentity::waitForLastIdentity()
 
   omniORB::logs(15, "Waiting for client invocations to complete");
 
-  cond = new omni_tracedcondition(omni::internalLock);
+  cond = new omni_tracedcondition(omni::internalLock, "omniIdentity::cond");
 
   while (identity_count) cond->wait();
 

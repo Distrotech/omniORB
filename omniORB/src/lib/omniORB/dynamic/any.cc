@@ -213,7 +213,7 @@ OMNI_FORCE_LINK(dynamicLib);
 OMNI_USING_NAMESPACE(omni)
 
 // Mutex to protect Any pointers against modification by multiple threads.
-static omni_tracedmutex anyLock;
+static omni_tracedmutex anyLock("anyLock");
 
 // Extract possibly nil typecode.
 static inline

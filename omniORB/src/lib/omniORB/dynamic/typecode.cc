@@ -6977,8 +6977,8 @@ static void check_static_data_is_initialised()
   registerTrackedObject(the_typecodes);
 
   // Mutexes
-  aliasExpandedTc_lock  = new omni_tracedmutex();
-  refcount_lock         = new omni_tracedmutex();
+  aliasExpandedTc_lock  = new omni_tracedmutex("aliasExpandedTc_lock");
+  refcount_lock         = new omni_tracedmutex("TypeCode::refcount_lock");
 
   // Primitive TypeCodes
   CORBA::_tc_null      	= new TypeCode_base(CORBA::tk_null);

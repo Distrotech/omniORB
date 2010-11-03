@@ -238,7 +238,7 @@ DEFINE_POLICY_OBJECT(RequestProcessingPolicy)
 ///////////////////////////// ServantBase ////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-static omni_tracedmutex ref_count_lock;
+static omni_tracedmutex ref_count_lock("ServantBase::ref_count_lock");
 
 PortableServer::ServantBase::~ServantBase() {}
 

@@ -91,7 +91,7 @@ proxyObjectFactory::proxyObjectFactory(const char* repoId)
     ofl_size  = 5;
     ofl       = new proxyObjectFactory* [ofl_size];
     ofl_len   = 0;
-    ofl_mutex = new omni_tracedmutex();
+    ofl_mutex = new omni_tracedmutex("proxyObjectFactory::ofl_mutex");
   }
 
   omni_tracedmutex_lock sync(*ofl_mutex);

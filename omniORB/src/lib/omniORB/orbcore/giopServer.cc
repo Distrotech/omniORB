@@ -249,7 +249,8 @@ static const char* plural(CORBA::ULong val)
 
 ////////////////////////////////////////////////////////////////////////////
 giopServer::giopServer() : pd_state(IDLE), pd_nconnections(0),
-			   pd_cond(&pd_lock),
+			   pd_lock("giopServer::pd_lock"),
+			   pd_cond(&pd_lock, "giopServer::pd_cond"),
 			   pd_n_temporary_workers(0),
 			   pd_n_dedicated_workers(0)
 {

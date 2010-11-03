@@ -1,3 +1,66 @@
+Wed Nov  3 10:59:48 GMT 2010 dgrisby
+====================================
+
+- Resurrect serverCallTimeOut parameter.
+
+src/lib/omniORB/orbcore/GIOP_S.cc
+
+- Parameter documentation.
+
+include/omniORB4/callDescriptor.h
+
+- Combine locateRequest handling into normal call handling.
+
+include/omniORB4/internal/localIdentity.h
+include/omniORB4/internal/omniIdentity.h
+src/lib/omniORB/orbcore/inProcessIdentity.cc
+src/lib/omniORB/orbcore/localIdentity.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/lib/omniORB/orbcore/remoteIdentity.cc
+
+- Cast away const to avoid compiler warning.
+
+src/appl/omniNames/omniNames.cc
+
+- Lock tracing for debugging.
+
+include/omniORB4/omniORB.h
+include/omniORB4/tracedthread.h
+src/lib/omniORB/dynamic/any.cc
+src/lib/omniORB/dynamic/context.cc
+src/lib/omniORB/dynamic/deferredRequest.cc
+src/lib/omniORB/dynamic/dynAny.cc
+src/lib/omniORB/dynamic/orbMultiRequest.cc
+src/lib/omniORB/dynamic/typecode.cc
+src/lib/omniORB/dynamic/valueBase.cc
+src/lib/omniORB/dynamic/valueFactory.cc
+src/lib/omniORB/orbcore/SocketCollection.cc
+src/lib/omniORB/orbcore/corbaBoa.cc
+src/lib/omniORB/orbcore/corbaOrb.cc
+src/lib/omniORB/orbcore/exception.cc
+src/lib/omniORB/orbcore/giopBiDir.cc
+src/lib/omniORB/orbcore/giopRope.cc
+src/lib/omniORB/orbcore/giopServer.cc
+src/lib/omniORB/orbcore/giopStrand.cc
+src/lib/omniORB/orbcore/giopStream.cc
+src/lib/omniORB/orbcore/initRefs.cc
+src/lib/omniORB/orbcore/invoker.cc
+src/lib/omniORB/orbcore/libcWrapper.cc
+src/lib/omniORB/orbcore/objectAdapter.cc
+src/lib/omniORB/orbcore/omniIOR.cc
+src/lib/omniORB/orbcore/omniIdentity.cc
+src/lib/omniORB/orbcore/omniInternal.cc
+src/lib/omniORB/orbcore/omniTransport.cc
+src/lib/omniORB/orbcore/poa.cc
+src/lib/omniORB/orbcore/poamanager.cc
+src/lib/omniORB/orbcore/portableserver.cc
+src/lib/omniORB/orbcore/proxyFactory.cc
+src/lib/omniORB/orbcore/ssl/sslActive.cc
+src/lib/omniORB/orbcore/tcp/tcpActive.cc
+src/lib/omniORB/orbcore/tracedthread.cc
+src/lib/omniORB/orbcore/unix/unixActive.cc
+
+
 Thu Sep 23 15:10:27 BST 2010 dgrisby
 ====================================
 

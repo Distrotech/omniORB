@@ -63,7 +63,9 @@ OMNI_NAMESPACE_BEGIN(omni)
 static tcpActiveCollection myCollection;
 
 /////////////////////////////////////////////////////////////////////////
-tcpActiveCollection::tcpActiveCollection() : pd_n_sockets(0), pd_shutdown(0) {}
+tcpActiveCollection::tcpActiveCollection()
+  : pd_n_sockets(0), pd_shutdown(0), pd_lock("tcpActiveCollection::pd_lock")
+{}
 
 /////////////////////////////////////////////////////////////////////////
 tcpActiveCollection::~tcpActiveCollection() {}

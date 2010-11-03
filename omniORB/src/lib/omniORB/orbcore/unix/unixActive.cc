@@ -67,7 +67,9 @@ OMNI_NAMESPACE_BEGIN(omni)
 static unixActiveCollection myCollection;
 
 /////////////////////////////////////////////////////////////////////////
-unixActiveCollection::unixActiveCollection(): pd_n_sockets(0),pd_shutdown(0) {}
+unixActiveCollection::unixActiveCollection()
+  : pd_n_sockets(0), pd_shutdown(0), pd_lock("unixActiveCollection::pd_lock") 
+{}
 
 /////////////////////////////////////////////////////////////////////////
 unixActiveCollection::~unixActiveCollection() {}

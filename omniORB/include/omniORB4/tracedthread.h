@@ -3,6 +3,7 @@
 // tracedthread.h             Created on: 15/6/99
 //                            Author    : David Riddoch (djr)
 //
+//    Copyright (C) 2010      Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -27,32 +28,6 @@
 //    omni_thread style mutex and condition variables with checks.
 //
 
-/*
-  $Log$
-  Revision 1.2.2.4  2002/04/28 20:39:46  dgrisby
-  autoconf, install location tweaks.
-
-  Revision 1.2.2.3  2001/12/03 18:47:39  dpg1
-  Detect use after deletion in traced mutex and condition.
-
-  Revision 1.2.2.2  2001/08/17 13:49:08  dpg1
-  Optional logging for traced mutexes and condition variables.
-
-  Revision 1.2.2.1  2000/07/17 10:35:38  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:04  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.2  2000/02/09 12:06:37  djr
-  Additional checks for tracedmutex/conditions.
-  Removed superflouous member of omni_tracedmutex.
-
-  Revision 1.1.2.1  1999/09/24 09:51:57  djr
-  Moved from omniORB2 + some new files.
-
-*/
-
 #ifndef __OMNI_TRACEDTHREAD_H__
 #define __OMNI_TRACEDTHREAD_H__
 
@@ -70,9 +45,19 @@
 #ifndef OMNIORB_ENABLE_LOCK_TRACES
 
 #define ASSERT_OMNI_TRACEDMUTEX_HELD(m, yes)
-typedef omni_mutex      omni_tracedmutex;
+
+class omni_tracedmutex : public omni_mutex {
+public:
+  inline omni_tracedmutex(const char* name=0) : omni_mutex() {}
+};
+
 typedef omni_mutex_lock omni_tracedmutex_lock;
-typedef omni_condition  omni_tracedcondition;
+
+class omni_tracedcondition : public omni_condition {
+public:
+  inline omni_tracedcondition(omni_tracedmutex* m, const char* name=0)
+    : omni_condition(m) {}
+};
 
 #else
 
@@ -81,7 +66,7 @@ class omni_tracedcondition;
 
 class omni_tracedmutex {
 public:
-  omni_tracedmutex();
+  omni_tracedmutex(const char* name=0);
   ~omni_tracedmutex();
 
   void lock();
@@ -90,11 +75,6 @@ public:
   inline void release(void) { unlock(); }
 
   void assert_held(const char* file, int line, int yes);
-
-  void log(const char* name);
-  // Call this to cause logging messages whenever the mutex is locked
-  // or unlocked. The storage associated with name must exist until
-  // the mutex is deleted, or log(0) is called.
 
 private:
   friend class omni_tracedcondition;
@@ -107,7 +87,7 @@ private:
   omni_thread*   pd_holder;  // the thread holding pd_m, or 0
   int            pd_n_conds; // number of dependent condition vars
   int            pd_deleted; // set true on deletion, may catch later use
-  const char*    pd_logname; // if non-zero, name to use for logging
+  char*          pd_logname; // name to use for logging
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -116,18 +96,13 @@ private:
 
 class omni_tracedcondition {
 public:
-  omni_tracedcondition(omni_tracedmutex* m);
+  omni_tracedcondition(omni_tracedmutex* m, const char* name = 0);
   ~omni_tracedcondition();
 
   void wait();
   int timedwait(unsigned long secs, unsigned long nanosecs = 0);
   void signal();
   void broadcast();
-
-  void log(const char* name);
-  // Call this to cause logging messages whenever the condition is
-  // signalled or waited upon. The storage associated with name must
-  // exist until the mutex is deleted, or log(0) is called.
 
 private:
   omni_tracedcondition(const omni_tracedcondition&);
@@ -137,7 +112,7 @@ private:
   omni_condition    pd_cond;
   int               pd_n_waiters;
   int               pd_deleted;
-  const char*       pd_logname;
+  char*             pd_logname;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -162,6 +137,7 @@ private:
 
 // #ifndef OMNIORB_ENABLE_LOCK_TRACES
 #endif
+
 
 //////////////////////////////////////////////////////////////////////
 ///////////////////////// omni_optional_lock /////////////////////////

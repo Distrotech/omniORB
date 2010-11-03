@@ -370,6 +370,7 @@ static void closePipe(int pipe_read, int pipe_write)
 
 SocketCollection::SocketCollection()
   : pd_refcount(1),
+    pd_collection_lock("SocketCollection::pd_collection_lock"),
     pd_abs_sec(0), pd_abs_nsec(0),
     pd_pipe_full(0),
     pd_idle_count(idle_scans),
@@ -729,7 +730,8 @@ SocketHolder::Peek()
 	}
 	if (!pd_peek_cond)
 	  pd_peek_cond =
-	    new omni_tracedcondition(&pd_belong_to->pd_collection_lock);
+	    new omni_tracedcondition(&pd_belong_to->pd_collection_lock,
+				     "SocketHolder::pd_peek_cond");
 	
 	if (s == 0 && ns == 0) {
 	  // Set timeout for condition wait
@@ -839,7 +841,8 @@ SocketHolder::Peek()
 
 SocketCollection::SocketCollection()
   : pd_refcount(1),
-    pd_select_cond(&pd_collection_lock),
+    pd_collection_lock("SocketCollection::pd_collection_lock"),
+    pd_select_cond(&pd_collection_lock, "SocketCollection::pd_select_cond"),
     pd_abs_sec(0), pd_abs_nsec(0),
     pd_pipe_full(0),
     pd_idle_count(idle_scans),
@@ -1091,7 +1094,8 @@ SocketHolder::Peek()
 	}
 	if (!pd_peek_cond)
 	  pd_peek_cond =
-	    new omni_tracedcondition(&pd_belong_to->pd_collection_lock);
+	    new omni_tracedcondition(&pd_belong_to->pd_collection_lock,
+				     "SocketHolder::pd_peek_cond");
 	
 	if (s == 0 && ns == 0) {
 	  // Set timeout for condition wait
@@ -1187,6 +1191,7 @@ SocketHolder::Peek()
 
 SocketCollection::SocketCollection()
   : pd_refcount(1),
+    pd_collection_lock("SocketCollection::pd_collection_lock"),
     pd_abs_sec(0), pd_abs_nsec(0),
     pd_pipe_full(0),
     pd_idle_count(idle_scans),
@@ -1475,7 +1480,8 @@ SocketHolder::Peek()
 	}
 	if (!pd_peek_cond)
 	  pd_peek_cond =
-	    new omni_tracedcondition(&pd_belong_to->pd_collection_lock);
+	    new omni_tracedcondition(&pd_belong_to->pd_collection_lock,
+				     "SocketHolder::pd_peek_cond");
 	
 	if (s == 0 && ns == 0) {
 	  // Set timeout for condition wait

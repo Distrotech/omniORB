@@ -127,7 +127,7 @@ namespace {
 valueBaseLockTracker::valueBaseLockTracker()
 {
   OMNIORB_ASSERT(!ref_count_lock);
-  ref_count_lock = new omni_tracedmutex();
+  ref_count_lock = new omni_tracedmutex("valueBaseLockTracker::ref_count_lock");
 }
 
 valueBaseLockTracker::~valueBaseLockTracker()
