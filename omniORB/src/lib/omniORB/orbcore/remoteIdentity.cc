@@ -3,7 +3,7 @@
 // remoteIdentity.cc          Created on: 16/6/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2010 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -26,92 +26,6 @@
 //
 // Description:
 //
-
-/*
-  $Log$
-  Revision 1.4.2.3  2007/04/14 17:56:52  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.4.2.2  2005/04/14 00:03:56  dgrisby
-  New traceInvocationReturns and traceTime options; remove logf function.
-
-  Revision 1.4.2.1  2003/03/23 21:02:03  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.15  2002/07/03 15:49:51  dgrisby
-  Correct debug flag, typos, bug report address.
-
-  Revision 1.2.2.14  2001/09/19 17:26:53  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.2.2.13  2001/09/03 16:52:05  sll
-  New signature for locateRequest. Now accept a calldescriptor argument.
-
-  Revision 1.2.2.12  2001/09/03 13:28:59  sll
-  Changed locateRequest to honour the same retry rule as normal invocation.
-
-  Revision 1.2.2.11  2001/08/17 13:42:49  dpg1
-  callDescriptor::userException() no longer has to throw an exception.
-
-  Revision 1.2.2.10  2001/08/15 10:26:14  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.2.2.9  2001/08/03 17:41:24  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.2.2.8  2001/05/09 17:02:25  sll
-  Throw omniORB::LOCATION_FORWARD with the right permanent flag.
-
-  Revision 1.2.2.7  2001/04/18 18:18:04  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.2.2.6  2000/12/05 17:39:31  dpg1
-  New cdrStream functions to marshal and unmarshal raw strings.
-
-  Revision 1.2.2.5  2000/11/15 17:25:45  sll
-  cdrCountingStream must now be told explicitly what char and wchar
-  codeset convertor to use.
-
-  Revision 1.2.2.4  2000/11/09 12:27:59  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.2.2.3  2000/11/03 19:12:07  sll
-  Use new marshalling functions for byte, octet and char. Use get_octet_array
-  instead of get_char_array and put_octet_array instead of put_char_array.
-
-  Revision 1.2.2.2  2000/09/27 18:05:51  sll
-  Use the new giop engine APIs to drive a remote call.
-
-  Revision 1.2.2.1  2000/07/17 10:35:58  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:55  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.5  2000/06/22 10:37:50  dpg1
-  Transport code now throws omniConnectionBroken exception rather than
-  CORBA::COMM_FAILURE when things go wrong. This allows the invocation
-  code to distinguish between transport problems and COMM_FAILURES
-  propagated from the server side.
-
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.1.2.4  1999/10/27 17:32:16  djr
-  omni::internalLock and objref_rc_lock are now pointers.
-
-  Revision 1.1.2.3  1999/10/14 16:22:16  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.1.2.2  1999/09/28 10:54:35  djr
-  Removed pretty-printing of object keys from object adapters.
-
-  Revision 1.1.2.1  1999/09/22 14:27:06  djr
-  Major rewrite of orbcore to support POA.
-
-*/
 
 #include <omniORB4/CORBA.h>
 
@@ -165,6 +79,11 @@ omniRemoteIdentity::dispatch(omniCallDescriptor& call_desc)
 
   omniRemoteIdentity_RefHolder rh(this);
   // omni::internalLock has been released by RefHolder constructor
+
+  if (!call_desc.op()) {
+    locateRequest(call_desc);
+    return;
+  }
 
   if( omniORB::traceInvocations ) {
     omniORB::logger l;
@@ -273,11 +192,9 @@ omniRemoteIdentity::loseRef(omniObjRef*)
 void
 omniRemoteIdentity::locateRequest(omniCallDescriptor& call_desc)
 {
-  ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
+  ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 0);
 
-  omniRemoteIdentity_RefHolder rh(this);
-
-  if( omniORB::trace(10) ) {
+  if( omniORB::trace(10) || omniORB::traceInvocations ) {
     omniORB::logger l;
     l << "LocateRequest to remote: " << this << '\n';
   }
@@ -291,10 +208,18 @@ omniRemoteIdentity::locateRequest(omniCallDescriptor& call_desc)
   switch( (rc = iop_client->IssueLocateRequest()) ) {
   case GIOP::OBJECT_HERE:
     iop_client->RequestCompleted();
+    if (omniORB::traceInvocationReturns) {
+      omniORB::logger l;
+      l << "Return LocateRequest to remote: " << this << '\n';
+    }
     break;
 
   case GIOP::UNKNOWN_OBJECT:
     iop_client->RequestCompleted();
+    if (omniORB::traceInvocationReturns) {
+      omniORB::logger l;
+      l << "Return LocateRequest to remote: " << this << " (unknown object)\n";
+    }
     OMNIORB_THROW(OBJECT_NOT_EXIST,OBJECT_NOT_EXIST_NoMatch,
 		  CORBA::COMPLETED_NO);
     break;        // dummy break
@@ -304,6 +229,10 @@ omniRemoteIdentity::locateRequest(omniCallDescriptor& call_desc)
     {
       CORBA::Object_var obj(CORBA::Object::_unmarshalObjRef(s));
       iop_client->RequestCompleted();
+      if (omniORB::traceInvocationReturns) {
+	omniORB::logger l;
+	l << "Finish LocateRequest (object forward)\n";
+      }
       throw omniORB::LOCATION_FORWARD(obj._retn(),
 				      (rc == GIOP::OBJECT_FORWARD_PERM) ? 1 : 0);
     }
@@ -314,6 +243,10 @@ omniRemoteIdentity::locateRequest(omniCallDescriptor& call_desc)
       v <<= s;
       pd_ior->addr_mode(v);
       iop_client->RequestCompleted();
+      if (omniORB::traceInvocationReturns) {
+	omniORB::logger l;
+	l << "Finish LocateRequest (needs addressing mode)\n";
+      }
       if (omniORB::trace(10)) {
 	omniORB::logger log;
 	log << "Remote locateRequest: GIOP::NEEDS_ADDRESSING_MODE: "

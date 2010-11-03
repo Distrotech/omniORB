@@ -29,51 +29,6 @@
 //    may be local or remote).
 //
 
-/*
-  $Log$
-  Revision 1.1.6.3  2007/04/14 17:56:52  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.1.6.2  2006/09/17 23:21:49  dgrisby
-  Properly import identity_count for Windows DLL hell.
-
-  Revision 1.1.6.1  2003/03/23 21:03:44  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.5  2001/09/19 17:26:46  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.4  2001/09/03 16:52:05  sll
-  New signature for locateRequest. Now accept a calldescriptor argument.
-
-  Revision 1.1.4.3  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.2  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:18:15  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.3  2000/11/03 19:08:52  sll
-  Use virtual dtor with gcc.
-
-  Revision 1.2.2.2  2000/09/27 17:39:28  sll
-  Updated include/omniORB3 to include/omniORB4
-
-  Revision 1.2.2.1  2000/07/17 10:35:40  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:03  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/22 14:26:26  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __OMNIIDENTITY_H__
 #define __OMNIIDENTITY_H__
 
@@ -115,13 +70,6 @@ public:
   // argument. Other entities holding references to identities use the
   // default zero objref.
   //  Must hold <omni::internalLock>.
-
-  virtual void locateRequest(omniCallDescriptor&) = 0;
-  // If this returns normally, then the object exists.
-  // Throws OBJECT_NOT_EXIST, or omniORB::LOCATION_FORWARD
-  // otherwise.
-  // Caller must hold <omni::internalLock>. On return or raised
-  // exception, the lock is released.
 
   inline _CORBA_Boolean is_equivalent(const omniIdentity* id) {
     // Returns TRUE(1) if the two identity objects refer to the same CORBA
