@@ -3,7 +3,7 @@
 // omnipy.h                   Created on: 2000/02/24
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2010 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -31,107 +31,6 @@
 #ifndef _omnipy_h_
 #define _omnipy_h_
 
-// $Log$
-// Revision 1.3.2.14  2008/10/09 15:04:36  dgrisby
-// Python exceptions occurring during unmarshalling were not properly
-// handled. Exception state left set when at traceLevel 0 (thanks
-// Morarenko Kirill).
-//
-// Revision 1.3.2.13  2007/01/19 11:11:09  dgrisby
-// Avoid assertion failure if an unexpected C++ exception occurs during
-// an invocation.
-//
-// Revision 1.3.2.12  2006/07/26 17:50:43  dgrisby
-// Reuse existing omniIOR object when converting C++ object reference to Python.
-//
-// Revision 1.3.2.11  2006/07/19 09:40:39  dgrisby
-// Track ORB core changes.
-//
-// Revision 1.3.2.10  2006/05/24 18:33:04  dgrisby
-// Unlock interpreter lock before clearing value tracker in cdrMarshal /
-// cdrUnmarshal.
-//
-// Revision 1.3.2.9  2006/05/15 10:26:11  dgrisby
-// More relaxation of requirements for old-style classes, for Python 2.5.
-//
-// Revision 1.3.2.8  2006/01/19 17:28:44  dgrisby
-// Merge from omnipy2_develop.
-//
-// Revision 1.3.2.7  2005/11/09 12:33:32  dgrisby
-// Support POA LocalObjects.
-//
-// Revision 1.3.2.6  2005/06/24 17:36:08  dgrisby
-// Support for receiving valuetypes inside Anys; relax requirement for
-// old style classes in a lot of places.
-//
-// Revision 1.3.2.5  2005/04/25 18:27:41  dgrisby
-// Maintain forwarded location when narrowing forwarded references.
-//
-// Revision 1.3.2.4  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.3.2.3  2003/07/10 22:13:25  dgrisby
-// Abstract interface support.
-//
-// Revision 1.3.2.2  2003/05/20 17:10:23  dgrisby
-// Preliminary valuetype support.
-//
-// Revision 1.3.2.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.2.4.20  2003/03/12 11:17:02  dgrisby
-// Registration of external pseudo object creation functions.
-//
-// Revision 1.2.4.19  2002/11/27 00:18:25  dgrisby
-// Per thread / per objref timeouts.
-//
-// Revision 1.2.4.18  2002/05/26 00:55:36  dgrisby
-// C++ API to convert object references to/from Python.
-//
-// Revision 1.2.4.17  2002/03/18 12:40:38  dpg1
-// Support overriding _non_existent.
-//
-// Revision 1.2.4.16  2002/01/18 15:49:44  dpg1
-// Context support. New system exception construction. Fix None call problem.
-//
-// Revision 1.2.4.15  2001/10/18 15:48:39  dpg1
-// Track ORB core changes.
-//
-// Revision 1.2.4.14  2001/09/24 10:48:25  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.2.4.13  2001/08/21 10:52:41  dpg1
-// Update to new ORB core APIs.
-//
-// Revision 1.2.4.12  2001/08/15 10:37:14  dpg1
-// Track ORB core object table changes.
-//
-// Revision 1.2.4.11  2001/06/11 13:06:26  dpg1
-// Support for PortableServer::Current.
-//
-// Revision 1.2.4.10  2001/06/01 11:09:26  dpg1
-// Make use of new omni::ptrStrCmp() and omni::strCmp().
-//
-// Revision 1.2.4.9  2001/05/29 17:10:14  dpg1
-// Support for in process identity.
-//
-// Revision 1.2.4.8  2001/05/14 12:47:21  dpg1
-// Fix memory leaks.
-//
-// Revision 1.2.4.7  2001/05/10 15:16:01  dpg1
-// Big update to support new omniORB 4 internals.
-//
-// Revision 1.2.4.6  2001/04/09 15:22:15  dpg1
-// Fixed point support.
-//
-// Revision 1.2.4.5  2001/03/13 10:38:07  dpg1
-// Fixes from omnipy1_develop
-//
-// Revision 1.2.4.4  2000/12/04 18:57:23  dpg1
-// Fix deadlock when trying to lock omniORB internal lock while holding
-// the Python interpreter lock.
-//
-
 #if defined(__VMS)
 #include <Python.h>
 #else
@@ -146,6 +45,8 @@
 #include <orbParameters.h>
 #include <omniORBpy.h>
 #include "omnipy_sysdep.h"
+
+#undef minor
 
 
 OMNI_USING_NAMESPACE(omni)
@@ -168,6 +69,74 @@ extern "C" {
 #define POA_TWIN        omniPy::pyPOA_TWIN
 #define POAMANAGER_TWIN omniPy::pyPOAMANAGER_TWIN
 #define POACURRENT_TWIN omniPy::pyPOACURRENT_TWIN
+
+
+////////////////////////////////////////////////////////////////////////////
+// Exception handling                                                     //
+////////////////////////////////////////////////////////////////////////////
+
+class Py_BAD_PARAM : public CORBA::BAD_PARAM {
+public:
+  inline Py_BAD_PARAM(CORBA::ULong minor, CORBA::CompletionStatus completed,
+		      PyObject* message)
+    : CORBA::BAD_PARAM(minor, completed)
+  {
+    info_ = PyList_New(1);
+    PyList_SetItem(info_, 0, message);
+  }
+
+  inline ~Py_BAD_PARAM()
+  {
+    // We cannot guarantee that the interpreter lock is held when the
+    // destructor is run, so ownership of the info list should have
+    // been handed over before now.
+    if (info_) {
+      omniORB::logs(1, "ERROR: Py_BAD_PARAM info not freed.");
+    }
+  }
+
+  // Log the exception if necessary, then throw it.
+  static void raise(const char* file, int line,
+		    CORBA::ULong minor, CORBA::CompletionStatus completed,
+		    PyObject* message);
+
+
+  // Add a message to the info.
+  inline void add(PyObject* message)
+  {
+    PyList_Append(info_, message);
+  }
+
+  // Return the stack of messages. Caller takes ownership of the list.
+  inline PyObject* getInfo()
+  {
+    PyObject* r = info_;
+    info_ = 0;
+    return r;
+  }
+
+  // Log the stack of messages then re-throw a base BAD_PARAM.
+  // Releases the list.
+  inline void logInfoAndThrow()
+  {
+    PyObject* info = getInfo();
+    if (omniORB::traceExceptions) {
+      PyObject* info_repr = PyObject_Repr(info);
+      omniORB::logger log;
+      log << "BAD_PARAM info: " << PyString_AsString(info_repr) << "\n";
+      Py_DECREF(info_repr);
+    }
+    Py_DECREF(info);
+    throw CORBA::BAD_PARAM(minor(), completed());
+  }
+
+private:
+  PyObject* info_; // Stack of messages.
+};
+
+
+#define THROW_PY_BAD_PARAM(minor, completion, message) \
+  Py_BAD_PARAM::raise(__FILE__, __LINE__, minor, completion, message);
 
 
 // Useful macro
@@ -319,7 +288,8 @@ public:
   // Returns a NULL PyObject so you can say
   //   return handleSystemException(ex).
   static
-  PyObject* handleSystemException(const CORBA::SystemException& ex);
+  PyObject* handleSystemException(const CORBA::SystemException& ex,
+				  PyObject* info = 0);
 
   // Create a new Python object for the given system exception
   static
@@ -345,29 +315,10 @@ public:
   static
   omni_thread* ensureOmniThread();
 
-  // IsInstance function for all Python versions.
-  static inline
-  CORBA::Boolean isInstance(PyObject* o, PyObject* c)
-  {
-#if PY_VERSION_HEX >= 0x02010000
-    return PyObject_IsInstance(o,c);
-#else
-    if (!PyInstance_Check(a_o)) return 0;
-    PyObject* acls = (PyObject*)((PyInstanceObject*)o)->in_class;
-    return PyClass_IsSubclass(acls, c);
-#endif
-  }
+  // String formatting function. Equivalent to Python fmt % (args)
+  static
+  PyObject* formatString(const char* fmt, const char* pyfmt, ...);
 
-  // IsSubclass function for all Python versions
-  static inline
-  CORBA::Boolean isSubclass(PyObject* o, PyObject* c)
-  {
-#if PY_VERSION_HEX >= 0x02010000
-    return PyObject_IsSubclass(o,c);
-#else
-    return PyClass_IsSubclass(o, c);
-#endif
-  }
 
   ////////////////////////////////////////////////////////////////////////////
   // Fixed point                                                            //
@@ -791,12 +742,13 @@ public:
     virtual void userException(cdrStream& stream, _OMNI_NS(IOP_C)* iop_client,
 			       const char* repoId);
 
-    inline void systemException(const CORBA::SystemException& ex) {
+    inline void systemException(const CORBA::SystemException& ex,
+				PyObject* info = 0) {
       if (tstate_) {
 	PyEval_RestoreThread(tstate_);
 	tstate_ = 0;
       }
-      handleSystemException(ex);
+      handleSystemException(ex, info);
     }
 
     //

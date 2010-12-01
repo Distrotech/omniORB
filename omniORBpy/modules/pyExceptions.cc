@@ -3,7 +3,7 @@
 // pyExceptions.cc            Created on: 1999/07/29
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2008 Apasphere Ltd
+//    Copyright (C) 2003-2010 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -28,77 +28,57 @@
 // Description:
 //    Exception handling functions
 
-// $Id$
-
-// $Log$
-// Revision 1.1.4.9  2008/10/09 15:04:36  dgrisby
-// Python exceptions occurring during unmarshalling were not properly
-// handled. Exception state left set when at traceLevel 0 (thanks
-// Morarenko Kirill).
-//
-// Revision 1.1.4.8  2006/07/05 10:46:16  dgrisby
-// Dump exception tracebacks with traceExceptions, not traceLevel 10.
-//
-// Revision 1.1.4.7  2006/05/15 10:26:11  dgrisby
-// More relaxation of requirements for old-style classes, for Python 2.5.
-//
-// Revision 1.1.4.6  2005/07/22 17:41:08  dgrisby
-// Update from omnipy2_develop.
-//
-// Revision 1.1.4.5  2005/06/24 17:36:08  dgrisby
-// Support for receiving valuetypes inside Anys; relax requirement for
-// old style classes in a lot of places.
-//
-// Revision 1.1.4.4  2005/01/25 11:45:48  dgrisby
-// Merge from omnipy2_develop; set RPM version.
-//
-// Revision 1.1.4.3  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
-// Preliminary valuetype support.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.8  2001/10/18 15:48:39  dpg1
-// Track ORB core changes.
-//
-// Revision 1.1.2.7  2001/09/24 10:48:25  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.6  2001/08/01 10:12:36  dpg1
-// Main thread policy.
-//
-// Revision 1.1.2.5  2001/05/29 17:10:14  dpg1
-// Support for in process identity.
-//
-// Revision 1.1.2.4  2001/05/14 12:47:21  dpg1
-// Fix memory leaks.
-//
-// Revision 1.1.2.3  2001/05/10 15:16:02  dpg1
-// Big update to support new omniORB 4 internals.
-//
-// Revision 1.1.2.2  2000/11/22 14:42:05  dpg1
-// Remove dead omniORB 2.8 code.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:24  dpg1
-// Initial support for omniORB 4.
-//
-
 #include <omnipy.h>
 #include <pyThreadCache.h>
 
 
+void
+Py_BAD_PARAM::raise(const char* file, int line,
+		    CORBA::ULong minor, CORBA::CompletionStatus completed,
+		    PyObject* message)
+{
+  if (omniORB::traceExceptions) {
+    omniORB::logger log;
+    log << "throw BAD_PARAM from " << _OMNI_NS(omniExHelper)::strip(file)
+	<< ":" << line << " (";
+
+    const char* description =
+      _OMNI_NS(minorCode2String)(_OMNI_NS(BAD_PARAM_LookupTable),minor);
+
+    if (description) {
+      log << omniORB::logger::exceptionStatus(completed, description) << ")\n";
+    }
+    else {
+      log << omniORB::logger::exceptionStatus(completed, minor) << ")\n";
+    }
+  }
+  throw Py_BAD_PARAM(minor, completed, message);
+}
+
+
 PyObject*
-omniPy::handleSystemException(const CORBA::SystemException& ex)
+omniPy::handleSystemException(const CORBA::SystemException& ex, PyObject* info)
 {
   int dummy;
   PyObject* excc = PyDict_GetItemString(pyCORBAsysExcMap,
 					(char*)ex._NP_repoId(&dummy));
   OMNIORB_ASSERT(excc);
 
-  PyObject* exca = Py_BuildValue((char*)"(ii)", ex.minor(), ex.completed());
+  PyObject* exca;
+  if (info) {
+    exca = Py_BuildValue((char*)"(iiO)", ex.minor(), ex.completed(), info);
+
+    if (omniORB::traceExceptions) {
+      PyObject* info_repr = PyObject_Repr(info);
+      omniORB::logger log;
+      log << "BAD_PARAM info: " << PyString_AsString(info_repr) << "\n";
+      Py_DECREF(info_repr);
+    }
+  }
+  else {
+    exca = Py_BuildValue((char*)"(ii)", ex.minor(), ex.completed());
+  }
+
   PyObject* exci = PyEval_CallObject(excc, exca);
   Py_DECREF(exca);
   if (exci) {
@@ -166,9 +146,11 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId,
   if (omni::strMatch(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
     if (omniORB::traceExceptions) { \
       { \
+	PyObject* erepr = PyObject_Repr(eobj); \
         omniORB::logger l; \
         l << "Caught a CORBA system exception during up-call: " \
-          << PyString_AS_STRING(erepoId) << "\n"; \
+          << PyString_AS_STRING(erepr) << "\n"; \
+        Py_DECREF(erepr); \
       } \
       PyErr_Restore(etype, eobj, etraceback); \
       PyErr_Print(); \
@@ -186,9 +168,11 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId,
 
   if (omniORB::trace(1)) {
     {
+      PyObject* erepr = PyObject_Repr(eobj);
       omniORB::logger l;
       l << "Caught an unexpected CORBA exception during up-call: "
-        << PyString_AS_STRING(erepoId) << "\n";
+        << PyString_AS_STRING(erepr) << "\n";
+      Py_DECREF(erepr);
     }
     PyErr_Restore(etype, eobj, etraceback);
     PyErr_Print();

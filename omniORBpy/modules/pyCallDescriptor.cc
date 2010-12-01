@@ -3,7 +3,7 @@
 // pyCallDescriptor.cc        Created on: 2000/02/02
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2005 Apasphere Ltd
+//    Copyright (C) 2003-2010 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -27,52 +27,6 @@
 //
 // Description:
 //    Implementation of Python call descriptor object
-
-// $Id$
-// $Log$
-// Revision 1.1.4.3  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.2  2003/07/10 22:17:02  dgrisby
-// Track orb core changes, fix bugs.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.11  2003/01/27 11:56:57  dgrisby
-// Correctly handle invalid returns from application code.
-//
-// Revision 1.1.2.10  2002/01/18 15:49:44  dpg1
-// Context support. New system exception construction. Fix None call problem.
-//
-// Revision 1.1.2.9  2001/09/24 10:48:25  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.8  2001/09/20 14:51:24  dpg1
-// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
-//
-// Revision 1.1.2.7  2001/08/15 10:37:14  dpg1
-// Track ORB core object table changes.
-//
-// Revision 1.1.2.6  2001/06/29 15:11:12  dpg1
-// Fix for clients using GIOP 1.0.
-//
-// Revision 1.1.2.5  2001/06/29 09:53:56  dpg1
-// Fix for clients using GIOP 1.0.
-//
-// Revision 1.1.2.4  2001/06/01 11:09:26  dpg1
-// Make use of new omni::ptrStrCmp() and omni::strCmp().
-//
-// Revision 1.1.2.3  2001/05/10 15:16:02  dpg1
-// Big update to support new omniORB 4 internals.
-//
-// Revision 1.1.2.2  2001/01/10 12:00:07  dpg1
-// Release the Python interpreter lock when doing potentially blocking
-// stream calls.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:24  dpg1
-// Initial support for omniORB 4.
-//
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
@@ -116,10 +70,18 @@ omniPy::Py_omniCallDescriptor::initialiseCall(cdrStream&)
   // safely
   cdLockHolder _l(this);
 
-  for (int i=0; i < in_l_; i++)
-    omniPy::validateType(PyTuple_GET_ITEM(in_d_,i),
-			 PyTuple_GET_ITEM(args_,i),
-			 CORBA::COMPLETED_NO);
+  for (int i=0; i < in_l_; i++) {
+    try {
+      omniPy::validateType(PyTuple_GET_ITEM(in_d_,i),
+			   PyTuple_GET_ITEM(args_,i),
+			   CORBA::COMPLETED_NO);
+    }
+    catch (Py_BAD_PARAM& bp) {
+      bp.add(omniPy::formatString("Operation %r parameter %d",
+				  "si", op(), i));
+      throw;
+    }
+  }
 }
 
 
@@ -210,7 +172,10 @@ omniPy::Py_omniCallDescriptor::userException(cdrStream& stream,
 {
   reacquireInterpreterLock();
 
-  PyObject* d_o = PyDict_GetItemString(exc_d_, (char*)repoId);
+  PyObject* d_o = 0;
+
+  if (exc_d_ != Py_None)
+    d_o = PyDict_GetItemString(exc_d_, (char*)repoId);
 
   if (d_o) { // class, repoId, exc name, name, descriptor, ...
 
@@ -291,26 +256,45 @@ omniPy::Py_omniCallDescriptor::setAndValidateReturnedValues(PyObject* result)
   result_ = result;
 
   if (out_l_ == -1 || out_l_ == 0) {
-    if (result_ != Py_None)
-      OMNIORB_THROW(BAD_PARAM,
-		    BAD_PARAM_WrongPythonType,
-		    CORBA::COMPLETED_MAYBE);
+    if (result_ != Py_None) {
+      THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_MAYBE,
+			 omniPy::formatString("Operation %r should return "
+					      "None, got %r",
+					      "sO", op(), result->ob_type));
+    }
   }
   else if (out_l_ == 1) {
-    omniPy::validateType(PyTuple_GET_ITEM(out_d_,0),
-			 result,
-			 CORBA::COMPLETED_MAYBE);
+    try {
+      omniPy::validateType(PyTuple_GET_ITEM(out_d_,0),
+			   result,
+			   CORBA::COMPLETED_MAYBE);
+    }
+    catch (Py_BAD_PARAM& bp) {
+      bp.add(omniPy::formatString("Operation %r return value",
+				  "s", op()));
+      throw;
+    }
   }
   else {
-    if (!PyTuple_Check(result) || PyTuple_GET_SIZE(result) != out_l_)
-      OMNIORB_THROW(BAD_PARAM,
-		    BAD_PARAM_WrongPythonType,
-		    CORBA::COMPLETED_MAYBE);
+    if (!PyTuple_Check(result) || PyTuple_GET_SIZE(result) != out_l_) {
+      THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_MAYBE,
+			 omniPy::formatString("Operation %r should return "
+					      "%d-tuple, got %r",
+					      "siO",
+					      op(), out_l_, result->ob_type));
+    }
 
     for (int i=0; i < out_l_; i++) {
-      omniPy::validateType(PyTuple_GET_ITEM(out_d_,i),
-			   PyTuple_GET_ITEM(result,i),
-			   CORBA::COMPLETED_MAYBE);
+      try {
+	omniPy::validateType(PyTuple_GET_ITEM(out_d_,i),
+			     PyTuple_GET_ITEM(result,i),
+			     CORBA::COMPLETED_MAYBE);
+      }
+      catch (Py_BAD_PARAM& bp) {
+	bp.add(omniPy::formatString("Operation %r return value %d",
+				    "si", op(), i));
+	throw;
+      }
     }
   }
 }

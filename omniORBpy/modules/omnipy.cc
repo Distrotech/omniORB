@@ -3,7 +3,7 @@
 // omnipy.cc                  Created on: 1999/06/01
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2010 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -27,133 +27,6 @@
 //
 // Description:
 //    Main entry points for _omnipy Python module
-
-// $Id$
-
-// $Log$
-// Revision 1.1.4.20  2009/05/05 14:26:21  dgrisby
-// Remove unused variable.
-//
-// Revision 1.1.4.19  2007/09/18 20:03:34  dgrisby
-// Refcount error if cdrUnmarshal raised a Python exception.
-//
-// Revision 1.1.4.18  2007/01/19 11:11:09  dgrisby
-// Avoid assertion failure if an unexpected C++ exception occurs during
-// an invocation.
-//
-// Revision 1.1.4.17  2006/09/05 11:30:22  dgrisby
-// Modify stub version check to be more specific.
-//
-// Revision 1.1.4.16  2006/09/01 13:44:06  dgrisby
-// Hard-code version check rather than using pre-processor defines.
-//
-// Revision 1.1.4.15  2006/07/26 17:49:59  dgrisby
-// Support unchecked_narrow.
-//
-// Revision 1.1.4.14  2006/05/24 18:33:04  dgrisby
-// Unlock interpreter lock before clearing value tracker in cdrMarshal /
-// cdrUnmarshal.
-//
-// Revision 1.1.4.13  2006/05/15 10:26:11  dgrisby
-// More relaxation of requirements for old-style classes, for Python 2.5.
-//
-// Revision 1.1.4.12  2006/01/19 17:28:44  dgrisby
-// Merge from omnipy2_develop.
-//
-// Revision 1.1.4.11  2005/11/09 12:33:32  dgrisby
-// Support POA LocalObjects.
-//
-// Revision 1.1.4.10  2005/06/24 17:36:09  dgrisby
-// Support for receiving valuetypes inside Anys; relax requirement for
-// old style classes in a lot of places.
-//
-// Revision 1.1.4.9  2005/04/25 18:27:41  dgrisby
-// Maintain forwarded location when narrowing forwarded references.
-//
-// Revision 1.1.4.8  2005/04/11 13:02:38  dgrisby
-// Another merge.
-//
-// Revision 1.1.4.7  2005/03/02 13:39:17  dgrisby
-// Another merge from omnipy2_develop.
-//
-// Revision 1.1.4.6  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.5  2004/02/16 10:14:17  dgrisby
-// Use stream based copy for local calls.
-//
-// Revision 1.1.4.4  2003/11/06 12:00:34  dgrisby
-// ValueType TypeCode support; track ORB core changes.
-//
-// Revision 1.1.4.3  2003/07/10 22:13:25  dgrisby
-// Abstract interface support.
-//
-// Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
-// Preliminary valuetype support.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.20  2003/03/12 11:17:02  dgrisby
-// Registration of external pseudo object creation functions.
-//
-// Revision 1.1.2.19  2002/05/26 00:55:36  dgrisby
-// C++ API to convert object references to/from Python.
-//
-// Revision 1.1.2.18  2002/02/18 18:48:13  dpg1
-// Autoconf support.
-//
-// Revision 1.1.2.17  2002/01/18 15:49:44  dpg1
-// Context support. New system exception construction. Fix None call problem.
-//
-// Revision 1.1.2.16  2001/12/10 18:10:37  dpg1
-// Segfault with narrow on pseudo object.
-//
-// Revision 1.1.2.15  2001/09/24 10:48:25  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.14  2001/09/20 14:51:24  dpg1
-// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
-//
-// Revision 1.1.2.13  2001/08/21 10:52:40  dpg1
-// Update to new ORB core APIs.
-//
-// Revision 1.1.2.12  2001/08/15 10:37:13  dpg1
-// Track ORB core object table changes.
-//
-// Revision 1.1.2.11  2001/06/22 10:29:26  dpg1
-// Add distribution date to logging.
-//
-// Revision 1.1.2.10  2001/06/11 13:06:25  dpg1
-// Support for PortableServer::Current.
-//
-// Revision 1.1.2.9  2001/06/01 11:09:25  dpg1
-// Make use of new omni::ptrStrCmp() and omni::strCmp().
-//
-// Revision 1.1.2.8  2001/05/14 15:22:00  dpg1
-// cdrMarshal() / cdrUnmarshal() are back.
-//
-// Revision 1.1.2.7  2001/05/14 12:47:20  dpg1
-// Fix memory leaks.
-//
-// Revision 1.1.2.6  2001/05/10 15:16:01  dpg1
-// Big update to support new omniORB 4 internals.
-//
-// Revision 1.1.2.5  2001/04/09 16:28:49  dpg1
-// De-uglify ORB_init command line argument eating.
-//
-// Revision 1.1.2.4  2001/04/09 15:22:15  dpg1
-// Fixed point support.
-//
-// Revision 1.1.2.3  2000/11/22 17:23:03  dpg1
-// Twin strings pre-allocated.
-//
-// Revision 1.1.2.2  2000/11/06 17:06:38  dpg1
-// Fix to prevent extra _is_a call after narrow
-//
-// Revision 1.1.2.1  2000/10/13 13:55:23  dpg1
-// Initial support for omniORB 4.
-//
 
 #ifdef __WIN32__
 #define DLL_EXPORT _declspec(dllexport)
@@ -328,6 +201,27 @@ generateExceptionList()
   return excs;
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+// Convenience functions                                                  //
+////////////////////////////////////////////////////////////////////////////
+
+PyObject*
+omniPy::formatString(const char* fmt, const char* pyfmt, ...)
+{
+  PyObject* fmt_string = PyString_FromString(fmt);
+
+  va_list va;
+  va_start(va, pyfmt);
+  PyObject* args = Py_VaBuildValue(pyfmt, va);
+  va_end(va);
+
+  PyObject* ret = PyString_Format(fmt_string, args);
+
+  Py_DECREF(fmt_string);
+  Py_DECREF(args);
+  return ret;
+}
 
 
 // Things visible to Python:
@@ -719,7 +613,7 @@ extern "C" {
     //  (objref, op_name, (in_desc,out_desc,exc_desc [, ctxt [,values]]), args)
     //
     //  exc_desc is a dictionary containing a mapping from repoIds to
-    //  tuples of the form (exception class, marshal desc., param count)
+    //  exception descriptor tuples.
 
     PyObject *pyobjref, *in_d, *out_d, *exc_d, *ctxt_d, *op_args;
     char*  op;
@@ -766,7 +660,7 @@ extern "C" {
       char* err = new char[80];
       sprintf(err, "Operation requires %d argument%s; %d given",
 	      arg_len, (arg_len == 1) ? "" : "s",
-	      PyTuple_GET_SIZE(op_args));
+	      (int)PyTuple_GET_SIZE(op_args));
 
       PyErr_SetString(PyExc_TypeError, err);
       delete [] err;
@@ -797,6 +691,10 @@ extern "C" {
 	Py_INCREF(Py_None);
 	return Py_None;
       }
+    }
+    catch (Py_BAD_PARAM& ex) {
+      // systemException() reacquires the interpreter lock if necessary
+      call_desc.systemException(ex, ex.getInfo());
     }
 #ifdef HAS_Cplusplus_catch_exception_by_base
     catch (const CORBA::SystemException& ex) {

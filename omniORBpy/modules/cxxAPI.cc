@@ -3,7 +3,7 @@
 // cxxAPI.cc                  Created on: 2002/05/25
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2002 Duncan Grisby
+//    Copyright (C) 2002-2010 Apasphere Ltd
 //
 //    This file is part of the omniORBpy library
 //
@@ -143,17 +143,27 @@ impl_handlePythonSystemException()
 }
 
 static void
+locked_marshalPyObject(cdrStream& stream, PyObject* desc, PyObject* obj)
+{
+  try {
+    omniPy::validateType(desc, obj, CORBA::COMPLETED_NO);
+    omniPy::marshalPyObject(stream, desc, obj);
+  }
+  catch (Py_BAD_PARAM& bp) {
+    bp.logInfoAndThrow();
+  }
+}
+
+static void
 impl_marshalPyObject(cdrStream& stream, PyObject* desc, PyObject* obj,
 		     CORBA::Boolean hold_lock)
 {
   if (hold_lock) {
-    omniPy::validateType(desc, obj, CORBA::COMPLETED_NO);
-    omniPy::marshalPyObject(stream, desc, obj);
+    locked_marshalPyObject(stream, desc, obj);
   }
   else {
     omnipyThreadCache::lock _t;
-    omniPy::validateType(desc, obj, CORBA::COMPLETED_NO);
-    omniPy::marshalPyObject(stream, desc, obj);
+    locked_marshalPyObject(stream, desc, obj);
   }
 }    
 

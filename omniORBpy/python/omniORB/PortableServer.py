@@ -3,7 +3,7 @@
 # PortableServer.py          Created on: 1999/09/22
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2005-2006 Apasphere Ltd
+#    Copyright (C) 2005-2010 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -24,80 +24,15 @@
 #    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 #    MA 02111-1307, USA
 #
-#
 # Description:
 #    PortableServer module
-
-
-# $Id$
-# $Log$
-# Revision 1.9.2.4  2006/01/19 17:28:44  dgrisby
-# Merge from omnipy2_develop.
-#
-# Revision 1.9.2.3  2005/11/09 12:33:31  dgrisby
-# Support POA LocalObjects.
-#
-# Revision 1.9.2.2  2005/01/07 00:22:35  dgrisby
-# Big merge from omnipy2_develop.
-#
-# Revision 1.9.2.1  2003/03/23 21:51:43  dgrisby
-# New omnipy3_develop branch.
-#
-# Revision 1.7.4.9  2003/01/27 11:58:51  dgrisby
-# Correct IfR scoping.
-#
-# Revision 1.7.4.8  2002/05/28 22:04:41  dgrisby
-# Incorrect repoIds.
-#
-# Revision 1.7.4.7  2002/03/18 12:40:38  dpg1
-# Support overriding _non_existent.
-#
-# Revision 1.7.4.6  2002/03/11 15:40:05  dpg1
-# _get_interface support, exception minor codes.
-#
-# Revision 1.7.4.5  2002/01/18 15:49:45  dpg1
-# Context support. New system exception construction. Fix None call problem.
-#
-# Revision 1.7.4.4  2001/09/20 14:51:26  dpg1
-# Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
-#
-# Revision 1.7.4.3  2001/08/01 10:12:36  dpg1
-# Main thread policy.
-#
-# Revision 1.7.4.2  2001/06/11 13:06:26  dpg1
-# Support for PortableServer::Current.
-#
-# Revision 1.7.4.1  2000/11/28 14:51:11  dpg1
-# Typo in method name.
-#
-# Revision 1.7  2000/05/25 16:07:44  dpg1
-# Servant._default_POA now caches the root POA.
-#
-# Revision 1.6  2000/03/03 17:41:27  dpg1
-# Major reorganisation to support omniORB 3.0 as well as 2.8.
-#
-# Revision 1.5  1999/11/25 11:21:36  dpg1
-# Proper support for server-side _is_a().
-#
-# Revision 1.4  1999/09/28 16:19:41  dpg1
-# Small memory management issues fixed.
-#
-# Revision 1.3  1999/09/24 13:26:00  dpg1
-# _default_POA() operation added to Servant.
-#
-# Revision 1.2  1999/09/24 09:22:01  dpg1
-# Added copyright notices.
-#
-# Revision 1.1  1999/09/22 15:46:11  dpg1
-# Fake POA implemented.
-#
 
 import _omnipy
 import omniORB
 from omniORB import CORBA
 
 # native Servant
-class Servant:
+class Servant(object):
     _NP_RepositoryId = ""
 
     def _this(self):
@@ -490,7 +425,7 @@ class Current (CORBA.Object) :
 # Generated declarations
 
 # ObjectId
-class ObjectId:
+class ObjectId(object):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/ObjectId:1.0"
     def __init__(self):
         raise RuntimeError("Cannot construct objects of this type.")

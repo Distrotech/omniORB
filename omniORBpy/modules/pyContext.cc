@@ -3,7 +3,7 @@
 // pyContext.cc               Created on: 2002/01/17
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2005 Apasphere Ltd
+//    Copyright (C) 2003-2010 Apasphere Ltd
 //    Copyright (C) 2002 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -24,28 +24,8 @@
 //    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 //    MA 02111-1307, USA
 //
-//
 // Description:
 //    Context support
-
-// $Id$
-// $Log$
-// Revision 1.1.4.3  2005/06/24 17:36:08  dgrisby
-// Support for receiving valuetypes inside Anys; relax requirement for
-// old style classes in a lot of places.
-//
-// Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
-// Preliminary valuetype support.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.2  2003/03/14 15:29:22  dgrisby
-// Remove const char* -> char* warnings.
-//
-// Revision 1.1.2.1  2002/01/18 15:49:44  dpg1
-// Context support. New system exception construction. Fix None call problem.
-//
 
 #include <omnipy.h>
 
@@ -55,7 +35,7 @@ OMNI_USING_NAMESPACE(omni)
 void
 omniPy::validateContext(PyObject* c_o, CORBA::CompletionStatus compstatus)
 {
-  if (!isInstance(c_o, pyCORBAContextClass))
+  if (!PyObject_IsInstance(c_o, pyCORBAContextClass))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 }
 

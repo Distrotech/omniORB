@@ -3,7 +3,7 @@
 # __init__.py                Created on: 1999/07/19
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2008 Apasphere Ltd
+#    Copyright (C) 2002-2010 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -27,213 +27,6 @@
 #
 # Description:
 #    omniORB module -- omniORB specific things
-
-
-# $Id$
-# $Log$
-# Revision 1.30.2.23  2009/05/06 16:50:23  dgrisby
-# Updated copyright.
-#
-# Revision 1.30.2.22  2008/08/21 10:53:55  dgrisby
-# Hook Thread.__stop instead of __delete. Thanks Luke Deller.
-#
-# Revision 1.30.2.21  2008/02/01 16:29:16  dgrisby
-# Error with implementation of operations with names clashing with
-# Python keywords.
-#
-# Revision 1.30.2.20  2007/10/07 15:30:58  dgrisby
-# Problems with modules inside packages. Thanks Fabian Knittel.
-#
-# Revision 1.30.2.19  2007/05/11 09:37:23  dgrisby
-# Ensure hash value of unpickled enum items is the same as that of the
-# original item.
-#
-# Revision 1.30.2.18  2006/09/07 15:29:57  dgrisby
-# Use boxes.idl to build standard value boxes.
-#
-# Revision 1.30.2.17  2006/07/11 13:53:09  dgrisby
-# Implement missing TypeCode creation functions.
-#
-# Revision 1.30.2.16  2006/02/22 13:05:15  dgrisby
-# __repr__ and _narrow methods for valuetypes.
-#
-# Revision 1.30.2.15  2006/01/19 17:28:44  dgrisby
-# Merge from omnipy2_develop.
-#
-# Revision 1.30.2.14  2006/01/17 17:38:20  dgrisby
-# Expose omniORB.setClientConnectTimeout function.
-#
-# Revision 1.30.2.13  2005/11/09 12:33:31  dgrisby
-# Support POA LocalObjects.
-#
-# Revision 1.30.2.12  2005/09/01 15:14:41  dgrisby
-# Merge from omnipy3_develop.
-#
-# Revision 1.30.2.11  2005/07/29 11:21:35  dgrisby
-# Fix long-standing problem with module re-opening by #included files.
-#
-# Revision 1.30.2.10  2005/06/24 17:36:00  dgrisby
-# Support for receiving valuetypes inside Anys; relax requirement for
-# old style classes in a lot of places.
-#
-# Revision 1.30.2.9  2005/04/25 18:28:29  dgrisby
-# Minor code for TRANSIENT_FailedOnForwarded.
-#
-# Revision 1.30.2.8  2005/04/14 13:50:45  dgrisby
-# New traceTime, traceInvocationReturns functions; removal of omniORB::logf.
-#
-# Revision 1.30.2.7  2005/03/02 13:39:16  dgrisby
-# Another merge from omnipy2_develop.
-#
-# Revision 1.30.2.6  2005/01/25 11:45:48  dgrisby
-# Merge from omnipy2_develop; set RPM version.
-#
-# Revision 1.30.2.5  2005/01/07 00:22:35  dgrisby
-# Big merge from omnipy2_develop.
-#
-# Revision 1.30.2.4  2003/09/04 14:08:41  dgrisby
-# Correct register_value_factory semantics.
-#
-# Revision 1.30.2.3  2003/07/10 22:13:25  dgrisby
-# Abstract interface support.
-#
-# Revision 1.30.2.2  2003/05/20 17:10:25  dgrisby
-# Preliminary valuetype support.
-#
-# Revision 1.30.2.1  2003/03/23 21:51:43  dgrisby
-# New omnipy3_develop branch.
-#
-# Revision 1.26.2.15  2003/03/12 11:17:49  dgrisby
-# Any / TypeCode fixes.
-#
-# Revision 1.26.2.14  2002/11/27 00:18:25  dgrisby
-# Per thread / per objref timeouts.
-#
-# Revision 1.26.2.13  2002/09/21 23:27:11  dgrisby
-# New omniORB.any helper module.
-#
-# Revision 1.26.2.12  2002/08/16 19:27:36  dgrisby
-# Documentation update. Minor ORB updates to match docs.
-#
-# Revision 1.26.2.11  2002/05/27 01:02:37  dgrisby
-# Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
-#
-# Revision 1.26.2.10  2002/03/11 15:40:05  dpg1
-# _get_interface support, exception minor codes.
-#
-# Revision 1.26.2.9  2002/02/25 15:34:26  dpg1
-# Get list of keywords from keyword module.
-#
-# Revision 1.26.2.8  2002/01/18 15:49:45  dpg1
-# Context support. New system exception construction. Fix None call problem.
-#
-# Revision 1.26.2.7  2001/09/20 14:51:26  dpg1
-# Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
-#
-# Revision 1.26.2.6  2001/08/01 10:12:37  dpg1
-# Main thread policy.
-#
-# Revision 1.26.2.5  2001/06/15 10:59:27  dpg1
-# Apply fixes from omnipy1_develop.
-#
-# Revision 1.26.2.4  2001/05/14 15:22:00  dpg1
-# cdrMarshal() / cdrUnmarshal() are back.
-#
-# Revision 1.26.2.3  2001/04/10 16:35:33  dpg1
-# Minor bugs in Any coercion.
-#
-# Revision 1.26.2.2  2001/04/09 15:22:17  dpg1
-# Fixed point support.
-#
-# Revision 1.26.2.1  2000/10/13 13:55:31  dpg1
-# Initial support for omniORB 4.
-#
-# Revision 1.26  2000/10/02 17:34:58  dpg1
-# Merge for 1.2 release
-#
-# Revision 1.24.2.2  2000/08/23 09:22:07  dpg1
-# Fix loading of IfR stubs with "import CORBA"
-#
-# Revision 1.24.2.1  2000/08/17 08:46:06  dpg1
-# Support for omniORB.LOCATION_FORWARD exception
-#
-# Revision 1.24  2000/07/12 14:33:10  dpg1
-# Support for Interface Repository stubs
-#
-# Revision 1.23  2000/06/28 10:49:07  dpg1
-# Incorrect comment removed.
-#
-# Revision 1.22  2000/06/27 15:09:41  dpg1
-# Expanded comment.
-#
-# Revision 1.21  2000/06/12 15:36:09  dpg1
-# Support for exception handler functions. Under omniORB 3, local
-# operation dispatch modified so exceptions handlers are run.
-#
-# Revision 1.20  2000/06/02 14:25:51  dpg1
-# orb.run() now properly exits when the ORB is shut down
-#
-# Revision 1.19  2000/06/01 11:10:30  dme
-# add omniORB.WorkerThread create/delete hooks (e.g. for profiling)
-#
-# Revision 1.18  2000/04/06 09:31:43  dpg1
-# newModule() spots if we're trying to re-open the CORBA module, and if
-# so uses omniORB.CORBA.
-#
-# Revision 1.17  2000/03/03 17:41:27  dpg1
-# Major reorganisation to support omniORB 3.0 as well as 2.8.
-#
-# Revision 1.16  2000/01/31 10:51:41  dpg1
-# Fix to exception throwing.
-#
-# Revision 1.15  2000/01/04 16:14:27  dpg1
-# Clear out byte-compiled files created by importIDL()
-#
-# Revision 1.14  2000/01/04 15:29:40  dpg1
-# Fixes to modules generated within a package.
-#
-# Revision 1.13  1999/11/12 17:15:50  dpg1
-# Can now specify arguments for omniidl.
-#
-# Revision 1.12  1999/11/12 16:49:18  dpg1
-# Stupid bug introduced with last change.
-#
-# Revision 1.11  1999/11/12 15:53:48  dpg1
-# New functions omniORB.importIDL() and omniORB.importIDLString().
-#
-# Revision 1.10  1999/10/18 08:25:57  dpg1
-# _is_a() now works properly for local objects.
-#
-# Revision 1.9  1999/09/29 15:46:50  dpg1
-# lockWithNewThreadState now creates a dummy threading.Thread object so
-# threading doesn't get upset that it's not there. Very dependent on the
-# implementation of threading.py.
-#
-# Revision 1.8  1999/09/27 09:06:37  dpg1
-# Friendly error message if there is no thread support.
-#
-# Revision 1.7  1999/09/24 09:22:01  dpg1
-# Added copyright notices.
-#
-# Revision 1.6  1999/09/23 16:28:16  dpg1
-# __doc__ strings now created for existing modules without them.
-#
-# Revision 1.5  1999/09/22 15:46:11  dpg1
-# Fake POA implemented.
-#
-# Revision 1.4  1999/09/13 15:13:09  dpg1
-# Module handling.
-# Any coercion (*** not fully tested).
-#
-# Revision 1.3  1999/08/03 09:03:46  dpg1
-# Unions with no default member fixed.
-#
-# Revision 1.2  1999/07/29 14:16:03  dpg1
-# Server side support.
-#
-# Revision 1.1  1999/07/19 15:53:26  dpg1
-# Initial revision
-#
 
 """
 omniORB module -- omniORB specific features
@@ -630,13 +423,13 @@ def skeletonModuleName(mname):
 
 # Function to create a new empty class as a scope place-holder
 def newEmptyClass():
-    class __dummy: pass
+    class __dummy(object): pass
     return __dummy
 
  
 # Classes to support IDL type mapping
 
-class EnumItem:
+class EnumItem(object):
     def __init__(self, name, value):
         self._n = name
         self._v = value
@@ -672,7 +465,7 @@ class AnonymousEnumItem (EnumItem):
         return "anonymous enum item"
 
 
-class Enum:
+class Enum(object):
     def __init__(self, repoId, items):
         self._NP_RepositoryId = repoId
         self._items = items
@@ -683,7 +476,7 @@ class Enum:
         return self._items[n]
 
 
-class StructBase:
+class StructBase(object):
     _NP_RepositoryId = None
     _NP_ClassName = None
     
@@ -720,7 +513,7 @@ class StructBase:
         return tuple(vals)
 
 
-class Union:
+class Union(object):
     _NP_ClassName = None
     _def_m = None
 
@@ -978,7 +771,7 @@ def static_is_a(cls, repoId):
 
 # Fixed point type
 
-class fixedConstructor:
+class fixedConstructor(object):
     def __init__(self, repoId, digits, scale):
         self._NP_RepositoryId = repoId
         self.digits           = digits
@@ -1044,7 +837,7 @@ class WorkerThread(threading.Thread):
 # omniThreadHook is used to release a dummy omni_thread C++ object
 # associated with a threading.Thread object when the thread stops.
 
-class omniThreadHook:
+class omniThreadHook(object):
     def __init__(self, target):
         self.target            = target
         self.target_stop       = target._Thread__stop

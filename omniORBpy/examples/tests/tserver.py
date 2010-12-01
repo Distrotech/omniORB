@@ -4,6 +4,20 @@ import sys, time, gc
 from omniORB import CORBA, PortableServer
 import TypeTest, TypeTest__POA
 
+class J_i (TypeTest__POA.J):
+    def __init__(self):
+        global op_called, j_deleted
+        op_called = j_deleted = 0
+
+    def op(self):
+        global op_called
+        op_called = 1
+
+    def __del__(self):
+        global j_deleted
+        j_deleted = 1
+
+
 class I_i (TypeTest__POA.I):
 
     def simple1 (self): return
@@ -41,6 +55,24 @@ class I_i (TypeTest__POA.I):
     def _get_sattr7(self): return self._sattr7
     def _get_sattr8(self): return self._sattr8
     def _get_sattr9(self): return self._sattr9
+
+    def _get_rattr1(self): return self._sattr1
+    def _get_rattr2(self): return self._sattr2
+    def _get_rattr3(self): return self._sattr3
+    def _get_rattr4(self): return self._sattr4
+    def _get_rattr5(self): return self._sattr5
+    def _get_rattr6(self): return self._sattr6
+    def _get_rattr7(self): return self._sattr7
+    def _get_rattr8(self): return self._sattr8
+    def _get_rattr9(self): return self._sattr9
+
+    @property
+    def propattr(self):
+        return self._propattr
+
+    @propattr.setter
+    def propattr(self, val):
+        self._propattr = val
 
     def complex1 (self, a): return a
     def complex2 (self, a):
@@ -110,6 +142,41 @@ class I_i (TypeTest__POA.I):
             raise CORBA.NO_PERMISSION(123, CORBA.COMPLETED_YES)
         else:
             return
+
+    def except4(self, a):
+        jo  = J_i()._this()
+        oid = poa.reference_to_id(jo)
+        poa.deactivate_object(oid)
+
+        s2 = TypeTest.S2(TypeTest.S1(1, 2, 3, 4, 5.6, 7, 8, "a", 10),
+                         TypeTest.U1(a = 5),
+                         jo,
+                         [1, 2, 3, 4, 5, 6, 7],
+                         "octet sequence",
+                         "string")
+        if a == 0:
+            pass
+        elif a == 1:
+            s2 = None
+        elif a == 2:
+            s2.a = "Hello"
+        elif a == 3:
+            s2.a.b = -5
+        elif a == 4:
+            s2.b = s2.a
+        elif a == 5:
+            s2.b.c = 1000
+        elif a == 6:
+            s2.c = "foo"
+        elif a == 7:
+            s2.d[2] = "broken"
+        elif a == 8:
+            s2.e = [1,2,3]
+        else:
+            s2.f = "string\0null"
+
+        return s2
+            
 
     def any1(self, a): return a
     def tc1 (self, a): return a

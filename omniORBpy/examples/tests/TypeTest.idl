@@ -142,6 +142,18 @@ module TypeTest {
     attribute char           sattr8;
     attribute octet          sattr9;
 
+    readonly attribute short          rattr1;
+    readonly attribute unsigned short rattr2;
+    readonly attribute long           rattr3;
+    readonly attribute unsigned long  rattr4;
+    readonly attribute float          rattr5;
+    readonly attribute double         rattr6;
+    readonly attribute boolean        rattr7;
+    readonly attribute char           rattr8;
+    readonly attribute octet          rattr9;
+
+    attribute string propattr;
+
     // Complex types
     Object     complex1 (in Object     a);
     J          complex2 (in J          a);
@@ -207,6 +219,11 @@ module TypeTest {
     void except3(in long a);
     // Raise X1 if a==1 (caller should get UNKNOWN), NO_PERMISSION if a==2,
     // no exception otherwise
+
+    S2 except4(in long a);
+    // If a==0, returns a valid S2, otherwise returns invalid S2.
+    // Different values of a between 1 and 9 return differently
+    // invalid values. Caller should get BAD_PARAM in all cases.
 
     // TypeCode, Any
     CORBA::TypeCode tc1 (in CORBA::TypeCode a);

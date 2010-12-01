@@ -3,7 +3,7 @@
 # tcInternal.py              Created on: 1999/06/24
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2007 Apasphere Ltd
+#    Copyright (C) 2002-2010 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -24,106 +24,8 @@
 #    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 #    MA 02111-1307, USA
 #
-#
 # Description:
 #    TypeCode internal implementation
-
-
-# $Id$
-# $Log$
-# Revision 1.13.2.11  2007/06/06 17:59:01  dgrisby
-# Allow enums to be used directly in CORBA.TypeCode().
-#
-# Revision 1.13.2.10  2007/04/26 08:33:38  dgrisby
-# Incorrect kind() return for object reference TypeCodes. Thanks
-# Andrew Edem.
-#
-# Revision 1.13.2.9  2006/07/11 13:53:09  dgrisby
-# Implement missing TypeCode creation functions.
-#
-# Revision 1.13.2.8  2006/02/16 22:55:45  dgrisby
-# Remove some tab characters that snuck in from a patch.
-#
-# Revision 1.13.2.7  2006/01/19 17:28:44  dgrisby
-# Merge from omnipy2_develop.
-#
-# Revision 1.13.2.6  2005/11/09 12:33:31  dgrisby
-# Support POA LocalObjects.
-#
-# Revision 1.13.2.5  2005/07/29 11:27:23  dgrisby
-# Static map of basic TypeCodes for speed.
-#
-# Revision 1.13.2.4  2005/01/07 00:22:35  dgrisby
-# Big merge from omnipy2_develop.
-#
-# Revision 1.13.2.3  2003/07/10 22:13:25  dgrisby
-# Abstract interface support.
-#
-# Revision 1.13.2.2  2003/05/20 17:10:26  dgrisby
-# Preliminary valuetype support.
-#
-# Revision 1.13.2.1  2003/03/23 21:51:43  dgrisby
-# New omnipy3_develop branch.
-#
-# Revision 1.10.2.8  2003/03/12 11:17:50  dgrisby
-# Any / TypeCode fixes.
-#
-# Revision 1.10.2.7  2003/03/07 11:56:04  dgrisby
-# Missing TypeCode creation functions.
-#
-# Revision 1.10.2.6  2002/06/11 20:21:31  dgrisby
-# Missed out wchar, wstring TypeCodes.
-#
-# Revision 1.10.2.5  2002/05/27 01:02:37  dgrisby
-# Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
-#
-# Revision 1.10.2.4  2002/03/11 15:40:05  dpg1
-# _get_interface support, exception minor codes.
-#
-# Revision 1.10.2.3  2001/05/14 14:49:39  dpg1
-# Fix get_compact_typecode() and equivalent()
-#
-# Revision 1.10.2.2  2001/04/10 11:11:15  dpg1
-# TypeCode support and tests for Fixed point.
-#
-# Revision 1.10.2.1  2000/11/01 15:29:01  dpg1
-# Support for forward-declared structs and unions
-# RepoIds in indirections are now resolved at the time of use
-#
-# Revision 1.10  2000/08/21 10:20:19  dpg1
-# Merge from omnipy1_develop for 1.1 release
-#
-# Revision 1.9.2.1  2000/08/07 09:19:24  dpg1
-# Long long support
-#
-# Revision 1.9  2000/01/31 10:51:41  dpg1
-# Fix to exception throwing.
-#
-# Revision 1.8  1999/11/02 10:38:31  dpg1
-# Last bug wasn't quite fixed.
-#
-# Revision 1.7  1999/11/01 20:59:42  dpg1
-# Fixed bug in insertIndirections() if the same node is indirected to
-# more than once.
-#
-# Revision 1.6  1999/09/24 09:22:00  dpg1
-# Added copyright notices.
-#
-# Revision 1.5  1999/09/20 15:11:45  dpg1
-# Bug in insertIndirections() fixed.
-#
-# Revision 1.4  1999/09/13 14:52:27  dpg1
-# TypeCode equivalence.
-#
-# Revision 1.3  1999/07/29 14:17:18  dpg1
-# TypeCode creation interface.
-#
-# Revision 1.2  1999/07/19 15:48:40  dpg1
-# All sorts of fixes.
-#
-# Revision 1.1  1999/06/24 15:23:28  dpg1
-# Initial revision
-#
 
 import omniORB, CORBA
 import types
@@ -195,7 +97,7 @@ def typeCodeFromClassOrRepoId(t):
     except AttributeError:
         pass
 
-    if type(t) is not types.StringType:
+    if not isinstance(t, types.StringType):
         raise TypeError("Argument must be CORBA class or repository id.")
 
     d = omniORB.findType(t)
@@ -302,7 +204,7 @@ def createArrayTC(length, element_type):
     return createTypeCode(d)
 
 def createRecursiveTC(id):
-    class recursivePlaceHolder: pass
+    class recursivePlaceHolder(object): pass
     recursivePlaceHolder._d = (tv__indirect, [id])
     return recursivePlaceHolder()
 

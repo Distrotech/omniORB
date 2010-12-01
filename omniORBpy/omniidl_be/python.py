@@ -3,7 +3,7 @@
 # python.py                 Created on: 1999/10/29
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2008 Apasphere Ltd
+#    Copyright (C) 2002-2010 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -26,195 +26,6 @@
 # Description:
 #   
 #   Back-end for Python
-
-# $Id$
-# $Log$
-# Revision 1.33.2.14  2008/02/01 16:29:17  dgrisby
-# Error with implementation of operations with names clashing with
-# Python keywords.
-#
-# Revision 1.33.2.13  2006/10/11 17:44:14  dgrisby
-# None is not a keyword, but it cannot be assigned to.
-#
-# Revision 1.33.2.12  2006/09/29 16:48:03  dgrisby
-# Stub changes broke use of package prefix. Thanks Teemu Torma.
-#
-# Revision 1.33.2.11  2006/09/07 15:28:57  dgrisby
-# Remove obsolete check for presence of omniORB.StructBase.
-#
-# Revision 1.33.2.10  2006/06/21 14:46:26  dgrisby
-# Invalid generated code for structs nested inside valuetypes.
-#
-# Revision 1.33.2.9  2006/01/19 17:28:44  dgrisby
-# Merge from omnipy2_develop.
-#
-# Revision 1.33.2.8  2006/01/18 19:25:13  dgrisby
-# Bug inheriting a valuetype from a typedef.
-#
-# Revision 1.33.2.7  2005/07/29 11:21:36  dgrisby
-# Fix long-standing problem with module re-opening by #included files.
-#
-# Revision 1.33.2.6  2005/01/07 00:22:34  dgrisby
-# Big merge from omnipy2_develop.
-#
-# Revision 1.33.2.5  2004/03/24 22:28:50  dgrisby
-# TypeCodes / truncation for inherited state members were broken.
-#
-# Revision 1.33.2.4  2004/02/16 10:14:18  dgrisby
-# Use stream based copy for local calls.
-#
-# Revision 1.33.2.3  2003/07/10 22:13:25  dgrisby
-# Abstract interface support.
-#
-# Revision 1.33.2.2  2003/05/20 17:10:24  dgrisby
-# Preliminary valuetype support.
-#
-# Revision 1.33.2.1  2003/03/23 21:51:56  dgrisby
-# New omnipy3_develop branch.
-#
-# Revision 1.29.2.14  2002/11/25 21:31:09  dgrisby
-# Friendly error messages with file errors, remove code to kill POA
-# modules from pre-1.0.
-#
-# Revision 1.29.2.13  2002/07/04 13:14:52  dgrisby
-# Bug with string escapes in Windows filenames.
-#
-# Revision 1.29.2.12  2002/05/27 01:02:37  dgrisby
-# Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
-#
-# Revision 1.29.2.11  2002/01/18 17:41:17  dpg1
-# Support for "docstrings" in IDL.
-#
-# Revision 1.29.2.10  2002/01/18 15:49:45  dpg1
-# Context support. New system exception construction. Fix None call problem.
-#
-# Revision 1.29.2.9  2001/12/04 12:17:08  dpg1
-# Incorrect generated code for fixed constants.
-#
-# Revision 1.29.2.8  2001/08/29 11:57:16  dpg1
-# Const fixes.
-#
-# Revision 1.29.2.7  2001/06/15 10:59:26  dpg1
-# Apply fixes from omnipy1_develop.
-#
-# Revision 1.29.2.6  2001/06/13 11:29:04  dpg1
-# Proper omniidl support for wchar/wstring constants.
-#
-# Revision 1.29.2.5  2001/05/10 15:16:03  dpg1
-# Big update to support new omniORB 4 internals.
-#
-# Revision 1.29.2.4  2001/04/09 15:22:16  dpg1
-# Fixed point support.
-#
-# Revision 1.29.2.3  2000/11/22 14:43:58  dpg1
-# Support code set conversion and wchar/wstring.
-#
-# Revision 1.29.2.2  2000/11/01 15:29:01  dpg1
-# Support for forward-declared structs and unions
-# RepoIds in indirections are now resolved at the time of use
-#
-# Revision 1.29.2.1  2000/10/13 13:55:30  dpg1
-# Initial support for omniORB 4.
-#
-# Revision 1.29  2000/10/02 17:34:58  dpg1
-# Merge for 1.2 release
-#
-# Revision 1.27.2.3  2000/08/22 11:52:28  dpg1
-# Generate inherited classes for typedef to struct/union.
-#
-# Revision 1.27.2.2  2000/08/07 09:19:24  dpg1
-# Long long support
-#
-# Revision 1.27.2.1  2000/07/18 15:31:29  dpg1
-# Bug with inheritance from typedef
-#
-# Revision 1.27  2000/07/12 14:32:13  dpg1
-# New no_package option to omniidl backend
-#
-# Revision 1.26  2000/06/28 12:47:48  dpg1
-# Proper error messages for unsupported IDL constructs.
-#
-# Revision 1.25  2000/06/27 15:01:48  dpg1
-# Change from POA_M to M__POA mapping.
-# Global module only built if necessary.
-#
-# Revision 1.24  2000/03/29 10:15:47  dpg1
-# Exceptions now more closely follow the interface of
-# exceptions.Exception.
-#
-# Revision 1.23  2000/03/17 12:28:09  dpg1
-# Comma missing in nested union descriptor.
-#
-# Revision 1.22  2000/03/03 17:41:28  dpg1
-# Major reorganisation to support omniORB 3.0 as well as 2.8.
-#
-# Revision 1.21  2000/02/23 10:20:52  dpg1
-# Bug in descriptors for single-item enums.
-#
-# Revision 1.20  2000/01/04 15:29:41  dpg1
-# Fixes to modules generated within a package.
-#
-# Revision 1.19  1999/12/21 16:06:15  dpg1
-# DOH!  global= not module= !
-#
-# Revision 1.18  1999/12/21 16:05:11  dpg1
-# New module= option.
-#
-# Revision 1.17  1999/12/17 11:39:52  dpg1
-# New arguments to put modules and stubs in a specified package.
-#
-# Revision 1.16  1999/12/15 11:32:42  dpg1
-# -Wbinline option added.
-#
-# Revision 1.15  1999/12/09 14:12:55  dpg1
-# invokeOp() calls now on a single line. typedef now generates a class
-# to be passed to CORBA.id().
-#
-# Revision 1.14  1999/12/07 15:35:14  dpg1
-# Bug in currentScope handling.
-#
-# Revision 1.13  1999/11/30 10:41:20  dpg1
-# Back-ends can now have their own usage string.
-#
-# Revision 1.12  1999/11/25 11:49:31  dpg1
-# Minor version number bumped since server-side _is_a() required an
-# incompatible change.
-#
-# Revision 1.11  1999/11/25 11:21:36  dpg1
-# Proper support for server-side _is_a().
-#
-# Revision 1.10  1999/11/19 11:03:49  dpg1
-# Extremely important spelling correction in a comment. :-)
-#
-# Revision 1.9  1999/11/12 15:53:48  dpg1
-# New functions omniORB.importIDL() and omniORB.importIDLString().
-#
-# Revision 1.8  1999/11/11 15:55:29  dpg1
-# Python back-end interface now supports valuetype declarations.
-# Back-ends still don't support them, though.
-#
-# Revision 1.7  1999/11/10 16:08:22  dpg1
-# Some types weren't registered properly.
-#
-# Revision 1.6  1999/11/04 11:46:12  dpg1
-# Now uses our own version of the GNU C preprocessor.
-#
-# Revision 1.5  1999/11/02 12:17:26  dpg1
-# Top-level module name now has a prefix of _0_ to avoid clashes with
-# names of nested declarations.
-#
-# Revision 1.4  1999/11/02 10:54:01  dpg1
-# Two small bugs in union generation.
-#
-# Revision 1.3  1999/11/02 10:01:46  dpg1
-# Minor fixes.
-#
-# Revision 1.2  1999/11/01 20:19:55  dpg1
-# Support for union switch types declared inside the switch statement.
-#
-# Revision 1.1  1999/11/01 16:40:11  dpg1
-# First revision with new front-end.
-#
 
 """omniORB Python bindings"""
 
@@ -258,6 +69,12 @@ from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
 _omnipy.checkVersion(3,0, __file__)
+
+try:
+    property
+except NameError:
+    def property(*args):
+        return None
 """
 
 file_end = """\
@@ -345,12 +162,23 @@ objref_object_init = """\
 objref_attribute_get = """
     def _get_@attr@(self, *args):
         return _omnipy.invoke(self, "_get_@attr@", _0_@modname@.@ifid@._d__get_@attr@, args)"""
+
 objref_attribute_set = """
     def _set_@attr@(self, *args):
         return _omnipy.invoke(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
+
+objref_attribute_property = """
+    @attr@ = property(_get_@attr@, _set_@attr@)
+"""
+
+objref_readonly_attribute_property = """
+    @attr@ = property(_get_@attr@)
+"""
+
 objref_operation = """
     def @opname@(self, *args):
         return _omnipy.invoke(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
+
 objref_methods = """
     __methods__ = @methods@"""
 
@@ -1142,16 +970,24 @@ class PythonVisitor:
                                 ifid    = ifid,
                                 modname = self.modname)
                     
-                    methodl.append('"_get_' + attr + '"')
+                    methodl.append('"_get_%s"' % attr)
+                    methodl.append('"%s"' % attr)
 
-                    if not c.readonly():
+                    if c.readonly():
+                        self.st.out(objref_readonly_attribute_property,
+                                    attr = attr)
+
+                    else:
 
                         self.st.out(objref_attribute_set,
                                     attr    = attr,
                                     ifid    = ifid,
                                     modname = self.modname)
                         
-                        methodl.append('"_set_' + attr + '"')
+                        self.st.out(objref_attribute_property,
+                                    attr = attr)
+
+                        methodl.append('"_set_%s"' % attr)
 
             else: # Operation
                 opname = mangle(c.identifier())
