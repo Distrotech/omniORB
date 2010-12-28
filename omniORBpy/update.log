@@ -1,3 +1,23 @@
+Tue Dec 28 23:31:41 GMT 2010 dgrisby
+====================================
+
+- Huge merge from 4_1 branch, up to revision 6012.
+
+README.txt
+ReleaseNotes.txt
+aclocal.m4
+bin/scripts/binrelease.sh
+bugfixes-34.xml
+configure
+contrib/RPMs/omniORBpy.spec
+modules/dir.mk
+modules/omnipy.cc
+modules/pyInterceptors.cc
+modules/pyTypeCode.cc
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Wed Dec  1 17:11:58 GMT 2010 dgrisby
 ====================================
 
