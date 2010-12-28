@@ -48,6 +48,10 @@
 #include <poaimpl.h>
 #include <orbParameters.h>
 
+#ifdef HAVE_STD
+#include <memory>
+#endif
+
 OMNI_NAMESPACE_BEGIN(omni)
 
 ////////////////////////////////////////////////////////////////////////
@@ -300,6 +304,9 @@ GIOP_S::handleRequest() {
   }
 
 #define MARSHAL_USER_EXCEPTION() do { \
+  if (pd_state == RequestIsBeingProcessed) { \
+    SkipRequestBody(); \
+  } \
   if (response_expected()) { \
     setServerDeadline(this); \
     if (calldescriptor()) { \
@@ -326,22 +333,19 @@ GIOP_S::handleRequest() {
       impl()->sendUserException(this,ex); \
     } \
   } \
-  if (pd_state == RequestIsBeingProcessed) { \
-    SkipRequestBody(); \
-  } \
 } while (0)
 
 #define MARSHAL_SYSTEM_EXCEPTION() do { \
     setServerDeadline(this); \
+    if (pd_state == RequestIsBeingProcessed) { \
+      SkipRequestBody(); \
+    } \
     if (pd_state == WaitForRequestHeader || \
 	pd_state == RequestHeaderIsBeingProcessed ) { \
       impl()->sendMsgErrorMessage(this, &ex); \
       return 0; \
     } else if (response_expected()) { \
       impl()->sendSystemException(this,ex); \
-    } \
-    if (pd_state == RequestIsBeingProcessed) { \
-      SkipRequestBody(); \
     } \
 } while (0) 
 
@@ -381,6 +385,46 @@ GIOP_S::handleRequest() {
 
   catch(const giopStream::CommFailure&) {
     throw;
+  }
+
+#ifdef HAVE_STD
+  catch (const std::bad_alloc&) {
+    // We keep logging as simple as possible to avoid too much allocation.
+    omniORB::logs(1, "ERROR -- upcall raised std::bad_alloc.");
+
+    if (response_expected()) {
+      CORBA::NO_MEMORY ex(NO_MEMORY_BadAlloc,
+			  (CORBA::CompletionStatus)completion());
+      impl()->sendSystemException(this,ex);
+    }
+  }
+  
+  catch (const std::exception& std_ex) {
+    if (omniORB::trace(1)) {
+      omniORB::logger l;
+      l << "WARNING -- method '" << operation() << "' raised an unexpected\n"
+	<< " std::exception (not a CORBA exception):\n "
+	<< std_ex.what() << "\n";
+    }
+    if (response_expected()) {
+      CORBA::UNKNOWN ex(UNKNOWN_UserException,
+			(CORBA::CompletionStatus) completion());
+      impl()->sendSystemException(this,ex);
+    }
+  }
+#endif // HAVE_STD
+
+  catch (const omni_thread_fatal& thr_ex) {
+    if (omniORB::trace(1)) {
+      omniORB::logger l;
+      l << "WARNING -- method '" << operation() << "' raised an "
+	<< "omni_thread_fatal exception (error " << thr_ex.error << ").\n";
+    }
+    if (response_expected()) {
+      CORBA::UNKNOWN ex(UNKNOWN_OmniThreadException,
+			(CORBA::CompletionStatus) completion());
+      impl()->sendSystemException(this,ex);
+    }
   }
 
   catch(...) {
@@ -473,15 +517,15 @@ GIOP_S::handleLocateRequest() {
 
 #define MARSHAL_SYSTEM_EXCEPTION() do { \
     setServerDeadline(this); \
+    if (pd_state == RequestIsBeingProcessed) { \
+      SkipRequestBody(); \
+    } \
     if (pd_state == WaitForRequestHeader || \
         pd_state == RequestHeaderIsBeingProcessed) { \
       impl()->sendMsgErrorMessage(this, &ex); \
       return 0; \
     } else if (response_expected()) { \
       impl()->sendSystemException(this,ex); \
-    } \
-    if (pd_state == RequestIsBeingProcessed) { \
-      SkipRequestBody(); \
     } \
 } while (0) 
 

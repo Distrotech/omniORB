@@ -67,6 +67,7 @@ tcpConnection::Send(void* buf, size_t sz,
     struct timeval t;
 
     if (deadline_secs || deadline_nanosecs) {
+      //      SocketSetnonblocking(pd_socket); // ***
       SocketSetTimeOut(deadline_secs,deadline_nanosecs,t);
       if (t.tv_sec == 0 && t.tv_usec == 0) {
 	// Already timeout.

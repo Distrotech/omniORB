@@ -88,7 +88,7 @@ private:
   static omni_tracedcondition*	 cond;
   static Scavenger*              theTask;
 
-  void removeIdle(StrandList& src,StrandList& dest, CORBA::Boolean skip_bidir);
+  void removeIdle(StrandList& src,StrandList& dest, CORBA::Boolean client);
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -596,7 +596,7 @@ giopStrand::stopIdleCounter() {
 ////////////////////////////////////////////////////////////////////////
 void
 Scavenger::removeIdle(StrandList& src,StrandList& dest,
-		      CORBA::Boolean skip_bidir)
+		      CORBA::Boolean client)
 {
   StrandList* p = src.next;
   while (p != &src) {
@@ -614,6 +614,19 @@ Scavenger::removeIdle(StrandList& src,StrandList& dest,
 	s->StrandList::remove();
 	s->RopeLink::remove();
 	s->StrandList::insert(dest);
+
+	if (omniORB::trace(25)) {
+	  omniORB::logger log;
+	  log << "Scavenger close ";
+	  if (client) {
+	    log << (s->connection ? "connection" : "unconnected strand")
+		<< " to " << s->address->address();
+	  }
+	  else {
+	    log << "connection from " << s->connection->peeraddress();
+	  }
+	  log << "\n";
+	}
 	continue;
       }
     }
@@ -659,7 +672,7 @@ Scavenger::execute()
 
       // Notice that only those strands that have no other threads touching
       // them will be scanned and may be removed.
-      removeIdle(giopStrand::active_timedout,client_shutdown_list,0);
+      removeIdle(giopStrand::active_timedout,client_shutdown_list,1);
       removeIdle(giopStrand::active,client_shutdown_list,1);
       removeIdle(giopStrand::passive,server_shutdown_list,0);
     }
@@ -672,12 +685,6 @@ Scavenger::execute()
 	p = p->next;
 	s->StrandList::remove();
 	s->state(giopStrand::DYING);
-	if (omniORB::trace(25)) {
-	  omniORB::logger log;
-          log << "Scavenger close "
-              << (s->connection ? "connection" : "unconnected strand")
-              << " to " << s->address->address() << "\n";
-	}
         if ( s->version.minor >= 2 && s->connection ) {
           // GIOP 1.2 or above requires the client send a CloseConnection
           // message.
@@ -698,11 +705,6 @@ Scavenger::execute()
 	p = p->next;
 	s->StrandList::remove();
 	s->state(giopStrand::DYING);
-	if (omniORB::trace(25)) {
-	  omniORB::logger log;
-	  log << "Scavenger close connection from " 
-	      << s->connection->peeraddress() << "\n";
-	}	
 	sendCloseConnection(s);
 	s->connection->Shutdown();
       }

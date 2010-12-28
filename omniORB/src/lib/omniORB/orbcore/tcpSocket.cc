@@ -534,7 +534,8 @@ doConnect(const char*   	 host,
   }
   if (::connect(sock,ai->addr(),ai->addrSize()) == RC_SOCKET_ERROR) {
 
-    if (ERRNO != EINPROGRESS) {
+    int err = ERRNO;
+    if (err && err != EINPROGRESS) {
       tcpSocket::logConnectFailure("Failed to connect", ai);
       CLOSESOCKET(sock);
       return RC_INVALID_SOCKET;

@@ -27,161 +27,6 @@
 //   
 //   Python interface to front-end
 
-// $Id$
-// $Log$
-// Revision 1.22.2.4  2008/12/03 12:46:30  dgrisby
-// More Python 3 updates.
-//
-// Revision 1.22.2.3  2005/01/06 23:11:14  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.22.2.2  2003/09/04 14:00:29  dgrisby
-// ValueType IDL updates.
-//
-// Revision 1.22.2.1  2003/03/23 21:01:45  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.17.2.15  2003/01/16 11:08:27  dgrisby
-// Patches to support Digital Mars C++. Thanks Christof Meerwald.
-//
-// Revision 1.17.2.14  2002/10/28 11:56:50  dgrisby
-// Work around VC++ 7 problem with FILE* change.
-//
-// Revision 1.17.2.13  2002/09/21 21:07:48  dgrisby
-// Support ValueBase in omniidl. (No use to omniORB yet...)
-//
-// Revision 1.17.2.12  2001/11/14 17:13:43  dpg1
-// Long double support.
-//
-// Revision 1.17.2.11  2001/10/17 16:48:33  dpg1
-// Minor error message tweaks
-//
-// Revision 1.17.2.10  2001/08/29 11:55:23  dpg1
-// Enumerator nodes record their value.
-//
-// Revision 1.17.2.9  2001/08/15 10:31:23  dpg1
-// Minor tweaks and fixes.
-//
-// Revision 1.17.2.8  2001/03/13 10:32:12  dpg1
-// Fixed point support.
-//
-// Revision 1.17.2.7  2001/01/08 12:35:26  dpg1
-// Incorrect exception handling when omniidl is an executable.
-//
-// Revision 1.17.2.6  2000/12/05 17:45:19  dpg1
-// omniidl case sensitivity updates from omni3_develop.
-//
-// Revision 1.17.2.5  2000/11/01 15:57:03  dpg1
-// More updates for 2.4.
-//
-// Revision 1.17.2.4  2000/11/01 12:45:56  dpg1
-// Update to CORBA 2.4 specification.
-//
-// Revision 1.17.2.3  2000/10/27 16:31:09  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.17.2.2  2000/10/10 10:18:51  dpg1
-// Update omniidl front-end from omni3_develop.
-//
-// Revision 1.15.2.15  2000/09/06 11:20:50  dpg1
-// Support for Python 1.6 and 2.0b1.
-//
-// Revision 1.15.2.14  2000/08/30 18:12:46  dpg1
-// Register operation declarations so they can be found with findDecl().
-//
-// Revision 1.15.2.13  2000/08/29 15:20:28  dpg1
-// New relativeScope() function. New -i flag to enter interactive loop
-// after parsing
-//
-// Revision 1.15.2.12  2000/08/29 10:20:26  dpg1
-// Operations and attributes now have repository ids.
-//
-// Revision 1.15.2.11  2000/08/14 16:07:52  dpg1
-// Error message now says "Could not open..." rather than "Could not
-// find..." when Python imports fail.
-//
-// Revision 1.15.2.10  2000/08/07 15:34:36  dpg1
-// Partial back-port of long long from omni3_1_develop.
-//
-// Revision 1.15.2.9  2000/06/27 16:23:25  sll
-// Merged OpenVMS port.
-//
-// Revision 1.15.2.8  2000/06/20 13:55:58  dpg1
-// omniidl now keeps the C++ tree until after the back-ends have run.
-// This means that back-ends can be C++ extension modules.
-//
-// Revision 1.15.2.7  2000/06/08 14:36:19  dpg1
-// Comments and pragmas are now objects rather than plain strings, so
-// they can have file,line associated with them.
-//
-// Revision 1.15.2.6  2000/06/06 15:21:47  dpg1
-// Comments and pragmas attached to attribute declarators are now
-// attached to the Python Attribute object.
-//
-// Revision 1.15.2.5  2000/06/05 18:13:27  dpg1
-// Comments can be attached to subsequent declarations (with -K). Better
-// idea of most recent decl in operation declarations
-//
-// Revision 1.15.2.4  2000/03/10 10:04:40  dpg1
-// Windows file/directory names are case insensitive.
-//
-// Revision 1.15.2.3  2000/03/06 15:03:48  dpg1
-// Minor bug fixes to omniidl. New -nf and -k flags.
-//
-// Revision 1.15.2.2  2000/02/17 10:00:38  dpg1
-// More robust path discovery.
-//
-// Revision 1.15.2.1  2000/02/16 16:23:52  dpg1
-// Support things for Python neophytes.
-//
-// Revision 1.15  2000/02/04 12:17:08  dpg1
-// Support for VMS.
-//
-// Revision 1.14  2000/01/18 17:15:05  dpg1
-// Changes for "small" distribution.
-//
-// Revision 1.13  1999/12/15 12:17:18  dpg1
-// Changes to compile with SunPro CC 5.0.
-//
-// Revision 1.12  1999/12/01 11:35:22  dpg1
-// Include path for Python.h changed to be consistent with omnipy module.
-//
-// Revision 1.11  1999/11/17 14:34:42  dpg1
-// More multi-platform support (NT and AIX).
-//
-// Revision 1.10  1999/11/11 15:55:19  dpg1
-// Python back-end interface now supports valuetype declarations.
-// Back-ends still don't support them, though.
-//
-// Revision 1.9  1999/11/08 11:43:34  dpg1
-// Changes for NT support.
-//
-// Revision 1.8  1999/11/04 17:16:55  dpg1
-// Changes for NT.
-//
-// Revision 1.7  1999/11/04 11:46:19  dpg1
-// Now uses our own version of the GNU C preprocessor.
-//
-// Revision 1.6  1999/11/02 17:07:26  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.5  1999/11/02 10:01:47  dpg1
-// Minor fixes.
-//
-// Revision 1.4  1999/11/01 20:19:56  dpg1
-// Support for union switch types declared inside the switch statement.
-//
-// Revision 1.3  1999/11/01 10:05:27  dpg1
-// New file attribute to AST.
-// Fix stupid bug in module initialisation.
-//
-// Revision 1.2  1999/10/29 18:19:19  dpg1
-// Added dump() function
-//
-// Revision 1.1  1999/10/29 15:44:45  dpg1
-// First revision.
-//
-
 #if defined(__VMS)
 #  include <Python.h>
 #else
@@ -664,6 +509,7 @@ visitTypedef(Typedef* t)
     d->accept(*this);
     PyList_SetItem(pydeclarators, i, result_);
   }
+  Py_INCREF(pydeclarators);
   result_ = PyObject_CallMethod(idlast_, (char*)"Typedef", (char*)"siiNNNiN",
 				t->file(), t->line(), (int)t->mainFile(),
 				pragmasToList(t->pragmas()),
@@ -678,6 +524,7 @@ visitTypedef(Typedef* t)
     PyObject_CallMethod(PyList_GetItem(pydeclarators, i),
 			(char*)"_setAlias", (char*)"O", result_);
   }
+  Py_DECREF(pydeclarators);
 }
 
 void

@@ -133,13 +133,15 @@ static inline char* alloc(int len) { return new char[len + 1]; }
 // we don't initialise to empty string.
 //  <len> does not include nul terminator.
 
+
+// *** HERE: rename to dealloc ***
 static inline void free(char* s) { 
   if (s && s != empty_string) delete[] s; 
 }
 // As CORBA::string_free().
 
 static inline char* dup(const char* s) { 
-  char* r = alloc(strlen(s));
+  char* r = alloc((int)strlen(s));
   if (r) {
     strcpy(r, s);
     return r;
@@ -573,6 +575,7 @@ public:
 
 private:
   _CORBA_String_inout();
+  _CORBA_String_inout& operator=(const _CORBA_String_inout&);
 };
 
 //////////////////////////////////////////////////////////////////////
