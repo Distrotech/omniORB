@@ -3,7 +3,7 @@
 // omniInternal.cc            Created on: 25/2/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 1996,1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -154,6 +154,12 @@ static CORBA::Boolean abortOnNativeException = 0;
 //  catch (...). Setting this parameter to true causes such exceptions
 //  to abort the process instead.
 //
+//  Valid values = 0 or 1
+
+CORBA::Boolean orbParameters::throwTransientOnTimeOut = 0;
+//  If true, CORBA::TRANSIENT is thrown when a timeout occurs. If
+//  false (the default), CORBA::TIMEOUT is thrown.
+//  
 //  Valid values = 0 or 1
 
 
@@ -1457,6 +1463,36 @@ static void abortOnNativeExceptionInterceptor(omniInterceptors::
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+class throwTransientOnTimeOutHandler : public orbOptions::Handler {
+public:
+
+  throwTransientOnTimeOutHandler() : 
+    orbOptions::Handler("throwTransientOnTimeOut",
+			"throwTransientOnTimeOut = 0 or 1",
+			1,
+			"-ORBthrowTransientOnTimeOut < 0 | 1 >") {}
+
+
+  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
+
+    CORBA::Boolean v;
+    if (!orbOptions::getBoolean(value,v)) {
+      throw orbOptions::BadParam(key(),value,
+				 orbOptions::expect_boolean_msg);
+    }
+    orbParameters::throwTransientOnTimeOut = v;
+  }
+
+  void dump(orbOptions::sequenceString& result) {
+    orbOptions::addKVBoolean(key(),orbParameters::throwTransientOnTimeOut,
+			     result);
+  }
+};
+
+static throwTransientOnTimeOutHandler throwTransientOnTimeOutHandler_;
+
+
+/////////////////////////////////////////////////////////////////////////////
 //            Module initialiser                                           //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1477,6 +1513,7 @@ public:
     orbOptions::singleton().registerHandler(objectTableSizeHandler_);
     orbOptions::singleton().registerHandler(abortOnInternalErrorHandler_);
     orbOptions::singleton().registerHandler(abortOnNativeExceptionHandler_);
+    orbOptions::singleton().registerHandler(throwTransientOnTimeOutHandler_);
   }
 
   void attach() {

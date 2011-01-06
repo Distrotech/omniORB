@@ -3,7 +3,7 @@
 // CORBA.h                    Created on: 30/1/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2007 Apasphere Ltd
+//    Copyright (C) 2003-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -490,6 +490,9 @@ _CORBA_MODULE_END
 extern CORBA::Boolean
 _omni_callTransientExceptionHandler(omniObjRef* obj, CORBA::ULong retries,
 				    const CORBA::TRANSIENT& ex);
+extern CORBA::Boolean
+_omni_callTimeoutExceptionHandler(omniObjRef* obj, CORBA::ULong retries,
+				  const CORBA::TIMEOUT& ex);
 extern CORBA::Boolean
 _omni_callCommFailureExceptionHandler(omniObjRef* obj,
 				      CORBA::ULong retries,

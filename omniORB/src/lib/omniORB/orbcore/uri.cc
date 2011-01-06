@@ -3,7 +3,7 @@
 // uri.cc                     Created on: 2000/04/03
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2006 Apasphere Ltd
+//    Copyright (C) 2003-2011 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library

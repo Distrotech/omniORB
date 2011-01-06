@@ -3,7 +3,7 @@
 // userexception.h            Created on: 1999
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2003-2004 Apasphere Ltd
+//    Copyright (C) 2003-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,60 +26,6 @@
 //
 // Description:
 //
-
-/*
- $Log$
- Revision 1.4.2.2  2004/07/23 10:29:57  dgrisby
- Completely new, much simpler Any implementation.
-
- Revision 1.4.2.1  2003/03/23 21:03:59  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.6  2001/10/17 16:44:01  dpg1
- Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
- Revision 1.2.2.5  2001/09/19 17:44:20  sll
- Remove obsolute system exception WRONG_TRANSACTION
-
- Revision 1.2.2.4  2001/07/31 15:59:02  sll
- Added new 2.4.2 System Exceptions
-
- Revision 1.2.2.3  2000/11/03 19:05:30  sll
- Added INV_POLICY and CODESET_INCOMPATIBLE.
-
- Revision 1.2.2.2  2000/09/27 16:58:07  sll
- Replaced marshalling operators for MemBufferedStream and NetBufferedStream
- with just one type for cdrStream.
-
- Revision 1.2.2.1  2000/07/17 10:35:38  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:26:04  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.7  2000/01/27 10:55:44  djr
- Mods needed for powerpc_aix.  New macro OMNIORB_BASE_CTOR to provide
- fqname for base class constructor for some compilers.
-
- Revision 1.1.2.6  1999/10/21 11:29:46  djr
- Added _core_attr to declaration of _PD_repoId in exceptions & interfaces.
-
- Revision 1.1.2.5  1999/10/18 17:28:19  djr
- Fixes for building MSVC dlls.
-
- Revision 1.1.2.4  1999/10/18 11:27:37  djr
- Centralised list of system exceptions.
-
- Revision 1.1.2.3  1999/10/04 17:08:30  djr
- Some more fixes/MSVC work-arounds.
-
- Revision 1.1.2.2  1999/10/04 15:51:51  djr
- Various fixes/MSVC work-arounds.
-
- Revision 1.1.2.1  1999/09/24 09:51:58  djr
- Moved from omniORB2 + some new files.
-
-*/
 
 #ifndef __OMNIORB_USEREXCEPTION_H__
 #define __OMNIORB_USEREXCEPTION_H__
@@ -200,6 +146,5 @@ doit (TIMEOUT) \
 doit (TRANSACTION_UNAVAILABLE) \
 doit (TRANSACTION_MODE) \
 doit (BAD_QOS)
-
 
 #endif // __OMNIORB_USEREXCEPTION_H__

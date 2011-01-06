@@ -3,7 +3,7 @@
 // orbParameters.h            Created on: 15/8/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,57 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.10  2008/02/14 12:37:50  dgrisby
-  New immediateAddressSwitch parameter.
-
-  Revision 1.1.4.9  2007/07/31 16:38:31  dgrisby
-  New resetTimeOutOnRetries parameter.
-
-  Revision 1.1.4.8  2007/02/26 15:16:31  dgrisby
-  New socketSendBuffer parameter, defaulting to 16384 on Windows.
-  Avoids a bug in Windows where select() on send waits for all sent data
-  to be acknowledged.
-
-  Revision 1.1.4.7  2006/01/10 13:59:37  dgrisby
-  New clientConnectTimeOutPeriod configuration parameter.
-
-  Revision 1.1.4.6  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.5  2005/09/01 14:52:12  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.4  2005/03/02 12:39:23  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.3  2005/01/06 23:08:26  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.2  2003/11/06 11:56:55  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.4.1  2003/03/23 21:03:43  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.4  2002/10/14 20:06:41  dgrisby
-  Per objref / per thread timeouts.
-
-  Revision 1.1.2.3  2002/03/18 16:50:17  dpg1
-  New threadPoolWatchConnection parameter.
-
-  Revision 1.1.2.2  2001/08/21 11:02:12  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.1.2.1  2001/08/17 17:12:34  sll
-  Modularise ORB configuration parameters.
-
-*/
 
 #ifndef __ORBPARAMETERS_H__
 #define __ORBPARAMETERS_H__
@@ -279,6 +230,13 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean  acceptMisalignedTcIndirections;
 //   could be used to work around some versions of Visibroker's Java ORB.
 //  
 //   Valid values = 0 or 1
+
+_CORBA_MODULE_VAR _core_attr CORBA::Boolean  throwTransientOnTimeOut;
+//   If true, CORBA::TRANSIENT is thrown when a timeout occurs. If
+//   false (the default), CORBA::TIMEOUT is thrown.
+//  
+//   Valid values = 0 or 1
+
 
 
 ///////////////////////////////////////////////////////////////////////////

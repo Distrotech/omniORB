@@ -3,7 +3,7 @@
 // minorCode.cc               Created on: 2 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005 Apasphere Ltd
+//    Copyright (C) 2005-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,28 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.2  2005/01/06 23:10:33  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:02:12  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2001/10/17 16:47:09  dpg1
-  New minor codes
-
-  Revision 1.1.2.2  2001/09/24 10:41:10  dpg1
-  Minor codes for Dynamic library and omniORBpy.
-
-  Revision 1.1.2.1  2001/08/03 17:49:33  sll
-  New minor code and lookup table for translating a minor code to its memonic
-  names.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/minorCode.h>
@@ -179,7 +159,6 @@ minorCodeLookup OBJECT_NOT_EXIST_LookupTable[] = {
   { 0, 0 } 
 };
 
-
 minorCodeLookup TRANSACTION_REQUIRED_LookupTable[] = { 
   { 0, 0 } 
 };
@@ -206,6 +185,7 @@ minorCodeLookup REBIND_LookupTable[] = {
 };
 
 minorCodeLookup TIMEOUT_LookupTable[] = { 
+  DECLARE_TIMEOUT_minors(DeclareLookupEntry,OMNI_COMMA),
   { 0, 0 } 
 };
 

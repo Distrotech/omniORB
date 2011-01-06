@@ -3,7 +3,7 @@
 # __init__.py                Created on: 1999/07/19
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2010 Apasphere Ltd
+#    Copyright (C) 2002-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -282,6 +282,7 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 # Import omniORB API functions. This provides:
 #
 #   installTransientExceptionHandler()
+#   installTimeoutExceptionHandler()
 #   installCommFailureExceptionHandler()
 #   installSystemExceptionHandler()
 #   traceLevel

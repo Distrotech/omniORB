@@ -3,7 +3,7 @@
 // giopRope.cc                Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2009 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -248,7 +248,16 @@ giopRope::acquireClient(const omniIOR* ior,
     if (deadline_secs || deadline_nanosecs) {
       if (pd_cond.timedwait(deadline_secs,deadline_nanosecs) == 0) {
 	pd_nwaiting--;
-	OMNIORB_THROW(TRANSIENT,TRANSIENT_CallTimedout,CORBA::COMPLETED_NO);
+	if (orbParameters::throwTransientOnTimeOut) {
+	  OMNIORB_THROW(TRANSIENT,
+			TRANSIENT_CallTimedout,
+			CORBA::COMPLETED_NO);
+	}
+	else {
+	  OMNIORB_THROW(TIMEOUT,
+			TIMEOUT_CallTimedOutOnClient,
+			CORBA::COMPLETED_NO);
+	}
       }
     }
     else {

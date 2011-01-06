@@ -1,3 +1,25 @@
+Thu Jan  6 14:36:29 GMT 2011 dgrisby
+====================================
+
+- Use CORBA::TIMEOUT exception by default; new timeout handler; option
+  to revert to CORBA::TRANSIENT.
+
+include/omniORB4/CORBA.h
+include/omniORB4/internal/excepthandler.h
+include/omniORB4/internal/orbParameters.h
+include/omniORB4/minorCode.h
+include/omniORB4/omniORB.h
+include/omniORB4/omniObjRef.h
+include/omniORB4/userexception.h
+src/lib/omniORB/orbcore/exception.cc
+src/lib/omniORB/orbcore/giopRope.cc
+src/lib/omniORB/orbcore/minorCode.cc
+src/lib/omniORB/orbcore/omniInternal.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/lib/omniORB/orbcore/poa.cc
+src/lib/omniORB/orbcore/uri.cc
+
+
 Tue Dec 28 23:31:41 GMT 2010 dgrisby
 ====================================
 

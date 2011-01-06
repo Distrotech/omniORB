@@ -3,6 +3,7 @@
 // excepthandler.h            Created on: 13/5/97
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -26,41 +27,18 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.4.2  2002/02/25 11:17:11  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.1.4.1  2001/04/18 17:18:17  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.3.2.1  2000/07/17 10:35:53  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.4  2000/07/13 15:25:58  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.2.8.1  1999/09/22 14:26:48  djr
-  Major rewrite of orbcore to support POA.
-
-  Revision 1.1  1997/12/09 18:43:07  sll
-  Initial revision
-
-  */
-
 #ifndef __EXCEPTHANDLER_H__
 #define __EXCEPTHANDLER_H__
 
 
-
 class omniExHandlers_iterator;
-
 
 class omniExHandlers {
 public:
   void*                   transient_hdr;
   void*                   transient_cookie;
+  void*                   timeout_hdr;
+  void*                   timeout_cookie;
   void*                   commfail_hdr;
   void*                   commfail_cookie;
   void*                   sysexcpt_hdr;

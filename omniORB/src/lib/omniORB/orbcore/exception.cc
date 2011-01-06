@@ -3,7 +3,7 @@
 // exception.cc               Created on: 13/5/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005 Apasphere Ltd
+//    Copyright (C) 2005-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,97 +27,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.12.2.2  2005/04/08 00:35:46  dgrisby
-  Merging again.
-
-  Revision 1.12.2.1  2003/03/23 21:02:17  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.10.2.10  2002/08/16 17:47:39  dgrisby
-  Documentation, message updates. ORB tweaks to match docs.
-
-  Revision 1.10.2.9  2002/02/25 11:17:12  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.10.2.8  2002/01/15 16:38:13  dpg1
-  On the road to autoconf. Dependencies refactored, configure.ac
-  written. No makefiles yet.
-
-  Revision 1.10.2.7  2001/09/20 15:10:47  sll
-  Default Transient Handler now checks for the minor code
-  TRANSIENT_FailedOnForwarded and do a retry.
-
-  Revision 1.10.2.6  2001/08/03 17:41:21  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.10.2.5  2001/07/31 16:38:05  sll
-  Remove dead code.
-
-  Revision 1.10.2.4  2001/05/11 14:29:23  sll
-  Default tranisent handler now do not retry at all.
-
-  Revision 1.10.2.3  2001/04/18 18:18:08  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.10.2.2  2000/09/27 17:35:49  sll
-  Updated include/omniORB3 to include/omniORB4
-
-  Revision 1.10.2.1  2000/07/17 10:35:53  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.11  2000/07/13 15:25:58  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.9.6.5  2000/06/22 10:40:14  dpg1
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.9.6.4  2000/06/12 11:16:23  dpg1
-  Global exception handlers were returning a zero cookie.
-
-  Revision 1.9.6.3  1999/10/14 16:22:08  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.9.6.2  1999/09/30 12:25:58  djr
-  Minor changes.
-
-  Revision 1.9.6.1  1999/09/22 14:26:48  djr
-  Major rewrite of orbcore to support POA.
-
-  Revision 1.9  1999/06/18 20:53:10  sll
-  New function _CORBA_bad_param_freebuf().
-
-  Revision 1.8  1999/03/11 16:25:52  djr
-  Updated copyright notice
-
-  Revision 1.7  1999/01/07 15:44:03  djr
-  Added _CORBA_invoked_nil_pseudo_ref() and
-  _CORBA_use_nil_ptr_as_nil_pseudo_objref().
-
-  Revision 1.6  1998/08/14 13:46:37  sll
-  Added pragma hdrstop to control pre-compile header if the compiler feature
-  is available.
-
-  Revision 1.5  1998/04/07 19:33:40  sll
-  Replace cerr with omniORB::log.
-  Use namespce when available.
-
-  Revision 1.4  1997/12/09 18:06:37  sll
-  Added support for system exception handlers.
-
-  Revision 1.3  1997/08/21 22:03:56  sll
-  Added system exception TRANSACTION_REQUIRED, TRANSACTION_ROLLEDBACK,
-  INVALID_TRANSACTION, WRONG_TRANSACTION.
-  INVALID_TRANSACTION, WRONG_TRANSACTION.
-
-// Revision 1.2  1997/05/06  15:12:21  sll
-// Public release.
-//
-  */
-
 #include <omniORB4/CORBA.h>
 
 #ifdef HAS_pch
@@ -135,6 +44,9 @@ static CORBA::Boolean
 omni_defaultTransientExcHandler(void*, CORBA::ULong n_retries,
 				const CORBA::TRANSIENT& ex);
 static CORBA::Boolean
+omni_defaultTimeoutExcHandler(void*, CORBA::ULong n_retries,
+				const CORBA::TIMEOUT& ex);
+static CORBA::Boolean
 omni_defaultCommFailureExcHandler(void*, CORBA::ULong n_retries,
 				  const CORBA::COMM_FAILURE& ex);
 static CORBA::Boolean
@@ -145,6 +57,9 @@ omni_defaultSystemExcHandler(void*, CORBA::ULong n_retries,
 static omniORB::transientExceptionHandler_t
 omni_globalTransientExcHandler = omni_defaultTransientExcHandler;
 
+static omniORB::timeoutExceptionHandler_t
+omni_globalTimeoutExcHandler = omni_defaultTimeoutExcHandler;
+
 static omniORB::commFailureExceptionHandler_t
 omni_globalCommFailureExcHandler = omni_defaultCommFailureExcHandler;
 
@@ -152,7 +67,8 @@ static omniORB::systemExceptionHandler_t
 omni_globalSystemExcHandler = omni_defaultSystemExcHandler;
 
 static void* omni_globalTransientExcHandlerCookie = 0;
-static void* omni_globalCommFailureExcHandlerCookie =0;
+static void* omni_globalTimeoutExcHandlerCookie = 0;
+static void* omni_globalCommFailureExcHandlerCookie = 0;
 static void* omni_globalSystemExcHandlerCookie = 0;
 
 
@@ -201,9 +117,38 @@ omniORB::installTransientExceptionHandler(CORBA::Object_ptr obj,
 
 
 static CORBA::Boolean
+omni_defaultTimeoutExcHandler(void*,
+			      CORBA::ULong,
+			      const CORBA::TIMEOUT&)
+{
+  return 0;
+}
+
+
+void
+omniORB::installTimeoutExceptionHandler(void* cookie,
+					omniORB::timeoutExceptionHandler_t fn)
+{
+  omni_globalTimeoutExcHandler = fn;
+  omni_globalTimeoutExcHandlerCookie = cookie;
+}
+
+
+void
+omniORB::installTimeoutExceptionHandler(CORBA::Object_ptr obj,
+					void* cookie,
+					omniORB::timeoutExceptionHandler_t fn)
+{
+  if (CORBA::is_nil(obj)) 
+    return;
+  obj->_PR_getobj()->_timeoutExceptionHandler((void*)fn,cookie);
+}
+
+
+static CORBA::Boolean
 omni_defaultCommFailureExcHandler(void*,
-				   CORBA::ULong,
-				   const CORBA::COMM_FAILURE&)
+				  CORBA::ULong,
+				  const CORBA::COMM_FAILURE&)
 {
   return 0;
 }
@@ -227,6 +172,7 @@ omniORB::installCommFailureExceptionHandler(CORBA::Object_ptr obj,
     return;
   obj->_PR_getobj()->_commFailureExceptionHandler((void*)fn,cookie);
 }
+
 
 
 static CORBA::Boolean
@@ -275,6 +221,27 @@ _omni_callTransientExceptionHandler(omniObjRef* obj,
     return (*omni_globalTransientExcHandler)(cookie,
 					     nretries,
 					     ex);
+  }
+}
+
+
+CORBA::Boolean
+_omni_callTimeoutExceptionHandler(omniObjRef* obj,
+				  CORBA::ULong nretries,
+				  const CORBA::TIMEOUT& ex)
+{
+  void* cookie = 0;
+  void* handler = obj->_timeoutExceptionHandler(cookie);
+  if (handler) {
+    return (*(omniORB::timeoutExceptionHandler_t)handler)(cookie,
+							  nretries,
+							  ex);
+  }
+  else {
+    cookie = omni_globalTimeoutExcHandlerCookie;
+    return (*omni_globalTimeoutExcHandler)(cookie,
+					   nretries,
+					   ex);
   }
 }
 
@@ -334,8 +301,9 @@ static int exHandlersTableSize = 103;
 
 omniExHandlers::omniExHandlers() :
   transient_hdr(0), transient_cookie(0),
-  commfail_hdr(0), commfail_cookie(0), 
-  sysexcpt_hdr(0), sysexcpt_cookie(0),
+  timeout_hdr(0),   timeout_cookie(0),
+  commfail_hdr(0),  commfail_cookie(0), 
+  sysexcpt_hdr(0),  sysexcpt_cookie(0),
   objptr(0), next(0)
 {
 }

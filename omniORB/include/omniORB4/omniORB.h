@@ -3,7 +3,7 @@
 // omniORB.h                  Created on: 6/2/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -377,6 +377,34 @@ _CORBA_MODULE_BEG
 				 void* cookie,                          //
 				 transientExceptionHandler_t fn);       //
     									//
+  ////////////////////////////////////////////////////////////////////////
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // When an operation is invoked via an object reference, a		//
+  // CORBA::TIMEOUT exception may be raised. 			        //
+  //									//
+  // By default, the ORB will pass this exception on to the application.//
+  //									//
+  // This behaviour can be overridden by installing an exception	//
+  // handler. The function signature of the handler should be the same 	//
+  // as omniORB::timeoutExceptionHandler_t. The handlers can be 	//
+  // installed using the overloaded functions				//
+  // omniORB::installTimeoutExceptionHandler. The use of these	        //
+  // functions is similar to those for the TRANSIENT exception. See 	//
+  // above for details.							//
+  //									//
+  typedef CORBA::Boolean (*timeoutExceptionHandler_t)(void* cookie,	//
+					CORBA::ULong n_retries,         //
+					const CORBA::TIMEOUT& ex);      //
+  //									//
+  _CORBA_MODULE_FN void installTimeoutExceptionHandler(void* cookie,    //
+				 timeoutExceptionHandler_t fn);         //
+  //									//
+  _CORBA_MODULE_FN void installTimeoutExceptionHandler(                 //
+				   CORBA::Object_ptr obj,               //
+				   void* cookie,		        //
+				   timeoutExceptionHandler_t fn);       //
   ////////////////////////////////////////////////////////////////////////
 
 

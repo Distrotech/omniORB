@@ -3,7 +3,7 @@
 // poa.cc                     Created on: 14/4/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2009 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,248 +27,6 @@
 // Description:
 //    Implementation of PortableServer::POA.
 //
-
-/*
-  $Log$
-  Revision 1.4.2.13  2009/01/13 14:11:00  dgrisby
-  When deactivating an object in a main thread policy POA, call
-  _remove_ref from the main thread.
-
-  Revision 1.4.2.12  2007/06/03 19:21:38  dgrisby
-  POAManager deactivate would not meet its detached object if all
-  objects were busy, leading to a hang in POA destruction.
-
-  Revision 1.4.2.11  2007/03/23 14:36:46  dgrisby
-  Use one etherealisation queue per POA, rather than one global one.
-  Thanks Teemu Torma.
-
-  Revision 1.4.2.10  2006/07/18 16:21:21  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.4.2.9  2005/11/29 13:33:35  dgrisby
-  INS POA leaked a reference to the Root POA. Thanks Dirk Siebnich.
-
-  Revision 1.4.2.8  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.4.2.7  2005/11/09 12:22:17  dgrisby
-  Local interfaces support.
-
-  Revision 1.4.2.6  2005/05/22 12:39:43  dgrisby
-  Merge Mac OS X and POA fixes.
-
-  Revision 1.4.2.5  2005/04/14 00:03:56  dgrisby
-  New traceInvocationReturns and traceTime options; remove logf function.
-
-  Revision 1.4.2.4  2005/04/08 00:35:46  dgrisby
-  Merging again.
-
-  Revision 1.4.2.3  2005/01/13 21:55:56  dgrisby
-  Turn off -g debugging; suppress some compiler warnings.
-
-  Revision 1.4.2.2  2005/01/06 23:10:37  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.4.2.1  2003/03/23 21:02:07  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.37  2003/02/17 02:03:08  dgrisby
-  vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-
-  Revision 1.2.2.36  2002/11/08 17:26:26  dgrisby
-  Hang on shutdown with servant locators.
-
-  Revision 1.2.2.35  2002/11/08 01:20:46  dgrisby
-  Initialise oid prefix member in nil POA.
-
-  Revision 1.2.2.34  2002/10/14 15:16:20  dgrisby
-  Fix create_POA / destroy deadlock, unique persistent system ids.
-
-  Revision 1.2.2.33  2002/09/11 20:40:15  dgrisby
-  Call thread interceptors from etherealiser queue.
-
-  Revision 1.2.2.32  2002/08/16 17:47:40  dgrisby
-  Documentation, message updates. ORB tweaks to match docs.
-
-  Revision 1.2.2.31  2002/03/18 15:13:09  dpg1
-  Fix bug with old-style ORBInitRef in config file; look for
-  -ORBtraceLevel arg before anything else; update Windows registry
-  key. Correct error message.
-
-  Revision 1.2.2.30  2002/02/25 11:17:13  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.2.2.29  2002/02/13 17:39:58  dpg1
-  Don't put POA in DISCARDING state during destroy().
-
-  Revision 1.2.2.28  2002/02/11 14:47:03  dpg1
-  Bug in cleanup of nil POA.
-
-  Revision 1.2.2.27  2002/01/16 11:31:59  dpg1
-  Race condition in use of registerNilCorbaObject/registerTrackedObject.
-  (Reported by Teemu Torma).
-
-  Revision 1.2.2.26  2002/01/15 16:38:13  dpg1
-  On the road to autoconf. Dependencies refactored, configure.ac
-  written. No makefiles yet.
-
-  Revision 1.2.2.25  2001/11/13 14:11:45  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.2.2.24  2001/11/08 16:33:52  dpg1
-  Local servant POA shortcut policy.
-
-  Revision 1.2.2.23  2001/11/06 16:52:47  dpg1
-  Minor bug with traceLevel >= 10.
-
-  Revision 1.2.2.22  2001/10/17 16:44:07  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.2.2.21  2001/09/20 09:27:44  dpg1
-  Remove assertion failure on exit if not all POAs are deleted.
-
-  Revision 1.2.2.20  2001/09/19 17:26:51  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.2.2.19  2001/08/21 11:02:18  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.2.2.18  2001/08/20 10:43:57  sll
-  Fixed minor bug detected by MSVC++
-
-  Revision 1.2.2.17  2001/08/17 17:12:41  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.2.2.16  2001/08/17 15:00:48  dpg1
-  Fixes for pre-historic compilers.
-
-  Revision 1.2.2.15  2001/08/15 17:59:12  dpg1
-  Minor POA bugs.
-
-  Revision 1.2.2.14  2001/08/15 10:26:13  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.2.2.13  2001/08/03 17:41:24  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.2.2.12  2001/08/01 10:08:22  dpg1
-  Main thread policy.
-
-  Revision 1.2.2.11  2001/07/31 16:10:37  sll
-  Added GIOP BiDir support.
-
-  Revision 1.2.2.10  2001/06/29 16:24:48  dpg1
-  Support re-entrancy in single thread policy POAs.
-
-  Revision 1.2.2.9  2001/06/07 16:24:10  dpg1
-  PortableServer::Current support.
-
-  Revision 1.2.2.8  2001/05/31 16:18:14  dpg1
-  inline string matching functions, re-ordered string matching in
-  _ptrToInterface/_ptrToObjRef
-
-  Revision 1.2.2.7  2001/05/29 17:03:52  dpg1
-  In process identity.
-
-  Revision 1.2.2.6  2001/04/18 18:18:05  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.2.2.5  2000/11/15 17:47:58  dpg1
-  Typo in Monday's servant manager fix
-
-  Revision 1.2.2.4  2000/11/13 12:39:54  dpg1
-  djr's fix to exceptions in servant managers from omni3_develop
-
-  Revision 1.2.2.3  2000/11/09 12:27:58  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.2.2.2  2000/09/27 18:02:56  sll
-  Updated to use the new cdrStream abstraction.
-
-  Revision 1.2.2.1  2000/07/17 10:35:56  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:56  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.21  2000/06/22 10:40:16  dpg1
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.1.2.20  2000/06/12 11:15:52  dpg1
-  Clarifying comment about TRANSIENT exceptions on exiting HOLDING
-  state.
-
-  Revision 1.1.2.19  2000/06/02 16:09:59  dpg1
-  If an object is deactivated while its POA is in the HOLDING state,
-  clients which were held now receive a TRANSIENT exception when the POA
-  becomes active again.
-
-  Revision 1.1.2.18  2000/05/05 18:59:36  dpg1
-  Back out last change, since it doesn't work.
-
-  Revision 1.1.2.17  2000/05/05 17:00:46  dpg1
-  INS POA now has the USE_SERVANT_MANAGER policy, with the small
-  exception that it raises OBJECT_NOT_EXIST rather than OBJ_ADAPTER if
-  no servant activator has been registered.
-
-  Revision 1.1.2.16  2000/04/27 10:51:39  dpg1
-  Interoperable Naming Service
-
-  Add magic INS POA.
-
-  Revision 1.1.2.15  2000/03/01 12:28:36  dpg1
-  find_POA() now correctly throws AdapterNonExistent if an
-  AdapterActivator fails to activate the POA.
-
-  Revision 1.1.2.14  2000/02/04 18:11:03  djr
-  Minor mods for IRIX (casting pointers to ulong instead of int).
-
-  Revision 1.1.2.13  2000/01/27 10:55:46  djr
-  Mods needed for powerpc_aix.  New macro OMNIORB_BASE_CTOR to provide
-  fqname for base class constructor for some compilers.
-
-  Revision 1.1.2.12  2000/01/20 11:51:36  djr
-  (Most) Pseudo objects now used omni::poRcLock for ref counting.
-  New assertion check OMNI_USER_CHECK.
-
-  Revision 1.1.2.11  2000/01/03 20:35:09  djr
-  Added check for POA being CORBA::release()d too many times.
-
-  Revision 1.1.2.10  1999/11/12 17:05:38  djr
-  Minor mods for hp-10.20 with aCC.
-
-  Revision 1.1.2.9  1999/10/29 13:18:18  djr
-  Changes to ensure mutexes are constructed when accessed.
-
-  Revision 1.1.2.8  1999/10/27 17:32:14  djr
-  omni::internalLock and objref_rc_lock are now pointers.
-
-  Revision 1.1.2.7  1999/10/21 12:34:06  djr
-  Removed duplicate include of exception.h.
-
-  Revision 1.1.2.6  1999/10/14 16:22:14  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.1.2.5  1999/09/30 11:52:32  djr
-  Implemented use of AdapterActivators in POAs.
-
-  Revision 1.1.2.4  1999/09/28 10:54:34  djr
-  Removed pretty-printing of object keys from object adapters.
-
-  Revision 1.1.2.3  1999/09/24 17:11:14  djr
-  New option -ORBtraceInvocations and omniORB::traceInvocations.
-
-  Revision 1.1.2.2  1999/09/24 10:28:51  djr
-  Added POA_Helper and POA::the_children().
-
-  Revision 1.1.2.1  1999/09/22 14:27:00  djr
-  Major rewrite of orbcore to support POA.
-
-*/
 
 #include <omniORB4/CORBA.h>
 
@@ -3089,7 +2847,16 @@ omniOrbPOA::synchronise_request(omniLocalIdentity* lid)
 	// will do endInvocation() when we pass through there.
 	startRequest();
 	omni::internalLock->unlock();
-	OMNIORB_THROW(TRANSIENT, TRANSIENT_CallTimedout, CORBA::COMPLETED_NO);
+	if (orbParameters::throwTransientOnTimeOut) {
+	  OMNIORB_THROW(TRANSIENT,
+			TRANSIENT_CallTimedout,
+			CORBA::COMPLETED_NO);
+	}
+	else {
+	  OMNIORB_THROW(TIMEOUT,
+			TIMEOUT_CallTimedOutOnServer,
+			CORBA::COMPLETED_NO);
+	}
       }
     }
     else
