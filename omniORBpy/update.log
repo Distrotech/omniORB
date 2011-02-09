@@ -1,3 +1,23 @@
+Wed Feb  9 14:31:05 GMT 2011 dgrisby
+====================================
+
+- Start of AMI support: implied IDL generation.
+
+omniidl_be/python.py
+python/CosNaming
+python/CosNaming/GNUmakefile.in
+python/CosNaming/GNUmakefile
+python/CosNaming/__init__.py
+python/CosNaming/dir.mk
+python/CosNaming__POA
+python/CosNaming__POA/GNUmakefile.in
+python/CosNaming__POA/GNUmakefile
+python/CosNaming__POA/__init__.py
+python/CosNaming__POA/dir.mk
+python/omniORB/__init__.py
+python/omniORB/dir.mk
+
+
 Thu Jan  6 14:36:29 GMT 2011 dgrisby
 ====================================
 

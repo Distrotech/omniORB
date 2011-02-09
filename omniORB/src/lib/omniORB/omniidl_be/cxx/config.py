@@ -3,7 +3,7 @@
 # config.py                 Created on: 2000/10/8
 #                           Author    : David Scott (djs)
 #
-#    Copyright (C) 2002-2007 Apasphere Ltd
+#    Copyright (C) 2002-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -29,114 +29,82 @@
 #
 # $Id$
 
-import string
+state = {
+    # Name of this program
+    'Program Name':          'omniidl (C++ backend)',
+    # Relevant omniORB C++ library version
+    'Library Version':       'omniORB_4_2',
+    # Suffix of generated header file
+    'HH Suffix':             '.hh',
+    # Suffix of generated Skeleton file
+    'SK Suffix':             'SK.cc',
+    # Suffix of generated Dynamic code
+    'DYNSK Suffix':          'DynSK.cc',
+    # Suffix of example interface implementation code
+    'IMPL Suffix':           '_i.cc',
 
-import config
+    # Are we in "fragment" mode?
+    'Fragment':              0,
+    # In fragment mode, suffix of definitions file
+    '_DEFS Fragment':        '_defs',
+    # In fragment mode, suffix of file containing operators (eg <<)
+    '_OPERS Fragment':       '_operators',
+    # In fragment mode, suffix of file containing POA code
+    '_POA Fragment':         '_poa',
 
-# Stores the global configuration of the C++ backend and can dump it to
-# stdout (for bug reporting)
-class ConfigurationState:
+    # Private prefix for internal names
+    'Private Prefix':        '_0RL',
+    # Prefix used to avoid clashes with C++ keywords
+    'Reserved Prefix':       '_cxx_',
+    # Base name of file being processed
+    'Basename':              None,
+    # Directory name of file being processed
+    'Directory':             None,
+    # Do we generate code for TypeCodes and Any?
+    'Typecode':              0,
+    # Do we splice reopened modules together into one large chunk?
+    # (not guaranteed to always work)
+    'Splice Modules':        0,
+    # Do we generate example code implementing all of the interfaces
+    # found in the input IDL?
+    'Example Code':          0,
+    # Do we generate normal (non-flattened) tie templates?
+    'Normal Tie':            0,
+    # Do we generate flattened tie templates?
+    'Flattened Tie':         0,
+    # Do we generate BOA compatible skeleton classes?
+    'BOA Skeletons':         0,
+    # Do we generate old CORBA 2.1 signatures for skeletons?
+    'Old Signatures':        0,
+    # Do we preserve the #include'd IDL path name in the generated
+    # header (eg #include <A/B.idl> -> #include <A/B.hh>?
+    'Keep Include Path':     0,
+    # Do we #include files using double-quotes rather than
+    # angled brackets (the default)
+    'Use Quotes':            0,
 
-    def __init__(self):
-        self._config = {
-            # Name of this program
-            'Program Name':          'omniidl (C++ backend)',
-            # Useful data from CVS
-            'CVS ID':                '$Id$',
-            # Relevant omniORB C++ library version
-            'Library Version':       'omniORB_4_2',
-            # Suffix of generated header file
-            'HH Suffix':             '.hh',
-            # Suffix of generated Skeleton file
-            'SK Suffix':             'SK.cc',
-            # Suffix of generated Dynamic code
-            'DYNSK Suffix':          'DynSK.cc',
-            # Suffix of example interface implementation code
-            'IMPL Suffix':           '_i.cc',
-            
-            # Are we in "fragment" mode?
-            'Fragment':              0,
-            # In fragment mode, suffix of definitions file
-            '_DEFS Fragment':        '_defs',
-            # In fragment mode, suffix of file containing operators (eg <<)
-            '_OPERS Fragment':       '_operators',
-            # In fragment mode, suffix of file containing POA code
-            '_POA Fragment':         '_poa',
+    # Do we make all the objref methods virtual?
+    'Virtual Objref Methods':0,
 
-            # Private prefix for internal names
-            'Private Prefix':        '_0RL',
-            # Prefix used to avoid clashes with C++ keywords
-            'Reserved Prefix':       '_cxx_',
-            # Base name of file being processed
-            'Basename':              None,
-            # Directory name of file being processed
-            'Directory':             None,
-            # Do we generate code for TypeCodes and Any?
-            'Typecode':              0,
-            # Do we splice reopened modules together into one large chunk?
-            # (not guaranteed to always work)
-            'Splice Modules':        0,
-            # Do we generate example code implementing all of the interfaces
-            # found in the input IDL?
-            'Example Code':          0,
-            # Do we generate normal (non-flattened) tie templates?
-            'Normal Tie':            0,
-            # Do we generate flattened tie templates?
-            'Flattened Tie':         0,
-            # Do we generate BOA compatible skeleton classes?
-            'BOA Skeletons':         0,
-            # Do we generate old CORBA 2.1 signatures for skeletons?
-            'Old Signatures':        0,
-            # Do we preserve the #include'd IDL path name in the generated
-            # header (eg #include <A/B.idl> -> #include <A/B.hh>?
-            'Keep Include Path':     0,
-            # Do we #include files using double-quotes rather than
-            # angled brackets (the default)
-            'Use Quotes':            0,
-            
-            # Do we make all the objref methods virtual?
-            'Virtual Objref Methods':0,
+    # Do we use the impl mapping for objref methods?
+    'Impl Mapping':          0,
 
-            # Do we use the impl mapping for objref methods?
-            'Impl Mapping':          0,
+    # Are #included files output inline with the main output?
+    'Inline Includes':       0,
 
-            # Are #included files output inline with the main output?
-            'Inline Includes':       0,
+    # Generate local servant shortcut code?
+    'Shortcut':              0,
 
-            # Generate local servant shortcut code?
-            'Shortcut':              0,
+    # Extra ifdefs for stubs in dlls?
+    'DLLIncludes':           0,
 
-            # Extra ifdefs for stubs in dlls?
-            'DLLIncludes':           0,
+    # Prefix for include guard in generated header
+    'GuardPrefix':           '',
 
-            # Prefix for include guard in generated header
-            'GuardPrefix':           '',
+    # Generate AMI?
+    'AMI':                   0,
 
-            # Are we in DEBUG mode?
-            'Debug':                 0
-                       
-            }
+    # Are we in DEBUG mode?
+    'Debug':                 0,
 
-    def __getitem__(self, key):
-        if self._config.has_key(key):
-            return self._config[key]
-        util.fatalError("Configuration key not found (" + key + ")")
-
-    def __setitem__(self, key, value):
-        if self._config.has_key(key):
-            self._config[key] = value
-            return
-        util.fatalError("Configuration key not found (" + key + ")")
-
-    def dump(self):
-        # find the longest key string
-        max = 0
-        for key in self._config.keys():
-            if len(key) > max: max = len(key)
-        # display the table
-        for key in self._config.keys():
-            print string.ljust(key, max), ":  ", repr(self._config[key])
-
-# Create state-holding singleton object
-if not hasattr(config, "state"):
-    config.state = ConfigurationState()
+    }

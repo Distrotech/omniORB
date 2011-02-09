@@ -215,6 +215,7 @@ code( BAD_PARAM_RegisterNilObject            , OMGMinorCode(27) ) sep \
 code( BAD_PARAM_InvalidComponentId           , OMGMinorCode(28) ) sep \
 code( BAD_PARAM_InvalidProfileId             , OMGMinorCode(29) ) sep \
 code( BAD_PARAM_DuplicatePolicyType          , OMGMinorCode(30) ) sep \
+code( BAD_PARAM_PollableAlreadyInPollableSet , OMGMinorCode(43) ) sep \
 code( BAD_PARAM_IndexOutOfRange      	     , OMNIORBMinorCode_21 ) sep \
 code( BAD_PARAM_InvalidUnionDiscValue	     , OMNIORBMinorCode_27 ) sep \
 code( BAD_PARAM_InvalidInitialSize   	     , OMNIORBMinorCode_29 ) sep \
@@ -420,6 +421,16 @@ enum NO_RESOURCES_minor {
 };
 
 
+// NO_RESPONSE
+#define DECLARE_NO_RESPONSE_minors(code,sep) \
+\
+code ( NO_RESPONSE_ReplyNotAvailableYet, OMGMinorCode(1) )
+
+enum NO_RESPONSE_minor {
+  DECLARE_NO_RESPONSE_minors(DeclareValue,OMNI_COMMA)  
+};
+
+
 // BAD_INV_ORDER
 #define DECLARE_BAD_INV_ORDER_minors(code,sep) \
 \
@@ -440,6 +451,7 @@ code( BAD_INV_ORDER_InvalidPortableInterceptorCall, OMGMinorCode(14) ) sep \
 code( BAD_INV_ORDER_ServiceContextIdAlreadyExists , OMGMinorCode(15) ) sep \
 code( BAD_INV_ORDER_PolicyFactoryTypeAlreadyExists, OMGMinorCode(16) ) sep \
 code( BAD_INV_ORDER_POACreationDuringDestruction  , OMGMinorCode(17) ) sep \
+code( BAD_INV_ORDER_NoPollerResponseYet           , OMGMinorCode(22) ) sep \
 code( BAD_INV_ORDER_CodeSetNotKnownYet	     	  , OMNIORBMinorCode_24 ) sep \
 code( BAD_INV_ORDER_ArgumentsNotCalled            , OMNIORBMinorCode_65 ) sep \
 code( BAD_INV_ORDER_ErrorInDynamicImplementation  , OMNIORBMinorCode_66 ) sep \
@@ -507,11 +519,12 @@ enum DATA_CONVERSION_minor {
 // OBJECT_NOT_EXIST
 #define DECLARE_OBJECT_NOT_EXIST_minors(code,sep) \
 \
-code( OBJECT_NOT_EXIST_NoMatch           , OMGMinorCode(1) ) sep \
-code( OBJECT_NOT_EXIST_IncarnateFailed   , OMGMinorCode(2) ) sep \
-code( OBJECT_NOT_EXIST_BOANotInitialised , OMNIORBMinorCode_34 ) sep \
-code( OBJECT_NOT_EXIST_POANotInitialised , OMNIORBMinorCode_58 ) sep \
-code( OBJECT_NOT_EXIST_DynAnyDestroyed   , OMNIORBMinorCode_102 )
+code( OBJECT_NOT_EXIST_NoMatch           	  , OMGMinorCode(1) ) sep \
+code( OBJECT_NOT_EXIST_IncarnateFailed   	  , OMGMinorCode(2) ) sep \
+code( OBJECT_NOT_EXIST_PollerAlreadyDeliveredReply, OMGMinorCode(5) ) sep \
+code( OBJECT_NOT_EXIST_BOANotInitialised 	  , OMNIORBMinorCode_34 ) sep \
+code( OBJECT_NOT_EXIST_POANotInitialised 	  , OMNIORBMinorCode_58 ) sep \
+code( OBJECT_NOT_EXIST_DynAnyDestroyed   	  , OMNIORBMinorCode_102 )
 
 enum OBJECT_NOT_EXIST_minor {
   DECLARE_OBJECT_NOT_EXIST_minors(DeclareValue,OMNI_COMMA)  
@@ -558,8 +571,9 @@ enum BAD_CONTEXT_minor {
 // TRANSIENT_CallTimedout
 #define DECLARE_TIMEOUT_minors(code,sep) \
 \
-code( TIMEOUT_CallTimedOutOnClient, OMNIORBMinorCode_8 ) sep \
-code( TIMEOUT_CallTimedOutOnServer, OMNIORBMinorCode_124 )
+code( TIMEOUT_NoPollerResponseInTime, OMGMinorCode(1) )    sep \
+code( TIMEOUT_CallTimedOutOnClient  , OMNIORBMinorCode_8 ) sep \
+code( TIMEOUT_CallTimedOutOnServer  , OMNIORBMinorCode_124 )
 
 enum TIMEOUT_minor {
   DECLARE_TIMEOUT_minors(DeclareValue,OMNI_COMMA)

@@ -22,12 +22,16 @@ EXPORTHEADERS = omniORB4/distdate.hh \
                 omniORB4/boxes_defs.hh \
                 omniORB4/boxes_operators.hh \
                 omniORB4/boxes_poa.hh \
+                omniORB4/pollable_defs.hh \
+                omniORB4/pollable_operators.hh \
+                omniORB4/pollable_poa.hh \
                 omniORB4/poa_enums_defs.hh \
                 omniORB4/poa_enums_operators.hh \
                 omniORB4/poa_enums_poa.hh \
 		omniORB4/omniTypedefs.hh \
                 omniORB4/bootstrap.hh \
-		omniORB4/omniConnectionData.hh
+		omniORB4/omniConnectionData.hh \
+		omniORB4/messaging.hh
 
 
 all:: $(EXPORTHEADERS)
@@ -99,9 +103,17 @@ omniORB4/boxes_defs.hh omniORB4/boxes_operators.hh omniORB4/boxes_poa.hh: boxes.
 	@(dir=omniORB4; $(CreateDir))
 	$(OMNIORB_IDL) -v -nf -P $(UNDEFINES) -WbF -ComniORB4 $<
 
+omniORB4/pollable_defs.hh omniORB4/pollable_operators.hh omniORB4/pollable_poa.hh: pollable.idl
+	@(dir=omniORB4; $(CreateDir))
+	$(OMNIORB_IDL) -v -nf -P $(UNDEFINES) -WbF -ComniORB4 $<
+
 omniORB4/poa_enums_defs.hh omniORB4/poa_enums_operators.hh omniORB4/poa_enums_poa.hh: poa_enums.idl
 	@(dir=omniORB4; $(CreateDir))
 	$(OMNIORB_IDL) -v -nf -P $(UNDEFINES) -WbF -ComniORB4 $<
+
+omniORB4/messaging.hh: messaging.idl
+	@(dir=omniORB4; $(CreateDir))
+	$(OMNIORB_IDL_ONLY) -v -ComniORB4 $<
 
 omniORB4/omniTypedefs.hh: omniTypedefs.idl
 	@(dir=omniORB4; $(CreateDir))
@@ -110,9 +122,3 @@ omniORB4/omniTypedefs.hh: omniTypedefs.idl
 omniORB4/omniConnectionData.hh: omniConnectionData.idl
 	@(dir=omniORB4; $(CreateDir))
 	$(OMNIORB_IDL_ONLY) -v -ComniORB4 $<
-
-ciao:: $(STUBHEADERS)
-	@$(MakeSubdirs)
-
-
-

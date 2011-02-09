@@ -3,7 +3,7 @@
 # python.py                 Created on: 1999/10/29
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2010 Apasphere Ltd
+#    Copyright (C) 2002-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -41,7 +41,8 @@ usage_string = """\
   -Wbmodules=p    Put Python modules in package p
   -Wbstubs=p      Put stub files in package p
   -Wbextern=f:p   Assume Python stub file for file f is in package p.
-  -Wbglobal=g     Module to use for global IDL scope (default _GlobalIDL)"""
+  -Wbglobal=g     Module to use for global IDL scope (default _GlobalIDL)
+  -Wbami          Generate code for AMI"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
 
@@ -575,6 +576,7 @@ stub_directory   = ""
 all_factories    = 0
 example_impl     = 0
 extern_stub_pkgs = {}
+generate_ami     = 0
 
 
 def error_exit(message):
@@ -584,7 +586,7 @@ def error_exit(message):
 def run(tree, args):
     global main_idl_file, imported_files, exported_modules, output_inline
     global global_module, module_package, stub_package, stub_directory
-    global all_factories, example_impl, extern_stub_pkgs
+    global all_factories, example_impl, extern_stub_pkgs, generate_ami
 
     imported_files.clear()
     exported_modules.clear()
@@ -641,6 +643,9 @@ def run(tree, args):
             else:
                 extern_stub_pkgs[f_p[0]] = f_p[1]
 
+        elif arg == "ami":
+            generate_ami = 1
+
         else:
             sys.stderr.write(main.cmdname + ": Warning: Python " \
                              "back-end does not understand argument: " + \
@@ -666,6 +671,10 @@ def run(tree, args):
             error_exit('Cannot open "%s" for writing.' % outpyname)
 
     st.out(file_start, filename=main_idl_file)
+
+    if generate_ami:
+        from omniidl_be import ami
+        tree.accept(ami.AMIVisitor())
 
     pv = PythonVisitor(st, outpymodule)
     tree.accept(pv)
@@ -2352,6 +2361,7 @@ def fixupScopedName(scopedName, prefix="_0_"):
         scopedName = [prefix + mangle(scopedName[0])] + scopedName[1:]
     else:
         scopedName = [prefix + global_module] + scopedName
+
     return scopedName
 
 def valueToString(val, kind, scope=[]):

@@ -3,7 +3,7 @@
 # marshal.py                Created on: 1999/12/1
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2005 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,63 +27,6 @@
 #   
 #   Produce the main header alignment and marshal function definitions
 #   for the C++ backend
-
-# $Id$
-# $Log$
-# Revision 1.8.2.5  2005/11/09 12:22:17  dgrisby
-# Local interfaces support.
-#
-# Revision 1.8.2.4  2004/10/13 17:58:24  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.8.2.3  2003/11/06 11:56:56  dgrisby
-# Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-#
-# Revision 1.8.2.2  2003/10/23 11:25:55  dgrisby
-# More valuetype support.
-#
-# Revision 1.8.2.1  2003/03/23 21:02:37  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.6.2.4  2001/10/29 17:42:40  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.6.2.3  2001/06/08 17:12:17  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.6.2.2  2000/10/12 15:37:51  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.7.2.1  2000/08/21 11:35:17  djs
-# Lots of tidying
-#
-# Revision 1.7  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.4.2.2  2000/04/26 18:22:30  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.4.2.1  2000/02/14 18:34:55  dpg1
-# New omniidl merged in.
-#
-# Revision 1.4  2000/01/19 11:23:28  djs
-# Moved most C++ code to template file
-#
-# Revision 1.3  2000/01/07 20:31:28  djs
-# Regression tests in CVSROOT/testsuite now pass for
-#   * no backend arguments
-#   * tie templates
-#   * flattened tie templates
-#   * TypeCode and Any generation
-#
-# Revision 1.2  1999/12/24 18:14:30  djs
-# Fixed handling of #include'd .idl files
-#
-# Revision 1.1  1999/12/01 17:02:11  djs
-# Moved ancillary marshalling and alignment code to this module from header.opers
-#
-
 
 """Produce the main header alignment and marshal function definitions
   for the C++ backend"""
@@ -141,7 +84,8 @@ def visitInterface(node):
     cxx_name = name.fullyQualify()
 
     if node.local():
-        pass
+        stream.out(template.local_interface_marshal_forward,
+                   name = cxx_name)
 
     elif node.abstract():
         stream.out(template.abstract_interface_marshal_forward,

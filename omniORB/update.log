@@ -1,3 +1,30 @@
+Wed Feb  9 14:31:05 GMT 2011 dgrisby
+====================================
+
+- Start of AMI support: implied IDL generation.
+
+idl/GNUmakefile.in
+idl/messaging.idl
+idl/pollable.idl
+include/omniORB4/CORBA.h
+include/omniORB4/minorCode.h
+src/lib/omniORB/dir.mk
+src/lib/omniORB/dynamic/dir.mk
+src/lib/omniORB/dynamic/pollablestub.cc
+src/lib/omniORB/omniidl_be/cxx/__init__.py
+src/lib/omniORB/omniidl_be/cxx/config.py
+src/lib/omniORB/omniidl_be/cxx/header/marshal.py
+src/lib/omniORB/omniidl_be/cxx/header/template.py
+src/lib/omniORB/omniidl_be/cxx/skel/__init__.py
+src/lib/omniORB/omniidl_be/cxx/skel/template.py
+src/lib/omniORB/orbcore/minorCode.cc
+src/tool/omniidl/python/omniidl/idlast.py
+src/tool/omniidl/python/omniidl/idlutil.py
+src/tool/omniidl/python/omniidl_be/ami.py
+src/tool/omniidl/python/omniidl_be/dir.mk
+src/tool/omniidl/python/omniidl_be/dump.py
+
+
 Thu Jan  6 14:36:29 GMT 2011 dgrisby
 ====================================
 

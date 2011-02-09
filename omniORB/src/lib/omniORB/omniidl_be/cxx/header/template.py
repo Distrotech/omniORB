@@ -3,7 +3,7 @@
 # template.py               Created on: 2000/01/18
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2008 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -22,207 +22,6 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #  02111-1307, USA.
-#
-# Description:
-#   
-#   C++ templates for the .hh file
-
-# $Id$
-# $Log$
-# Revision 1.8.2.20  2008/12/29 18:44:38  dgrisby
-# Globally scope array functions to avoid ambiguities.
-#
-# Revision 1.8.2.19  2008/12/03 10:53:58  dgrisby
-# Tweaks leading to Python 3 support; other minor clean-ups.
-#
-# Revision 1.8.2.18  2007/09/19 14:16:07  dgrisby
-# Avoid namespace clashes if IDL defines modules named CORBA.
-#
-# Revision 1.8.2.17  2007/05/11 09:52:27  dgrisby
-# New -Wbguard_prefix option. Thanks Austin Bingham.
-#
-# Revision 1.8.2.16  2006/10/23 15:36:25  dgrisby
-# Undefine USE_stub_in_nt_dll at the end of header if it was not defined
-# at the start.
-#
-# Revision 1.8.2.15  2006/09/04 11:40:06  dgrisby
-# Remove crazy switch code in enum marshalling.
-#
-# Revision 1.8.2.14  2006/01/10 12:24:03  dgrisby
-# Merge from omni4_0_develop pre 4.0.7 release.
-#
-# Revision 1.8.2.13  2005/11/14 11:02:16  dgrisby
-# Local interface fixes.
-#
-# Revision 1.8.2.12  2005/11/09 12:22:17  dgrisby
-# Local interfaces support.
-#
-# Revision 1.8.2.11  2005/08/16 13:51:21  dgrisby
-# Problems with valuetype / abstract interface C++ mapping.
-#
-# Revision 1.8.2.10  2005/07/22 17:18:37  dgrisby
-# Another merge from omni4_0_develop.
-#
-# Revision 1.8.2.9  2005/01/06 23:10:06  dgrisby
-# Big merge from omni4_0_develop.
-#
-# Revision 1.8.2.8  2005/01/06 16:35:18  dgrisby
-# Narrowing for abstract interfaces.
-#
-# Revision 1.8.2.7  2004/10/13 17:58:24  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.8.2.6  2004/07/31 23:46:27  dgrisby
-# Correct constness of exception Any insertion operator.
-#
-# Revision 1.8.2.5  2004/07/23 10:29:59  dgrisby
-# Completely new, much simpler Any implementation.
-#
-# Revision 1.8.2.4  2004/07/04 23:53:39  dgrisby
-# More ValueType TypeCode and Any support.
-#
-# Revision 1.8.2.3  2004/02/16 10:10:32  dgrisby
-# More valuetype, including value boxes. C++ mapping updates.
-#
-# Revision 1.8.2.2  2003/10/23 11:25:55  dgrisby
-# More valuetype support.
-#
-# Revision 1.8.2.1  2003/03/23 21:02:36  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.5.2.19  2001/11/12 13:46:07  dpg1
-# _unchecked_narrow, improved _narrow.
-#
-# Revision 1.5.2.18  2001/11/08 16:33:51  dpg1
-# Local servant POA shortcut policy.
-#
-# Revision 1.5.2.17  2001/10/29 17:42:41  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.5.2.16  2001/10/18 12:45:28  dpg1
-# IDL compiler tweaks.
-#
-# Revision 1.5.2.15  2001/10/17 16:44:05  dpg1
-# Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-#
-# Revision 1.5.2.14  2001/09/19 17:29:04  dpg1
-# Cosmetic changes.
-#
-# Revision 1.5.2.13  2001/08/17 13:45:56  dpg1
-# C++ mapping fixes.
-#
-# Revision 1.5.2.12  2001/08/15 10:26:10  dpg1
-# New object table behaviour, correct POA semantics.
-#
-# Revision 1.5.2.11  2001/08/03 17:41:17  sll
-# System exception minor code overhaul. When a system exeception is raised,
-# a meaning minor code is provided.
-#
-# Revision 1.5.2.10  2001/07/31 19:25:11  sll
-#  Array _var should be separated into fixed and variable size ones.
-#
-# Revision 1.5.2.9  2001/06/18 20:30:51  sll
-# Only define 1 conversion operator from T_var to T* if the compiler is
-# gcc. Previously, this is only done for gcc 2.7.2. It seems that gcc 3.0
-# requires this to be the case. This is the default for all versions of
-# gcc.
-#
-# Revision 1.5.2.8  2001/05/29 17:03:50  dpg1
-# In process identity.
-#
-# Revision 1.5.2.7  2001/04/19 09:30:12  sll
-#  Big checkin with the brand new internal APIs.
-# Scoped where appropriate with the omni namespace.
-#
-# Revision 1.5.2.6  2001/03/13 10:32:09  dpg1
-# Fixed point support.
-#
-# Revision 1.5.2.5  2000/11/20 14:43:25  sll
-# Added support for wchar and wstring.
-#
-# Revision 1.5.2.4  2000/11/09 12:27:55  dpg1
-# Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-#
-# Revision 1.5.2.3  2000/11/03 19:20:41  sll
-# Replaced old marshal operators with a unified operator for cdrStream.
-#
-# Revision 1.5.2.2  2000/10/12 15:37:51  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.6.2.2  2000/08/21 11:35:18  djs
-# Lots of tidying
-#
-# Revision 1.6.2.1  2000/08/02 10:52:02  dpg1
-# New omni3_1_develop branch, merged from omni3_develop.
-#
-# Revision 1.6  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.3.2.15  2000/07/26 15:29:11  djs
-# Missing typedef and forward when generating BOA skeletons
-#
-# Revision 1.3.2.14  2000/07/24 09:35:20  dpg1
-# Adding the missing constructor meant that there was no longer a
-# default constructor.
-#
-# Revision 1.3.2.13  2000/07/24 10:17:31  djs
-# Added missing BOA skeleton constructor
-#
-# Revision 1.3.2.12  2000/07/04 12:57:55  djs
-# Fixed Any insertion/extraction operators for unions and exceptions
-#
-# Revision 1.3.2.11  2000/06/26 16:24:00  djs
-# Better handling of #include'd files (via new commandline options)
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.3.2.10  2000/06/19 18:19:50  djs
-# Implemented union discriminant setting function _d(_value) with checks for
-# illegal uses (setting to a label corresponding to a non-current member and
-# setting before initialisation)
-#
-# Revision 1.3.2.9  2000/06/05 13:03:57  djs
-# Removed union member name clash (x & pd_x, pd__default, pd__d)
-# Removed name clash when a sequence is called "pd_seq"
-# Nested union within union fix
-# Actually generates BOA non-flattened tie templates
-#
-# Revision 1.3.2.8  2000/05/31 18:02:58  djs
-# Better output indenting (and preprocessor directives now correctly output at
-# the beginning of lines)
-#
-# Revision 1.3.2.7  2000/05/30 15:59:25  djs
-# Removed inheritance ambiguity in generated BOA _sk_ and POA_ classes
-#
-# Revision 1.3.2.6  2000/05/18 15:57:33  djs
-# Added missing T* data constructor for bounded sequence types
-#
-# Revision 1.3.2.5  2000/03/20 11:50:20  djs
-# Removed excess buffering- output templates have code attached which is
-# lazily evaluated when required.
-#
-# Revision 1.3.2.4  2000/03/10 12:01:03  djr
-# Re-fixed omniidl (make exception _NP_duplicate() public).
-#
-# Revision 1.3.2.3  2000/03/09 15:22:42  djs
-# Changing the protection status of an exception method, mirroring a change
-# in omniidl3
-#
-# Revision 1.3.2.2  2000/03/07 18:07:33  djr
-# Fixed user-exceptions when can't catch by base class.
-#
-# Revision 1.3.2.1  2000/03/03 14:29:17  djr
-# Improvement to BOA skeletons (less generated code).
-#
-# Revision 1.3  2000/02/01 09:26:45  djs
-# Tracking fixes in old compiler: powerpc-aix scoped identifier workarounds
-#
-# Revision 1.2  2000/01/19 11:23:29  djs
-# Moved most C++ code to template file
-#
-# Revision 1.1  2000/01/18 18:05:53  djs
-# Extracted most C++ from header/defs and put in a template file.
-# General refactoring.
-#
 
 """C++ templates for the .hh file"""
 
@@ -592,17 +391,8 @@ public:
   @abstract_narrows@
   static _ptr_type _nil();
 
-  static inline void _marshalObjRef(_ptr_type, cdrStream& s) {
-    OMNIORB_THROW(MARSHAL, _OMNI_NS(MARSHAL_LocalObject),
-                  (::CORBA::CompletionStatus)s.completion());
-  }
-  static inline _ptr_type _unmarshalObjRef(cdrStream& s) {
-    OMNIORB_THROW(MARSHAL, _OMNI_NS(MARSHAL_LocalObject),
-                  (::CORBA::CompletionStatus)s.completion());
-#ifdef NEED_DUMMY_RETURN
-    return 0;
-#endif
-  }
+  static inline void _marshalObjRef(_ptr_type, cdrStream& s);
+  static inline _ptr_type _unmarshalObjRef(cdrStream& s);
 
   static _core_attr const char* _PD_repoId;
 
@@ -746,7 +536,23 @@ inline void
 @name@::_marshalObjRef(::@name@_ptr obj, cdrStream& s) {
   omniObjRef::_marshal(obj->_PR_getobj(),s);
 }
+"""
 
+local_interface_marshal_forward = """\
+inline void
+@name@::_marshalObjRef(::@name@_ptr, cdrStream& s) {
+  OMNIORB_THROW(MARSHAL, _OMNI_NS(MARSHAL_LocalObject),
+                (::CORBA::CompletionStatus)s.completion());
+}
+
+inline @name@_ptr
+@name@::_unmarshalObjRef(cdrStream& s) {
+  OMNIORB_THROW(MARSHAL, _OMNI_NS(MARSHAL_LocalObject),
+                (::CORBA::CompletionStatus)s.completion());
+#ifdef NEED_DUMMY_RETURN
+  return 0;
+#endif
+}
 """
 
 abstract_interface_marshal_forward = """\

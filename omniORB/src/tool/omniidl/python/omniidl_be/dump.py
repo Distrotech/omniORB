@@ -1,9 +1,9 @@
 # -*- python -*-
 #                           Package   : omniidl
-# idldump.py                Created on: 1999/10/29
+# dump.py                   Created on: 1999/10/29
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2005 Apasphere Ltd
+#    Copyright (C) 2005-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,80 +27,89 @@
 #   
 #   Back-end which just dumps the IDL tree
 
-# $Id$
-# $Log$
-# Revision 1.12.2.2  2005/06/08 09:40:37  dgrisby
-# Update example code, IDL dumping.
-#
-# Revision 1.12.2.1  2003/03/23 21:01:37  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.8.2.7  2002/02/25 15:02:18  dpg1
-# Dump wstring constants properly.
-#
-# Revision 1.8.2.6  2001/08/29 11:54:23  dpg1
-# Clean up const handling in IDL compiler.
-#
-# Revision 1.8.2.5  2001/03/13 10:32:16  dpg1
-# Fixed point support.
-#
-# Revision 1.8.2.4  2000/11/01 15:57:03  dpg1
-# More updates for 2.4.
-#
-# Revision 1.8.2.3  2000/11/01 12:46:00  dpg1
-# Update to CORBA 2.4 specification.
-#
-# Revision 1.8.2.2  2000/10/10 10:18:54  dpg1
-# Update omniidl front-end from omni3_develop.
-#
-# Revision 1.6.2.3  2000/08/14 14:35:14  dpg1
-# IDL dumping now properly escapes string and char constants
-#
-# Revision 1.6.2.2  2000/06/28 14:02:55  dpg1
-# Checked in wrong file. Changes backed out.
-#
-# Revision 1.6.2.1  2000/06/28 13:54:53  dpg1
-# Remove dependency on traceback module.
-#
-# Revision 1.6  1999/11/11 15:55:29  dpg1
-# Python back-end interface now supports valuetype declarations.
-# Back-ends still don't support them, though.
-#
-# Revision 1.5  1999/11/02 17:07:23  dpg1
-# Changes to compile on Solaris.
-#
-# Revision 1.4  1999/11/01 20:19:55  dpg1
-# Support for union switch types declared inside the switch statement.
-#
-# Revision 1.3  1999/11/01 16:39:49  dpg1
-# Cosmetic change.
-#
-# Revision 1.2  1999/11/01 10:06:07  dpg1
-# Various clean-ups.
-#
-
 """Dumps the IDL tree"""
 
-from omniidl import idlast, idltype, idlutil, idlvisitor, output
-import sys, string
+from omniidl import idlast, idltype, idlutil, idlvisitor, output, main
+import sys
 
-class DumpVisitor (idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
+usage_string = """\
+  -Wbinline       Output declarations from #included files inline"""
 
+
+ccolonName = idlutil.ccolonName
+
+def relativeScope(fromScope, destScope):
+    """relativeScope variant that handles invented fromScopes"""
+    rs = idlutil.relativeScope(fromScope, destScope)
+
+    if rs[0] is None:
+        try:
+            rd = idlast.findDecl(destScope)
+
+        except idlast.DeclNotFound:
+            return rs
+
+        new_rs = rs
+        while new_rs[0] is None and len(fromScope) > 1:
+            fromScope = fromScope[:-1]
+            new_rs = idlutil.relativeScope(fromScope, destScope)
+
+        if new_rs[0] is not None:
+            return new_rs
+
+    return rs
+
+
+class DummyStream:
     def __init__(self, st):
         self.st = st
 
+    def out(self, *args, **kw):
+        pass
+
+    def inc_indent(self):
+        self.st.inc_indent()
+
+    def dec_indent(self):
+        self.st.dec_indent()
+
+
+class DumpVisitor (idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
+
+    def __init__(self, st, inline):
+        self.dummy_st = DummyStream(st)
+        self.real_st  = st
+        self.st       = st
+        self.scope    = []
+        self.inline   = inline
+
     def visitAST(self, node):
         for n in node.declarations():
+            if not self.inline:
+                if n.mainFile():
+                    self.st = self.real_st
+                else:
+                    self.st = self.dummy_st
+
             n.accept(self)
 
     def visitModule(self, node):
+        self.st.out("")
+
+        for comment in node.comments():
+            self.st.out(comment.text().strip())
+
         self.st.out("""\
 module @id@ {""", id = node.identifier())
 
         self.st.inc_indent()
 
+        self.scope.append(node.identifier())
+
         for n in node.definitions():
             n.accept(self)
+
+        self.scope.pop()
 
         self.st.dec_indent()
 
@@ -108,12 +117,19 @@ module @id@ {""", id = node.identifier())
 };""")
 
     def visitInterface(self, node):
+
+        self.st.out("")
+
+        for comment in node.comments():
+            self.st.out(comment.text().strip())
+
         if len(node.inherits()) != 0:
             inheritl = []
             for i in node.inherits():
-                inheritl.append("::" + idlutil.ccolonName(i.scopedName()))
+                inheritl.append(ccolonName(relativeScope(self.scope,
+                                                         i.scopedName())))
 
-            inherits = ": " + string.join(inheritl, ", ") + " "
+            inherits = ": " + ", ".join(inheritl) + " "
         else:
             inherits = ""
 
@@ -127,8 +143,23 @@ module @id@ {""", id = node.identifier())
 
         self.st.inc_indent()
 
+        self.scope.append(node.identifier())
+
         for n in node.contents():
             n.accept(self)
+
+        if hasattr(node, "_ami_ops"):
+            self.st.out("""
+/* AMI pseudo-operations...
+""")
+            for n in node._ami_ops:
+                n.accept(self)
+            self.st.out("""
+** ...end of AMI pseudo operations.
+*/
+""")
+
+        self.scope.pop()
 
         self.st.dec_indent()
         self.st.out("""\
@@ -136,11 +167,14 @@ module @id@ {""", id = node.identifier())
 
 
     def visitForward(self, node):
+        for comment in node.comments():
+            self.st.out(comment.text().strip())
+
         if   node.abstract(): qual = "abstract "
         elif node.local():    qual = "local "
         else:                 qual = ""
         
-        self.st.out("""\
+        self.st.out("""
 @qual@interface @id@;""", id = node.identifier(), qual=qual)
 
 
@@ -149,7 +183,8 @@ module @id@ {""", id = node.identifier())
         type = self.__result_type
 
         if node.constKind() == idltype.tk_enum:
-            value = "::" + idlutil.ccolonName(node.value().scopedName())
+            value = ccolonName(relativeScope(self.scope,
+                                             node.value().scopedName()))
 
         elif node.constKind() == idltype.tk_string:
             value = '"' + idlutil.escapifyString(node.value()) + '"'
@@ -185,7 +220,7 @@ const @type@ @id@ = @value@;""",
             d.accept(self)
             decll.append(self.__result_declarator)
 
-        decls = string.join(decll, ", ")
+        decls = ", ".join(decll)
 
         self.st.out("""\
 typedef @type@ @decls@;""",
@@ -193,9 +228,11 @@ typedef @type@ @decls@;""",
 
 
     def visitStruct(self, node):
-        self.st.out("""\
+        self.st.out("""
 struct @id@ {""",
                id = node.identifier())
+
+        self.scope.append(node.identifier())
 
         for m in node.members():
             if m.constrType():
@@ -209,25 +246,29 @@ struct @id@ {""",
             for d in m.declarators():
                 d.accept(self)
                 decll.append(self.__result_declarator)
-            decls = string.join(decll, ", ")
+            decls = ", ".join(decll)
 
             self.st.out("""\
   @type@ @decls@;""",
 
                    type=type, decls=decls)
 
+        self.scope.pop()
+
         self.st.out("""\
 };""")
 
     def visitStructForward(self, node):
-        self.st.out("""\
+        self.st.out("""
 struct @id@;""", id = node.identifier())
 
 
     def visitException(self, node):
-        self.st.out("""\
+        self.st.out("""
 exception @id@ {""",
                id = node.identifier())
+
+        self.scope.append(node.identifier())
 
         for m in node.members():
             if m.constrType():
@@ -241,12 +282,14 @@ exception @id@ {""",
             for d in m.declarators():
                 d.accept(self)
                 decll.append(self.__result_declarator)
-            decls = string.join(decll, ", ")
+            decls = ", ".join(decll)
 
             self.st.out("""\
   @type@ @decls@;""",
 
                         type=type, decls=decls)
+
+        self.scope.pop()
 
         self.st.out("""\
 };""")
@@ -255,7 +298,7 @@ exception @id@ {""",
     def visitUnion(self, node):
         if node.constrType():
 
-            self.st.out("""\
+            self.st.out("""
 union @id@ switch (""",
                         id = node.identifier())
             self.st.inc_indent()
@@ -272,6 +315,8 @@ union @id@ switch (@stype@) {""",
 
                         id=node.identifier(), stype=stype)
 
+        self.scope.append(node.identifier())
+
         for c in node.cases():
             if c.constrType():
                 self.st.inc_indent()
@@ -284,7 +329,8 @@ union @id@ switch (@stype@) {""",
   default:""")
                 else:
                     if l.labelKind() == idltype.tk_enum:
-                        lv = "::" + idlutil.ccolonName(l.value().scopedName())
+                        lv = ccolonName(relativeScope(self.scope,
+                                                      l.value().scopedName()))
                     elif l.labelKind() == idltype.tk_char:
                         lv = "'" + repr(l.value())[1:-1] + "'"
                     else:
@@ -304,18 +350,20 @@ union @id@ switch (@stype@) {""",
                    
                    type=type, decl=decl)
 
+        self.scope.pop()
+
         self.st.out("};")
 
 
     def visitUnionForward(self, node):
-        self.st.out("""\
+        self.st.out("""
 union @id@;""", id = node.identifier())
 
     def visitEnum(self, node):
         enuml = []
         for e in node.enumerators(): enuml.append(e.identifier())
 
-        enums = string.join(enuml, ", ")
+        enums = ", ".join(enuml)
 
         self.st.out("""\
 enum @id@ {@enums@};""",
@@ -331,7 +379,7 @@ enum @id@ {@enums@};""",
         node.attrType().accept(self)
         type = self.__result_type
 
-        ids  = string.join(node.identifiers(), ", ")
+        ids  = ", ".join(node.identifiers())
 
         self.st.out("""\
 @readonly@attribute @type@ @ids@;""",
@@ -348,6 +396,8 @@ enum @id@ {@enums@};""",
         node.returnType().accept(self)
         rtype = self.__result_type
 
+        self.scope.append(node.identifier())
+
         paraml = []
         for p in node.parameters():
             if   p.is_in() and p.is_out(): inout = "inout"
@@ -357,15 +407,18 @@ enum @id@ {@enums@};""",
             type = self.__result_type
             paraml.append(inout + " " + type + " " + p.identifier())
 
-        params = string.join(paraml, ", ")
+        params = ", ".join(paraml)
+
+        self.scope.pop()
 
         if len(node.raises()) > 0:
             raisel = []
             for r in node.raises():
-                ename  = idlutil.ccolonName(r.scopedName())
+                ename  = ccolonName(relativeScope(self.scope, r.scopedName()))
+
                 raisel.append(ename)
 
-            raises = " raises (" + string.join(raisel, ", ") + ")"
+            raises = " raises (" + ", ".join(raisel) + ")"
         else:
             raises = ""
 
@@ -376,32 +429,38 @@ enum @id@ {@enums@};""",
                params=params, raises=raises)
 
     def visitNative(self, node):
-        self.st.out("""\
+        self.st.out("""
 native @id@;""",
                     id=node.identifier())
 
     def visitValue(self, node):
+        self.st.out("")
+
+        for comment in node.comments():
+            self.st.out(comment.text().strip())
+
         if node.inherits():
             inheritl = []
             for i in node.inherits():
-                inheritl.append("::" + idlutil.ccolonName(i.scopedName()))
+                inheritl.append(ccolonName(relativeScope(self.scope,
+                                                         i.scopedName())))
 
             if node.truncatable():
                 truncatable = "truncatable "
             else:
                 truncatable = ""
 
-            inherits = ": " + truncatable + string.join(inheritl, ", ") + " "
+            inherits = ": " + truncatable + ", ".join(inheritl) + " "
         else:
             inherits = ""
 
         if node.supports():
             inheritl = []
             for i in node.supports():
-                inheritl.append("::" + idlutil.ccolonName(i.scopedName()))
+                inheritl.append(ccolonName(relativeScope(self.scope,
+                                                         i.scopedName())))
 
-            inherits = (inherits + "supports " +
-                        string.join(inheritl, ", ") + " ")
+            inherits = inherits + "supports " + ", ".join(inheritl) + " "
 
         if node.custom():
             custom = "custom "
@@ -412,9 +471,13 @@ native @id@;""",
 @custom@valuetype @id@ @inherits@{""",
                     id = node.identifier(), inherits=inherits, custom=custom)
 
+        self.scope.append(node.identifier())
+
         self.st.inc_indent()
         for n in node.contents():
             n.accept(self)
+
+        self.scope.pop()
 
         self.st.dec_indent()
         self.st.out("""\
@@ -432,29 +495,35 @@ native @id@;""",
         for d in node.declarators():
             d.accept(self)
             decll.append(self.__result_declarator)
-        decls = string.join(decll, ", ")
+        decls = ", ".join(decll)
 
         self.st.out("""\
 @access@ @type@ @decls@;""",
                     access=access, type=type, decls=decls)
 
     def visitValueAbs(self, node):
+        self.st.out("")
+
+        for comment in node.comments():
+            self.st.out(comment.text().strip())
+
         if node.inherits():
             inheritl = []
             for i in node.inherits():
-                inheritl.append("::" + idlutil.ccolonName(i.scopedName()))
+                inheritl.append(ccolonName(relativeScope(self.scope,
+                                                         i.scopedName())))
 
-            inherits = ": " + string.join(inheritl, ", ") + " "
+            inherits = ": " + ", ".join(inheritl) + " "
         else:
             inherits = ""
 
         if node.supports():
             inheritl = []
             for i in node.supports():
-                inheritl.append("::" + idlutil.ccolonName(i.scopedName()))
+                inheritl.append(ccolonName(relativeScope(self.scope,
+                                                         i.scopedName())))
 
-            inherits = (inherits + "supports " +
-                        string.join(inheritl, ", ") + " ")
+            inherits = inherits + "supports " + ", ".join(inheritl) + " "
 
         self.st.out("""\
 abstract valuetype @id@ @inherits@{""",
@@ -468,7 +537,22 @@ abstract valuetype @id@ @inherits@{""",
         self.st.out("""\
 };""")
 
-    def visitValueForward(self, node):  return
+    def visitValueForward(self, node):
+        self.st.out("")
+
+        for comment in node.comments():
+            self.st.out(comment.text().strip())
+
+        if node.abstract():
+            abstract = "abstract "
+        else:
+            abstract = ""
+
+        self.st.out("""\
+@abstract@valuetype @id@;""",
+                    id = node.identifier(), abstract = abstract)
+
+        
     def visitValueBox(self, node):      return
 
     def visitFactory(self, node):       return
@@ -479,7 +563,7 @@ abstract valuetype @id@ @inherits@{""",
         for s in node.sizes():
             l.append("[" + str(s) + "]")
 
-        self.__result_declarator = string.join(l, "")
+        self.__result_declarator = "".join(l)
 
 
     ttsMap = {
@@ -533,11 +617,26 @@ abstract valuetype @id@ @inherits@{""",
             self.__result_type = "fixed"
 
     def visitDeclaredType(self, type):
-        self.__result_type = "::" + \
-                             idlutil.ccolonName(type.decl().scopedName())
+        if type.decl().scopedName() == ["CORBA", "Object"]:
+            self.__result_type = "Object"
+            return
+
+        rs = relativeScope(self.scope, type.decl().scopedName())
+        self.__result_type = ccolonName(rs)
 
 
 def run(tree, args):
+    inline = 0
+
+    for arg in args:
+        if arg == "inline":
+            inline = 1
+
+        else:
+            sys.stderr.write(main.cmdname + ": Warning: dump "
+                             "back-end does not understand argument: %s\n" %
+                             arg)
+
     st = output.Stream(sys.stdout, 2)
-    dv = DumpVisitor(st)
+    dv = DumpVisitor(st, inline)
     tree.accept(dv)

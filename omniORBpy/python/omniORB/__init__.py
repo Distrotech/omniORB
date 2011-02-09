@@ -30,7 +30,6 @@
 
 """
 omniORB module -- omniORB specific features
-
 """
 
 import sys, types, string, imp, os, os.path, tempfile, exceptions
@@ -175,6 +174,7 @@ sys.modules."""
         del sys.modules[modname]
         raise ImportError("Invalid output from omniidl")
 
+
 def importIDLString(str, args=None, inline=1):
     """importIDLString(string [, args ] [, inline ]) -> tuple
 
@@ -228,6 +228,7 @@ CORBA.BAD_INV_ORDER if the ORB has not been initialised."""
 
     return _omnipy.cdrMarshal(tc._d, data, endian)
 
+
 def cdrUnmarshal(tc, encap, endian=-1):
     """cdrUnmarshal(TypeCode, string [,endian]) -> data
 
@@ -253,6 +254,7 @@ or CORBA.BAD_INV_ORDER if the ORB has not been initialised."""
         raise TypeError("Argument 1 must be a TypeCode")
 
     return _omnipy.cdrUnmarshal(tc._d, encap, endian)
+
 
 
 WTHREAD_CREATED = 0
@@ -406,14 +408,25 @@ def newModule(mname):
 
     return mod
 
-# Function to update a module with the partial module store in the
-# partial module map
 def updateModule(mname):
+    """
+    updateModule(mname) -- update a module with a partial module
+    stored in the partial module map.
+    """
     if _partialModules.has_key(mname):
         pmod = _partialModules[mname]
         mod  = sys.modules[mname]
         mod.__dict__.update(pmod.__dict__)
         del _partialModules[mname]
+
+
+def promotePartialModule(mname):
+    """
+    promotePartialModule(mname) -- convert partial module to full
+    module in sys.modules.
+    """
+    sys.modules[mname] = _partialModules[mname]
+    del _partialModules[mname]
 
 
 def skeletonModuleName(mname):
@@ -935,12 +948,20 @@ _omnipy.registerPyObjects(omniORB)
 # Import CORBA module stubs
 import corbaidl_idl
 import boxes_idl
+import pollable_idl
+import messaging_idl
 
-sys.modules["corbaidl_idl"] = corbaidl_idl
-sys.modules["boxes_idl"]    = boxes_idl
+sys.modules["corbaidl_idl"]  = corbaidl_idl
+sys.modules["boxes_idl"]     = boxes_idl
+sys.modules["pollable_idl"]  = pollable_idl
+sys.modules["messaging_idl"] = messaging_idl
 
 # Import the Interface Repository stubs if necessary
 if os.environ.has_key("OMNIORBPY_IMPORT_IR_STUBS"):
     importIRStubs()
+
+promotePartialModule("CORBA__POA")
+promotePartialModule("Messaging")
+promotePartialModule("Messaging__POA")
 
 del omniORB

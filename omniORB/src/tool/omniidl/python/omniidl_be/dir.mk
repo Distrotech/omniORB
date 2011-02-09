@@ -9,7 +9,7 @@ export::
 	@$(NoPythonError)
 endif
 
-FILES = __init__.py dump.py example.py interactive.py
+FILES = __init__.py ami.py dump.py example.py interactive.py
 
 export:: $(FILES)
 	@(dir="$(PYLIBDIR)"; \

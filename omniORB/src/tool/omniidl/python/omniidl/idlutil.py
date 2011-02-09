@@ -3,7 +3,7 @@
 # idlutil.py                Created on: 1999/10/27
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2003-2008 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999      AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,55 +27,6 @@
 #   
 #   Utility functions
 
-# $Id$
-# $Log$
-# Revision 1.9.2.6  2008/12/03 10:57:03  dgrisby
-# Incorrect code generated for some float constants. Thanks Will Denissen.
-#
-# Revision 1.9.2.5  2008/12/03 10:53:58  dgrisby
-# Tweaks leading to Python 3 support; other minor clean-ups.
-#
-# Revision 1.9.2.4  2006/01/10 12:24:03  dgrisby
-# Merge from omni4_0_develop pre 4.0.7 release.
-#
-# Revision 1.9.2.3  2005/07/21 09:54:59  dgrisby
-# Typo in docstring.
-#
-# Revision 1.9.2.2  2005/04/08 00:35:45  dgrisby
-# Merging again.
-#
-# Revision 1.9.2.1  2003/03/23 21:01:38  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.5.2.6  2001/08/29 11:54:22  dpg1
-# Clean up const handling in IDL compiler.
-#
-# Revision 1.5.2.5  2001/08/15 10:31:23  dpg1
-# Minor tweaks and fixes.
-#
-# Revision 1.5.2.4  2001/06/13 11:28:22  dpg1
-# Proper omniidl support for wchar/wstring constants.
-#
-# Revision 1.5.2.3  2001/03/13 10:34:01  dpg1
-# Minor Python clean-ups
-#
-# Revision 1.5.2.2  2000/10/10 10:18:54  dpg1
-# Update omniidl front-end from omni3_develop.
-#
-# Revision 1.3.2.1  2000/08/29 15:20:29  dpg1
-# New relativeScope() function. New -i flag to enter interactive loop
-# after parsing
-#
-# Revision 1.3  1999/11/15 15:49:23  dpg1
-# Documentation strings.
-#
-# Revision 1.2  1999/11/01 20:18:30  dpg1
-# Added string escaping
-#
-# Revision 1.1  1999/10/29 15:47:07  dpg1
-# First revision.
-#
-
 """Utility functions for IDL compilers
 
 escapifyString()  -- return a string with non-printing characters escaped.
@@ -87,9 +38,6 @@ ccolonName()      -- format a scoped name with '::' separating components.
 pruneScope()      -- remove common prefix from a scoped name.
 relativeScope()   -- give a minimal name for one scope relative to another."""
 
-import idlstring
-string = idlstring
-
 def slashName(scopedName, our_scope=[]):
     """slashName(list, [list]) -> string
 
@@ -98,7 +46,7 @@ with the components separated by '/' characters. If a second list is
 given, remove a common prefix using pruneScope()."""
     
     pscope = pruneScope(scopedName, our_scope)
-    return string.join(pscope, "/")
+    return "/".join(pscope)
 
 def dotName(scopedName, our_scope=[]):
     """dotName(list, [list]) -> string
@@ -108,7 +56,7 @@ with the components separated by '.' characters. If a second list is
 given, remove a common prefix using pruneScope()."""
     
     pscope = pruneScope(scopedName, our_scope)
-    return string.join(pscope, ".")
+    return ".".join(pscope)
 
 def ccolonName(scopedName, our_scope=[]):
     """ccolonName(list, [list]) -> string
@@ -118,7 +66,11 @@ with the components separated by '::' strings. If a second list is
 given, remove a common prefix using pruneScope()."""
     
     pscope = pruneScope(scopedName, our_scope)
-    return string.join(pscope, "::")
+
+    if pscope[0] is None:
+        return "::" + "::".join(pscope[1:])
+    else:
+        return "::".join(pscope)
 
 def pruneScope(target_scope, our_scope):
     """pruneScope(list A, list B) -> list
@@ -127,6 +79,9 @@ Given two lists of strings (scoped names), return a copy of list A
 with any prefix it shares with B removed.
 
   e.g. pruneScope(['A', 'B', 'C', 'D'], ['A', 'B', 'D']) -> ['C', 'D']"""
+
+    if not our_scope:
+        return target_scope
 
     tscope = target_scope[:]
     i = 0
@@ -152,7 +107,7 @@ Return the given string with any non-printing characters escaped."""
     for i in range(len(l)):
         if l[i] not in _valid_chars:
             l[i] = "\\%03o" % ord(l[i])
-    return string.join(l, "")
+    return "".join(l)
 
 
 def escapifyWString(l, escchar="u"):
@@ -170,7 +125,7 @@ escapes."""
             m[i] = chr(l[i])
         else:
             m[i] = "\\%s%04x" % (escchar, l[i])
-    return string.join(m, "")
+    return "".join(m)
 
 
 def reprFloat(f):
@@ -182,7 +137,7 @@ pattern."""
     # *** Deal with long double
 
     s = "%.17g" % f
-    if string.find(s, ".") == -1 and string.find(s, "e") == -1:
+    if s.find(".") == -1 and s.find("e") == -1:
         s = s + ".0"
     return s
 
@@ -224,8 +179,16 @@ prefixed with None:
   };
 
 relativeScope(["P", "O", "J"], ["O", "C"]) -> [None, "O", "C"]
-
-If either scoped name does not exist, returns None."""
+"""
+    if not fromScope:
+        # At global scope: just use the destination scope
+        return destScope
 
     import _omniidl
-    return _omniidl.relativeScopedName(fromScope, destScope)
+    rs = _omniidl.relativeScopedName(fromScope, destScope)
+
+    if rs is None:
+        # Compiler does not know about the scopes. Globally scope.
+        return [None] + destScope
+    else:
+        return rs

@@ -3,7 +3,7 @@
 # idlast.py                 Created on: 1999/10/27
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2003-2008 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999      AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -26,107 +26,6 @@
 # Description:
 #   
 #   Python definitions for abstract syntax tree classes
-
-# $Id$
-# $Log$
-# Revision 1.20.2.9  2008/12/03 10:53:58  dgrisby
-# Tweaks leading to Python 3 support; other minor clean-ups.
-#
-# Revision 1.20.2.8  2006/06/22 13:01:50  dgrisby
-# Cut and paste error in local() method of Forward class.
-#
-# Revision 1.20.2.7  2006/01/18 19:23:17  dgrisby
-# Code generation problems with valuetype inheritance / typedefs.
-#
-# Revision 1.20.2.6  2004/10/13 17:58:26  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.20.2.5  2003/11/06 11:56:57  dgrisby
-# Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-#
-# Revision 1.20.2.4  2003/09/04 14:00:35  dgrisby
-# ValueType IDL updates.
-#
-# Revision 1.20.2.3  2003/07/10 21:54:47  dgrisby
-# Missed methods in ValueAbs.
-#
-# Revision 1.20.2.2  2003/05/20 16:53:17  dgrisby
-# Valuetype marshalling support.
-#
-# Revision 1.20.2.1  2003/03/23 21:01:39  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.15.2.7  2002/09/21 21:07:51  dgrisby
-# Support ValueBase in omniidl. (No use to omniORB yet...)
-#
-# Revision 1.15.2.6  2001/08/29 11:55:23  dpg1
-# Enumerator nodes record their value.
-#
-# Revision 1.15.2.5  2001/06/08 17:12:25  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.15.2.4  2000/11/01 15:57:03  dpg1
-# More updates for 2.4.
-#
-# Revision 1.15.2.3  2000/11/01 12:45:59  dpg1
-# Update to CORBA 2.4 specification.
-#
-# Revision 1.15.2.2  2000/10/10 10:18:54  dpg1
-# Update omniidl front-end from omni3_develop.
-#
-# Revision 1.13.2.4  2000/08/29 10:20:29  dpg1
-# Operations and attributes now have repository ids.
-#
-# Revision 1.13.2.3  2000/06/29 14:08:11  dpg1
-# Incorrect visitor method called for Value nodes.
-#
-# Revision 1.13.2.2  2000/06/08 14:36:21  dpg1
-# Comments and pragmas are now objects rather than plain strings, so
-# they can have file,line associated with them.
-#
-# Revision 1.13.2.1  2000/03/06 15:03:45  dpg1
-# Minor bug fixes to omniidl. New -nf and -k flags.
-#
-# Revision 1.13  1999/11/29 16:43:51  dpg1
-# Forgot a case in registerDecl().
-#
-# Revision 1.12  1999/11/29 15:04:47  dpg1
-# Fixed bug in clear().
-#
-# Revision 1.11  1999/11/25 11:20:33  dpg1
-# Tidy documentation changes.
-#
-# Revision 1.10  1999/11/23 09:52:11  dpg1
-# Dumb bug where maps weren't cleared between runs.
-#
-# Revision 1.9  1999/11/15 15:49:23  dpg1
-# Documentation strings.
-#
-# Revision 1.8  1999/11/11 15:55:30  dpg1
-# Python back-end interface now supports valuetype declarations.
-# Back-ends still don't support them, though.
-#
-# Revision 1.7  1999/11/02 17:07:24  dpg1
-# Changes to compile on Solaris.
-#
-# Revision 1.6  1999/11/02 10:01:46  dpg1
-# Minor fixes.
-#
-# Revision 1.5  1999/11/01 20:19:55  dpg1
-# Support for union switch types declared inside the switch statement.
-#
-# Revision 1.4  1999/11/01 16:39:01  dpg1
-# Small fixes and cosmetic changes.
-#
-# Revision 1.3  1999/11/01 10:05:01  dpg1
-# New file attribute to AST.
-#
-# Revision 1.2  1999/10/29 18:19:39  dpg1
-# Clean up
-#
-# Revision 1.1  1999/10/29 15:47:08  dpg1
-# First revision.
-#
 
 """Classes and functions for handling the IDL Abstract Syntax Tree
 

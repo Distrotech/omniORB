@@ -3,7 +3,7 @@
 # template.py               Created on: 2000/01/19
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2009 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -22,12 +22,6 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #  02111-1307, USA.
-#
-# Description:
-#   
-#   C++ templates for the SK.cc file
-
-# $Id$
 
 """C++ templates for the SK.cc file"""
 
@@ -45,7 +39,6 @@ boilerplate = """\
 #include <omniORB4/callDescriptor.h>
 #include <omniORB4/callHandle.h>
 #include <omniORB4/objTracker.h>
-@include_omniAMICallDescriptor@
 
 OMNI_USING_NAMESPACE(omni)
 

@@ -104,6 +104,7 @@ minorCodeLookup NO_RESOURCES_LookupTable[] = {
 };
 
 minorCodeLookup NO_RESPONSE_LookupTable[] = { 
+  DECLARE_NO_RESPONSE_minors(DeclareLookupEntry,OMNI_COMMA),
   { 0, 0 } 
 };
 

@@ -26,6 +26,22 @@ boxes_idl.py: boxes.idl
         -I$(DATADIR)/idl/omniORB \
         -bpython -nf -Wbno_package $^
 
+pollable_idl.py: pollable.idl
+	$(OMNIIDL) -v -p$(BASE_OMNI_TREE)/omniidl_be \
+        -I$(BASE_OMNI_TREE)/idl \
+        -I$(OMNIORB_ROOT)/idl/omniORB \
+        -I$(OMNIORB_ROOT)/share/idl/omniORB \
+        -I$(DATADIR)/idl/omniORB \
+        -bpython -nf -Wbno_package $^
+
+messaging_idl.py: messaging.idl
+	$(OMNIIDL) -v -p$(BASE_OMNI_TREE)/omniidl_be \
+        -I$(BASE_OMNI_TREE)/idl \
+        -I$(OMNIORB_ROOT)/idl/omniORB \
+        -I$(OMNIORB_ROOT)/share/idl/omniORB \
+        -I$(DATADIR)/idl/omniORB \
+        -bpython -nf -Wbno_package $^
+
 minorfile := $(shell file="$(INCDIR)/omniORB4/minorCode.h"; \
                dirs="$(IMPORT_TREES)"; \
                $(FindFileInDirs); \
@@ -40,13 +56,15 @@ endif
 minorCodes.py: $(minorfile)
 	$(PYTHON) $(MAKEMINORS) $^ $@
 
-all:: corbaidl_idl.py ir_idl.py boxes_idl.py minorCodes.py
+all:: corbaidl_idl.py ir_idl.py boxes_idl.py pollable_idl.py messaging_idl.py \
+      minorCodes.py
 
 
 FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
         tcInternal.py URI.py codesets.py any.py BiDirPolicy.py \
-        interceptors.py corbaidl_idl.py ir_idl.py boxes_idl.py minorCodes.py \
-        omniConnectionMgmt.py
+        interceptors.py corbaidl_idl.py ir_idl.py boxes_idl.py \
+	pollable_idl.py messaging_idl.py \
+	minorCodes.py omniConnectionMgmt.py
 
 ifdef OPEN_SSL_ROOT
 FILES += sslTP.py
@@ -62,6 +80,7 @@ export:: $(FILES)
 	 )
 
 ifdef INSTALLTARGET
+
 install:: $(FILES)
 	@(dir="$(INSTALLPYLIBDIR)"; \
           for file in $^; do \
