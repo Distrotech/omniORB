@@ -158,12 +158,12 @@ CORBA::Policy_ptr createPolicyObject(PortableServer::POA_ptr poa,
   PyObject* pyvalue  = PyObject_GetAttrString(pypolicy, (char*)"_value");
   PyObject* pyivalue = 0;
 
-  if (PyInstance_Check(pyvalue)) {
-    pyivalue = PyObject_GetAttrString(pyvalue, (char*)"_v");
-  }
-  else {
+  if (PyInt_Check(pyvalue)) {
     Py_INCREF(pyvalue);
     pyivalue = pyvalue;
+  }
+  else {
+    pyivalue = PyObject_GetAttrString(pyvalue, (char*)"_v");
   }
 
   if (pyptype && PyInt_Check(pyptype) &&

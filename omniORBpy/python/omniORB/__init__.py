@@ -778,9 +778,17 @@ def coerceAny(v, fd, td):
 
 # Support for _is_a()
 def static_is_a(cls, repoId):
-    if cls._NP_RepositoryId == repoId: return 1
+    try:
+        if cls._NP_RepositoryId == repoId:
+            return 1
+
+    except AttributeError:
+        return 0
+    
     for b in cls.__bases__:
-        if static_is_a(b, repoId): return 1
+        if static_is_a(b, repoId):
+            return 1
+
     return 0
 
 
