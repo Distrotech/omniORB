@@ -30,7 +30,8 @@
 """omniORB Python bindings"""
 
 from omniidl import idlast, idltype, idlutil, idlvisitor, output, main
-import sys, string, types, os.path, keyword
+import sys, os.path, keyword
+import string  # for maketrans
 
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
 usage_string = """\
@@ -616,15 +617,13 @@ def run(tree, args):
 
         elif arg[:6] == "stubs=":
             stub_package   = arg[6:]
-            stub_directory = apply(os.path.join,
-                                   string.split(stub_package, "."))
+            stub_directory = os.path.join(*(stub_package.split(".")))
             if stub_package != "":
                 stub_package = stub_package + "."
 
         elif arg[:8] == "package=":
             module_package = stub_package = arg[8:]
-            stub_directory = apply(os.path.join,
-                                   string.split(stub_package, "."))
+            stub_directory = os.path.join(*(stub_package.split(".")))
             if module_package != "":
                 module_package = stub_package = module_package + "."
 
@@ -637,7 +636,7 @@ def run(tree, args):
             example_impl = 1
 
         elif arg[:7] == "extern=":
-            f_p = string.split(arg[7:], ":", 1)
+            f_p = arg[7:].split(":", 1)
             if len(f_p) == 1:
                 extern_stub_pkgs[f_p[0]] = None
             else:
@@ -685,9 +684,11 @@ def run(tree, args):
 
     exports = exported_modules.keys()
     exports.sort()
-    export_list = map(lambda s: '"' + module_package + s + '"', exports)
-    if len(export_list) == 1: export_list.append("")
-    export_string = string.join(export_list, ", ")
+    export_list = [ '"%s%s"' % (module_package, s) for s in exports ]
+    if len(export_list) == 1:
+        export_list.append("")
+
+    export_string = ", ".join(export_list)
 
     st.out(file_end, export_string=export_string)
 
@@ -869,7 +870,7 @@ class PythonVisitor:
                 i = i.fullDecl()
                 inheritl.append(dotName(fixupScopedName(i.scopedName())))
             
-            inherits = "(" + string.join(inheritl, ", ") + ")"
+            inherits = "(" + ", ".join(inheritl) + ")"
         else:
             inherits = ""
 
@@ -954,7 +955,7 @@ class PythonVisitor:
                 sn = fixupScopedName(i.scopedName())
                 inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
                 
-            inherits = string.join(inheritl, ", ")
+            inherits = ", ".join(inheritl)
         else:
             inherits = "CORBA.Object"
 
@@ -1010,7 +1011,7 @@ class PythonVisitor:
                 methodl.append('"' + opname + '"')
 
         # __methods__ assignment
-        methods = "[" + string.join(methodl, ", ") + "]"
+        methods = "[" + ", ".join(methodl) + "]"
 
         if node.inherits():
             inheritl = []
@@ -1038,7 +1039,7 @@ class PythonVisitor:
                 ssn = skeletonModuleName(dsn)
                 inheritl.append(ssn)
                 
-            inherits = string.join(inheritl, ", ")
+            inherits = ", ".join(inheritl)
         else:
             inherits = "PortableServer.Servant"
 
@@ -1074,7 +1075,7 @@ class PythonVisitor:
                 methodl.append('"' + opname + '": ' + '_0_' + self.modname +
                                '.' + ifid + '.' + '_d_' + m_opname)
 
-        methodmap = "{" + string.join(methodl, ", ") + "}"
+        methodmap = "{" + ", ".join(methodl) + "}"
 
         self.st.out(skeleton_methodmap, methodmap = methodmap)
 
@@ -1265,7 +1266,7 @@ class PythonVisitor:
                                                       decl,
                                                       self.currentScope))
         if len(mnamel) > 0:
-            mnames = ", " + string.join(mnamel, ", ")
+            mnames = ", " + ", ".join(mnamel)
 
             self.st.out(struct_class_init, mnames = mnames)
 
@@ -1273,7 +1274,7 @@ class PythonVisitor:
                 self.st.out(struct_init_member, mname = mname)
 
         if len(mdescl) > 0:
-            mdescs = ", " + string.join(mdescl, ", ")
+            mdescs = ", " + ", ".join(mdescl)
         else:
             mdescs = ""
 
@@ -1363,7 +1364,7 @@ class PythonVisitor:
                                                       self.currentScope))
 
         if len(mnamel) > 0:
-            mnames = ", " + string.join(mnamel, ", ")
+            mnames = ", " + ", ".join(mnamel)
         else:
             mnames = ""
 
@@ -1373,7 +1374,7 @@ class PythonVisitor:
             self.st.out(exception_init_member, mname = mname)
 
         if len(mdescl) > 0:
-            mdescs = ", " + string.join(mdescl, ", ")
+            mdescs = ", " + ", ".join(mdescl)
         else:
             mdescs = ""
 
@@ -1506,10 +1507,10 @@ class PythonVisitor:
                                        uname + "[" + str(i) + "]")
                 i = i + 1
 
-        m_to_d = string.join(m_to_d_l, ", ")
-        d_to_m = string.join(d_to_m_l, ", ")
-        m_un   = string.join(m_un_l,   ", ")
-        d_map  = string.join(d_map_l,  ", ")
+        m_to_d = ", ".join(m_to_d_l)
+        d_to_m = ", ".join(d_to_m_l)
+        m_un   = ", ".join(m_un_l)
+        d_map  = ", ".join(d_map_l)
 
         if self.at_module_scope:
             self.st.out(union_descriptor_at_module_scope,
@@ -1596,7 +1597,7 @@ class PythonVisitor:
 
             i = i + 1
 
-        eitems = string.join(elist, ", ")
+        eitems = ", ".join(elist)
 
         if self.at_module_scope:
             self.st.out(enum_object_and_descriptor_at_module_scope,
@@ -1650,7 +1651,7 @@ class PythonVisitor:
                 i = i.fullDecl()
                 inheritl.append(dotName(fixupScopedName(i.scopedName())))
             
-            inherits = string.join(inheritl, ", ")
+            inherits = ", ".join(inheritl)
         else:
             inherits = "_0_CORBA.ValueBase"
 
@@ -1706,7 +1707,7 @@ class PythonVisitor:
             inheritl.append(dn)
             skeleton_opl.append(dn)
 
-        inherits = string.join(inheritl, ", ")
+        inherits = ", ".join(inheritl)
 
         # Go up the chain of inherited interfaces, picking out the
         # state members
@@ -1739,7 +1740,7 @@ class PythonVisitor:
                                 (mangle(d.identifier()),i))
 
         if set_argl:
-            set_args = string.join(set_argl, "\n")
+            set_args = "\n".join(set_argl)
         else:
             set_args = "pass"
 
@@ -1808,14 +1809,14 @@ class PythonVisitor:
                 methodl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]) +
                                ".__methods__")
                 
-            inherits = string.join(inheritl, ", ")
+            inherits = ", ".join(inheritl)
 
             self.st.out(objref_class, ifid=vname, inherits=inherits)
 
             for inclass in inheritl:
                 self.st.out(objref_inherit_init, inclass=inclass)
 
-            methods = string.join(methodl, " + ")
+            methods = " + ".join(methodl)
             self.st.out(objref_methods, methods = methods)
 
             # registerObjRef()
@@ -1849,8 +1850,7 @@ class PythonVisitor:
             cnode = i
 
         if tbasel:
-            tbaseids = "(%s._NP_RepositoryId, %s)" % (vname,
-                                                     string.join(tbasel, ", "))
+            tbaseids = "(%s._NP_RepositoryId, %s)" % (vname, ", ".join(tbasel))
         else:
             tbaseids = "None"
 
@@ -1876,7 +1876,7 @@ class PythonVisitor:
                 else:
                     mlist.append("_0_CORBA.PUBLIC_MEMBER")
                     
-        mdescs = string.join(mlist, ", ")
+        mdescs = ", ".join(mlist)
         self.st.out(value_descriptor_at_module_scope,
                     vname=vname, modifier=modifier, tbaseids=tbaseids,
                     basedesc=basedesc, mdescs=mdescs, modname=self.modname)
@@ -2130,15 +2130,15 @@ class ExampleVisitor (idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                                  p.identifier()))
 
                 signature = "%s %s(%s)" % (rettype, c.identifier(),
-                                           string.join(siglist, ", "))
+                                           ", ".join(siglist))
 
                 if innames:
-                    args = ", " + string.join(innames, ", ")
+                    args = ", " + ", ".join(innames)
                 else:
                     args = ""
 
                 if outnames:
-                    returnspec = string.join(outnames, ", ")
+                    returnspec = ", ".join(outnames)
                 else:
                     returnspec = "None"
 
@@ -2224,11 +2224,11 @@ def operationToDescriptors(op):
     if len(indl)  == 1: indl.append("")
     if len(outdl) == 1: outdl.append("")
 
-    inds = "(" + string.join(indl, ", ") + ")"
+    inds = "(" + ", ".join(indl) + ")"
     if op.oneway():
         outds = "None"
     else:
-        outds = "(" + string.join(outdl, ", ") + ")"
+        outds = "(" + ", ".join(outdl) + ")"
 
     # Exceptions
     excl = []
@@ -2240,12 +2240,12 @@ def operationToDescriptors(op):
         excl.append(ename + "._NP_RepositoryId: " + edesc)
 
     if len(excl) > 0:
-        excs = "{" + string.join(excl, ", ") + "}"
+        excs = "{" + ", ".join(excl) + "}"
     else:
         excs = "None"
 
     if op.contexts():
-        ctxts = "[" + string.join(map(repr, op.contexts()), ", ") + "]"
+        ctxts = "[" + ", ".join(map(repr, op.contexts())) + "]"
     else:
         ctxts = None
 
@@ -2303,7 +2303,6 @@ def typeToDescriptor(tspec, from_scope=[], is_typedef=0):
               str(tspec.digits()) + ", " + str(tspec.scale()) + ")"
 
     elif tspec.kind() == idltype.tk_alias:
-        sn = fixupScopedName(tspec.scopedName())
         if is_typedef:
             return 'omniORB.typeCodeMapping["%s"]._d' % tspec.decl().repoId()
         else:
@@ -2330,16 +2329,16 @@ def typeAndDeclaratorToDescriptor(tspec, decl, from_scope, is_typedef=0):
 def skeletonModuleName(mname):
     """Convert a scoped name string into the corresponding skeleton
 module name. e.g. M1.M2.I -> M1__POA.M2.I"""
-    l = string.split(mname, ".")
+    l = mname.split(".")
     l[0] = l[0] + "__POA"
-    return string.join(l, ".")
+    return ".".join(l)
 
 def dotName(scopedName, our_scope=[]):
     if scopedName[:len(our_scope)] == our_scope:
         l = map(mangle, scopedName[len(our_scope):])
     else:
         l = map(mangle, scopedName)
-    return string.join(l, ".")
+    return ".".join(l)
 
 def mangle(name):
     if keyword.iskeyword(name): return "_" + name
@@ -2393,7 +2392,7 @@ __translate_table = string.maketrans(" -.,", "____")
 
 def outputFileName(idlname):
     global __translate_table
-    return string.translate(os.path.basename(idlname), __translate_table)
+    return os.path.basename(idlname).translate(__translate_table)
 
 def checkStubPackage(package):
     """Check the given package name for use as a stub directory
@@ -2408,7 +2407,7 @@ def checkStubPackage(package):
         package = package[:-1]
 
     path = ""
-    for name in string.split(package, "."):
+    for name in package.split("."):
         path = os.path.join(path, name)
         
         if os.path.exists(path):
@@ -2449,8 +2448,8 @@ def updateModules(modules, pymodule):
 def real_updateModules(modules, pymodule):
 
     for module in modules:
-        modlist = string.split(module_package, ".") + string.split(module, ".")
-        modpath = apply(os.path.join, modlist)
+        modlist = module_package.split(".") + module.split(".")
+        modpath = os.path.join(*modlist)
         modfile = os.path.join(modpath, "__init__.py")
         tmpfile = os.path.join(modpath, "new__init__.py")
 
@@ -2538,14 +2537,14 @@ def real_updateModules(modules, pymodule):
 
     # Go round again, importing sub-modules from their parent modules
     for module in modules:
-        modlist = string.split(module, ".")
+        modlist = module.split(".")
 
         if len(modlist) == 1:
             continue
 
-        modlist = string.split(module_package, ".") + modlist
+        modlist = module_package.split(".") + modlist
         submod  = modlist[-1]
-        modpath = apply(os.path.join, modlist[:-1])
+        modpath = os.path.join(*modlist[:-1])
         modfile = os.path.join(modpath, "__init__.py")
         tmpfile = os.path.join(modpath, "new__init__.py")
 

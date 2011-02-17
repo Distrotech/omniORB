@@ -1,3 +1,11 @@
+Thu Feb 17 12:49:03 GMT 2011 dgrisby
+====================================
+
+- omniidl Python clean-up and reorg. Now require Python 2.x.
+
+omniidl_be/python.py
+
+
 Sat Feb 12 19:44:40 GMT 2011 dgrisby
 ====================================
 
