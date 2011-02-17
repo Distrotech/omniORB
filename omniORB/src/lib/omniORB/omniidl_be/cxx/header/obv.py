@@ -3,7 +3,7 @@
 # obv.py                    Created on: 2003/10/08
 #			    Author    : Duncan Grisby
 #
-#    Copyright (C) 2003-2004 Apasphere Ltd.
+#    Copyright (C) 2003-2011 Apasphere Ltd.
 #
 #  This file is part of omniidl.
 #
@@ -23,36 +23,24 @@
 #  02111-1307, USA.
 #
 # Description:
-#
-#   Produce the main header OBV definitions for the C++ backend
-
-# $Id$
-# $Log$
-# Revision 1.1.2.3  2004/10/13 17:58:24  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.1.2.2  2003/11/06 11:56:56  dgrisby
-# Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-#
-# Revision 1.1.2.1  2003/10/23 11:25:55  dgrisby
-# More valuetype support.
-#
 
 """Produce the main header OBV definitions for the C++ backend"""
 
 import string
 
-from omniidl import idlast, idltype, idlutil
-from omniidl_be.cxx import id,  config, ast
-from omniidl_be.cxx.header import tie, template
+from omniidl_be.cxx import id, config, ast
+from omniidl_be.cxx.header import template
 
 import obv
-
 self = obv
 
-def __init__(stream):
+stream = None
+
+def init(s):
+    global stream
+    stream = s
+    
     self.__nested = 0
-    obv.stream = stream
     return obv
 
 

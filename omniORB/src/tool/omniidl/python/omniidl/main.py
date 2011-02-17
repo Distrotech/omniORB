@@ -101,8 +101,7 @@ if sys.hexversion < 0x10502f0:
 import _omniidl
 import getopt, os, os.path
 
-import idlast, idltype, idlstring
-string = idlstring
+import idlast, idltype
 
 cmdname = "omniidl"
 
@@ -182,10 +181,10 @@ else:
     else:
         preprocessor_path = os.path.dirname(sys.argv[0])
 
-    names = string.split(preprocessor_path, "/")
+    names = preprocessor_path.split("/")
     preprocessor_cmd = \
          '''mcr %s:[%s]omnicpp -lang-c++ -undef "-D__OMNIIDL__=%s"'''\
-         % (names[1], string.join(names[2:],"."), _omniidl.version)
+         % (names[1], ".".join(names[2:]), _omniidl.version)
 
 no_preprocessor   = 0
 backends          = []
@@ -240,14 +239,14 @@ def parseArgs(args):
 
         elif o == "-W":
             if a[0] == "p":
-              preprocessor_args.extend(string.split(a[1:], ","))
+                preprocessor_args.extend(a[1:].split(","))
             elif a[0] == "b":
                 if len(backends) == 0:
                     if not quiet:
                         sys.stderr.write(cmdname + ": Error in arguments: "
                                          "no back-ends selected\n")
                     sys.exit(1)
-                backends_args[-1].extend(string.split(a[1:], ","))
+                backends_args[-1].extend(a[1:].split(","))
             else:
                 if not quiet:
                     sys.stderr.write("Error in arguments: option " + o + \
@@ -336,7 +335,7 @@ def genTempFileName():
 
 def my_import(name):
     mod = __import__(name)
-    components = string.split(name, ".")
+    components = name.split(".")
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
@@ -424,11 +423,11 @@ def main(argv=None):
 
         if sys.platform != 'OpenVMS' or len(preprocessor_args)==0:
             preproc_cmd = '%s %s "%s"' % (preprocessor_cmd,
-                                          string.join(preprocessor_args, ' '),
+                                          " ".join(preprocessor_args),
                                           name)
         else:
             preproc_cmd = '%s "%s" %s' % (preprocessor_cmd,
-                                          string.join(preprocessor_args,'" "'),
+                                          '" "'.join(preprocessor_args),
                                           name)
         if not no_preprocessor:
             if verbose:

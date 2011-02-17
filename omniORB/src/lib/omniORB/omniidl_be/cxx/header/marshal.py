@@ -31,17 +31,18 @@
 """Produce the main header alignment and marshal function definitions
   for the C++ backend"""
 
-from omniidl import idlast, idltype, idlutil
-from omniidl_be.cxx import config, id, ast
+from omniidl_be.cxx import ast, id
 from omniidl_be.cxx.header import template
 
 import marshal
-
 self = marshal
 
-def __init__(stream):
-    marshal.stream = stream
-    return marshal
+stream = None
+
+def init(s):
+    global stream
+    stream = s
+    return self
 
 # Control arrives here
 #

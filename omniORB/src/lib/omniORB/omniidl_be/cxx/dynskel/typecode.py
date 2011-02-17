@@ -3,7 +3,7 @@
 # typecode.py               Created on: 1999/12/2
 #                           Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2006 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -22,163 +22,19 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #  02111-1307, USA.
-#
-# Description:
-#   
-#   Produces the instances of CORBA::TypeCode
-
-# $Id$
-# $Log$
-# Revision 1.19.2.10  2006/11/28 00:07:57  dgrisby
-# TypeCodes for nested structures / unions were not exported.
-#
-# Revision 1.19.2.9  2005/11/09 12:22:17  dgrisby
-# Local interfaces support.
-#
-# Revision 1.19.2.8  2005/08/16 13:51:21  dgrisby
-# Problems with valuetype / abstract interface C++ mapping.
-#
-# Revision 1.19.2.7  2004/10/13 17:58:23  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.19.2.6  2004/07/31 23:45:44  dgrisby
-# ifdef for forward declared union typecodes.
-#
-# Revision 1.19.2.5  2004/07/04 23:53:38  dgrisby
-# More ValueType TypeCode and Any support.
-#
-# Revision 1.19.2.4  2004/04/02 13:26:22  dgrisby
-# Start refactoring TypeCode to support value TypeCodes, start of
-# abstract interfaces support.
-#
-# Revision 1.19.2.3  2004/02/16 10:10:31  dgrisby
-# More valuetype, including value boxes. C++ mapping updates.
-#
-# Revision 1.19.2.2  2003/10/23 11:25:55  dgrisby
-# More valuetype support.
-#
-# Revision 1.19.2.1  2003/03/23 21:02:39  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.16.2.8  2001/11/14 17:13:43  dpg1
-# Long double support.
-#
-# Revision 1.16.2.7  2001/10/29 17:42:39  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.16.2.6  2001/06/08 17:12:16  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.16.2.5  2001/03/13 10:32:08  dpg1
-# Fixed point support.
-#
-# Revision 1.16.2.4  2000/11/20 14:43:24  sll
-# Added support for wchar and wstring.
-#
-# Revision 1.16.2.3  2000/11/09 12:27:55  dpg1
-# Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-#
-# Revision 1.16.2.2  2000/10/12 15:37:50  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.17.2.2  2000/08/21 11:35:08  djs
-# Lots of tidying
-#
-# Revision 1.17.2.1  2000/08/04 17:10:29  dpg1
-# Long long support
-#
-# Revision 1.17  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.14.2.7  2000/07/03 14:56:43  djs
-# Fixed bug generating typecodes for struct members which are anonymous
-# sequences.
-#
-# Revision 1.14.2.6  2000/06/26 16:23:27  djs
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.14.2.5  2000/05/04 14:35:12  djs
-# Added new flag splice-modules which causes all continuations to be output
-# as one lump. Default is now to output them in pieces following the IDL.
-#
-# Revision 1.14.2.4  2000/04/26 18:22:20  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.14.2.3  2000/03/23 15:31:10  djs
-# Failed to handle recursive unions properly where the cycle had more
-# than one node (didn't use recursion detection functions everywhere it
-# should have)
-#
-# Revision 1.14.2.2  2000/03/09 15:21:48  djs
-# Better handling of internal compiler exceptions (eg attempts to use
-# wide string types)
-#
-# Revision 1.14.2.1  2000/02/14 18:34:55  dpg1
-# New omniidl merged in.
-#
-# Revision 1.14  2000/01/20 18:26:45  djs
-# Moved large C++ output strings into an external template file
-#
-# Revision 1.13  2000/01/19 09:35:48  djs
-# *** empty log message ***
-#
-# Revision 1.12  2000/01/17 17:07:29  djs
-# Better handling of recursive types
-#
-# Revision 1.11  2000/01/13 18:16:35  djs
-# A little formatting
-#
-# Revision 1.10  2000/01/13 15:56:35  djs
-# Factored out private identifier prefix rather than hard coding it all through
-# the code.
-#
-# Revision 1.9  2000/01/13 14:16:25  djs
-# Properly clears state between processing separate IDL input files
-#
-# Revision 1.8  2000/01/11 11:33:55  djs
-# Tidied up
-#
-# Revision 1.7  2000/01/07 20:31:24  djs
-# Regression tests in CVSROOT/testsuite now pass for
-#   * no backend arguments
-#   * tie templates
-#   * flattened tie templates
-#   * TypeCode and Any generation
-#
-# Revision 1.6  1999/12/26 16:41:28  djs
-# Fix to output TypeCode information on Enums #included from another IDL
-# file. Mimics behaviour of the old BE
-#
-# Revision 1.5  1999/12/24 18:16:39  djs
-# Array handling and TypeCode building fixes (esp. across multiple files)
-#
-# Revision 1.4  1999/12/16 16:10:05  djs
-# Fix to make the output order consistent with the old compiler
-#
-# Revision 1.3  1999/12/14 11:51:53  djs
-# Support for CORBA::TypeCode, CORBA::Any and CORBA::Object
-#
-# Revision 1.2  1999/12/10 18:26:36  djs
-# Moved most #ifdef buildDesc code into a separate module
-# General tidying up
-#
-# Revision 1.1  1999/12/09 20:40:14  djs
-# TypeCode and Any generation option performs identically to old compiler for
-# all current test fragments.
-#
 
 """Produces the instances of CORBA::TypeCode"""
 
-import string, re
-
 from omniidl import idlast, idltype, idlutil
-from omniidl_be.cxx import cxx, ast, output, util, config, types, id
-from omniidl_be.cxx.dynskel import tcstring, template
+from omniidl_be.cxx import ast, output, util, config, types, id
+from omniidl_be.cxx.dynskel import template
 
 import typecode
-
 self = typecode
+
+stream     = None
+tophalf    = None
+bottomhalf = None
 
 # For a given type declaration, creates (private) static instances of
 # CORBA::TypeCode_ptr for that type, and any necessary for contained
@@ -207,7 +63,7 @@ self = typecode
 class NameAlreadyDefined:
     def __str__(self):
         return "Name has already been defined in this scope/block/file/section"
-    pass
+
 
 # returns true if the name has already been defined, and need not be defined
 # again.
@@ -252,8 +108,10 @@ def currently_being_defined(node):
 def recursive_Depth(node):
     return len(self.__currentNodes) - self.__currentNodes.index(node)
 
-def __init__(stream):
+
+def init(stream):
     self.stream = stream
+
     # declarations are built in two halves, this is to allow us
     # to keep the same order as the old backend. It could be simpler.
     self.tophalf = stream
@@ -278,6 +136,7 @@ def __init__(stream):
     
     return self
 
+
 # Places TypeCode symbol in appropriate namespace with a non-static const
 # declaration (performs MSVC workaround)
 def external_linkage(decl, mangled_name = ""):
@@ -288,12 +147,12 @@ def external_linkage(decl, mangled_name = ""):
     if self.__resolving_dependency:
         return
 
-    where = bottomhalf
-    scopedName = id.Name(decl.scopedName())
-    scope = scopedName.scope()
-    tc_name = scopedName.prefix("_tc_")
+    where            = bottomhalf
+    scopedName       = id.Name(decl.scopedName())
+    scope            = scopedName.scope()
+    tc_name          = scopedName.prefix("_tc_")
     tc_unscoped_name = tc_name.simple()
-    tc_name = tc_name.fullyQualify()
+    tc_name          = tc_name.fullyQualify()
 
     if mangled_name == "":
         mangled_name = mangleName(config.state['Private Prefix'] + "_tc_",
@@ -301,9 +160,8 @@ def external_linkage(decl, mangled_name = ""):
 
     if alreadyDefined(tc_name):
         return
-    defineName(tc_name)
 
-    global_scope = len(scope) == 0
+    defineName(tc_name)
 
     # Needs the workaround if directly inside a module
     if not self.__immediatelyInsideModule:
@@ -349,7 +207,6 @@ def mkTypeCode(type, declarator = None, node = None):
         return pre_str + mkTypeCode(type, None, node) + post_str
 
     type = type.type()
-    
 
     basic = {
         idltype.tk_short:      "short",
@@ -368,13 +225,12 @@ def mkTypeCode(type, declarator = None, node = None):
         idltype.tk_ulonglong:  "ulonglong",
         idltype.tk_longdouble: "longdouble"
         }
+
     if basic.has_key(type.kind()):
         return prefix + basic[type.kind()] + "_tc()"
 
     if isinstance(type, idltype.Base):
         util.fatalError("Internal error generating TypeCode data")
-        raise AssertionError("Don't know how to generate TypeCode for"
-                             "Base kind = " + repr(type.kind()))
 
     if isinstance(type, idltype.String):
         return prefix + "string_tc(" + str(type.bound()) + tctrack + ")"
@@ -450,7 +306,8 @@ def visitAST(node):
 
 
 def visitModule(node):
-    slash_scopedName = string.join(node.scopedName(), '/')
+    slash_scopedName = '/'.join(node.scopedName())
+
     if self.__completedModules.has_key(slash_scopedName):
         return
     self.__completedModules[slash_scopedName] = 1
@@ -463,7 +320,7 @@ def visitModule(node):
 
     # Treat a reopened module as if it had been defined all at once
     for c in node.continuations():
-        slash_scopedName = string.join(c.scopedName(), '/')
+        slash_scopedName = '/'.join(c.scopedName())
         self.__completedModules[slash_scopedName] = 1
         for n in c.definitions():
             n.accept(self)
@@ -496,7 +353,7 @@ def buildMembersStructure(node):
         struct.out("""\
 static CORBA::PR_structMember @mangled_name@[] = {
   @members@
-};""", members = string.join(array, ",\n"), mangled_name = mangled_name)
+};""", members = ",\n".join(array), mangled_name = mangled_name)
 
     return struct
 
@@ -536,6 +393,7 @@ def visitStruct(node):
 
         if isinstance(memberType, idltype.Declared):
             memberType.decl().accept(self)
+
         elif isinstance(memberType, idltype.Sequence):
             # anonymous sequence (maybe sequence<sequence<...<T>>>)
             # Find the ultimate base type, and if it's user declared then
@@ -555,8 +413,8 @@ def visitStruct(node):
     tophalf.out(str(buildMembersStructure(node)))
 
     scopedName = node.scopedName()
-    mangled_name = mangleName(config.state['Private Prefix'] +\
-                              "_tc_", scopedName)
+    mangled_name = mangleName(config.state['Private Prefix'] + "_tc_",
+                              scopedName)
     if not alreadyDefined(mangled_name):
         # only define the name once
 
@@ -565,9 +423,7 @@ def visitStruct(node):
         structmember_mangled_name =\
                                   mangleName(config.state['Private Prefix'] + \
                                              "_structmember_", scopedName)
-        assert alreadyDefined(structmember_mangled_name), \
-               "The name \"" + structmember_mangled_name + \
-               "\" should be defined by now"
+        assert alreadyDefined(structmember_mangled_name)
     
         num = numMembers(node)
         repoID = node.repoId()
@@ -587,11 +443,12 @@ static CORBA::TypeCode_ptr @mangled_name@ = CORBA::TypeCode::PR_struct_tc("@repo
     self.__immediatelyInsideModule = insideModule
 
     external_linkage(node)
+
     # restore the old bottom half
     oldbottomhalf.out(str(self.bottomhalf))
     self.bottomhalf = oldbottomhalf
     finishingNode()
-    return
+
 
 def visitStructForward(node):
     scopedName = node.scopedName()
@@ -611,6 +468,7 @@ static CORBA::TypeCode_ptr @fmangled_name@ = CORBA::TypeCode::PR_forward_tc("@re
                     fmangled_name = fmangled_name,
                     repoId = node.repoId(),
                     pprefix=config.state['Private Prefix'])
+
 
 def visitUnion(node):
     scopedName = node.scopedName()
@@ -657,6 +515,7 @@ def visitUnion(node):
 
         if isinstance(caseType.type(), idltype.Declared):
             caseType.type().decl().accept(self)
+
         elif caseType.sequence():
             # anonymous sequence
             seqType = caseType.type().seqType()
@@ -678,7 +537,9 @@ def visitUnion(node):
                 hasDefault = numlabels
             else:
                 label = switchType.literal(l.value())
-            array.append( "{\"" + case_name + "\", " + typecode + ", " + label + "}")
+
+            array.append("{\"" + case_name + "\", " + typecode +
+                         ", " + label + "}")
             numlabels = numlabels + 1
 
 
@@ -686,7 +547,7 @@ def visitUnion(node):
     repoID = node.repoId()
 
     union_name = id.Name(scopedName).simple()
-    unionmember_mangled_name = mangleName(config.state['Private Prefix'] + \
+    unionmember_mangled_name = mangleName(config.state['Private Prefix'] +
                                           "_unionMember_", scopedName)
     
     default_str = ""
@@ -710,7 +571,7 @@ static CORBA::TypeCode_ptr @mangled_name@ = CORBA::TypeCode::PR_union_tc("@repoI
                 name = union_name,
                 labels = str(numlabels),
                 default_str = default_str,
-                members = string.join(array, ",\n"),
+                members = ",\n".join(array),
                 pprefix = config.state['Private Prefix'])
     
     defineName(unionmember_mangled_name)
@@ -725,6 +586,7 @@ static CORBA::TypeCode_ptr @mangled_name@ = CORBA::TypeCode::PR_union_tc("@repoI
     self.bottomhalf = oldbottomhalf
 
     finishingNode()
+
 
 def visitUnionForward(node):
     scopedName = node.scopedName()
@@ -758,14 +620,15 @@ def visitEnum(node):
 
     names = []
     for enumerator in enumerators:
-        names.append("\"" + id.Name(enumerator.scopedName()).simple(cxx=0) + "\"")
+        names.append('"' + id.Name(enumerator.scopedName()).simple(cxx=0) +
+                     '"')
 
     enum_name = id.Name(scopedName).simple()
     
     repoID = node.repoId()
 
     tc_name = id.Name(scopedName).prefix("_tc_").fullyQualify()
-    enummember_mangled_name = mangleName(config.state['Private Prefix'] + \
+    enummember_mangled_name = mangleName(config.state['Private Prefix'] +
                                          "_enumMember_", scopedName)
 
     tophalf.out("""\
@@ -773,7 +636,7 @@ static const char* @enummember_mangled_name@[] = { @elements@ };
 static CORBA::TypeCode_ptr @mangled_name@ = CORBA::TypeCode::PR_enum_tc("@repoID@", "@name@", @enummember_mangled_name@, @numcases@, &@pprefix@_tcTrack);""",
                 enummember_mangled_name = enummember_mangled_name,
                 mangled_name = mangled_name,
-                elements = string.join(names, ", "),
+                elements = ", ".join(names),
                 repoID = repoID,
                 name = enum_name,
                 numcases = str(len(names)),
@@ -795,9 +658,10 @@ def visitInterface(node):
     # cause a minor (non fatal) problem with ordering of the outputted
     # declarations. This check only serves to correct this cosmetic flaw
     # and make the output of the new system identical to the old one.
-    if hasattr(node, "already_been_here"):
+    if hasattr(node, "typecode_already_been_here"):
         return
-    node.already_been_here = 1
+
+    node.typecode_already_been_here = 1
 
     startingNode(node)
 
@@ -819,8 +683,6 @@ def visitInterface(node):
 
     typecode = 'CORBA::TypeCode::' + func + '("' + repoID + '", "' +\
                iname + '", &' + config.state['Private Prefix'] + '_tcTrack)'
-
-    node.accept(tcstring)
 
 
     external_linkage(node, typecode)
@@ -848,6 +710,7 @@ def recurse(type, constr=0):
             self.__resolving_dependency = 1
             base_decl.accept(self)
             self.__resolving_dependency = save_resolving_dependency
+
         elif types.Type(seqType).sequence():
             # anonymous sequence
             recurse(types.Type(seqType.seqType()))
@@ -862,7 +725,7 @@ def visitDeclarator(declarator):
     recurse(aliasType)
     
     scopedName = declarator.scopedName()
-    mangled_name = mangleName(config.state['Private Prefix'] +\
+    mangled_name = mangleName(config.state['Private Prefix'] +
                               "_tc_", scopedName)
     if alreadyDefined(mangled_name):
         return
@@ -884,8 +747,8 @@ static CORBA::TypeCode_ptr @mangled_name@ = CORBA::TypeCode::PR_alias_tc("@repoI
                 pprefix = config.state['Private Prefix'])
     defineName(mangled_name)
 
+    external_linkage(declarator)
 
-    external_linkage(declarator)    
 
 def visitTypedef(node):
     aliasType = types.Type(node.aliasType())
@@ -902,7 +765,7 @@ def visitConst(node):
 
 def visitException(node):
     scopedName = node.scopedName()
-    mangled_name = mangleName(config.state['Private Prefix'] +\
+    mangled_name = mangleName(config.state['Private Prefix'] +
                               "_tc_", scopedName)
     if alreadyDefined(mangled_name):
         return
@@ -940,8 +803,6 @@ def visitException(node):
     # output the structure of members
     tophalf.out(str(buildMembersStructure(node)))
     
-    tc_name = id.Name(scopedName).prefix("_tc_").fullyQualify()
-
     num = numMembers(node)
 
     repoID = node.repoId()
@@ -966,8 +827,6 @@ static CORBA::TypeCode_ptr @mangled_name@ = CORBA::TypeCode::PR_exception_tc("@r
 
 
     finishingNode()
-
-
 
 
 # builds an instance of CORBA::PR_valueMember containing pointers
@@ -996,9 +855,10 @@ def buildStateMembersStructure(node):
     struct.out("""\
 static CORBA::PR_valueMember @mangled_name@[] = {
   @members@
-};""", members = string.join(array, ",\n"), mangled_name = mangled_name)
+};""", members = ",\n".join(array), mangled_name = mangled_name)
 
     return struct
+
 
 # Convenience function to total up the number of members, treating
 # declarators separately.
@@ -1050,6 +910,7 @@ def visitValue(node):
             decl = memberType.decl()
             if not currently_being_defined(decl):
                 decl.accept(self)
+
         elif isinstance(memberType, idltype.Sequence):
             # anonymous sequence (maybe sequence<sequence<...<T>>>)
             # Find the ultimate base type, and if it's user declared then
@@ -1073,9 +934,7 @@ def visitValue(node):
     
         valuemember_mangled_name = mangleName(config.state['Private Prefix'] +
                                               "_valuemember_", scopedName)
-        assert alreadyDefined(valuemember_mangled_name), \
-               "The name \"" + valuemember_mangled_name + \
-               "\" should be defined by now"
+        assert alreadyDefined(valuemember_mangled_name)
     
         num = numStateMembers(node)
         repoID = node.repoId()
@@ -1093,7 +952,7 @@ def visitValue(node):
             modifierl.append("CORBA::VM_ABSTRACT")
 
         if modifierl:
-            modifiers = string.join(modifierl, "|")
+            modifiers = "|".join(modifierl)
         else:
             modifiers = "CORBA::VM_NONE"
 

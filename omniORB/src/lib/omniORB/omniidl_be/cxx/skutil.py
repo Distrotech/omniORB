@@ -3,7 +3,7 @@
 # skutil.py                 Created on: 1999/11/15
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2008 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,160 +27,13 @@
 #   
 #   Skeleton utility functions designed for the C++ backend
 
-# $Id$
-# $Log$
-# Revision 1.20.2.12  2008/12/03 10:53:58  dgrisby
-# Tweaks leading to Python 3 support; other minor clean-ups.
-#
-# Revision 1.20.2.11  2007/09/19 14:16:08  dgrisby
-# Avoid namespace clashes if IDL defines modules named CORBA.
-#
-# Revision 1.20.2.10  2007/04/12 19:50:32  dgrisby
-# A few cases of sizeof(bool) > 1 were not handled correctly.
-#
-# Revision 1.20.2.9  2006/04/28 18:40:46  dgrisby
-# Merge from omni4_0_develop.
-#
-# Revision 1.20.2.8  2005/11/09 12:22:17  dgrisby
-# Local interfaces support.
-#
-# Revision 1.20.2.7  2005/08/16 13:51:21  dgrisby
-# Problems with valuetype / abstract interface C++ mapping.
-#
-# Revision 1.20.2.6  2005/01/06 23:09:50  dgrisby
-# Big merge from omni4_0_develop.
-#
-# Revision 1.20.2.5  2004/10/13 17:58:22  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.20.2.4  2004/02/16 10:10:30  dgrisby
-# More valuetype, including value boxes. C++ mapping updates.
-#
-# Revision 1.20.2.3  2003/10/23 11:25:54  dgrisby
-# More valuetype support.
-#
-# Revision 1.20.2.2  2003/05/20 16:53:14  dgrisby
-# Valuetype marshalling support.
-#
-# Revision 1.20.2.1  2003/03/23 21:02:41  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.17.2.9  2001/06/19 16:41:49  sll
-# Type cast now correctly distinguishes between normal and array types.
-#
-# Revision 1.17.2.8  2001/06/19 14:23:21  sll
-# In the marshalling and unmarshalling code, only cast from a sequence T_var to
-# T&. Otherwise, the generate code is wrong with gcc 3.0. Suppose T is a
-# sequence of A, even though T is always a derived class of the template
-# instance seq<A>, casting a T_var to a seq<A>& causes GCC 3.0 to generate
-# wrong code quietly!
-#
-# Revision 1.17.2.7  2001/06/15 10:22:09  sll
-# Work around for MSVC++ bug. Changed the casting of the array of base types
-# when they are marshalled using the quick method.
-#
-# Revision 1.17.2.6  2001/06/08 17:12:13  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.17.2.5  2001/04/19 10:04:13  dpg1
-# Bug in sort_exceptions()
-#
-# Revision 1.17.2.4  2000/11/07 18:28:21  sll
-# Use helper marshal functions if the interface is a forward declaration.
-#
-# Revision 1.17.2.3  2000/11/03 19:26:01  sll
-# Simplified the marshalling functions.
-#
-# Revision 1.17.2.2  2000/10/12 15:37:48  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.18.2.2  2000/08/21 11:34:35  djs
-# Lots of omniidl/C++ backend changes
-#
-# Revision 1.18.2.1  2000/08/04 17:10:26  dpg1
-# Long long support
-#
-# Revision 1.18  2000/07/13 15:26:01  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.15.2.4  2000/05/31 18:02:16  djs
-# Better output indenting (and preprocessor directives now correctly output at
-# the beginning of lines)
-#
-# Revision 1.15.2.3  2000/04/26 18:22:13  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.15.2.2  2000/03/09 15:21:40  djs
-# Better handling of internal compiler exceptions (eg attempts to use
-# wide string types)
-#
-# Revision 1.15.2.1  2000/02/14 18:34:57  dpg1
-# New omniidl merged in.
-#
-# Revision 1.15  2000/01/17 16:58:52  djs
-# Marshalling code: exceptions (BAD_PARAM, MARSHAL) and bounded strings
-#
-# Revision 1.14  2000/01/11 12:02:34  djs
-# More tidying up
-#
-# Revision 1.13  2000/01/07 20:31:18  djs
-# Regression tests in CVSROOT/testsuite now pass for
-#   * no backend arguments
-#   * tie templates
-#   * flattened tie templates
-#   * TypeCode and Any generation
-#
-# Revision 1.12  1999/12/26 16:38:06  djs
-# Support for bounded strings (specifically a bounds check raising
-# CORBA::BAD_PARAM)
-#
-# Revision 1.11  1999/12/16 16:08:02  djs
-# More TypeCode and Any fixes
-#
-# Revision 1.10  1999/12/15 12:11:54  djs
-# Marshalling arrays of Anys fix
-#
-# Revision 1.9  1999/12/14 11:53:56  djs
-# Support for CORBA::TypeCode and CORBA::Any
-#
-# Revision 1.8  1999/12/10 18:26:03  djs
-# Added a utility function to order exceptions based on their names
-#
-# Revision 1.7  1999/11/29 19:26:59  djs
-# Code tidied and moved around. Some redundant code eliminated.
-#
-# Revision 1.6  1999/11/29 15:26:04  djs
-# Marshalling bugfixes.
-#
-# Revision 1.5  1999/11/26 18:52:06  djs
-# Bugfixes and refinements
-#
-# Revision 1.4  1999/11/23 18:49:26  djs
-# Lots of fixes, especially marshalling code
-# Added todo list to keep track of issues
-#
-# Revision 1.3  1999/11/19 20:07:33  djs
-# Bugfixes. Added utility functions for operations and attributes
-#
-# Revision 1.2  1999/11/17 20:37:09  djs
-# General util functions
-#
-# Revision 1.1  1999/11/15 19:10:55  djs
-# Added module for utility functions specific to generating skeletons
-# Union skeletons working
-#
-
-import string
-
 try:
     # Python 3 does not have a built in reduce()
     from functools import reduce
 except ImportError:
     pass
 
-from omniidl import idlutil, idltype, idlast
-
+from omniidl import idltype, idlast
 from omniidl_be.cxx import util, types, id, ast, output, cxx
 
 # From http://www-i3.informatik.rwth-aachen.de/funny/babbage.html:
@@ -329,7 +182,7 @@ else """,
     kind = d_type.type().kind()
     
     if d_type.interface():
-        type_name = string.replace(type_name,"_ptr","")
+        type_name = type_name.replace("_ptr", "")
         if isinstance(d_type.type().decl(),idlast.Forward):
             # hack to denote an interface forward declaration
             # kind is used to index the dictionary below
@@ -486,7 +339,7 @@ def unmarshall(to, environment, type, decl, name, from_where, is_union=0):
     kind = d_type.type().kind()
 
     if d_type.interface():
-        type_name = string.replace(type_name,"_ptr","")
+        type_name = type_name.replace("_ptr", "")
         if isinstance(d_type.type().decl(),idlast.Forward):
             # hack to denote an interface forward declaration
             # kind is used to index the associative array below

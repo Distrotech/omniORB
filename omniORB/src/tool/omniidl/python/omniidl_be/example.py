@@ -30,7 +30,7 @@
 """Example IDL compiler back-end."""
 
 from omniidl import idlast, idlvisitor, idlutil
-import string
+
 
 class ExampleVisitor (idlvisitor.AstVisitor):
 

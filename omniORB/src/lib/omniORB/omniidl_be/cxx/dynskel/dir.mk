@@ -2,7 +2,7 @@ PYLIBROOT= $(EXPORT_TREE)/lib/python
 PYLIBDIR = $(PYLIBROOT)/omniidl_be/cxx/dynskel
 INSTALLPYLIBDIR = $(INSTALLPYTHONDIR)/omniidl_be/cxx/dynskel
 
-FILES = __init__.py main.py typecode.py tcstring.py template.py
+FILES = __init__.py main.py typecode.py template.py
 
 export:: $(FILES)
 	@(dir="$(PYLIBDIR)"; \

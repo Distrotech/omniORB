@@ -3,7 +3,7 @@
 # defs.py                   Created on: 1999/11/2
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2008 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,297 +27,10 @@
 #   
 #   Produce the main header definitions for the C++ backend
 
-# $Id$
-# $Log$
-# Revision 1.36.2.16  2008/12/29 18:44:38  dgrisby
-# Globally scope array functions to avoid ambiguities.
-#
-# Revision 1.36.2.15  2007/09/19 14:16:07  dgrisby
-# Avoid namespace clashes if IDL defines modules named CORBA.
-#
-# Revision 1.36.2.14  2007/04/12 19:51:16  dgrisby
-# Fixed point member values should not go in a union's union.
-#
-# Revision 1.36.2.13  2006/05/25 18:19:12  dgrisby
-# Incorrect code generated for valuebox containing sequence of value;
-# clean up class nesting tracking.
-#
-# Revision 1.36.2.12  2006/01/18 19:23:18  dgrisby
-# Code generation problems with valuetype inheritance / typedefs.
-#
-# Revision 1.36.2.11  2006/01/10 12:24:04  dgrisby
-# Merge from omni4_0_develop pre 4.0.7 release.
-#
-# Revision 1.36.2.10  2005/11/09 12:22:17  dgrisby
-# Local interfaces support.
-#
-# Revision 1.36.2.9  2005/08/16 13:51:21  dgrisby
-# Problems with valuetype / abstract interface C++ mapping.
-#
-# Revision 1.36.2.8  2005/01/06 23:10:03  dgrisby
-# Big merge from omni4_0_develop.
-#
-# Revision 1.36.2.7  2004/10/13 17:58:23  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.36.2.6  2004/07/23 10:29:59  dgrisby
-# Completely new, much simpler Any implementation.
-#
-# Revision 1.36.2.5  2004/07/04 23:53:38  dgrisby
-# More ValueType TypeCode and Any support.
-#
-# Revision 1.36.2.4  2004/02/16 10:10:31  dgrisby
-# More valuetype, including value boxes. C++ mapping updates.
-#
-# Revision 1.36.2.3  2003/11/06 11:56:56  dgrisby
-# Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-#
-# Revision 1.36.2.2  2003/10/23 11:25:55  dgrisby
-# More valuetype support.
-#
-# Revision 1.36.2.1  2003/03/23 21:02:38  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.33.2.14  2001/10/29 17:42:39  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.33.2.13  2001/10/18 12:45:28  dpg1
-# IDL compiler tweaks.
-#
-# Revision 1.33.2.12  2001/08/17 13:45:55  dpg1
-# C++ mapping fixes.
-#
-# Revision 1.33.2.11  2001/08/15 10:29:53  dpg1
-# Update DSI to use Current, inProcessIdentity.
-#
-# Revision 1.33.2.10  2001/07/31 19:25:11  sll
-#  Array _var should be separated into fixed and variable size ones.
-#
-# Revision 1.33.2.9  2001/07/26 11:27:26  dpg1
-# Typo in C++ back-end broke wstring constants.
-#
-# Revision 1.33.2.8  2001/06/08 17:12:16  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.33.2.7  2001/03/13 10:32:08  dpg1
-# Fixed point support.
-#
-# Revision 1.33.2.6  2000/11/20 14:43:25  sll
-# Added support for wchar and wstring.
-#
-# Revision 1.33.2.5  2000/11/10 15:40:52  dpg1
-# Missed an update in yesterday's merge.
-#
-# Revision 1.33.2.4  2000/11/07 18:29:56  sll
-# Choose a default constant not too large to avoid g++ complaining.
-#
-# Revision 1.33.2.3  2000/11/03 19:19:46  sll
-# visitTypedef() just rely on types.base() to give the right type name for
-# object reference, instead of adding in a "_ptr" suffix.
-#
-# Revision 1.33.2.2  2000/10/12 15:37:50  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.34.2.3  2000/08/21 11:35:15  djs
-# Lots of tidying
-#
-# Revision 1.34.2.2  2000/08/04 17:10:29  dpg1
-# Long long support
-#
-# Revision 1.34.2.1  2000/08/02 10:52:02  dpg1
-# New omni3_1_develop branch, merged from omni3_develop.
-#
-# Revision 1.34  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.31.2.19  2000/08/03 21:27:39  djs
-# Typo in -Wbvirtual_objref code caused incorrect operation signatures to be
-# generated in the _objref class of an interface.
-#
-# Revision 1.31.2.18  2000/07/26 15:29:08  djs
-# Missing typedef and forward when generating BOA skeletons
-#
-# Revision 1.31.2.17  2000/07/18 15:34:25  djs
-# Added -Wbvirtual_objref option to make attribute and operation _objref
-# methods virtual
-#
-# Revision 1.31.2.16  2000/07/12 17:16:11  djs
-# Minor bugfix to option -Wbsplice-modules
-#
-# Revision 1.31.2.15  2000/06/27 16:15:10  sll
-# New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
-# _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
-# sequence of string and a sequence of object reference.
-#
-# Revision 1.31.2.14  2000/06/26 16:23:57  djs
-# Better handling of #include'd files (via new commandline options)
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.31.2.13  2000/06/19 18:19:49  djs
-# Implemented union discriminant setting function _d(_value) with checks for
-# illegal uses (setting to a label corresponding to a non-current member and
-# setting before initialisation)
-#
-# Revision 1.31.2.12  2000/06/16 08:36:40  djs
-# For a union with a boolean discriminant and an implied default, sets a
-# better default discriminator in _default()
-#
-# Revision 1.31.2.11  2000/06/05 13:03:55  djs
-# Removed union member name clash (x & pd_x, pd__default, pd__d)
-# Removed name clash when a sequence is called "pd_seq"
-# Nested union within union fix
-# Actually generates BOA non-flattened tie templates
-#
-# Revision 1.31.2.10  2000/05/31 18:02:56  djs
-# Better output indenting (and preprocessor directives now correctly output at
-# the beginning of lines)
-#
-# Revision 1.31.2.9  2000/05/30 15:59:23  djs
-# Removed inheritance ambiguity in generated BOA _sk_ and POA_ classes
-#
-# Revision 1.31.2.8  2000/05/18 15:57:32  djs
-# Added missing T* data constructor for bounded sequence types
-#
-# Revision 1.31.2.7  2000/05/04 14:35:02  djs
-# Added new flag splice-modules which causes all continuations to be output
-# as one lump. Default is now to output them in pieces following the IDL.
-#
-# Revision 1.31.2.6  2000/04/26 18:22:28  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.31.2.5  2000/04/05 10:57:37  djs
-# Minor source tidying (removing commented out blocks)
-#
-# Revision 1.31.2.4  2000/03/24 17:18:48  djs
-# Missed _ from typedefs to objrefs
-#
-# Revision 1.31.2.3  2000/03/24 16:24:22  djs
-# Produced 2 invalid typedefs in the case of a typedef to an object reference
-# (it transformed a " " into a "_" by mistake)
-#
-# Revision 1.31.2.2  2000/03/20 11:50:18  djs
-# Removed excess buffering- output templates have code attached which is
-# lazily evaluated when required.
-#
-# Revision 1.31.2.1  2000/02/14 18:34:55  dpg1
-# New omniidl merged in.
-#
-# Revision 1.31  2000/01/19 11:23:27  djs
-# Moved most C++ code to template file
-#
-# Revision 1.30  2000/01/18 18:05:52  djs
-# Extracted most C++ from header/defs and put in a template file.
-# General refactoring.
-#
-# Revision 1.29  2000/01/17 17:01:49  djs
-# Many fixes including:
-#   Module continuations
-#   Constructed types
-#   Union discriminator handling
-#
-# Revision 1.28  2000/01/14 17:38:27  djs
-# Preliminary support for unions with multiple case labels
-#
-# Revision 1.27  2000/01/13 17:02:00  djs
-# Added support for operation contexts.
-#
-# Revision 1.26  2000/01/13 15:56:38  djs
-# Factored out private identifier prefix rather than hard coding it all through
-# the code.
-#
-# Revision 1.25  2000/01/13 14:16:29  djs
-# Properly clears state between processing separate IDL input files
-#
-# Revision 1.24  2000/01/12 17:48:31  djs
-# Added option to create BOA compatible skeletons (same as -BBOA in omniidl3)
-#
-# Revision 1.23  2000/01/11 14:13:15  djs
-# Updated array mapping to include NAME_copy(to, from) as per 2.3 spec
-#
-# Revision 1.22  2000/01/11 11:34:27  djs
-# Added support for fragment generation (-F) mode
-#
-# Revision 1.21  2000/01/10 16:13:13  djs
-# Removed a chunk of redundant code.
-#
-# Revision 1.20  2000/01/10 15:38:55  djs
-# Better name and scope handling.
-#
-# Revision 1.19  2000/01/07 20:31:27  djs
-# Regression tests in CVSROOT/testsuite now pass for
-#   * no backend arguments
-#   * tie templates
-#   * flattened tie templates
-#   * TypeCode and Any generation
-#
-# Revision 1.18  1999/12/26 16:43:06  djs
-# Enum scope fix
-# Handling default case of char discriminated switch fixed
-#
-# Revision 1.17  1999/12/25 21:47:18  djs
-# Better TypeCode support
-#
-# Revision 1.16  1999/12/24 18:14:29  djs
-# Fixed handling of #include'd .idl files
-#
-# Revision 1.15  1999/12/16 16:10:46  djs
-# TypeCode fixes
-#
-# Revision 1.14  1999/12/15 12:13:16  djs
-# Multiple forward declarations of interface fix
-#
-# Revision 1.13  1999/12/14 17:38:22  djs
-# Fixed anonymous sequences of sequences bug
-#
-# Revision 1.12  1999/12/14 11:52:30  djs
-# Support for CORBA::TypeCode and CORBA::Any
-#
-# Revision 1.11  1999/12/01 17:03:15  djs
-# Added support for Typecodes and Anys
-#
-# Revision 1.10  1999/11/23 18:46:34  djs
-# Constant fixes
-# Moved exception constructor argument generator into a more central place
-#
-# Revision 1.9  1999/11/19 20:08:09  djs
-# Removed references to a non-existant utility function
-#
-# Revision 1.8  1999/11/15 19:12:45  djs
-# Tidied up sequence template handling
-# Moved useful functions into separate utility module
-#
-# Revision 1.7  1999/11/12 17:18:39  djs
-# Lots of header generation bugfixes
-#
-# Revision 1.6  1999/11/10 20:19:43  djs
-# Array struct element fix
-# Union sequence element fix
-#
-# Revision 1.5  1999/11/08 19:29:03  djs
-# Rewrite of sequence template code
-# Fixed lots of typedef problems
-#
-# Revision 1.4  1999/11/04 19:05:08  djs
-# Finished moving code from tmp_omniidl. Regression tests ok.
-#
-# Revision 1.3  1999/11/03 18:18:12  djs
-# Struct and Exception fixes
-#
-# Revision 1.2  1999/11/03 17:35:11  djs
-# Brought more of the old tmp_omniidl code into the new tree
-#
-# Revision 1.1  1999/11/03 11:09:56  djs
-# General module renaming
-#
-
 """Produce the main header definitions"""
-# similar to o2be_root::produce_hdr_defs in the old C++ BE
 
-import string
-
-from omniidl import idlast, idltype, idlutil
-from omniidl_be.cxx import output, config, id, types, iface, cxx, ast, util
+from omniidl import idlast, idltype
+from omniidl_be.cxx import id, output, config, types, iface, cxx, ast, util
 from omniidl_be.cxx import value
 from omniidl_be.cxx.header import template
 
@@ -358,7 +71,7 @@ def popInsideInterface():
     _insideInterface = _insideInterface - 1
 
 
-def __init__(_stream):
+def init(_stream):
     global stream, _insideClass, _insideModule, _insideInterface
     global _interfaces, _completedModules
 
@@ -475,7 +188,7 @@ def visitInterface(node):
     cxx_name = id.mapID(name)
 
     outer_environment = id.lookup(node)
-    environment = outer_environment.enter(name)
+    outer_environment.enter(name)
 
     pushInsideInterface()
     pushInsideClass()
@@ -484,7 +197,7 @@ def visitInterface(node):
     # the _Helper class
     I = iface.Interface(node)
 
-    I_Helper = iface.instance("I_Helper")(I)
+    I_Helper = iface.I_Helper(I)
     I_Helper.hh(stream)
 
     # recursively take care of other IDL declared within this
@@ -494,23 +207,23 @@ def visitInterface(node):
             n.accept(self)
 
     # Output the this interface's corresponding class
-    Ibase = iface.instance("I")(I,Other_IDL)
+    Ibase = iface.I(I,Other_IDL)
     Ibase.hh(stream)
 
     if not node.local():
-        _objref_I = iface.instance("_objref_I")(I)
+        _objref_I = iface._objref_I(I)
         _objref_I.hh(stream)
 
-        _pof_I = iface.instance("_pof_I")(I)
+        _pof_I = iface._pof_I(I)
         _pof_I.hh(stream)
 
         # Skeleton class
-        _impl_I = iface.instance("_impl_I")(I)
+        _impl_I = iface._impl_I(I)
         _impl_I.hh(stream)
 
         # Generate BOA compatible skeletons?
         if config.state['BOA Skeletons']:
-            _sk_I = iface.instance("_sk_I")(I)
+            _sk_I = iface._sk_I(I)
             _sk_I.hh(stream)
 
     popInsideClass()
@@ -534,10 +247,8 @@ def visitForward(node):
     _interfaces[node.repoId()] = 1
 
     environment = id.lookup(node)
-    scope = environment.scope()
-    cxx_id = id.mapID(node.identifier())
-    name = id.Name(node.scopedName())
-    guard = name.guard()
+    name        = id.Name(node.scopedName())
+    guard       = name.guard()
 
     # Potentially forward declare BOA skeleton class
     class_sk = ""
@@ -563,7 +274,6 @@ def visitForward(node):
         
 def visitConst(node):
     environment = id.lookup(node)
-    scope = environment.scope()
 
     constType = types.Type(node.constType())
     d_constType = constType.deref()
@@ -612,12 +322,10 @@ def visitConst(node):
 
 def visitTypedef(node):
     environment = id.lookup(node)
-    scope = environment.scope()
     
     is_global_scope = not (_insideModule or _insideInterface)
     
     aliasType = types.Type(node.aliasType())
-    aliasTypeID = aliasType.member(environment)
 
     # is _this_ type a constructed type?
     if node.constrType():
@@ -701,7 +409,7 @@ def visitTypedef(node):
                     
             # Non-array of object reference
             elif d_type.interface():
-                derefTypeID = string.replace(derefTypeID,"_ptr","")
+                derefTypeID = derefTypeID.replace("_ptr","")
                 # Note that the base name is fully flattened
                 is_CORBA_Object = d_type.type().scopedName() ==\
                                   ["CORBA", "Object"]
@@ -735,8 +443,8 @@ def visitTypedef(node):
 
             # Non-array of valuetype
             elif d_type.value() or d_type.valuebox():
-                basicReferencedTypeID = string.replace(basicReferencedTypeID,
-                                                       "_member", "")
+                basicReferencedTypeID = basicReferencedTypeID.replace("_member",
+                                                                      "")
                 stream.out(template.typedef_simple_constructed,
                            base = basicReferencedTypeID,
                            name = derivedName)
@@ -813,7 +521,6 @@ def visitTypedef(node):
                             element_ptr = element
 
                     # enums are a special case
-                    # from o2be_sequence.cc:795:
                     # ----
                     # gcc requires that the marshalling operators for the
                     # element be declared before the sequence template is
@@ -984,7 +691,6 @@ def visitStruct(node):
 
     outer_environment = id.lookup(node)
     environment = outer_environment.enter(name)
-    scope = environment.scope()
     
     pushInsideClass()
             
@@ -1071,7 +777,6 @@ def visitException(node):
 
     outer_environment = id.lookup(node)
     environment = outer_environment.enter(exname)
-    scope = environment.scope()
     
     pushInsideClass()
 
@@ -1091,8 +796,6 @@ def visitException(node):
 
             for d in m.declarators():
                 decl_dims = d.sizes()
-                full_dims = decl_dims + memberType.dims()
-                is_array = full_dims != []
                 is_array_declarator = decl_dims != []
                 
                 memtype = memberType.member(environment)
@@ -1145,8 +848,8 @@ def visitException(node):
        
     ctor = ""
     if ctor_args != []:
-        ctor = cxx_exname + "(" + string.join(ctor_args, ", ") + ");"
-            
+        ctor = cxx_exname + "(" + ", ".join(ctor_args) + ");"
+
     if no_members:
         inline = "inline "
         body = "{ }"
@@ -1183,7 +886,6 @@ def visitUnion(node):
     cxx_id = id.mapID(ident)
     outer_environment = id.lookup(node)
     environment = outer_environment.enter(ident)
-    scope = environment.scope()
     
     pushInsideClass()
     
@@ -1223,18 +925,17 @@ def visitUnion(node):
         elif kind == idltype.tk_enum:
             all = switchType.type().decl().enumerators()
         else:
-            util.fatalError("Failed to generate a default union " +\
+            util.fatalError("Failed to generate a default union "
                             "discriminator value")
-            
-        # remove all those values which are already in use to leave
-        # a set of possible unused values
-        possibles = util.minus(all, values)
-        # return the first one for simplicity
-        return switchType.literal(possibles[0], environment)
+
+        for item in all:
+            if item not in values:
+                return switchType.literal(item, environment)
+
+        return None
     #
     ###############################################################
     
-
     # does the IDL union have any default case?
     # It'll be handy to know which case is the default one later-
     # so add a new attribute to mark it
@@ -1320,8 +1021,8 @@ def visitUnion(node):
     # do we need an implicit _default function?
     def implicit_default(stream = stream, choose = chooseArbitraryDefault,
                          implicitDefault = implicitDefault):
+
         if implicitDefault:
-    
             stream.out(template.union_implicit_default,
                        arbitraryDefault = choose())
         return
@@ -1355,10 +1056,6 @@ def visitUnion(node):
         outer_has_default = 0
 
         cases = output.StringStream()
-
-        # keep track of which cases have been done
-        cases_done = []
-
 
         # Produce a set of "case <foo>: goto fail;" for every label
         # except those in an exception list
@@ -1410,8 +1107,6 @@ def visitUnion(node):
             cases.inc_indent()
             cases.out("switch (_value){\n")
             cases.inc_indent()
-            inner_has_default = 0
-
 
             # If we currently are in the default case, fail all attempts
             # to switch cases.
@@ -1466,7 +1161,7 @@ def visitUnion(node):
 
     # get and set functions for each case:
     def members(stream = stream, node = node, environment = environment,
-                choose = chooseArbitraryDefault, switchType = switchType):
+                switchType = switchType):
 
         for c in node.cases():
             # Following the typedef chain will deliver the base type of
@@ -1483,172 +1178,147 @@ def visitUnion(node):
             
             is_array = full_dims != []
             is_array_declarator = decl_dims != []
-            alias_array = caseType.dims() != []
 
             member = id.mapID(decl.identifier())
             
             memtype = caseType.member(environment)
             
-            # CORBA 2.3 C++ language mapping (June, 1999) 1-34:
-            # ... Setting the union value through a modifier function
-            # automatically sets the discriminant and may release the
-            # storage associated with the previous value ... If a
-            # modifier for a union member with multiple legal
-            # discriminant values is used to set the value of the
-            # discriminant, the union implementation is free to set
-            # the discriminant to any one of the legal values for that
-            # member. The actual discriminant value chose under these
-            # circumstances is implementation-dependent. ...
-            
-            # Do we pick the first element (seems obvious)?
-            # Or pick another one, hoping to trip-up people who write
-            # non-compliant code and make an incorrect assumption?
-            
+            # Pick a discriminator value to use when selecting the
+            # case. Pick the first non-default label if there is one.
             labels = c.labels()
-            if labels != []:
-                non_default_labels = filter(lambda x:not x.default(), labels)
-                if non_default_labels == []:
-                    # only one label and it's the default
-                    label = labels[0]
-                    discrimvalue = choose()
-                elif len(non_default_labels) > 1:
-                    # oooh, we have a choice. Let's pick the second one.
-                    # no-one will be expecting that
-                    label = non_default_labels[1]
+
+            label = labels[0]
+            if label.default() and len(labels) > 1:
+                # Pick a non-default label if there is one
+                label = labels[1]
+
+            discrimvalue = switchType.literal(label.value(), environment)
+
+
+            # only different when array declarator
+            const_type_str = memtype
+
+            # create typedefs for anonymous arrays
+            if is_array_declarator:
+                prefix = config.state['Private Prefix']
+                stream.out(template.union_array_declarator,
+                           prefix = prefix,
+                           memtype = memtype,
+                           name = member,
+                           dims = cxx.dimsToString(decl.sizes()),
+                           tail_dims = cxx.dimsToString(decl.sizes()[1:]))
+                const_type_str = prefix + "_" + member
+                memtype = "_" + member
+
+            if is_array:
+                # build the loop
+                def loop(stream = stream, full_dims = full_dims,
+                         member = member):
+                    loop = cxx.For(stream, full_dims)
+                    index = loop.index()
+                    stream.out("\n_pd_" + member + index + " = _value" +\
+                               index + ";\n")
+                    loop.end()
+                    return
+
+                stream.out(template.union_array,
+                           memtype = memtype,
+                           const_type = const_type_str,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue,
+                           first_dim = repr(full_dims[0]),
+                           loop = loop)
+
+            elif d_caseType.any():
+                # note type != CORBA::Any when its an alias...
+                stream.out(template.union_any,
+                           type = memtype,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
+
+            elif d_caseType.typecode():
+                stream.out(template.union_typecode,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
+
+            elif isinstance(d_caseType.type(), idltype.Base) or \
+                 d_caseType.enum():
+                # basic type
+                stream.out(template.union_basic,
+                           type = memtype,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
+
+            elif d_caseType.string():
+                stream.out(template.union_string,
+                           type = memtype,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
+
+            elif d_caseType.wstring():
+                stream.out(template.union_wstring,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
+
+            elif d_caseType.interface():
+                scopedName = d_caseType.type().decl().scopedName()
+
+                name     = id.Name(scopedName)
+                ptr_name = name.suffix("_ptr").unambiguous(environment)
+                var_name = name.suffix("_var").unambiguous(environment)
+
+                if isinstance(d_caseType.type().decl(), idlast.Forward):
+                    helper = name.suffix("_Helper").unambiguous(environment)
+                    duplicate = helper + "::duplicate"
                 else:
-                    # just the one interesting label
-                    label = non_default_labels[0]
+                    iclass    = name.unambiguous(environment)
+                    duplicate = iclass + "::_duplicate"
 
-                if label.default():
-                    discrimvalue = choose()
-                else:
-                    discrimvalue = switchType.literal(label.value(),
-                                                      environment)
+                stream.out(template.union_objref,
+                           member = member,
+                           memtype = memtype,
+                           ptr_name = ptr_name,
+                           var_name = var_name,
+                           duplicate = duplicate,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
 
-                # only different when array declarator
-                const_type_str = memtype
-                
-                # create typedefs for anonymous arrays
-                if is_array_declarator:
-                    prefix = config.state['Private Prefix']
-                    stream.out(template.union_array_declarator,
-                               prefix = prefix,
-                               memtype = memtype,
-                               name = member,
-                               dims = cxx.dimsToString(decl.sizes()),
-                               tail_dims = cxx.dimsToString(decl.sizes()[1:]))
-                    const_type_str = prefix + "_" + member
-                    memtype = "_" + member
-             
-                if is_array:
-                    # build the loop
-                    def loop(stream = stream, full_dims = full_dims,
-                             member = member):
-                        loop = cxx.For(stream, full_dims)
-                        index = loop.index()
-                        stream.out("\n_pd_" + member + index + " = _value" +\
-                                   index + ";\n")
-                        loop.end()
-                        return
-                    
-                    stream.out(template.union_array,
-                               memtype = memtype,
-                               const_type = const_type_str,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue,
-                               first_dim = repr(full_dims[0]),
-                               loop = loop)
-                    
-                elif d_caseType.any():
-                    # note type != CORBA::Any when its an alias...
-                    stream.out(template.union_any,
-                               type = memtype,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
+            elif caseType.typedef() or d_caseType.struct() or \
+                 d_caseType.union() or d_caseType.fixed():
+                stream.out(template.union_constructed,
+                           type = memtype,
+                           name = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
 
-                elif d_caseType.typecode():
-                    stream.out(template.union_typecode,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
-                                    
-                elif isinstance(d_caseType.type(), idltype.Base) or \
-                     d_caseType.enum():
-                    # basic type
-                    stream.out(template.union_basic,
-                               type = memtype,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
-                    
-                elif d_caseType.string():
-                    stream.out(template.union_string,
-                               type = memtype,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
+            elif d_caseType.sequence():
+                sequence_template = d_caseType.sequenceTemplate(environment)
+                stream.out(template.union_sequence,
+                           sequence_template = sequence_template,
+                           member = member,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
 
-                elif d_caseType.wstring():
-                    stream.out(template.union_wstring,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
+            elif d_caseType.value() or d_caseType.valuebox():
+                scopedName = d_caseType.type().decl().scopedName()
+                name = id.Name(scopedName)
+                type = name.unambiguous(environment)
 
-                elif d_caseType.interface():
-                    scopedName = d_caseType.type().decl().scopedName()
+                stream.out(template.union_value,
+                           member=member,
+                           type=type,
+                           isDefault = str(c.isDefault),
+                           discrimvalue = discrimvalue)
 
-                    name     = id.Name(scopedName)
-                    ptr_name = name.suffix("_ptr").unambiguous(environment)
-                    var_name = name.suffix("_var").unambiguous(environment)
+            else:
+                util.fatalError("Unknown union case type encountered")
 
-                    if isinstance(d_caseType.type().decl(), idlast.Forward):
-                        helper = name.suffix("_Helper").unambiguous(environment)
-                        duplicate = helper + "::duplicate"
-                    else:
-                        iclass    = name.unambiguous(environment)
-                        duplicate = iclass + "::_duplicate"
-
-                    stream.out(template.union_objref,
-                               member = member,
-                               memtype = memtype,
-                               ptr_name = ptr_name,
-                               var_name = var_name,
-                               duplicate = duplicate,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
-
-                elif caseType.typedef() or d_caseType.struct() or \
-                     d_caseType.union() or d_caseType.fixed():
-                    stream.out(template.union_constructed,
-                               type = memtype,
-                               name = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
-
-                elif d_caseType.sequence():
-                    sequence_template = d_caseType.sequenceTemplate(environment)
-                    stream.out(template.union_sequence,
-                               sequence_template = sequence_template,
-                               member = member,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
-
-                elif d_caseType.value() or d_caseType.valuebox():
-                    scopedName = d_caseType.type().decl().scopedName()
-                    name = id.Name(scopedName)
-                    type = name.unambiguous(environment)
-
-                    stream.out(template.union_value,
-                               member=member,
-                               type=type,
-                               isDefault = str(c.isDefault),
-                               discrimvalue = discrimvalue)
-                    pass
-
-                else:
-                    util.fatalError("Unknown union case type encountered")
         return
 
     # declare the instance of the discriminator and
@@ -1839,7 +1509,7 @@ def visitEnum(node):
     memberlist = map(lambda x: id.Name(x.scopedName()).simple(), enumerators)
     stream.out(template.enum,
                name = name,
-               memberlist = string.join(memberlist, ", "))
+               memberlist = ", ".join(memberlist))
 
     # TypeCode and Any
     if config.state['Typecode']:

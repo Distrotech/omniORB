@@ -36,13 +36,16 @@
 #
 
 ## Import Output generation functions ###################################
-## 
+##
 from omniidl_be.cxx import header, skel, dynskel, impl, util
 
 ## Utility functions
 from omniidl_be.cxx import id, config, ast, output, support, descriptor
+import os.path
 
-import re, sys, os.path
+## Resolve recursive imports
+from omniidl_be.cxx import call, iface
+
 
 cpp_args = ["-D__OMNIIDL_CXX__"]
 usage_string = """\
@@ -160,6 +163,10 @@ def run(tree, args):
         util.fatalError("Sorry, the C++ backend cannot process more "
                         "than one IDL file at a time.")
     run_before = 1
+
+    # Initialise modules that would otherwise contain circular imports
+    call.init()
+    iface.init()
 
     dirname, filename = os.path.split(tree.file())
     basename,ext      = os.path.splitext(filename)

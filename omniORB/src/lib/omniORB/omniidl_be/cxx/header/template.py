@@ -92,8 +92,6 @@ main = """\
 
 @forward_declarations@
 
-@string_tcParser_declarations@
-
 @defs@
 
 @poa@
@@ -1555,24 +1553,4 @@ private:
   _omniT*                  pd_obj;
   _CORBA_Boolean           pd_rel;
 };
-"""
-
-##
-## tc_string
-##
-tcstring = """\
-#if !defined(___tc_string_@n@__) && !defined(DISABLE_Unnamed_Bounded_String_TC)
-#define ___tc_string_@n@__
-_CORBA_GLOBAL_VAR _dyn_attr const ::CORBA::TypeCode_ptr _tc_string_@n@;
-#endif
-"""
-
-##
-## tc_wstring
-##
-tcwstring = """\
-#if !defined(___tc_wstring_@n@__) && !defined(DISABLE_Unnamed_Bounded_WString_TC)
-#define ___tc_wstring_@n@__
-_CORBA_GLOBAL_VAR _dyn_attr const ::CORBA::TypeCode_ptr _tc_wstring_@n@;
-#endif
 """

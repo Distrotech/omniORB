@@ -3,7 +3,7 @@
 # poa.py                    Created on: 1999/11/4
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2007 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -24,142 +24,18 @@
 #  02111-1307, USA.
 #
 # Description:
-#
-#   Produce the main header POA definitions for the C++ backend
-
-# $Id$
-# $Log$
-# Revision 1.20.2.5  2007/09/19 14:16:07  dgrisby
-# Avoid namespace clashes if IDL defines modules named CORBA.
-#
-# Revision 1.20.2.4  2005/11/09 12:22:17  dgrisby
-# Local interfaces support.
-#
-# Revision 1.20.2.3  2003/11/06 11:56:56  dgrisby
-# Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-#
-# Revision 1.20.2.2  2003/10/23 11:25:55  dgrisby
-# More valuetype support.
-#
-# Revision 1.20.2.1  2003/03/23 21:02:36  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.17.2.4  2001/10/29 17:42:40  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.17.2.3  2001/06/08 17:12:17  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.17.2.2  2000/10/12 15:37:51  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.18.2.2  2000/08/21 11:35:18  djs
-# Lots of tidying
-#
-# Revision 1.18.2.1  2000/08/02 10:52:02  dpg1
-# New omni3_1_develop branch, merged from omni3_develop.
-#
-# Revision 1.18  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.15.2.9  2000/07/17 09:36:40  djs
-# Now handles the case where an interface inherits from a typedef to another
-# interface.
-#
-# Revision 1.15.2.8  2000/07/12 17:16:12  djs
-# Minor bugfix to option -Wbsplice-modules
-#
-# Revision 1.15.2.7  2000/06/26 16:23:59  djs
-# Better handling of #include'd files (via new commandline options)
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.15.2.6  2000/06/05 13:03:57  djs
-# Removed union member name clash (x & pd_x, pd__default, pd__d)
-# Removed name clash when a sequence is called "pd_seq"
-# Nested union within union fix
-# Actually generates BOA non-flattened tie templates
-#
-# Revision 1.15.2.5  2000/05/30 15:59:25  djs
-# Removed inheritance ambiguity in generated BOA _sk_ and POA_ classes
-#
-# Revision 1.15.2.4  2000/05/04 14:35:04  djs
-# Added new flag splice-modules which causes all continuations to be output
-# as one lump. Default is now to output them in pieces following the IDL.
-#
-# Revision 1.15.2.3  2000/04/26 18:22:30  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.15.2.2  2000/04/05 10:57:39  djs
-# Minor source tidying (removing commented out blocks)
-#
-# Revision 1.15.2.1  2000/02/14 18:34:54  dpg1
-# New omniidl merged in.
-#
-# Revision 1.15  2000/01/20 18:26:13  djs
-# Tie template output order problem
-#
-# Revision 1.14  2000/01/20 12:46:40  djs
-# Renamed a function to avoid a name clash with a module.
-#
-# Revision 1.13  2000/01/19 11:23:28  djs
-# Moved most C++ code to template file
-#
-# Revision 1.12  2000/01/17 17:03:37  djs
-# Support for module continuations
-#
-# Revision 1.11  2000/01/13 14:16:30  djs
-# Properly clears state between processing separate IDL input files
-#
-# Revision 1.10  2000/01/11 11:34:28  djs
-# Added support for fragment generation (-F) mode
-#
-# Revision 1.9  2000/01/10 17:18:14  djs
-# Removed redundant code.
-#
-# Revision 1.8  2000/01/10 15:38:55  djs
-# Better name and scope handling.
-#
-# Revision 1.7  2000/01/10 11:01:56  djs
-# Forgot to keep track of names already defined causing a scoping problem.
-#
-# Revision 1.6  2000/01/07 20:31:29  djs
-# Regression tests in CVSROOT/testsuite now pass for
-#   * no backend arguments
-#   * tie templates
-#   * flattened tie templates
-#   * TypeCode and Any generation
-#
-# Revision 1.5  1999/12/24 18:14:30  djs
-# Fixed handling of #include'd .idl files
-#
-# Revision 1.4  1999/12/13 15:40:27  djs
-# Added generation of "flattened" tie templates
-#
-# Revision 1.3  1999/12/12 14:02:47  djs
-# Support for tie-templates added.
-#
-# Revision 1.2  1999/11/10 20:19:43  djs
-# Array struct element fix
-# Union sequence element fix
-#
-# Revision 1.1  1999/11/04 19:05:09  djs
-# Finished moving code from tmp_omniidl. Regression tests ok.
-#
 
 """Produce the main header POA definitions for the C++ backend"""
 
-import string
-
-from omniidl import idlast, idltype, idlutil
-from omniidl_be.cxx import id,  config, ast
+from omniidl_be.cxx import id, config, ast
 from omniidl_be.cxx.header import tie, template
 
 import poa
-
 self = poa
 
-def __init__(stream):
+stream = None
+
+def init(stream):
     self.__nested = 0
     poa.stream = stream
     return poa
@@ -250,7 +126,7 @@ def visitInterface(node):
     if node.inherits() == []:
         inherits.append("public virtual ::PortableServer::ServantBase")
 
-    inherits_str = string.join(inherits, ",\n  ")
+    inherits_str = ",\n  ".join(inherits)
 
     # build the normal POA class first
     stream.out(template.POA_interface,

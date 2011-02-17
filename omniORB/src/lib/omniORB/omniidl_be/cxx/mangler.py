@@ -3,6 +3,7 @@
 # mangler.py                Created on: 1999/11/16
 #			    Author    : David Scott (djs)
 #
+#    Copyright (C) 2011 Apasphere Ltd
 #    Copyright (C) 1999-2000 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -26,109 +27,9 @@
 #   Produce mangled names for types and operation signatures
 #   
 
-# $Id$
-# $Log$
-# Revision 1.15.2.9  2002/11/21 16:12:52  dgrisby
-# Oneway call descriptor bug.
-#
-# Revision 1.15.2.8  2001/11/27 14:37:25  dpg1
-# long double TC descriptor.
-#
-# Revision 1.15.2.7  2001/11/13 15:23:52  dpg1
-# Bug in forward declared structs/unions.
-#
-# Revision 1.15.2.6  2001/10/29 17:42:42  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.15.2.5  2001/06/08 17:12:20  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.15.2.4  2001/03/13 10:32:09  dpg1
-# Fixed point support.
-#
-# Revision 1.15.2.3  2000/11/20 14:43:26  sll
-# Added support for wchar and wstring.
-#
-# Revision 1.15.2.2  2000/10/12 15:37:53  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.16.2.2  2000/09/14 16:03:59  djs
-# Remodularised C++ descriptor name generator
-#
-# Revision 1.16.2.1  2000/08/21 11:35:33  djs
-# Lots of tidying
-#
-# Revision 1.16  2000/07/13 15:25:59  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.13.2.5  2000/06/26 16:24:18  djs
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.13.2.4  2000/04/26 18:22:56  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-# Removed superfluous externs in front of function definitions
-#
-# Revision 1.13.2.3  2000/03/09 15:21:57  djs
-# Better handling of internal compiler exceptions (eg attempts to use
-# wide string types)
-#
-# Revision 1.13.2.2  2000/02/16 16:30:03  djs
-# Fix to proxy call descriptor code- failed to handle special case of
-#   Object method(in string x)
-#
-# Revision 1.13.2.1  2000/02/14 18:34:53  dpg1
-# New omniidl merged in.
-#
-# Revision 1.13  2000/01/13 17:02:05  djs
-# Added support for operation contexts.
-#
-# Revision 1.12  2000/01/13 15:56:44  djs
-# Factored out private identifier prefix rather than hard coding it all through
-# the code.
-#
-# Revision 1.11  2000/01/13 14:16:35  djs
-# Properly clears state between processing separate IDL input files
-#
-# Revision 1.10  1999/12/17 10:48:11  djs
-# Typedef to a sequence<sequence< name mangling bug
-#
-# Revision 1.9  1999/12/14 17:38:25  djs
-# Fixed anonymous sequences of sequences bug
-#
-# Revision 1.8  1999/12/14 11:53:23  djs
-# Support for CORBA::TypeCode and CORBA::Any
-# Exception member bugfix
-#
-# Revision 1.7  1999/12/13 10:50:07  djs
-# Treats the two call descriptors associated with an attribute separately,
-# since it can happen that one needs to be generated but not the other.
-#
-# Revision 1.6  1999/12/10 18:27:05  djs
-# Fixed bug to do with marshalling arrays of things, mirrored in the old
-# compiler
-#
-# Revision 1.5  1999/12/09 20:40:58  djs
-# Bugfixes and integration with dynskel/ code
-#
-# Revision 1.4  1999/12/01 16:59:01  djs
-# Fixed name generation for attributes with user exceptions.
-#
-# Revision 1.3  1999/11/23 18:48:26  djs
-# Bugfixes, more interface operations and attributes code
-#
-# Revision 1.2  1999/11/19 20:09:03  djs
-# Fixed signature generating bug when return type is void
-#
-# Revision 1.1  1999/11/17 20:37:23  djs
-# Code for call descriptors and proxies
-#
-
-
 from omniidl import idlast, idltype
 from omniidl_be.cxx import types, id, skutil, util
 
-import string
 
 #######################################################################
 ## Produce cannonical names for types and operation signatures
@@ -179,7 +80,7 @@ def canonTypeName(type, decl = None, useScopedName = 0):
     def dims(d):
         if d == []: return ""
         d_str = map(lambda x:ARRAY_SEPARATOR + str(x), d)
-        return string.join(d_str, "")
+        return "".join(d_str)
 
     full_dims = decl_dims + type_dims
     is_array = full_dims != []
@@ -313,9 +214,7 @@ def produce_signature(returnType, parameters, raises, oneway):
         return EXCEPTION_SEPARATOR + cname
     
     raises_sigs = map(exception_signature, raises)
-    raises_str = string.join(raises_sigs, "")
+    raises_str = "".join(raises_sigs)
 
     sig = sig + raises_str
     return sig
-            
-

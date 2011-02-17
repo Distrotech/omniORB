@@ -3,6 +3,7 @@
 # __init__.py               Created on: 2000/02/03
 #			    Author    : David Scott (djs)
 #
+#    Copyright (C) 2011 Apasphere Ltd
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -26,30 +27,16 @@
 #
 #   Entrypoint to example implementation generation code
 
-# $Id$
-# $Log$
-# Revision 1.2.2.2  2003/01/22 12:10:55  dgrisby
-# Explicitly close files in C++ backend.
-#
-# Revision 1.2.2.1  2000/10/12 15:37:52  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.2.4.1  2000/08/21 11:35:22  djs
-# Lots of tidying
-#
-
-import os
-
-from omniidl_be.cxx import config, util, output
+from omniidl_be.cxx import config, output
 from omniidl_be.cxx.impl import main
 
 def run(tree):
-    hh_filename = config.state['Basename'] + config.state['HH Suffix']
-    idl_filename = tree.file()
+    hh_filename   = config.state['Basename'] + config.state['HH Suffix']
+    idl_filename  = tree.file()
     impl_filename = config.state['Basename'] + config.state['IMPL Suffix']
 
     stream = output.Stream(output.createFile(impl_filename), 2)
-    main.__init__(stream, idl_filename, hh_filename)
+    main.init(stream, idl_filename, hh_filename)
 
     main.run(tree)
 

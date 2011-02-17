@@ -3,7 +3,7 @@
 # call.py                   Created on: 2000/08/03
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2002-2008 Apasphere Ltd
+#    Copyright (C) 2002-2011 Apasphere Ltd
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,105 +27,18 @@
 #   Produce local callback functions
 #
 
-# $Id$
-# $Log$
-# Revision 1.1.6.11  2008/10/28 15:33:42  dgrisby
-# Undeclared user exceptions not caught in local calls.
-#
-# Revision 1.1.6.10  2007/09/19 14:16:08  dgrisby
-# Avoid namespace clashes if IDL defines modules named CORBA.
-#
-# Revision 1.1.6.9  2007/02/26 15:51:15  dgrisby
-# Suppress cd parameter when it is definitely unused, to avoid compiler
-# warnings.
-#
-# Revision 1.1.6.8  2005/11/09 12:22:18  dgrisby
-# Local interfaces support.
-#
-# Revision 1.1.6.7  2005/08/16 13:51:21  dgrisby
-# Problems with valuetype / abstract interface C++ mapping.
-#
-# Revision 1.1.6.6  2005/03/30 23:36:11  dgrisby
-# Another merge from omni4_0_develop.
-#
-# Revision 1.1.6.5  2005/01/06 23:09:49  dgrisby
-# Big merge from omni4_0_develop.
-#
-# Revision 1.1.6.4  2004/10/13 17:58:21  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.1.6.3  2003/11/06 11:56:56  dgrisby
-# Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-#
-# Revision 1.1.6.2  2003/10/23 11:25:54  dgrisby
-# More valuetype support.
-#
-# Revision 1.1.6.1  2003/03/23 21:02:42  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.1.4.13  2003/01/14 11:48:16  dgrisby
-# Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-#
-# Revision 1.1.4.12  2002/11/21 16:12:34  dgrisby
-# Oneway call descriptor bug.
-#
-# Revision 1.1.4.11  2001/11/27 14:35:08  dpg1
-# Context, DII fixes.
-#
-# Revision 1.1.4.10  2001/11/06 15:41:37  dpg1
-# Reimplement Context. Remove CORBA::Status. Tidying up.
-#
-# Revision 1.1.4.9  2001/10/18 12:45:27  dpg1
-# IDL compiler tweaks.
-#
-# Revision 1.1.4.8  2001/10/17 16:50:25  dpg1
-# Incorrect code with multiple out arguments
-#
-# Revision 1.1.4.7  2001/08/15 10:26:10  dpg1
-# New object table behaviour, correct POA semantics.
-#
-# Revision 1.1.4.6  2001/05/31 16:18:11  dpg1
-# inline string matching functions, re-ordered string matching in
-# _ptrToInterface/_ptrToObjRef
-#
-# Revision 1.1.4.5  2001/05/02 14:20:15  sll
-# Make sure that getStream() is used instead of casting to get a cdrStream
-# from a IOP_C and IOP_S.
-#
-# Revision 1.1.4.4  2001/04/19 09:30:12  sll
-#  Big checkin with the brand new internal APIs.
-# Scoped where appropriate with the omni namespace.
-#
-# Revision 1.1.4.3  2000/11/07 18:27:31  sll
-# out_objrefcall now generates the correct unambiguous type name in its castings.
-#
-# Revision 1.1.4.2  2000/11/03 19:25:23  sll
-# A new class CallDescriptor. The class contains all the code to generate
-# the call descriptor for each operation. It also has functions to be called
-# by different parts of the stub that use the call descriptor.
-#
-# Revision 1.1.4.1  2000/10/12 15:37:46  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.1.2.2  2000/09/14 16:03:01  djs
-# Remodularised C++ descriptor name generator
-# Bug in listing all inherited interfaces if one is a forward
-# repoID munging function now handles #pragma ID in bootstrap.idl
-# Naming environments generating code now copes with new IDL AST types
-# Modified type utility functions
-# Minor tidying
-#
-# Revision 1.1.2.1  2000/08/21 11:34:32  djs
-# Lots of omniidl/C++ backend changes
-#
-
 """Produce call descriptors and local callback functions"""
 
 from omniidl import idlast, idltype
-from omniidl_be.cxx import types, id, util, skutil, output, cxx, ast, descriptor
-from omniidl_be.cxx.skel import mangler, template
+from omniidl_be.cxx import types, id, skutil, output, descriptor, mangler
 
-import string
+template = None
+
+def init():
+    global template
+    import omniidl_be.cxx.skel.template
+    template = omniidl_be.cxx.skel.template
+
 
 # Callable- represents the notion of a callable entity (eg operation or
 # attribute accessor method). Note that a read/write attribute is really
@@ -371,13 +284,13 @@ class CallDescriptor:
             impl_call.out(template.interface_callback_tryblock,
                           result = result_string,
                           cxx_operation_name = operation,
-                          operation_arguments = string.join(impl_args, ", "),
+                          operation_arguments = ", ".join(impl_args),
                           catch = str(catch))
         else:
             impl_call.out(template.interface_callback_invoke,
                           result = result_string,
                           cxx_operation_name = operation,
-                          operation_arguments = string.join(impl_args, ", "))
+                          operation_arguments = ", ".join(impl_args))
 
         stream.out(template.interface_callback,
                    local_call_descriptor = function_name,
@@ -449,9 +362,9 @@ class CallDescriptor:
         
         stream.out(template.interface_operation,
                    call_descriptor = self.__name,
-                   call_desc_args = string.join(ctor_args, ", "),
-                   assign_args = string.join(assign_args,"\n"),
-                   assign_res = string.join(assign_res,"\n"),
+                   call_desc_args = ", ".join(ctor_args),
+                   assign_args = "\n".join(assign_args),
+                   assign_res = "\n".join(assign_res),
                    assign_context = assign_context)
 
     def out_implcall(self,stream,operation,localcall_fn):
@@ -483,8 +396,8 @@ class CallDescriptor:
         stream.out(template.interface_operation_dispatch,
                    idl_operation_name = operation,
                    call_descriptor = self.__name,
-                   call_desc_args = string.join(ctor_args, ", "),
-                   prepare_out_args = string.join(prepare_out_args,"\n"))
+                   call_desc_args = ", ".join(ctor_args),
+                   prepare_out_args = "\n".join(prepare_out_args))
 
     def __out_declaration(self,stream):
         # build up the constructor argument list, the initialisation
@@ -574,13 +487,13 @@ class CallDescriptor:
         stream.out(template.interface_proxy_class,
                    signature = self.__signature,
                    call_descriptor = self.__name,
-                   ctor_args = string.join(ctor_args,","),
+                   ctor_args = ",".join(ctor_args),
                    base_ctor = base_ctor,
                    contains_values = contains_values,
                    in_arguments_decl = in_arguments_decl,
                    out_arguments_decl = out_arguments_decl,
                    user_exceptions_decl = user_exceptions_decl,
-                   member_data = string.join(data_members,"\n"))
+                   member_data = "\n".join(data_members))
 
     def __out_contextDescriptor(self,stream):
         if self.__contexts:
@@ -760,11 +673,11 @@ class CallDescriptor:
                                       "*" + arg_n + " = " + \
                                       "::CORBA::TypeCode::_nil();")
                 elif d_type.interface():
-                    nilobjref = string.replace(d_type.base(),"_ptr","::_nil()")
+                    nilobjref = d_type.base().replace("_ptr","::_nil()")
                     if isinstance(d_type.type().decl(),idlast.Forward):
-                        nilobjref = string.replace(nilobjref,\
-                                                   "::_nil()",\
-                                                   "_Helper::_nil()")
+                        nilobjref = nilobjref.replace("::_nil()",
+                                                      "_Helper::_nil()")
+                    
                     marshal_block.out(arg_n + "_ = *" + arg_n + ";\n" + \
                                       "*" + arg_n + " = " + \
                                       nilobjref + ";")
@@ -804,7 +717,7 @@ class CallDescriptor:
             stream.out(template.interface_proxy_exn,
                        call_descriptor = self.__name,
                        exception_block = str(block),
-                       exception_namelist = string.join(repoIDs,",\n"))
+                       exception_namelist = ",\n".join(repoIDs))
         else:
             stream.out(template.interface_proxy_empty_exn,
                        call_descriptor = self.__name)

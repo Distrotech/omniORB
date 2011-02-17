@@ -4,7 +4,7 @@
 #			    Author1   : David Scott (djs)
 #                           Author2   : Duncan Grisby (dgrisby)
 #
-#  Copyright (C) 2004-2007 Apasphere Ltd.
+#  Copyright (C) 2004-2011 Apasphere Ltd.
 #  Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -23,115 +23,6 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #  02111-1307, USA.
-#
-# Description:
-#   
-#   C++ templates for the DynSK.cc file
-
-# $Id$
-# $Log$
-# Revision 1.5.2.7  2007/09/19 14:16:07  dgrisby
-# Avoid namespace clashes if IDL defines modules named CORBA.
-#
-# Revision 1.5.2.6  2004/10/13 17:58:23  dgrisby
-# Abstract interfaces support; values support interfaces; value bug fixes.
-#
-# Revision 1.5.2.5  2004/07/31 23:44:55  dgrisby
-# Properly handle null and void Anys; store omniObjRef pointer for
-# objrefs in Anys.
-#
-# Revision 1.5.2.4  2004/07/23 10:29:58  dgrisby
-# Completely new, much simpler Any implementation.
-#
-# Revision 1.5.2.3  2004/07/04 23:53:38  dgrisby
-# More ValueType TypeCode and Any support.
-#
-# Revision 1.5.2.2  2004/04/02 13:26:22  dgrisby
-# Start refactoring TypeCode to support value TypeCodes, start of
-# abstract interfaces support.
-#
-# Revision 1.5.2.1  2003/03/23 21:02:39  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.3.2.12  2001/10/29 17:42:39  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.3.2.11  2001/08/29 13:41:04  dpg1
-# jnw's fix for compilers with variable sizeof(enum)
-#
-# Revision 1.3.2.10  2001/08/22 13:29:48  dpg1
-# Re-entrant Any marshalling.
-#
-# Revision 1.3.2.9  2001/08/15 10:29:53  dpg1
-# Update DSI to use Current, inProcessIdentity.
-#
-# Revision 1.3.2.8  2001/06/13 17:26:41  sll
-# Remove '+' from 'namespace' in the generated code.
-#
-# Revision 1.3.2.7  2001/06/08 17:12:15  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.3.2.6  2001/04/19 09:30:12  sll
-#  Big checkin with the brand new internal APIs.
-# Scoped where appropriate with the omni namespace.
-#
-# Revision 1.3.2.5  2001/03/13 10:32:08  dpg1
-# Fixed point support.
-#
-# Revision 1.3.2.4  2000/11/20 14:43:24  sll
-# Added support for wchar and wstring.
-#
-# Revision 1.3.2.3  2000/11/03 19:21:55  sll
-# Use include omniORB4 in the generated code.
-#
-# Revision 1.3.2.2  2000/10/12 15:37:50  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.4  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.1.2.10  2000/07/04 12:57:52  djs
-# Fixed Any insertion/extraction operators for unions and exceptions
-#
-# Revision 1.1.2.9  2000/06/30 09:33:05  djs
-# Removed more possible nameclashes with user supplied names.
-#
-# Revision 1.1.2.8  2000/06/27 16:15:10  sll
-# New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
-# _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
-# sequence of string and a sequence of object reference.
-#
-# Revision 1.1.2.7  2000/06/26 16:23:27  djs
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.1.2.6  2000/06/05 13:03:05  djs
-# Removed union member name clash (x & pd_x, pd__default, pd__d)
-# Removed name clash when a sequence is called "pd_seq"
-#
-# Revision 1.1.2.5  2000/05/31 18:02:51  djs
-# Better output indenting (and preprocessor directives now correctly output at
-# the beginning of lines)
-#
-# Revision 1.1.2.4  2000/03/28 18:28:23  djs
-# Sequence deletion function used unescaped name "data" which could clash with a
-# user identifier
-#   eg typedef sequence<char> data
-# produces output that could not be parsed.
-#
-# Revision 1.1.2.3  2000/03/24 16:18:25  djs
-# Added missing prefix to CORBA::Any extraction operators used for
-#   typedef sequence<X> Y
-# (typedef sequence<long> a; would not produce C++ which gcc could parse)
-#
-# Revision 1.1.2.2  2000/02/16 18:34:49  djs
-# Fixed problem generating fragments in DynSK.cc file
-#
-# Revision 1.1.2.1  2000/02/15 15:36:25  djs
-# djr's and jnw's "Super-Hacky Optimisation" patched and added
-#
-# Revision 1.1  2000/01/20 18:26:45  djs
-# Moved large C++ output strings into an external template file
-#
 
 """C++ templates for the DynSK.cc file"""
 
@@ -604,23 +495,6 @@ void operator<<=(::CORBA::Any& _a, @fqname@* _sp)
 }
 """
 
-
-
-## TypeCode generation
-##
-tc_string = """\
-#if !defined(___tc_string_@n@_value__) && !defined(DISABLE_Unnamed_Bounded_String_TC)
-#define ___tc_string_@n@_value__
-const ::CORBA::TypeCode_ptr _tc_string_@n@ = ::CORBA::TypeCode::PR_string_tc(@n@, &@prefix@_tcTrack);
-#endif
-"""
-
-tc_wstring = """\
-#if !defined(___tc_wstring_@n@_value__) && !defined(DISABLE_Unnamed_Bounded_WString_TC)
-#define ___tc_wstring_@n@_value__
-const ::CORBA::TypeCode_ptr _tc_wstring_@n@ = ::CORBA::TypeCode::PR_wstring_tc(@n@, &@prefix@_tcTrack);
-#endif
-"""
 
 external_linkage = """\
 #if defined(HAS_Cplusplus_Namespace) && defined(_MSC_VER)

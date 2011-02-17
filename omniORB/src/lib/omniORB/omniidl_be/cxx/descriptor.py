@@ -3,7 +3,7 @@
 # descriptor.py             Created on: 2000/08/23
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2004 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999-2000 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,41 +27,8 @@
 #   Produce internal descriptors
 #
 
-# $Id$
-# $Log$
-# Revision 1.1.6.3  2004/02/20 00:03:35  dgrisby
-# Compilation fixes. Thanks Gary Duzan for pointing them out.
-#
-# Revision 1.1.6.2  2003/10/23 11:25:54  dgrisby
-# More valuetype support.
-#
-# Revision 1.1.6.1  2003/03/23 21:02:42  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.1.4.4  2001/06/08 17:12:12  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.1.4.3  2001/03/26 11:11:54  dpg1
-# Python clean-ups. Output routine optimised.
-#
-# Revision 1.1.4.2  2001/03/13 10:34:01  dpg1
-# Minor Python clean-ups
-#
-# Revision 1.1.4.1  2000/10/12 15:37:47  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.1.2.1  2000/09/14 16:03:02  djs
-# Remodularised C++ descriptor name generator
-# Bug in listing all inherited interfaces if one is a forward
-# repoID munging function now handles #pragma ID in bootstrap.idl
-# Naming environments generating code now copes with new IDL AST types
-# Modified type utility functions
-# Minor tidying
-#
-
 from omniidl import idlvisitor, idlast
-from omniidl_be.cxx import config, id, ast
-import string
+from omniidl_be.cxx import id, config, ast
 
 # All descriptors are of the form:
 #  TAG _ PREFIX _ BASE
@@ -179,7 +146,7 @@ class HashVisitor(idlvisitor.AstVisitor):
         low.reverse()
         
         global prefix
-        prefix = string.join(high + low, "")
+        prefix = "".join(high + low)
 
 
 # Return a unique PREFIX + BASE
@@ -188,7 +155,7 @@ def unique():
     clist = list(hex_word(counter))
     clist.reverse()
 
-    name = prefix + "_" + string.join(clist, "")
+    name = prefix + "_" + "".join(clist)
     counter = counter + 1
     
     return name
@@ -223,11 +190,7 @@ def get_interface_operation_descriptor(iname, operation_name, signature):
 
 
 # Takes an int and returns the int in hex, without leading 0x and with
-# 0s padding. Can't use %08x because Python 1.5.2 can't do it with
-# longs >= 2**31.
+# 0s padding.
 
 def hex_word(x):
-    s = hex(x)[2:]
-    if s[-1] == "L":
-        s = s[:-1]
-    return string.zfill(s, 8)
+    return "%08x" % x

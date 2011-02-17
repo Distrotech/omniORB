@@ -3,7 +3,7 @@
 # __init__.py               Created on: 1999/11/11
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2004 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -27,75 +27,6 @@
 #
 #   Entrypoint to dynamic skeleton generation code
 
-# $Id$
-# $Log$
-# Revision 1.10.2.2  2004/04/02 13:26:22  dgrisby
-# Start refactoring TypeCode to support value TypeCodes, start of
-# abstract interfaces support.
-#
-# Revision 1.10.2.1  2003/03/23 21:02:40  dgrisby
-# Start of omniORB 4.1.x development branch.
-#
-# Revision 1.8.2.4  2003/01/22 12:10:55  dgrisby
-# Explicitly close files in C++ backend.
-#
-# Revision 1.8.2.3  2001/06/08 17:12:14  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.8.2.2  2000/10/12 15:37:49  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.9.2.1  2000/08/21 11:35:06  djs
-# Lots of tidying
-#
-# Revision 1.9  2000/07/13 15:26:01  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.6.2.6  2000/06/26 16:23:26  djs
-# Refactoring of configuration state mechanism.
-#
-# Revision 1.6.2.5  2000/05/31 18:02:50  djs
-# Better output indenting (and preprocessor directives now correctly output at
-# the beginning of lines)
-#
-# Revision 1.6.2.4  2000/04/26 18:22:19  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.6.2.3  2000/03/24 22:30:17  djs
-# Major code restructuring:
-#   Control flow is more recursive and obvious
-#   Properly distinguishes between forward declarations and externs
-#   Only outputs definitions once
-#   Lots of assertions to check all is well
-#
-# Revision 1.6.2.2  2000/02/16 18:34:49  djs
-# Fixed problem generating fragments in DynSK.cc file
-#
-# Revision 1.6.2.1  2000/02/14 18:34:56  dpg1
-# New omniidl merged in.
-#
-# Revision 1.6  2000/01/20 18:26:43  djs
-# Moved large C++ output strings into an external template file
-#
-# Revision 1.5  2000/01/17 17:06:30  djs
-# Added tcParser #ifdefs for bounded strings
-#
-# Revision 1.4  2000/01/13 15:56:34  djs
-# Factored out private identifier prefix rather than hard coding it all through
-# the code.
-#
-# Revision 1.3  2000/01/12 11:52:09  djs
-# Added important comment :)
-#
-# Revision 1.2  1999/12/09 20:40:13  djs
-# TypeCode and Any generation option performs identically to old compiler for
-# all current test fragments.
-#
-# Revision 1.1  1999/11/12 17:18:06  djs
-# Skeleton of dynamic skeleton code :)
-#
-
 # All you really need to know for the moment is that the universe
 # is a lot more complicated than you might think, even if you
 # start from a position of thinking it's pretty damn complicated
@@ -108,12 +39,10 @@ from omniidl_be.cxx import config
 
 # -----------------------------
 # Utility functions
-from omniidl_be.cxx import ast, cxx, output, util
-
-#import omniidl_be.cxx.dynskel.tcstring
-import omniidl_be.cxx.dynskel.typecode
-import omniidl_be.cxx.dynskel.main
-import omniidl_be.cxx.dynskel.template
+from omniidl_be.cxx import output
+from omniidl_be.cxx.dynskel import typecode
+from omniidl_be.cxx.dynskel import main
+from omniidl_be.cxx.dynskel import template
 
 def generate(stream, tree):
     stream.out(template.header_comment,
@@ -130,14 +59,11 @@ def generate(stream, tree):
                    library = config.state['Library Version'],
                    prefix = config.state['Private Prefix'])
 
-    # This is the bit shared with the header file?
-    tcstring = omniidl_be.cxx.dynskel.tcstring.__init__(stream)
+    typecode.init(stream)
+    tree.accept(typecode)
 
-    Typecode = omniidl_be.cxx.dynskel.typecode.__init__(stream)
-    tree.accept(Typecode)
-
-    Main = omniidl_be.cxx.dynskel.main.__init__(stream)
-    tree.accept(Main)
+    main.init(stream)
+    tree.accept(main)
 
 def run(tree):
     # create somewhere to put the output

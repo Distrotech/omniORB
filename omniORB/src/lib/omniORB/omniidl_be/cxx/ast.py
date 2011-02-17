@@ -3,6 +3,7 @@
 # ast.py                    Created on: 2000/8/10
 #                           Author    : David Scott (djs)
 #
+#    Copyright (C) 2011 Apasphere Ltd
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -26,47 +27,11 @@
 #   
 #   Routines for manipulating the AST
 
-# $Id$
-# $Log$
-# Revision 1.1.4.6  2001/10/29 17:42:38  dpg1
-# Support forward-declared structs/unions, ORB::create_recursive_tc().
-#
-# Revision 1.1.4.5  2001/06/08 17:12:11  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.1.4.4  2001/03/26 11:11:54  dpg1
-# Python clean-ups. Output routine optimised.
-#
-# Revision 1.1.4.3  2001/03/13 10:34:01  dpg1
-# Minor Python clean-ups
-#
-# Revision 1.1.4.2  2000/12/05 17:44:10  dpg1
-# Remove dead repoId checking code.
-#
-# Revision 1.1.4.1  2000/10/12 15:37:46  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.1.2.3  2000/09/21 16:35:54  djs
-# *** empty log message ***
-#
-# Revision 1.1.2.2  2000/09/14 16:03:01  djs
-# Remodularised C++ descriptor name generator
-# Bug in listing all inherited interfaces if one is a forward
-# repoID munging function now handles #pragma ID in bootstrap.idl
-# Naming environments generating code now copes with new IDL AST types
-# Modified type utility functions
-# Minor tidying
-#
-# Revision 1.1.2.1  2000/08/21 11:34:32  djs
-# Lots of omniidl/C++ backend changes
-#
-
 """Routines for mangipulating the AST"""
 
 from omniidl import idlast, idltype, idlvisitor
 from omniidl_be.cxx import util, config
 
-import string, re
 
 # Global values used by functions in this module
 _initialised = 0
@@ -250,6 +215,10 @@ def shouldGenerateCodeForDecl(decl):
     return hasattr(decl, "cxx_generate")
 
 
+#
+# Union-related functions
+#
+
 # Returns the list of all non-default union case labels (ie those which
 # have an explicit value)
 def allCaseLabels(union):
@@ -269,12 +238,11 @@ def allCaseLabelValues(union):
 # Returns the default case of a union or None if it doesn't exist
 def defaultCase(union):
     assert isinstance(union, idlast.Union)
-    default = None
     for case in union.cases():
         for label in case.labels():
             if label.default():
-                default = case
-    return default
+                return case
+    return None
 
 # Adds a new attribute to all the union cases:
 #  isDefault: boolean, true if case is the default one
@@ -285,6 +253,7 @@ def markDefaultCase(union):
         for label in case.labels():
             if label.default():
                 case.isDefault = 1
+                break
 
 # Returns the default label of a case
 def defaultLabel(case):
@@ -349,8 +318,7 @@ def exhaustiveMatch(type, values):
             if enum not in values: return 0
         return 1
 
-    raise AssertionError("exhaustiveMatch type="+repr(type)+
-                         " val="+repr(discrimvalue))
+    assert 0
 
 
 # Return the base AST node after following all the typedef chains

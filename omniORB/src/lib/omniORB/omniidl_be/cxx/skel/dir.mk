@@ -2,7 +2,7 @@ PYLIBROOT= $(EXPORT_TREE)/lib/python
 PYLIBDIR = $(PYLIBROOT)/omniidl_be/cxx/skel
 INSTALLPYLIBDIR = $(INSTALLPYTHONDIR)/omniidl_be/cxx/skel
 
-FILES = __init__.py main.py poa.py mangler.py template.py
+FILES = __init__.py main.py poa.py template.py
 
 export:: $(FILES)
 	@(dir="$(PYLIBDIR)"; \

@@ -3,6 +3,7 @@
 # main.py                   Created on: 2000/02/13
 #                           Author    : David Scott (djs)
 #
+#    Copyright (C) 2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -21,61 +22,17 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #  02111-1307, USA.
-#
-# Description:
-#   
-#   Produce example interface implementations
-
-# $Id$
-# $Log$
-# Revision 1.3.2.3  2001/06/08 17:12:18  dpg1
-# Merge all the bug fixes from omni3_develop.
-#
-# Revision 1.3.2.2  2000/10/12 15:37:52  sll
-# Updated from omni3_1_develop.
-#
-# Revision 1.4.2.2  2000/09/27 17:11:28  djs
-# Bugfix
-#
-# Revision 1.4.2.1  2000/08/21 11:35:23  djs
-# Lots of tidying
-#
-# Revision 1.4  2000/07/13 15:26:00  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.1.2.5  2000/05/16 11:16:01  djs
-# Updated to simplify memory management, correct errors in function prototypes,
-# add missing attribute functions and generate #warnings which the user should
-# remove when they fill in the gaps in the output.
-#
-# Revision 1.1.2.4  2000/04/26 18:22:37  djs
-# Rewrote type mapping code (now in types.py)
-# Rewrote identifier handling code (now in id.py)
-#
-# Revision 1.1.2.3  2000/03/09 15:21:53  djs
-# Better handling of internal compiler exceptions (eg attempts to use
-# wide string types)
-#
-# Revision 1.1.2.2  2000/02/18 23:01:25  djs
-# Updated example implementation code generating module
-#
-# Revision 1.1  2000/02/13 15:54:14  djs
-# Beginnings of code to generate example interface implementations
-#
 
 """Produce example interface implementations"""
 
-import string
-
 from omniidl import idlast, idlvisitor
-from omniidl_be.cxx import ast, cxx, util, id, types, output
+from omniidl_be.cxx import ast, util, types, output, id
 from omniidl_be.cxx.impl import template
 
 import main
-
 self = main
 
-def __init__(stream, idl_filename, hh_filename):
+def init(stream, idl_filename, hh_filename):
     self.stream = stream
     self.idl_filename = idl_filename
     self.hh_filename = hh_filename
@@ -89,7 +46,7 @@ def __init__(stream, idl_filename, hh_filename):
 # implementation class
 def impl_fullname(name):
     bits = name.suffix("_i").fullName()
-    return string.join(bits, "_")
+    return "_".join(bits)
 
 # Convert an IDL name into the simple name of the implementation class
 def impl_simplename(name):
@@ -115,15 +72,19 @@ def run(tree):
         name = id.Name(i.scopedName())
 
         impl_name = impl_fullname(name)
+
         # for an implementation class A_B_C_i, generate an instance myA_B_C_i
         inst_name = "my" + impl_name
+
         # allocate an instance of the implementation on the heap
         allocate.out("@impl_name@* @inst_name@ = new @impl_name@();",
                      impl_name = impl_name, inst_name = inst_name)
+
         # activate the object and get a T_var reference to it
         activate.out("PortableServer::ObjectId_var @inst_name@id = " +\
                      "poa->activate_object(@inst_name@);",
                      inst_name = inst_name)
+
         # get the reference and output it
         reference.out(template.interface_ior,
                       fqname = name.fullyQualify(cxx = 0),
@@ -182,16 +143,15 @@ class BuildInterfaceImplementations(idlvisitor.AstVisitor):
         # signatures eg
         #   [ char *echoString(const char *mesg) ]
         attributes = []
-        operations = []
-        virtual_operations = []
 
         # we need to consider all callables, including inherited ones
         # since this implementation class is not inheriting from anywhere
         # other than the IDL skeleton
         allInterfaces = [node] + ast.allInherits(node)
-        allCallables = util.fold( map(lambda x:x.callables(), allInterfaces),
-                                  [], lambda x, y: x + y )
 
+        allCallables = []
+        for intf in allInterfaces:
+            allCallables.extend(intf.callables())
 
         # declarations[] contains a list of in-class decl signatures
         # implementations[] contains a list of out of line impl signatures
@@ -202,13 +162,13 @@ class BuildInterfaceImplementations(idlvisitor.AstVisitor):
         for c in allCallables:
             if isinstance(c, idlast.Attribute):
                 attrType = types.Type(c.attrType())
-                d_attrType = attrType.deref()
 
                 for i in c.identifiers():
                     attribname = id.mapID(i)
                     returnType = attrType.op(types.RET)
                     inType = attrType.op(types.IN)
                     attributes.append(returnType + " " + attribname + "()")
+
                     # need a set method if not a readonly attribute
                     if not c.readonly():
                         args = attribname + "(" + inType + ")"
@@ -218,6 +178,7 @@ class BuildInterfaceImplementations(idlvisitor.AstVisitor):
                     declarations.append(returnType + " " + attribname + "()")
                     implementations.append(returnType + " " + impl_flat_name+\
                                            "::" + attribname + "()")
+
             elif isinstance(c, idlast.Operation):
                 params = []
                 for p in c.parameters():
@@ -234,18 +195,17 @@ class BuildInterfaceImplementations(idlvisitor.AstVisitor):
                 return_type = types.Type(c.returnType()).op(types.RET)
 
                 opname = id.mapID(c.identifier())
-                arguments = string.join(params, ", ")
+                arguments = ", ".join(params)
                 args = opname + "(" + arguments + ")"
-                declarations.append(return_type + " " + args)
-                implementations.append(return_type + " " + impl_flat_name +\
+                declarations.append(return_type + " " + args + ";")
+                implementations.append(return_type + " " + impl_flat_name +
                                        "::" + args)
             else:
                 util.fatalError("Internal error generating interface member")
-                raise AssertionError("No code for interface member: "+repr(c))
 
         # the class definition has no actual code...
-        defs = string.join(map(lambda x:x + ";\n", declarations), "")
-            
+        defs = "\n".join(declarations)
+
         # Output the _i class definition definition
         self.stream.out(template.interface_def,
                         impl_fqname = impl_flat_name,
@@ -255,20 +215,17 @@ class BuildInterfaceImplementations(idlvisitor.AstVisitor):
                         operations = defs)
 
         # Output the implementations of the class methods
-        impls = string.join(map(lambda x: x + """\
+        impls = "".join([ """\
+%s
 {
   // insert code here and remove the warning
-  #warning "Code missing in function <""" + x + """>"
+  #warning "Code missing in function <%s>"
 }
 
-""",
-                                implementations), "")
+""" % (impl,impl) for impl in implementations ])
                
         self.stream.out(template.interface_code,
                         fqname = fqname,
                         impl_name = impl_flat_name,
                         impl_fqname = impl_flat_name,
                         operations = impls)
-
-
-

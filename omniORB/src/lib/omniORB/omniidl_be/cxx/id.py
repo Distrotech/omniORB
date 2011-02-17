@@ -3,7 +3,7 @@
 # id.py                     Created on: 2000/4/6
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2006 Apasphere Ltd
+#    Copyright (C) 2003-2011 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -29,9 +29,9 @@
 
 from omniidl import idlvisitor, idlutil
 
-import config, util
+from omniidl_be.cxx import config, util
 
-import string, re
+import re
 
 # CORBA2.3 P1-166 1.43 C++ Keywords
 #
@@ -128,7 +128,7 @@ class Name:
 
         sn = self._apply_presuffix(sn)
 
-        return string.join(sn, "::")
+        return "::".join(sn)
 
     def fullName(self):
         """fullName(id.Name): string list
@@ -160,7 +160,7 @@ class Name:
 
         if cxx: relName = map(mapID, relName)
         relName = self._apply_presuffix(relName)
-        return string.join(relName, "::")
+        return "::".join(relName)
 
 
     def guard(self):
@@ -172,10 +172,10 @@ class Name:
             return re.sub(r"\W", "_", text)
         scopedName = map(escapeChars, self._scopedName[:])
 
-        return string.join(self._apply_presuffix(scopedName), "_m")
+        return "_m".join(self._apply_presuffix(scopedName))
 
     def flatName(self):
-        return string.join(self.fullName(), "_")
+        return "_".join(self.fullName())
     
     def needFlatName(self, environment):
         # does the name have scope :: qualifiers?
@@ -186,10 +186,11 @@ class Name:
     def hash(self):
         """hash(id.Name): string
            Returns a hashable unique key for this object"""
-        return string.join(self._scopedName, "/")
+        return "/".join(self._scopedName)
 
     def __str__(self):
-        return string.join(self._scopedName, "/")
+        return "/".join(self._scopedName)
+
 
 class Environment:
     """An environment encapsulates the naming environment at a point

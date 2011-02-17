@@ -44,7 +44,7 @@ OUT    = 1
 INOUT  = 2
 RET    = 3
 
-# we don't support these yet
+# we don't support these
 unsupported_typecodes =[idltype.tk_Principal,
                         idltype.tk_native]
 
@@ -574,7 +574,6 @@ class Type:
            sequence"""
         # returns a template instantiation suitable for the
         # sequence type
-        # (similar in function to o2be_sequence::seq_template_name)
         sequence = self.__type
         assert isinstance(sequence, idltype.Sequence)
         

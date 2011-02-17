@@ -25,7 +25,7 @@ endif
 
 FILES = __init__.py util.py skutil.py id.py types.py config.py output.py \
         ast.py iface.py call.py cxx.py support.py descriptor.py \
-        mapping.py value.py
+        mapping.py mangler.py value.py
 
 export:: $(FILES)
 	@(dir="$(PYLIBDIR)"; \
