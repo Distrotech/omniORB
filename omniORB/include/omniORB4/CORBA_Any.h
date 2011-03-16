@@ -270,6 +270,8 @@ public:
   void NP_marshalDataOnly(cdrStream& s) const;
   void NP_unmarshalDataOnly(cdrStream& s);
 
+  inline TypeCode_ptr NP_type() const { return pd_tc; }
+
   //
   // omniORB internal stub support routines
   //

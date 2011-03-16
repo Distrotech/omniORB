@@ -53,9 +53,8 @@ public:
 
   virtual ~cdrAnyMemoryStream();
 
-  cdrAnyMemoryStream& operator=(const cdrMemoryStream&);
-
   virtual void* ptrToClass(int* cptr);
+
   static inline cdrAnyMemoryStream* downcast(cdrStream* s) {
     return (cdrAnyMemoryStream*)s->ptrToClass(&_classid);
   }
@@ -81,6 +80,9 @@ private:
   // representing an index into this sequence. The sequence is only
   // allocated if there are values inside the Any.
   omniTypedefs::ValueBaseSeq_var pd_values;
+
+  // Not implemented
+  cdrAnyMemoryStream& operator=(const cdrAnyMemoryStream&);
 };
 
 #undef _dyn_attr

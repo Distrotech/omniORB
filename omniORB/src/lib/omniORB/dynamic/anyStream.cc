@@ -64,14 +64,6 @@ cdrAnyMemoryStream::cdrAnyMemoryStream(void* d, CORBA::Boolean release)
     pd_readonly_and_external_buffer = 0;
 }
 
-cdrAnyMemoryStream& 
-cdrAnyMemoryStream::operator=(const cdrMemoryStream& s)
-{
-  clearValueSeq();
-  cdrMemoryStream::operator=(s);
-  return *this;
-}
-
 
 cdrAnyMemoryStream::~cdrAnyMemoryStream() {}
 

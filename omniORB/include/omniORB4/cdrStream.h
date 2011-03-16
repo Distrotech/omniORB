@@ -953,11 +953,27 @@ public:
   // Rewind the both input and output pointers to the beginning of the buffer
   // bufSize() returns 0 after this call.
 
-  _CORBA_ULong bufSize() const;
+  inline _CORBA_ULong bufSize() const
+  {
+    return (_CORBA_ULong)((omni::ptr_arith_t)pd_outb_mkr - 
+			  (omni::ptr_arith_t)pd_bufp_8);
+  }
   // Returns the size of the buffer containing valid data.
 
-  void* bufPtr() const;
+  inline void* bufPtr() const {
+    return pd_bufp_8;
+  }
   // Returns a pointer to the beginning of the buffer.
+
+  inline void* inPtr() const {
+    return pd_inb_mkr;
+  }
+  // Current input pointer
+
+  inline void* outPtr() const {
+    return pd_outb_mkr;
+  }
+  // Current output pointer
 
   void setByteSwapFlag(_CORBA_Boolean littleendian);
   // Data in the buffer is little-endian (<littleendian> = TRUE(1)) or
