@@ -50,7 +50,7 @@ CORBA::Exception::~Exception() { pd_magic = 0; }
 
 
 CORBA::Exception*
-CORBA::Exception::_duplicate(Exception* e)
+CORBA::Exception::_duplicate(const Exception* e)
 {
   if( e )  return e->_NP_duplicate();
   else     return 0;

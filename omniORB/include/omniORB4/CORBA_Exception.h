@@ -71,7 +71,7 @@ public:
   // returning a pointer to the descendant's type.
   // NOTE: deprecated function from CORBA 2.2. Same as _downcast.
 
-  static Exception* _duplicate(Exception* e);
+  static Exception* _duplicate(const Exception* e);
 
   virtual const char* _name() const;
   virtual const char* _rep_id() const;
