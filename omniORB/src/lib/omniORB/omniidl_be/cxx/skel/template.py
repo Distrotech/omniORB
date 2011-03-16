@@ -708,9 +708,9 @@ void
 void
 @name@::operator<<= (cdrStream& _n)
 {
-  @unmarshal_discriminator@
   _release_member();
   
+  @unmarshal_discriminator@
   switch(_pd__d) {
     @unmarshal_cases@
   }

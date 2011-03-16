@@ -1,3 +1,24 @@
+Wed Mar 16 18:30:40 GMT 2011 dgrisby
+====================================
+
+- Non-portable non-refcount Any typecode access; inline some methods.
+
+include/omniORB4/CORBA_Any.h
+include/omniORB4/anyStream.h
+include/omniORB4/cdrStream.h
+src/lib/omniORB/dynamic/anyStream.cc
+src/lib/omniORB/orbcore/cdrMemoryStream.cc
+
+- Allow duplication of const Exception pointer.
+
+include/omniORB4/CORBA_Exception.h
+src/lib/omniORB/orbcore/exceptn.cc
+
+- Must release union member before unmarshalling new discriminator.
+
+src/lib/omniORB/omniidl_be/cxx/skel/template.py
+
+
 Thu Feb 17 12:42:40 GMT 2011 dgrisby
 ====================================
 
