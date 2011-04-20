@@ -3,7 +3,7 @@
 // cxxAPI.cc                  Created on: 2002/05/25
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //
 //    This file is part of the omniORBpy library
 //
@@ -205,16 +205,30 @@ impl_unmarshalTypeDesc(cdrStream& stream, CORBA::Boolean hold_lock)
   }
 }
 
+static void*
+impl_aquireGIL()
+{
+  return (void*)omnipyThreadCache::acquire();
+}
+
+static void
+impl_releaseGIL(void* ptr)
+{
+  omnipyThreadCache::release((omnipyThreadCache::CacheNode*)ptr);
+}
+
 
 omniORBpyAPI::omniORBpyAPI()
-  : cxxObjRefToPyObjRef(impl_cxxObjRefToPyObjRef),
-    pyObjRefToCxxObjRef(impl_pyObjRefToCxxObjRef),
-    handleCxxSystemException(impl_handleCxxSystemException),
+  : cxxObjRefToPyObjRef	       (impl_cxxObjRefToPyObjRef),
+    pyObjRefToCxxObjRef	       (impl_pyObjRefToCxxObjRef),
+    handleCxxSystemException   (impl_handleCxxSystemException),
     handlePythonSystemException(impl_handlePythonSystemException),
-    marshalPyObject(impl_marshalPyObject),
-    unmarshalPyObject(impl_unmarshalPyObject),
-    marshalTypeDesc(impl_marshalTypeDesc),
-    unmarshalTypeDesc(impl_unmarshalTypeDesc)
+    marshalPyObject  	       (impl_marshalPyObject),
+    unmarshalPyObject	       (impl_unmarshalPyObject),
+    marshalTypeDesc  	       (impl_marshalTypeDesc),
+    unmarshalTypeDesc	       (impl_unmarshalTypeDesc),
+    acquireGIL	     	       (impl_aquireGIL),
+    releaseGIL	     	       (impl_releaseGIL)
 {}
 
 

@@ -3,7 +3,7 @@
 // pyThreadCache.h            Created on: 2000/05/26
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2005 Apasphere Ltd
+//    Copyright (C) 2005-2011 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,32 +29,13 @@
 //    Cached mapping from threads to PyThreadState and
 //    threading.Thread objects
 
-// $Id$
-
-// $Log$
-// Revision 1.1.4.4  2005/03/02 13:39:16  dgrisby
-// Another merge from omnipy2_develop.
-//
-// Revision 1.1.4.3  2005/01/25 11:45:48  dgrisby
-// Merge from omnipy2_develop; set RPM version.
-//
-// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:27  dpg1
-// Initial support for omniORB 4.
-//
-
 #if defined(__VMS)
 #include <pythread.h>
 #else
 #include PYTHON_THREAD_INC
 #endif
 
-// Python 2.3 introduced functions to get and released the Python
+// Python 2.3 introduced functions to get and release the Python
 // interpreter lock, and create thread state as necessary.
 // Unfortunately, they are too inefficient since we would end up
 // creating and destroying thread states (and Python threading.Thread
@@ -99,33 +80,47 @@ public:
   // Time in seconds between runs of the node scavenger
   static unsigned int       scanPeriod;
 
+  // Acquire the global interpreter lock
+  static inline CacheNode* acquire()
+  {
+    CacheNode* cn;
+#if PY_VERSION_HEX >= 0x02030000
+    PyThreadState* tstate = PyGILState_GetThisThreadState();
+    if (tstate) {
+      cn = 0;
+      PyEval_AcquireLock();
+      PyThreadState_Swap(tstate);
+    }
+    else
+#endif
+    {
+      long id = PyThread_get_thread_ident();
+      cn      = acquireNode(id);
+      PyEval_AcquireLock();
+      PyThreadState_Swap(cn->threadState);
+    }
+    return cn;
+  }
+
+  // Release the global interpreter lock
+  static inline void release(CacheNode* cn)
+  {
+    PyThreadState_Swap(0);
+    PyEval_ReleaseLock();
+    if (cn)
+      releaseNode(cn);
+  }
+
+
   // Class lock acquires the Python interpreter lock when it is
   // created, and releases it again when it is deleted.
   class lock {
   public:
     inline lock() {
-#if PY_VERSION_HEX >= 0x02030000
-      PyThreadState* tstate = PyGILState_GetThisThreadState();
-      if (tstate) {
-	cacheNode_ = 0;
-	PyEval_AcquireLock();
-	PyThreadState_Swap(tstate);
-      }
-      else
-#endif
-      {
-	long id    = PyThread_get_thread_ident();
-	cacheNode_ = acquireNode(id);
-	PyEval_AcquireLock();
-	PyThreadState_Swap(cacheNode_->threadState);
-      }
+      cacheNode_ = acquire();
     }
-
     inline ~lock() {
-      PyThreadState_Swap(0);
-      PyEval_ReleaseLock();
-      if (cacheNode_)
-	releaseNode(cacheNode_);
+      release(cacheNode_);
     }
   private:
     CacheNode* cacheNode_;
