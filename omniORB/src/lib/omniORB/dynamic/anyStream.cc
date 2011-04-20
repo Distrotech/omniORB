@@ -33,11 +33,11 @@
 
 OMNI_USING_NAMESPACE(omni)
 
-cdrAnyMemoryStream::cdrAnyMemoryStream() : cdrMemoryStream() {}
+cdrAnyMemoryStream::cdrAnyMemoryStream() : cdrMemoryStream(), pd_refCount(1) {}
 
 cdrAnyMemoryStream::cdrAnyMemoryStream(const cdrAnyMemoryStream& s,
 				       CORBA::Boolean read_only)
-  : cdrMemoryStream(s, read_only)
+  : cdrMemoryStream(s, read_only), pd_refCount(1)
 {
   cdrAnyMemoryStream* ns = OMNI_CONST_CAST(cdrAnyMemoryStream*, &s);
 
@@ -58,14 +58,17 @@ cdrAnyMemoryStream::cdrAnyMemoryStream(const cdrAnyMemoryStream& s,
 }
 
 cdrAnyMemoryStream::cdrAnyMemoryStream(void* d, CORBA::Boolean release)
-  : cdrMemoryStream(d)
+  : cdrMemoryStream(d), pd_refCount(1)
 {
   if (release)
     pd_readonly_and_external_buffer = 0;
 }
 
 
-cdrAnyMemoryStream::~cdrAnyMemoryStream() {}
+cdrAnyMemoryStream::~cdrAnyMemoryStream()
+{
+  OMNIORB_ASSERT(pd_refCount.value() <= 1);
+}
 
 
 void*

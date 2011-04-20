@@ -225,6 +225,9 @@
 /* define if you want mutexes to be traced */
 #undef OMNIORB_ENABLE_LOCK_TRACES
 
+/* define if you want to disable atomic operations */
+#undef OMNI_DISABLE_ATOMIC_OPS
+
 /* define if you want to disable IPv6 support */
 #undef OMNI_DISABLE_IPV6
 

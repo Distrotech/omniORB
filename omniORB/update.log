@@ -1,3 +1,23 @@
+Wed Apr 20 18:22:35 BST 2011 dgrisby
+====================================
+
+- Any efficiency improvements.
+
+acinclude.m4
+configure.ac
+configure
+include/omniORB4/CORBA_Any.h
+include/omniORB4/CORBA_TypeCode_member.h
+include/omniORB4/acconfig.h.in
+include/omniORB4/anyStream.h
+include/omnithread.h
+include/omnithread/GNUmakefile.in
+include/omnithread/atomic.h
+src/lib/omniORB/dynamic/any.cc
+src/lib/omniORB/dynamic/anyStream.cc
+src/lib/omnithread/threaddata.cc
+
+
 Wed Mar 16 18:30:40 GMT 2011 dgrisby
 ====================================
 

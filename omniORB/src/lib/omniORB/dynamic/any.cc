@@ -5,7 +5,7 @@
 //                            Author2   : James Weatherall (jnw)
 //                            Author3   : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2004-2007 Apasphere Ltd.
+//    Copyright (C) 2004-2011 Apasphere Ltd.
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -29,173 +29,6 @@
 // Description:
 //      Implementation of type any
 
-/*
- * $Log$
- * Revision 1.21.2.10  2007/11/28 11:17:59  dgrisby
- * More problems with Anys containing nil objrefs. Thanks Peter S. Housel.
- *
- * Revision 1.21.2.9  2007/11/26 16:14:35  dgrisby
- * Assertion failure with nil objref in Any value marshalling.
- * failure receiving a struct containing an enum.
- *
- * Revision 1.21.2.8  2007/05/11 09:46:45  dgrisby
- * Initialise Any's TypeCode to 0 rather than tc_null to avoid locking
- * overhead at creation. Thanks Teemu Torma.
- *
- * Revision 1.21.2.7  2007/02/28 15:22:53  dgrisby
- * Assertion failure trying to marshal an Any containing a nil objref.
- *
- * Revision 1.21.2.6  2005/07/21 10:00:29  dgrisby
- * Bugs with valuetypes in Anys.
- *
- * Revision 1.21.2.5  2005/01/06 16:39:24  dgrisby
- * DynValue and DynValueBox implementations; misc small fixes.
- *
- * Revision 1.21.2.4  2004/10/13 17:58:20  dgrisby
- * Abstract interfaces support; values support interfaces; value bug fixes.
- *
- * Revision 1.21.2.3  2004/07/31 23:44:55  dgrisby
- * Properly handle null and void Anys; store omniObjRef pointer for
- * objrefs in Anys.
- *
- * Revision 1.21.2.2  2004/07/23 10:29:58  dgrisby
- * Completely new, much simpler Any implementation.
- *
- * Revision 1.21.2.1  2003/03/23 21:02:51  dgrisby
- * Start of omniORB 4.1.x development branch.
- *
- * Revision 1.19.2.12  2001/10/17 16:44:02  dpg1
- * Update DynAny to CORBA 2.5 spec, const Any exception extraction.
- *
- * Revision 1.19.2.11  2001/09/24 10:41:08  dpg1
- * Minor codes for Dynamic library and omniORBpy.
- *
- * Revision 1.19.2.10  2001/08/22 13:29:45  dpg1
- * Re-entrant Any marshalling.
- *
- * Revision 1.19.2.9  2001/08/17 17:08:05  sll
- * Modularise ORB configuration parameters.
- *
- * Revision 1.19.2.8  2001/08/17 13:45:55  dpg1
- * C++ mapping fixes.
- *
- * Revision 1.19.2.7  2001/04/19 09:14:16  sll
- * Scoped where appropriate with the omni namespace.
- *
- * Revision 1.19.2.6  2001/03/13 10:32:05  dpg1
- * Fixed point support.
- *
- * Revision 1.19.2.5  2000/11/17 19:09:36  dpg1
- * Support codeset conversion in any.
- *
- * Revision 1.19.2.4  2000/11/09 12:27:52  dpg1
- * Huge merge from omni3_develop, plus full long long from omni3_1_develop.
- *
- * Revision 1.19.2.3  2000/10/06 16:40:52  sll
- * Changed to use cdrStream.
- *
- * Revision 1.19.2.2  2000/09/27 17:25:39  sll
- * Changed include/omniORB3 to include/omniORB4.
- *
- * Revision 1.19.2.1  2000/07/17 10:35:40  sll
- * Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
- *
- * Revision 1.20  2000/07/13 15:26:03  dpg1
- * Merge from omni3_develop for 3.0 release.
- *
- * Revision 1.18.6.6  2000/06/27 16:15:09  sll
- * New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
- * _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
- * sequence of string and a sequence of object reference.
- *
- * Revision 1.18.6.5  2000/02/09 12:04:52  djr
- * Fixed memory allocation bug in Any insertion/extraction of strings.
- * Optimisation for insertion/extraction of sequence of simple types.
- *
- * Revision 1.18.6.4  1999/10/14 17:31:30  djr
- * Minor corrections.
- *
- * Revision 1.18.6.3  1999/10/14 16:21:54  djr
- * Implemented logging when system exceptions are thrown.
- *
- * Revision 1.18.6.2  1999/09/27 08:48:31  djr
- * Minor corrections to get rid of warnings.
- *
- * Revision 1.18.6.1  1999/09/22 14:26:27  djr
- * Major rewrite of orbcore to support POA.
- *
- * Revision 1.18  1999/07/02 19:35:16  sll
- * Corrected typo in operator>>= for typecode.
- *
- * Revision 1.16  1999/07/02 19:10:46  sll
- * Typecode extraction is now non-copy as well.
- *
- * Revision 1.15  1999/06/28 17:38:19  sll
- * Fixed bug in Any marshalling when tcAliasExpand is set to 1.
- *
- * Revision 1.14  1999/06/25 13:47:19  sll
- * Rename copyStringInAnyExtraction to omniORB_27_CompatibleAnyExtraction.
- * operator<<=(Object_ptr) now marshal the real repository ID of the object.
- * operator<<=(const char*) changed to use new format of string data in tcDescriptor.
- * operator<<=(from_string)
- * Removed operator>>=(Object_ptr&) const
- * operator>>=(char*&)  Default to non-copy semantics. Override by
- * omniORB_27_CompatibleAnyExtraction.
- * operator>>=(const char*&) const
- * operator>>=(tostring) const Default to non-copy semantics. Override by
- * omniORB_27_CompatibleAnyExtraction.
- * operator>>=(to_object) const Use _0RL_tcParser_objref_setObjectPtr in
- * the redundent setObjectPtr.
- *
- * Revision 1.13  1999/06/18 20:59:48  sll
- * Updated to CORBA 2.3 mapping.
- * Semantics of extraction operator for string has changed.
- *
- * Revision 1.12  1999/05/25 18:07:51  sll
- * In value(), return 0 if typecode is _tc_null.
- *
- * Revision 1.11  1999/03/11 16:25:58  djr
- * Updated copyright notice
- *
- * Revision 1.10  1999/03/01 09:12:18  djr
- * Accept insertion of null strings into Any (with warning message)
- *
- * Revision 1.9  1999/02/18 15:45:39  djr
- * (Re)Fixed broken insertion/extraction of Object_ptr from Any.
- *
- * Revision 1.8  1999/02/10 15:14:50  djr
- * Fixed broken implementation of marshalling object references into Anys.
- *
- * Revision 1.7  1999/01/07 16:47:03  djr
- * New implementation
- *
- * Revision 1.6  1998/08/14 13:43:04  sll
- * Added pragma hdrstop to control pre-compile header if the compiler feature
- * is available.
- *
- * Revision 1.5  1998/08/10 18:08:26  sll
- * Fixed Any ctor and Any::replace() for untyped values. Now accept null
- * pointer for the value parameter for all typecode types.
- *
- * Revision 1.4  1998/08/05 18:03:36  sll
- * Fixed bug in Any::operator>>=(NetBufferedStream|MemBufferedStream).
- * Previously, basic data types other than any, objref and typecode would be
- * marshalled incorrectly.
- *
- * Revision 1.3  1998/04/08 16:07:32  sll
- * Minor change to help some compiler to find the right TypeCode ctor.
- *
- * Revision 1.2  1998/04/07 19:30:45  sll
- * Moved inline functions to this module.
- *
-// Revision 1.1  1998/01/27  15:43:47  ewc
-// Initial revision
-//
-// Revision 1.1  1998/01/27  15:43:47  ewc
-// Initial revision
-//
-*/
-
 #include <omniORB4/CORBA.h>
 
 #ifdef HAS_pch
@@ -214,6 +47,18 @@ OMNI_USING_NAMESPACE(omni)
 
 // Mutex to protect Any pointers against modification by multiple threads.
 static omni_tracedmutex anyLock("anyLock");
+
+
+// This code is slightly unsafe by default, in that there is a small
+// risk that compiler optimisations or CPU instruction re-ordering
+// could lead to a race condition resulting in use of uninitialised
+// memory if multiple threads try to read from a particular Any at the
+// same time. To avoid that risk, but incur a small performance
+// penalty, uncomment the SNAP_LOCK define below.
+
+//#define SNAP_LOCK omni_tracedmutex_lock snap_lock(anyLock)
+#define SNAP_LOCK do{}while(0)
+
 
 // Extract possibly nil typecode.
 static inline
@@ -237,7 +82,7 @@ CORBA::Any::Any()
 CORBA::Any::~Any()
 {
   if (pd_mbuf)
-    delete pd_mbuf;
+    pd_mbuf->remove_ref();
 
   if (pd_data) {
     OMNIORB_ASSERT(pd_destructor);
@@ -249,7 +94,7 @@ void
 CORBA::Any::PR_clearData()
 {
   if (pd_mbuf)
-    delete pd_mbuf;
+    pd_mbuf->remove_ref();
 
   if (pd_data) {
     OMNIORB_ASSERT(pd_destructor);
@@ -267,16 +112,28 @@ CORBA::Any::Any(const Any& a)
 {
   pd_tc = CORBA::TypeCode::_duplicate(a.pd_tc);
 
-  if (a.pd_mbuf) {
-    pd_mbuf = new cdrAnyMemoryStream(*a.pd_mbuf);
+  cdrAnyMemoryStream* snap_mbuf;
+  void*               snap_data;
+  pr_marshal_fn       snap_marshal;
+
+  {
+    SNAP_LOCK;
+    snap_mbuf	 = a.pd_mbuf;
+    snap_data	 = a.pd_data;
+    snap_marshal = a.pd_marshal;
   }
-  else if (a.pd_marshal) {
+
+  if (snap_mbuf) {
+    pd_mbuf = snap_mbuf;
+    pd_mbuf->add_ref();
+  }
+  else if (snap_data) {
     // Existing Any has data in its void* pointer. Rather than trying
     // to copy that (which would require a copy function to be
     // registered along with the marshal and destructor functions), we
     // marshal the data into a memory buffer.
     pd_mbuf = new cdrAnyMemoryStream;
-    a.pd_marshal(*pd_mbuf, a.pd_data);
+    snap_marshal(*pd_mbuf, snap_data);
   }
   else {
     // The Any has just a TypeCode and no data yet.
@@ -292,12 +149,24 @@ CORBA::Any::operator=(const CORBA::Any& a)
     PR_clearData();
     pd_tc = CORBA::TypeCode::_duplicate(a.pd_tc);
 
-    if (a.pd_mbuf) {
-      pd_mbuf = new cdrAnyMemoryStream(*a.pd_mbuf);
+    cdrAnyMemoryStream* snap_mbuf;
+    void*               snap_data;
+    pr_marshal_fn       snap_marshal;
+
+    {
+      SNAP_LOCK;
+      snap_mbuf	   = a.pd_mbuf;
+      snap_data	   = a.pd_data;
+      snap_marshal = a.pd_marshal;
     }
-    else if (a.pd_marshal) {
+
+    if (snap_mbuf) {
+      pd_mbuf = snap_mbuf;
+      pd_mbuf->add_ref();
+    }
+    else if (snap_data) {
       pd_mbuf = new cdrAnyMemoryStream;
-      a.pd_marshal(*pd_mbuf, a.pd_data);
+      snap_marshal(*pd_mbuf, snap_data);
     }
   }
   return *this;
@@ -375,12 +244,23 @@ CORBA::Any::operator>>= (cdrStream& s) const
   else
     CORBA::TypeCode::marshalTypeCode(get(pd_tc), s);
 
-  if (pd_data) {
-    OMNIORB_ASSERT(pd_marshal);
-    pd_marshal(s, pd_data);
+  cdrAnyMemoryStream* snap_mbuf;
+  void*               snap_data;
+  pr_marshal_fn       snap_marshal;
+
+  {
+    SNAP_LOCK;
+    snap_mbuf	 = pd_mbuf;
+    snap_data	 = pd_data;
+    snap_marshal = pd_marshal;
   }
-  else if (pd_mbuf) {
-    tcParser::copyMemStreamToStream_rdonly(get(pd_tc), *pd_mbuf, s);
+
+  if (snap_data) {
+    OMNIORB_ASSERT(snap_marshal);
+    snap_marshal(s, snap_data);
+  }
+  else if (snap_mbuf) {
+    tcParser::copyMemStreamToStream_rdonly(get(pd_tc), *snap_mbuf, s);
   }
   else {
     CORBA::TCKind kind = get(pd_tc)->kind();
@@ -390,10 +270,11 @@ CORBA::Any::operator>>= (cdrStream& s) const
 	kind == CORBA::tk_abstract_interface) {
 
       // Nil objref / value
-      OMNIORB_ASSERT(pd_marshal);
-      pd_marshal(s, pd_data);
+      OMNIORB_ASSERT(snap_marshal);
+      snap_marshal(s, snap_data);
     }
     else {
+      // No data
       OMNIORB_ASSERT(kind == CORBA::tk_void || kind == CORBA::tk_null);
     }
   }
@@ -413,12 +294,23 @@ CORBA::Any::operator<<= (cdrStream& s)
 void
 CORBA::Any::NP_marshalDataOnly(cdrStream& s) const
 {
-  if (pd_data) {
-    OMNIORB_ASSERT(pd_marshal);
-    pd_marshal(s, pd_data);
+  cdrAnyMemoryStream* snap_mbuf;
+  void*               snap_data;
+  pr_marshal_fn       snap_marshal;
+
+  {
+    SNAP_LOCK;
+    snap_mbuf	 = pd_mbuf;
+    snap_data	 = pd_data;
+    snap_marshal = pd_marshal;
   }
-  else if (pd_mbuf) {
-    tcParser::copyMemStreamToStream_rdonly(get(pd_tc), *pd_mbuf, s);
+
+  if (snap_data) {
+    OMNIORB_ASSERT(snap_marshal);
+    snap_marshal(s, snap_data);
+  }
+  else if (snap_mbuf) {
+    tcParser::copyMemStreamToStream_rdonly(get(pd_tc), *snap_mbuf, s);
   }
   else {
     CORBA::TCKind kind = get(pd_tc)->kind();
@@ -428,10 +320,11 @@ CORBA::Any::NP_marshalDataOnly(cdrStream& s) const
 	kind == CORBA::tk_abstract_interface) {
 
       // Nil objref / value
-      OMNIORB_ASSERT(pd_marshal);
-      pd_marshal(s, pd_data);
+      OMNIORB_ASSERT(snap_marshal);
+      snap_marshal(s, snap_data);
     }
     else {
+      // No data
       OMNIORB_ASSERT(kind == CORBA::tk_void || kind == CORBA::tk_null);
     }
   }
@@ -508,14 +401,23 @@ PR_extract(CORBA::TypeCode_ptr     tc,
   if (!tc->equivalent(get(pd_tc)))
     return 0;
 
-  if (pd_data) {
-    data = pd_data;
+  void*               snap_data;
+  cdrAnyMemoryStream* snap_mbuf;
+
+  {
+    SNAP_LOCK;
+    snap_data = pd_data;
+    snap_mbuf = pd_mbuf;
+  }
+
+  if (snap_data) {
+    data = snap_data;
     return 1;
   }
-  else if (pd_mbuf) {
+  else if (snap_mbuf) {
     {
       // Make a temporary stream wrapper around memory buffer.
-      cdrAnyMemoryStream tbuf(*pd_mbuf, 1);
+      cdrAnyMemoryStream tbuf(*snap_mbuf, 1);
 
       // Extract the data
       data = 0;
@@ -538,11 +440,12 @@ PR_extract(CORBA::TypeCode_ptr     tc,
 	// Another thread got there first. We destroy the data we just
 	// extracted, and return what the other thread made.
 	race = 1;
+	snap_data = pd_data;
       }
     }
     if (race) {
       destructor(data);
-      data = pd_data;
+      data = snap_data;
     }
     return 1;
   }
@@ -554,7 +457,14 @@ PR_extract(CORBA::TypeCode_ptr     tc,
 cdrAnyMemoryStream&
 CORBA::Any::PR_streamToRead() const
 {
-  if (!pd_mbuf) {
+  cdrAnyMemoryStream* snap_mbuf;
+
+  {
+    SNAP_LOCK;
+    snap_mbuf = pd_mbuf;
+  }
+
+  if (!snap_mbuf) {
 
     if (!pd_marshal)
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidAny, CORBA::COMPLETED_NO);
@@ -569,14 +479,15 @@ CORBA::Any::PR_streamToRead() const
       if (pd_mbuf) {
 	// Another thread beat us to it
 	delete mbuf;
+	snap_mbuf = pd_mbuf;
       }
       else {
 	CORBA::Any* me = OMNI_CONST_CAST(CORBA::Any*, this);
-	me->pd_mbuf = mbuf;
+	snap_mbuf = me->pd_mbuf = mbuf;
       }
     }
   }
-  return *pd_mbuf;
+  return *snap_mbuf;
 }
 
 cdrAnyMemoryStream&
@@ -1456,6 +1367,12 @@ CORBA::Any::type() const
   return CORBA::TypeCode::_duplicate(get(pd_tc));
 }
 
+CORBA::TypeCode_ptr
+CORBA::Any::NP_type() const
+{
+  return get(pd_tc);
+}
+
 void
 CORBA::Any::type(CORBA::TypeCode_ptr tc)
 {
@@ -1474,7 +1391,14 @@ CORBA::Any::value() const
       get(pd_tc)->kind() == CORBA::tk_void)
     return 0;
 
-  if (!pd_mbuf) {
+  cdrAnyMemoryStream* snap_mbuf;
+
+  {
+    SNAP_LOCK;
+    snap_mbuf = pd_mbuf;
+  }
+
+  if (!snap_mbuf) {
     OMNIORB_ASSERT(pd_marshal);
 
     // We create a memory buffer and marshal our value into it. Note
@@ -1493,12 +1417,13 @@ CORBA::Any::value() const
       if (pd_mbuf) {
 	// Another thread beat us to it
 	delete mbuf;
+	snap_mbuf = pd_mbuf;
       }
       else {
 	CORBA::Any* me = OMNI_CONST_CAST(CORBA::Any*, this);
-	me->pd_mbuf = mbuf;
+	snap_mbuf = me->pd_mbuf = mbuf;
       }
     }
   }
-  return pd_mbuf->bufPtr();
+  return snap_mbuf->bufPtr();
 }

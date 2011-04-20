@@ -437,6 +437,24 @@ AC_SUBST(ENABLE_LONGDOUBLE, $omni_cv_enable_longdouble)
 ])
 
 
+dnl Disable support for atomic operations even if they look like they
+dnl are available
+
+AC_DEFUN([OMNI_DISABLE_ATOMIC],
+[AC_CACHE_CHECK(whether to disable use of atomic operations,
+omni_cv_enable_atomic,
+[AC_ARG_ENABLE(atomic,
+               AC_HELP_STRING([--disable-atomic],
+                  [disable atomic operations (default enable-atomic)]),
+               omni_cv_enable_atomic=$enableval,
+               omni_cv_enable_atomic=yes)
+])
+if test "$omni_cv_enable_atomic" = "no"; then
+  AC_DEFINE(OMNI_DISABLE_ATOMIC_OPS,,[define if you want to disable atomic operations])
+fi
+])
+
+
 
 dnl
 dnl Tests from http://www.gnu.org/software/ac-archive/

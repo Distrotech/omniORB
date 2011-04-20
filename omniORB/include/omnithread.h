@@ -2,7 +2,7 @@
 //				Package : omnithread
 // omnithread.h			Created : 7/94 tjr
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 1994-1997 Olivetti & Oracle Research Laboratory
 //
 //    This file is part of the omnithread library
@@ -602,6 +602,53 @@ public:
 OMNI_THREAD_EXPOSE:
     OMNI_THREAD_IMPLEMENTATION
 };
+
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+// Atomic reference count
+//
+///////////////////////////////////////////////////////////////////////////
+
+#ifndef OMNI_DISABLE_ATOMIC_OPS
+#  include <omnithread/atomic.h>
+#endif
+
+#ifndef OMNI_REFCOUNT_DEFINED
+
+#define OMNI_REFCOUNT_DEFAULT
+
+class omni_refcount {
+public:
+  inline omni_refcount(int start) : count(start) {}
+  inline ~omni_refcount() {}
+
+  // Atomically increment reference count
+  inline void inc() {
+    omni_mutex_lock l(lock);
+    ++count;
+  }
+
+  // Atomically decrement reference count and return new value
+  inline int dec() {
+    omni_mutex_lock l(lock);
+    return --count;
+  }
+
+  // Return snapshot of current value. Real count may have changed by
+  // the time the value is looked at!
+  inline int value() {
+    return count;
+  }
+
+private:
+  static omni_mutex lock;
+  int count;
+};
+
+#endif // OMNI_REFCOUNT_DEFINED
+
 
 
 #ifndef __rtems__

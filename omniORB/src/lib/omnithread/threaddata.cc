@@ -80,3 +80,11 @@ omni_thread::remove_value(key_t k)
   _values[k-1] = 0;
   return v;
 }
+
+
+#ifdef OMNI_REFCOUNT_DEFAULT
+
+omni_mutex omni_refcount::lock;
+
+
+#endif // OMNI_REFCOUNT_DEFAULT

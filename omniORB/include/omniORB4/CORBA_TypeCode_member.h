@@ -72,6 +72,12 @@ public:
 
   TypeCode_ptr _ptr;
 
+  inline void NP_swap(TypeCode_member& other) {
+    TypeCode_ptr tmp = _ptr;
+    _ptr = other._ptr;
+    other._ptr = tmp;
+  }
+
   void operator>>=(cdrStream&) const;
   void operator<<=(cdrStream&);
 };
