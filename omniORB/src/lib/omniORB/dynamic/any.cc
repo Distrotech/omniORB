@@ -466,12 +466,18 @@ CORBA::Any::PR_streamToRead() const
 
   if (!snap_mbuf) {
 
-    if (!pd_marshal)
-      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidAny, CORBA::COMPLETED_NO);
-
     cdrAnyMemoryStream* mbuf = new cdrAnyMemoryStream;
 
-    pd_marshal(*mbuf, pd_data);
+    if (pd_marshal) {
+      pd_marshal(*mbuf, pd_data);
+    }
+    else {
+      CORBA::TCKind kind = get(pd_tc)->kind();
+      if (!(kind == CORBA::tk_void || kind == CORBA::tk_null)) {
+	delete mbuf;
+	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidAny, CORBA::COMPLETED_NO);
+      }
+    }
 
     {
       omni_tracedmutex_lock l(anyLock);
