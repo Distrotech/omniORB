@@ -1,3 +1,12 @@
+Thu May 19 12:03:05 BST 2011 dgrisby
+====================================
+
+- Valuetypes supporting abstract interfaces do not need to re-declare
+  the operations.
+
+src/lib/omniORB/omniidl_be/cxx/value.py
+
+
 Wed Apr 20 18:22:35 BST 2011 dgrisby
 ====================================
 

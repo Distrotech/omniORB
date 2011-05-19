@@ -2525,7 +2525,8 @@ class ValueType (mapping.Decl):
 
         for intf in astdecl.supports():
             intf = intf.fullDecl()
-            callables.extend(intf.all_callables())
+            if not intf.abstract():
+                callables.extend(intf.all_callables())
 
         callables.extend(astdecl.callables())
 
