@@ -252,7 +252,6 @@ _OMNI_NS(omniExHelper)::strip(const char* fn)
 	l << omniORB::logger::exceptionStatus(status,minor) << ")\n"; \
       } \
     } \
-    throw CORBA::name(minor,status); \
   }
 
 OMNIORB_FOR_EACH_SYS_EXCEPTION(STD_EXCEPTION)

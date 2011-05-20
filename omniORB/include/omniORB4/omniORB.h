@@ -583,8 +583,10 @@ public:
 OMNI_NAMESPACE_END(omni)
 
 #define OMNIORB_THROW(name, minor, completion) \
-  _OMNI_NS(omniExHelper)::name(__FILE__, __LINE__, minor, completion)
-
+  do {\
+    _OMNI_NS(omniExHelper)::name(__FILE__, __LINE__, minor, completion); \
+    throw ::CORBA::name(minor, completion); \
+  } while(0)
 #else
 
 
