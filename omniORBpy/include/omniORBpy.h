@@ -111,17 +111,22 @@ struct omniORBpyAPI {
 
 class omniORBpyLock {
 public:
-  inline omniORBpyLock(omniORBpyAPI* api)
-    : api_(api), ptr_(api->acquireGIL())
-  { }
+  inline omniORBpyLock(omniORBpyAPI* api, CORBA::Boolean do_it=1)
+    : api_(api), ptr_(0), do_it_(do_it)
+  {
+    if (do_it)
+      ptr_ = api->acquireGIL();
+  }
 
   inline ~omniORBpyLock()
   {
-    api_->releaseGIL(ptr_);
+    if (do_it_)
+      api_->releaseGIL(ptr_);
   }
 private:
-  omniORBpyAPI* api_;
-  void*         ptr_;
+  omniORBpyAPI*  api_;
+  void*          ptr_;
+  CORBA::Boolean do_it_;
 };
 
 
