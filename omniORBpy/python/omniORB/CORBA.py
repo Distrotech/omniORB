@@ -565,8 +565,8 @@ class Object(object):
     def __setstate__(self, state):
         o = ORB_init().string_to_object(state)
         self.__dict__.update(o.__dict__)
-        def dummy(): pass # Why doesn't dummy want an argument? ***
-        o.__del__ = dummy
+        def dummy(*_): pass
+        o.__release = dummy
 
     def _get_interface(self):
         import omniORB

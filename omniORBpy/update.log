@@ -1,3 +1,11 @@
+Mon Aug  8 16:16:42 BST 2011 dgrisby
+====================================
+
+- Error unpickling object references due to change to new-style classes.
+
+python/omniORB/CORBA.py
+
+
 Fri May 20 16:06:12 BST 2011 dgrisby
 ====================================
 
