@@ -1,3 +1,13 @@
+Fri May 20 16:04:40 BST 2011 dgrisby
+====================================
+
+- Modify OMNIORB_THROW macro so the throw is visible to the compiler,
+  to avoid warnings about functions not returning.
+
+include/omniORB4/omniORB.h
+src/lib/omniORB/orbcore/exceptn.cc
+
+
 Thu May 19 14:20:14 BST 2011 dgrisby
 ====================================
 
