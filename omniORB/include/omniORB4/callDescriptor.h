@@ -300,6 +300,46 @@ private:
 
 
 //////////////////////////////////////////////////////////////////////
+///////////////////////// omniAsyncCallDescriptor ////////////////////
+//////////////////////////////////////////////////////////////////////
+
+class omniAsyncCallDescriptor : public omniCallDescriptor
+{
+public:
+  inline omniAsyncCallDescriptor(LocalCallFn lcfn, const char* op_,
+				 size_t op_len_, _CORBA_Boolean oneway,
+				 const char*const* user_excns_,
+				 int n_user_excns_,
+				 _CORBA_Boolean is_upcall_)
+    : omniCallDescriptor(lcfn, op_, op_len_, oneway,
+			 user_excns_, n_user_excns_,
+			 is_upcall_),
+      pd_exception(0)
+  {}
+
+  virtual ~omniAsyncCallDescriptor()
+  {
+    if (pd_exception)
+      delete pd_exception;
+  }
+
+  inline void storeException(const CORBA::Exception& ex)
+  {
+    pd_exception = CORBA::Exception::_duplicate(&ex);
+  }
+
+  inline void raiseException()
+  {
+    if (pd_exception)
+      pd_exception->_raise();
+  }
+
+private:
+  CORBA::Exception* pd_exception;
+};
+
+
+//////////////////////////////////////////////////////////////////////
 /////////////////////////// omniStdCallDesc //////////////////////////
 //////////////////////////////////////////////////////////////////////
 

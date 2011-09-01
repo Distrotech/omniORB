@@ -1,3 +1,13 @@
+Thu Sep  1 10:42:41 BST 2011 dgrisby
+====================================
+
+- Async call entry-point.
+
+include/omniORB4/callDescriptor.h
+include/omniORB4/omniObjRef.h
+src/lib/omniORB/orbcore/omniObjRef.cc
+
+
 Fri May 20 16:04:40 BST 2011 dgrisby
 ====================================
 

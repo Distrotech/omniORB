@@ -40,6 +40,7 @@
 #include <orbOptions.h>
 #include <orbParameters.h>
 #include <shutdownIdentity.h>
+#include <invoker.h>
 
 OMNI_USING_NAMESPACE(omni)
 
@@ -52,6 +53,7 @@ static omniObjRef* objref_list = 0;
 ////////////////////////////////////////////////////////////////////////////
 //             Configuration options                                      //
 ////////////////////////////////////////////////////////////////////////////
+
 CORBA::Boolean orbParameters::verifyObjectExistsAndType = 1;
 //  If the value of this variable is 0 then the ORB will not
 //  send a GIOP LOCATE_REQUEST message to verify the existence of
@@ -76,6 +78,10 @@ CORBA::Boolean orbParameters::resetTimeOutOnRetries = 0;
 // FALSE, the timeout is not reset, and therefore applies to the call
 // as a whole, rather than each individual call attempt.
 
+
+////////////////////////////////////////////////////////////////////////////
+//             Object type and identity                                   //
+////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////
 const char*
@@ -344,9 +350,9 @@ omniObjRef::_remote_non_existent()
   return call_desc.result;
 }
 
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+//             Exception handlers                                         //
+////////////////////////////////////////////////////////////////////////////
 
 void*
 omniObjRef::_transientExceptionHandler(void*& cookie)
@@ -455,9 +461,9 @@ omniObjRef::_systemExceptionHandler(void* new_handler,void* cookie)
   pd_flags.system_exception_handler = 1;
 }
 
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+//             Object lifecycle                                           //
+////////////////////////////////////////////////////////////////////////////
 
 omniObjRef::~omniObjRef()
 {
@@ -583,6 +589,10 @@ omniObjRef::_disable()
   pd_flags.orb_shutdown = 1;
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+//             Invocation                                                 //
+////////////////////////////////////////////////////////////////////////////
 
 void
 omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
@@ -750,6 +760,99 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
   }
 }
 
+void
+omniObjRef::_locateRequest()
+{
+  omniCallDescriptor call_desc(0,0,0,0,0,0,0);
+  _invoke(call_desc, 0);
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+//             Asynchronous invocation                                    //
+////////////////////////////////////////////////////////////////////////////
+
+OMNI_NAMESPACE_BEGIN(omni)
+
+class AsyncRequest : public omniTask {
+public:
+  inline AsyncRequest(omniObjRef* objref, omniAsyncCallDescriptor* call_desc)
+    : omniTask(omniTask::AnyTime),
+      pd_objref(objref),
+      pd_callDescriptor(call_desc)
+  {
+    duplicateObjRef(objref);
+  }
+
+  virtual void execute();
+
+protected:
+  virtual ~AsyncRequest();
+
+private:
+  omniObjRef*              pd_objref;
+  omniAsyncCallDescriptor* pd_callDescriptor;
+
+  // Not implemented
+  AsyncRequest(const AsyncRequest&);
+  AsyncRequest& operator=(const AsyncRequest&);
+};
+
+void
+AsyncRequest::execute()
+{
+  if (omniORB::trace(25)) {
+    omniORB::logger log;
+    log << "Asynchronous invoke '" << pd_callDescriptor->op() << "'...\n";
+  }
+
+  try {
+    pd_objref->_invoke(*pd_callDescriptor);
+    if (omniORB::trace(25)) {
+      omniORB::logger log;
+      log << "Asynchronous invoke '" << pd_callDescriptor->op()
+	  << "' done\n";
+    }
+  }
+  catch (const CORBA::SystemException& ex) {
+    if (omniORB::trace(25)) {
+      omniORB::logger log;
+      log << "Asynchronous invoke '" << pd_callDescriptor->op()
+	  << "' raised CORBA::" << ex._name() << "\n";
+    }
+    pd_callDescriptor->storeException(ex);
+  }
+  catch (...) {
+    if (omniORB::trace(1)) {
+      omniORB::logger log;
+      log << "Unexpected exception performing asynchronous request '"
+	  << pd_callDescriptor->op() << "'\n";
+    }
+  }
+  delete this;
+}
+
+AsyncRequest::~AsyncRequest()
+{
+  releaseObjRef(pd_objref);
+}
+
+OMNI_NAMESPACE_END(omni)
+
+
+void
+omniObjRef::_invoke_async(omniAsyncCallDescriptor* call_desc)
+{
+  // *** HERE: do something about per-thread timeouts!
+
+  AsyncRequest* req = new AsyncRequest(this, call_desc);
+  orbAsyncInvoker->insert(req);
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+//             IORs and marshalling                                       //
+////////////////////////////////////////////////////////////////////////////
 
 omniIOR* 
 omniObjRef::_getIOR()
@@ -944,13 +1047,6 @@ omniObjRef::_fromString(const char* str)
 }
 
 void
-omniObjRef::_locateRequest()
-{
-  omniCallDescriptor call_desc(0,0,0,0,0,0,0);
-  _invoke(call_desc, 0);
-}
-
-void
 omniObjRef::_setIdentity(omniIdentity* id)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
@@ -968,11 +1064,12 @@ omniObjRef::_enableShortcut(omniServant*, const _CORBA_Boolean*)
   // Default does nothing
 }
 
-OMNI_NAMESPACE_BEGIN(omni)
 
 /////////////////////////////////////////////////////////////////////////////
 //            Handlers for Configuration Options                           //
 /////////////////////////////////////////////////////////////////////////////
+
+OMNI_NAMESPACE_BEGIN(omni)
 
 /////////////////////////////////////////////////////////////////////////////
 class verifyObjectExistsAndTypeHandler : public orbOptions::Handler {

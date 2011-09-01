@@ -39,6 +39,7 @@ OMNI_NAMESPACE_END(omni)
 
 class omniIOR;
 class omniCallDescriptor;
+class omniAsyncCallDescriptor;
 class omniIdentity;
 class omniLocalIdentity;
 class omniObjTableEntry;
@@ -231,6 +232,10 @@ public:
   // Does the client-side work of making a request.  Dispaches
   // the call to the object identity, and deals with exception
   // handlers, retries and location forwarding.
+
+  void _invoke_async(omniAsyncCallDescriptor*);
+  // Equivalent to _invoke, but the call is performed asynchronously.
+  // The call descriptor is informed when the call completes.
 
   omniIOR* _getIOR();
   // Returns an omniIOR. The object contains all the fields in
