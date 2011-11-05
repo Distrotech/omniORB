@@ -75,21 +75,20 @@ sslAddress::duplicate() const {
 
 /////////////////////////////////////////////////////////////////////////
 giopActiveConnection*
-sslAddress::Connect(unsigned long deadline_secs,
-		    unsigned long deadline_nanosecs,
-		    CORBA::ULong  strand_flags) const {
+sslAddress::Connect(const omni_time_t& deadline,
+		    CORBA::ULong       strand_flags,
+		    CORBA::Boolean&    timed_out) const {
 
   if (pd_address.port == 0) return 0;
 
   SocketHandle_t sock = tcpSocket::Connect(pd_address.host, pd_address.port,
-					   deadline_secs, deadline_nanosecs,
-					   strand_flags);
+					   deadline, strand_flags, timed_out);
   if (sock == RC_SOCKET_ERROR)
     return 0;
 
   if (SocketSetnonblocking(sock) == RC_INVALID_SOCKET) {
     tcpSocket::logConnectFailure("Failed to set socket to non-blocking mode",
-				 pd_address.host);
+				 pd_address.host, pd_address.port);
     CLOSESOCKET(sock);
     return 0;
   }
@@ -104,12 +103,13 @@ sslAddress::Connect(unsigned long deadline_secs,
   // Do the SSL handshake...
   while (1) {
 
-    if (tcpSocket::setAndCheckTimeout(deadline_secs, deadline_nanosecs, t)) {
+    if (tcpSocket::setAndCheckTimeout(deadline, t)) {
       // Already timed out.
       tcpSocket::logConnectFailure("Timed out before SSL handshake",
-				   pd_address.host);
+				   pd_address.host, pd_address.port);
       SSL_free(ssl);
       CLOSESOCKET(sock);
+      timed_out = 1;
       return 0;
     }
 
@@ -121,7 +121,7 @@ sslAddress::Connect(unsigned long deadline_secs,
       {
 	if (SocketSetblocking(sock) == RC_INVALID_SOCKET) {
 	  tcpSocket::logConnectFailure("Failed to set socket to blocking mode",
-				       pd_address.host);
+				       pd_address.host, pd_address.port);
 	  SSL_free(ssl);
 	  CLOSESOCKET(sock);
 	  return 0;
@@ -136,9 +136,10 @@ sslAddress::Connect(unsigned long deadline_secs,
 	  // Timeout
 #if !defined(USE_FAKE_INTERRUPTABLE_RECV)
 	  tcpSocket::logConnectFailure("Timed out during SSL handshake",
-				       pd_address.host);
+				       pd_address.host, pd_address.port);
 	  SSL_free(ssl);
 	  CLOSESOCKET(sock);
+	  timed_out = 1;
 	  return 0;
 #endif
 	}
@@ -152,9 +153,10 @@ sslAddress::Connect(unsigned long deadline_secs,
 	  // Timeout
 #if !defined(USE_FAKE_INTERRUPTABLE_RECV)
 	  tcpSocket::logConnectFailure("Timed out during SSL handshake",
-				       pd_address.host);
+				       pd_address.host, pd_address.port);
 	  SSL_free(ssl);
 	  CLOSESOCKET(sock);
+	  timed_out = 1;
 	  return 0;
 #endif
 	}

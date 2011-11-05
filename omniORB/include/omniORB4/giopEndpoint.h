@@ -1,9 +1,9 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORB
-// giopEndpoint.h               Created on: 20 Dec 2000
+// giopEndpoint.h             Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2000      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -50,11 +50,11 @@ public:
   // None of the members raise an exception.
 
   virtual int Send(void* buf, size_t sz,
-		   unsigned long deadline_secs = 0,
-		   unsigned long deadline_nanosecs = 0) = 0;
+		   const omni_time_t& deadline) = 0;
+
   virtual int Recv(void* buf, size_t sz,
-		   unsigned long deadline_secs = 0,
-		   unsigned long deadline_nanosecs = 0) = 0;
+		   const omni_time_t& deadline) = 0;
+
   virtual void Shutdown() = 0;
 
   virtual const char* myaddress() = 0;
@@ -183,18 +183,19 @@ public:
   // Returns 0 if no suitable endpoint can be created.
 
   virtual const char* type() const = 0;
-  // return the transport identifier, e.g. "giop:tcp","giop:ssl", etc.
+  // Return the transport identifier, e.g. "giop:tcp","giop:ssl", etc.
 
   virtual const char* address() const = 0;
-  // return the string that describe this remote address.
+  // Return the string that describes this remote address.
   // The string format is described in str2Address().
 
   virtual giopActiveConnection*
-  Connect(unsigned long deadline_secs = 0,
-	  unsigned long deadline_nanosecs = 0,
-	  _CORBA_ULong  strand_flags = 0) const = 0;
+  Connect(const omni_time_t& deadline,
+	  _CORBA_ULong       strand_flags,
+	  _CORBA_Boolean&    timed_out) const = 0;
   // Connect to the remote address.
-  // Return 0 if no connection can be established.
+  // Returns 0 if no connection can be established. Sets timed_out to
+  // true if the connection attempt failed due to timeout.
 
   virtual giopAddress* duplicate() const = 0;
   // Return an identical instance.

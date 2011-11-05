@@ -47,11 +47,6 @@ _CORBA_MODULE orbParameters
 
 _CORBA_MODULE_BEG
 
-struct timeValue {
-  unsigned long secs;
-  unsigned long nanosecs;
-};
-
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -309,7 +304,7 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong outConScanPeriod;
 //  Valid values = (n >= 0 in seconds) 
 //                  0 --> do not close idle connections.
 
-_CORBA_MODULE_VAR _core_attr timeValue clientCallTimeOutPeriod;
+_CORBA_MODULE_VAR _core_attr omni_time_t clientCallTimeOutPeriod;
 //   Call timeout. On the client side, if a remote call takes longer
 //   than the timeout value, the ORB will shutdown the connection and
 //   raise a COMM_FAILURE.
@@ -317,7 +312,7 @@ _CORBA_MODULE_VAR _core_attr timeValue clientCallTimeOutPeriod;
 //   Valid values = (n >= 0 in milliseconds) 
 //                   0 --> no timeout. Block till a reply comes back
 
-_CORBA_MODULE_VAR _core_attr timeValue clientConnectTimeOutPeriod;
+_CORBA_MODULE_VAR _core_attr omni_time_t clientConnectTimeOutPeriod;
 //   Connect timeout. When a client has no existing connection to
 //   communicate with a server, it must open a new connection before
 //   performing the call. If this parameter is non-zero, it sets a
@@ -452,7 +447,7 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong  inConScanPeriod;
 //                   0 --> do not close idle connections.
 
 
-_CORBA_MODULE_VAR _core_attr timeValue serverCallTimeOutPeriod;
+_CORBA_MODULE_VAR _core_attr omni_time_t serverCallTimeOutPeriod;
 //   Call timeout. On the server side, if the ORB cannot completely 
 //   unmarshal a call's arguments in the defined timeout, it shutdown the
 //   connection.

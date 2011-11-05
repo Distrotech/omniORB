@@ -74,15 +74,14 @@ tcpAddress::duplicate() const {
 
 /////////////////////////////////////////////////////////////////////////
 giopActiveConnection*
-tcpAddress::Connect(unsigned long deadline_secs,
-		    unsigned long deadline_nanosecs,
-		    CORBA::ULong  strand_flags) const {
+tcpAddress::Connect(const omni_time_t& deadline,
+		    CORBA::ULong       strand_flags,
+		    CORBA::Boolean&    timed_out) const {
 
   if (pd_address.port == 0) return 0;
 
   SocketHandle_t sock = tcpSocket::Connect(pd_address.host, pd_address.port,
-					   deadline_secs, deadline_nanosecs,
-					   strand_flags);
+					   deadline, strand_flags, timed_out);
   if (sock == RC_SOCKET_ERROR)
     return 0;
 

@@ -40,12 +40,10 @@ class tcpConnection : public giopConnection, public SocketHolder {
 public:
 
   int Send(void* buf, size_t sz,
-	   unsigned long deadline_secs = 0,
-	   unsigned long deadline_nanosecs = 0);
+	   const omni_time_t& deadline);
 
   int Recv(void* buf, size_t sz,
-	   unsigned long deadline_secs = 0,
-	   unsigned long deadline_nanosecs = 0);
+	   const omni_time_t& deadline);
 
   void Shutdown();
 

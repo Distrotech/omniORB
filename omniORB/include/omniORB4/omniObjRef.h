@@ -278,8 +278,7 @@ public:
 
   inline void _setTimeout(unsigned long secs, unsigned long ns)
   {
-    pd_timeout_secs     = secs;
-    pd_timeout_nanosecs = ns;
+    pd_timeout.assign(secs, ns);
   }
 
 protected:
@@ -411,8 +410,7 @@ private:
   } pd_flags;
   // Mutable.  Protected by <omni::internalLock>.
 
-  unsigned long pd_timeout_secs;
-  unsigned long pd_timeout_nanosecs;
+  omni_time_t pd_timeout;
 };
 
 

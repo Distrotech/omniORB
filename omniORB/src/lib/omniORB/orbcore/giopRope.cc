@@ -243,10 +243,10 @@ giopRope::acquireClient(const omniIOR* ior,
   else if (pd_oneCallPerConnection || ndying >= max) {
     // Wait for a strand to be unused.
     pd_nwaiting++;
-    unsigned long deadline_secs,deadline_nanosecs;
-    calldesc->getDeadline(deadline_secs,deadline_nanosecs);
-    if (deadline_secs || deadline_nanosecs) {
-      if (pd_cond.timedwait(deadline_secs,deadline_nanosecs) == 0) {
+
+    const omni_time_t& deadline = calldesc->getDeadline();
+    if (deadline) {
+      if (pd_cond.timedwait(deadline) == 0) {
 	pd_nwaiting--;
 	if (orbParameters::throwTransientOnTimeOut) {
 	  OMNIORB_THROW(TRANSIENT,

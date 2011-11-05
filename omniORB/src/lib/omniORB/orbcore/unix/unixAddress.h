@@ -3,6 +3,7 @@
 // unixAddress.h              Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2011 Apasphere Ltd.
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -24,21 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.2  2006/04/28 18:40:46  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:57  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/08/06 15:47:44  sll
-  Added support to use the unix domain socket as the local transport.
-
-*/
 
 #ifndef __UNIXADDRESS_H__
 #define __UNIXADDRESS_H__
@@ -52,9 +40,9 @@ class unixAddress : public giopAddress {
   const char* type() const;
   const char* address() const;
   giopAddress* duplicate() const;
-  giopActiveConnection* Connect(unsigned long deadline_secs = 0,
-				unsigned long deadline_nanosecs = 0,
-				CORBA::ULong  strand_flags = 0) const;
+  giopActiveConnection* Connect(const omni_time_t& deadline,
+				CORBA::ULong  	   strand_flags,
+				CORBA::Boolean&    timed_out) const;
   CORBA::Boolean Poke() const;
   ~unixAddress() {}
 

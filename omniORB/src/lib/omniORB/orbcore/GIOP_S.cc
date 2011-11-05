@@ -3,7 +3,7 @@
 // GIOP_S.cc                  Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -116,14 +116,11 @@ int GIOP_S::_classid;
 static inline void
 setServerDeadline(GIOP_S* giop_s)
 {
-  if (orbParameters::serverCallTimeOutPeriod.secs ||
-      orbParameters::serverCallTimeOutPeriod.nanosecs) {
+  if (orbParameters::serverCallTimeOutPeriod) {
 
-    unsigned long abs_secs, abs_nanosecs;
-    omni_thread::get_time(&abs_secs, &abs_nanosecs,
-			  orbParameters::serverCallTimeOutPeriod.secs,
-			  orbParameters::serverCallTimeOutPeriod.nanosecs);
-    giop_s->setDeadline(abs_secs, abs_nanosecs);
+    omni_time_t deadline;
+    omni_thread::get_time(deadline, orbParameters::serverCallTimeOutPeriod);
+    giop_s->setDeadline(deadline);
   }
 }
 
@@ -441,7 +438,7 @@ GIOP_S::handleRequest() {
     }
   }
   pd_state = ReplyCompleted;
-  setDeadline(0,0);
+  clearDeadline();
   return 1;
 }
 
@@ -549,7 +546,7 @@ GIOP_S::handleLocateRequest() {
   }
 
   pd_state = ReplyCompleted;
-  setDeadline(0,0);
+  clearDeadline();
   return 1;
 }
 
@@ -563,7 +560,7 @@ GIOP_S::handleCancelRequest() {
   omniORB::logs(5, "Received a CancelRequest message.");
   pd_state = WaitingForReply;
   response_expected(0);
-  setDeadline(0,0);
+  clearDeadline();
   return 1;
 }
 
@@ -648,7 +645,7 @@ GIOP_S::SendReply() {
 
   if (!response_expected()) {
     pd_state = ReplyCompleted;
-    setDeadline(0,0);
+    clearDeadline();
     return;
   }
 
@@ -668,7 +665,7 @@ GIOP_S::SendReply() {
   pd_state = ReplyCompleted;
 
   clearValueTracker();
-  setDeadline(0,0);
+  clearDeadline();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -703,7 +700,7 @@ GIOP_S::SendException(CORBA::Exception* ex) {
   pd_state = ReplyCompleted;
 
   clearValueTracker();
-  setDeadline(0,0);
+  clearDeadline();
 }
 
 ////////////////////////////////////////////////////////////////////////

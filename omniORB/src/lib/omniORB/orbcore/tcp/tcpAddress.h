@@ -63,9 +63,9 @@ class tcpAddress : public giopAddress {
   const char* type() const;
   const char* address() const;
   giopAddress* duplicate() const;
-  giopActiveConnection* Connect(unsigned long deadline_secs = 0,
-				unsigned long deadline_nanosecs = 0,
-				CORBA::ULong  strand_flags = 0) const;
+  giopActiveConnection* Connect(const omni_time_t& deadline,
+				CORBA::ULong  	   strand_flags,
+				CORBA::Boolean&    timed_out) const;
   CORBA::Boolean Poke() const;
   ~tcpAddress() {}
 

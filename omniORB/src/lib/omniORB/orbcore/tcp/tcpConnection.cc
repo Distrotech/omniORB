@@ -54,8 +54,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 /////////////////////////////////////////////////////////////////////////
 int
 tcpConnection::Send(void* buf, size_t sz,
-		    unsigned long deadline_secs,
-		    unsigned long deadline_nanosecs) {
+		    const omni_time_t& deadline) {
 
   if (sz > orbParameters::maxSocketSend)
     sz = orbParameters::maxSocketSend;
@@ -66,9 +65,9 @@ tcpConnection::Send(void* buf, size_t sz,
 
     struct timeval t;
 
-    if (deadline_secs || deadline_nanosecs) {
+    if (deadline) {
       //      SocketSetnonblocking(pd_socket); // ***
-      SocketSetTimeOut(deadline_secs,deadline_nanosecs,t);
+      SocketSetTimeOut(deadline, t);
       if (t.tv_sec == 0 && t.tv_usec == 0) {
 	// Already timeout.
 	return 0;
@@ -123,8 +122,7 @@ tcpConnection::Send(void* buf, size_t sz,
 /////////////////////////////////////////////////////////////////////////
 int
 tcpConnection::Recv(void* buf, size_t sz,
-		    unsigned long deadline_secs,
-		    unsigned long deadline_nanosecs) {
+		    const omni_time_t& deadline) {
 
   if (sz > orbParameters::maxSocketRecv)
     sz = orbParameters::maxSocketRecv;
@@ -138,8 +136,8 @@ tcpConnection::Recv(void* buf, size_t sz,
 
     struct timeval t;
 
-    if (deadline_secs || deadline_nanosecs) {
-      SocketSetTimeOut(deadline_secs,deadline_nanosecs,t);
+    if (deadline) {
+      SocketSetTimeOut(deadline, t);
       if (t.tv_sec == 0 && t.tv_usec == 0) {
 	// Already timeout.
 	return 0;

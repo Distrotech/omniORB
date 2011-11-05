@@ -3,7 +3,7 @@
 // giopStrand.cc              Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -107,18 +107,20 @@ sendCloseConnection(giopStrand* s)
     omniORB::logger log;
     log << "sendCloseConnection: to " << s->connection->peeraddress()
 	<< " 12 bytes\n";
+
+    if (omniORB::trace(30))
+      giopStream::dumpbuf((unsigned char*)hdr, 12);
   }
-  if (omniORB::trace(30))
-    giopStream::dumpbuf((unsigned char*)hdr, 12);
 
-  CORBA::ULong timeout = orbParameters::scanGranularity;
-  if (timeout < 5)
-    timeout = 5;
+  omni_time_t timeout(orbParameters::scanGranularity);
+  omni_time_t deadline;
 
-  unsigned long deadline_secs, deadline_nanosecs;
-  omni_thread::get_time(&deadline_secs, &deadline_nanosecs, timeout);
+  if (timeout.s < 5)
+    timeout.s = 5;
 
-  int tx = s->connection->Send(hdr, 12, deadline_secs, deadline_nanosecs);
+  omni_thread::get_time(deadline, timeout);
+
+  int tx = s->connection->Send(hdr, 12, deadline);
   if (tx <= 0 && omniORB::trace(25)) {
     omniORB::logger log;
     const char* err = (tx == 0 ? "Timed out" : "Error");
@@ -443,7 +445,7 @@ giopStrand::acquireServer(giopWorker* w)
   sp->TCS_C(0);
   sp->TCS_W(0);
   sp->worker(w);
-  sp->setDeadline(0,0);
+  sp->clearDeadline();
   return sp;
 }
 

@@ -3,7 +3,7 @@
 // giopStreamImpl.cc          Created on: 14/02/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,52 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.6.5  2008/02/14 12:37:50  dgrisby
-  New immediateAddressSwitch parameter.
-
-  Revision 1.1.6.4  2006/02/22 14:56:36  dgrisby
-  New endPointPublishHostname and endPointResolveNames parameters.
-
-  Revision 1.1.6.3  2006/01/10 13:59:37  dgrisby
-  New clientConnectTimeOutPeriod configuration parameter.
-
-  Revision 1.1.6.2  2005/01/06 23:10:30  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:02:14  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.7  2002/10/14 20:07:11  dgrisby
-  Per objref / per thread timeouts.
-
-  Revision 1.1.4.6  2002/04/29 11:52:51  dgrisby
-  More fixes for FreeBSD, Darwin, Windows.
-
-  Revision 1.1.4.5  2002/03/18 15:13:08  dpg1
-  Fix bug with old-style ORBInitRef in config file; look for
-  -ORBtraceLevel arg before anything else; update Windows registry
-  key. Correct error message.
-
-  Revision 1.1.4.4  2001/09/20 13:26:14  dpg1
-  Allow ORB_init() after orb->destroy().
-
-  Revision 1.1.4.3  2001/08/21 11:02:16  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.1.4.2  2001/08/17 17:12:38  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.1  2001/04/18 18:10:48  sll
-  Big checkin with the brand new internal APIs.
-
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <giopStream.h>
@@ -103,7 +59,7 @@ CORBA::ULong orbParameters::giopMaxMsgSize = 2048 * 1024;
 //
 //   Valid values = (n >= 8192)
 
-orbParameters::timeValue orbParameters::clientCallTimeOutPeriod = {0,0};
+omni_time_t orbParameters::clientCallTimeOutPeriod;
 //   Call timeout. On the client side, if a remote call takes longer
 //   than the timeout value, the ORB will shutdown the connection and
 //   raise a COMM_FAILURE.
@@ -111,7 +67,7 @@ orbParameters::timeValue orbParameters::clientCallTimeOutPeriod = {0,0};
 //   Valid values = (n >= 0 in seconds) 
 //                   0 --> no timeout. Block till a reply comes back
 
-orbParameters::timeValue orbParameters::clientConnectTimeOutPeriod = {0,0};
+omni_time_t orbParameters::clientConnectTimeOutPeriod;
 //   Connect timeout. When a client has no existing connection to
 //   communicate with a server, it must open a new connection before
 //   performing the call. If this parameter is non-zero, it sets a
@@ -136,7 +92,7 @@ CORBA::Boolean orbParameters::supportPerThreadTimeOut = 0;
 //
 //   Valid values = 0 or 1
 
-orbParameters::timeValue orbParameters::serverCallTimeOutPeriod = {0,0};
+omni_time_t orbParameters::serverCallTimeOutPeriod;
 //   Call timeout. On the server side, if the ORB cannot completely 
 //   unmarshal a call's arguments in the defined timeout, it shutdown the
 //   connection.
@@ -370,13 +326,13 @@ public:
       throw orbOptions::BadParam(key(),value,
 				 "Expect n >= 0 in msecs");
     }
-    orbParameters::clientCallTimeOutPeriod.secs = v / 1000;
-    orbParameters::clientCallTimeOutPeriod.nanosecs = (v % 1000) * 1000000;
+    orbParameters::clientCallTimeOutPeriod.assign(v / 1000,
+						  (v % 1000) * 1000000);
   }
 
   void dump(orbOptions::sequenceString& result) {
-    CORBA::ULong v = orbParameters::clientCallTimeOutPeriod.secs * 1000 +
-      orbParameters::clientCallTimeOutPeriod.nanosecs / 1000000;
+    CORBA::ULong v = orbParameters::clientCallTimeOutPeriod.s * 1000 +
+      orbParameters::clientCallTimeOutPeriod.ns / 1000000;
     orbOptions::addKVULong(key(),v,result);
   }
 
@@ -429,13 +385,13 @@ public:
       throw orbOptions::BadParam(key(),value,
 				 "Expect n >= 0 in msecs");
     }
-    orbParameters::clientConnectTimeOutPeriod.secs = v / 1000;
-    orbParameters::clientConnectTimeOutPeriod.nanosecs = (v % 1000) * 1000000;
+    orbParameters::clientConnectTimeOutPeriod.assign(v / 1000,
+						     (v % 1000) * 1000000);
   }
 
   void dump(orbOptions::sequenceString& result) {
-    CORBA::ULong v = orbParameters::clientConnectTimeOutPeriod.secs * 1000 +
-      orbParameters::clientConnectTimeOutPeriod.nanosecs / 1000000;
+    CORBA::ULong v = orbParameters::clientConnectTimeOutPeriod.s * 1000 +
+      orbParameters::clientConnectTimeOutPeriod.ns / 1000000;
     orbOptions::addKVULong(key(),v,result);
   }
 
@@ -462,13 +418,13 @@ public:
       throw orbOptions::BadParam(key(),value,
 				 "Expect n >= 0 in msecs");
     }
-    orbParameters::serverCallTimeOutPeriod.secs = v / 1000;
-    orbParameters::serverCallTimeOutPeriod.nanosecs = (v % 1000) * 1000000;
+    orbParameters::serverCallTimeOutPeriod.assign(v / 1000,
+						  (v % 1000) * 1000000);
   }
 
   void dump(orbOptions::sequenceString& result) {
-    CORBA::ULong v = orbParameters::serverCallTimeOutPeriod.secs * 1000 +
-      orbParameters::serverCallTimeOutPeriod.nanosecs / 1000000;
+    CORBA::ULong v = orbParameters::serverCallTimeOutPeriod.s * 1000 +
+      orbParameters::serverCallTimeOutPeriod.ns / 1000000;
     orbOptions::addKVULong(key(),v,result);
   }
 

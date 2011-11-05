@@ -3,7 +3,7 @@
 // sslTransportImpl.cc        Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,58 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.6  2009/05/06 16:14:49  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.5  2007/11/28 12:24:26  dgrisby
-  Implement a tiny subset of CSIv2 to permit multiple SSL endpoints in IORs.
-
-  Revision 1.1.4.4  2006/03/25 18:54:03  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.4.3  2005/09/05 17:12:20  dgrisby
-  Merge again. Mainly SSL transport changes.
-
-  Revision 1.1.4.2  2005/03/30 23:35:58  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:59  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.9  2002/09/09 22:11:51  dgrisby
-  SSL transport cleanup even if certificates are wrong.
-
-  Revision 1.1.2.8  2002/08/23 14:18:38  dgrisby
-  Avoid init exceptioni when SSL linked but not configured.
-
-  Revision 1.1.2.7  2002/04/16 12:44:27  dpg1
-  Fix SSL accept bug, clean up logging.
-
-  Revision 1.1.2.6  2001/08/23 16:02:58  sll
-  Implement getInterfaceAddress().
-
-  Revision 1.1.2.5  2001/08/03 17:41:25  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.2.4  2001/07/31 16:16:22  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.2.3  2001/07/26 16:37:21  dpg1
-  Make sure static initialisers always run.
-
-  Revision 1.1.2.2  2001/06/18 20:27:56  sll
-  Use strchr instead of index() for maximal portability.
-
-  Revision 1.1.2.1  2001/06/11 18:11:05  sll
-  *** empty log message ***
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <sys/stat.h>
@@ -112,7 +62,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 
 
 /////////////////////////////////////////////////////////////////////////
-sslTransportImpl::timeValue sslTransportImpl::sslAcceptTimeOut = {10,0};
+omni_time_t sslTransportImpl::sslAcceptTimeOut(10);
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -357,13 +307,13 @@ public:
       throw orbOptions::BadParam(key(),value,
 				 "Expect n >= 0 in msecs");
     }
-    sslTransportImpl::sslAcceptTimeOut.secs = v / 1000;
-    sslTransportImpl::sslAcceptTimeOut.nanosecs = (v % 1000) * 1000000;
+    sslTransportImpl::sslAcceptTimeOut.assign(v / 1000, (v % 1000) * 1000000);
   }
 
   void dump(orbOptions::sequenceString& result) {
-    CORBA::ULong v = sslTransportImpl::sslAcceptTimeOut.secs * 1000 +
-      sslTransportImpl::sslAcceptTimeOut.nanosecs / 1000000;
+    CORBA::ULong v = sslTransportImpl::sslAcceptTimeOut.s * 1000 +
+      sslTransportImpl::sslAcceptTimeOut.ns / 1000000;
+
     orbOptions::addKVULong(key(),v,result);
   }
 

@@ -3,7 +3,7 @@
 // giopStream.h                   Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2006 Apasphere Ltd
+//    Copyright (C) 2003-2011 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,50 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.6.3  2006/09/20 13:36:31  dgrisby
-  Descriptive logging for connection and GIOP errors.
-
-  Revision 1.1.6.2  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:03:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.7  2001/10/17 16:44:05  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.4.6  2001/09/04 14:38:09  sll
-  Added the boolean argument to notifyCommFailure to indicate if
-  omniTransportLock is held by the caller.
-
-  Revision 1.1.4.5  2001/09/03 16:50:43  sll
-  Added the deadline parameter and access functions. All member functions
-  that previously had deadline arguments now use the per-object deadline
-  implicitly.
-
-  Revision 1.1.4.4  2001/08/03 17:43:19  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.4.3  2001/07/31 16:20:30  sll
-  New primitives to acquire read lock on a connection.
-
-  Revision 1.1.4.2  2001/05/01 16:07:32  sll
-  All GIOP implementations should now work with fragmentation and abitrary
-  sizes non-copy transfer.
-
-  Revision 1.1.4.1  2001/04/18 17:18:59  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:04  sll
-  Added new files.
-
-  */
-
 
 #ifndef __GIOPSTREAM_H__
 #define __GIOPSTREAM_H__
@@ -97,7 +55,8 @@ struct giopStream_Buffer {
   CORBA::ULong             last;    // offset to the last data byte
   CORBA::ULong             size;    // GIOP message size.
   giopStream_Buffer*       next;    // next Buffer in a chain
-  // buffer data to follows.
+  // buffer data to follow.
+
   void alignStart(omni::alignment_t);
   static void deleteBuffer(giopStream_Buffer*);
   static giopStream_Buffer* newBuffer(CORBA::ULong sz=0);
@@ -123,24 +82,30 @@ public:
   GIOP::Version version();
   // No thread safety precondition
 
-  operator giopStrand& () { return *pd_strand; }
+  inline operator giopStrand& () { return *pd_strand; }
   // No thread safety precondition
 
-  giopStreamImpl* impl() const { return pd_impl; }
+  inline giopStrand& strand() { return *pd_strand; }
   // No thread safety precondition
 
-  void impl(giopStreamImpl* impl) { pd_impl = impl; }
+  inline giopStreamImpl* impl() const { return pd_impl; }
   // No thread safety precondition
 
-  inline void getDeadline(unsigned long& secs, unsigned long& nanosecs) const {
-    secs = pd_deadline_secs;
-    nanosecs = pd_deadline_nanosecs;
+  inline void impl(giopStreamImpl* impl) { pd_impl = impl; }
+  // No thread safety precondition
+
+  inline const omni_time_t& getDeadline() const {
+    return pd_deadline;
   }
   // No thread safety precondition
 
-  inline void setDeadline(unsigned long secs, unsigned long nanosecs) {
-    pd_deadline_secs = secs;
-    pd_deadline_nanosecs = nanosecs;
+  inline void setDeadline(const omni_time_t& deadline) {
+    pd_deadline = deadline;
+  }
+  // No thread safety precondition
+
+  inline void clearDeadline() {
+    pd_deadline.assign(0,0);
   }
   // No thread safety precondition
   
@@ -307,8 +272,7 @@ protected:
   CORBA::Boolean             pd_rdlocked;
   CORBA::Boolean             pd_wrlocked;
   giopStreamImpl*            pd_impl;
-  unsigned long              pd_deadline_secs;
-  unsigned long              pd_deadline_nanosecs;
+  omni_time_t                pd_deadline;
 
 private:
   giopStream();
@@ -334,20 +298,28 @@ public:
 
   void put_octet_array(const _CORBA_Octet* b, int size,
 		       omni::alignment_t align=omni::ALIGN_1);
+
   void get_octet_array(_CORBA_Octet* b,int size,
 		       omni::alignment_t align=omni::ALIGN_1);
+
   void skipInput(_CORBA_ULong);
+
   _CORBA_Boolean checkInputOverrun(_CORBA_ULong, _CORBA_ULong,
 				   omni::alignment_t align=omni::ALIGN_1);
+
   _CORBA_Boolean checkOutputOverrun(_CORBA_ULong,_CORBA_ULong,
 				    omni::alignment_t align=omni::ALIGN_1);
+
   void fetchInputData(omni::alignment_t,size_t);
+
   _CORBA_Boolean reserveOutputSpaceForPrimitiveType(omni::alignment_t,size_t);
+
   _CORBA_Boolean maybeReserveOutputSpace(omni::alignment_t,size_t);
 
   _CORBA_Boolean is_giopStream();
 
   _CORBA_ULong currentInputPtr() const;
+
   _CORBA_ULong currentOutputPtr() const;
 
 
@@ -363,19 +335,11 @@ public:
   // inputMessage() and inputChunk(). Both functions return a
   // giopStream_Buffer. The buffer should be returned to the strand using
   // the releaseInputBuffer() function.
-  //
-  // struct giopStream_Buffer {
-  //   CORBA::ULong        start;   /* offset to the beginning of data */
-  //   CORBA::ULong        end;     /* offset to the end of buffer */
-  //   CORBA::ULong        last;    /* offset to the last data byte */
-  //   CORBA::ULong        size;    /* GIOP message size. */
-  //   inputBuffer*        next;    /* next inputBuffer in a chain */
-  //   buffer data to follows.
-  //   static void deleteBuffer(inputBuffer*);
-  // };
+
   giopStream_Buffer* newInputBuffer(CORBA::ULong sz=0);
   // Return a giopStream_Buffer. Should be deleted by calling its
   // deleteBuffer() method.
+
 private:
 
   // The following variables must be initialised to 0 by reset().
@@ -529,6 +493,10 @@ private:
 
   void errorOnSend(int,const char*,CORBA::ULong,CORBA::Boolean,const char*);
   // internal helper function, do not use outside this class
+
+public:
+  giopActiveConnection* openConnection();
+  // For a client-side stream, open the connection.
 
 protected:
   //////////////////////////////////////////////////////////////////

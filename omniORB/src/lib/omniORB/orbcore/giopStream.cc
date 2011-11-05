@@ -3,7 +3,7 @@
 // giopStream.cc              Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -49,8 +49,6 @@ giopStream::giopStream(giopStrand* strand) :
   pd_rdlocked(0),
   pd_wrlocked(0),
   pd_impl(0),
-  pd_deadline_secs(0),
-  pd_deadline_nanosecs(0),
   pd_currentInputBuffer(0),
   pd_input(0),
   pd_inputFullyBuffered(0),
@@ -66,7 +64,8 @@ giopStream::giopStream(giopStrand* strand) :
 }
 
 ////////////////////////////////////////////////////////////////////////
-giopStream::~giopStream() {
+giopStream::~giopStream()
+{
   giopStream_Buffer* p = pd_input;
   while (p) {
     giopStream_Buffer* q = p->next;
@@ -97,7 +96,8 @@ int giopStream::_classid;
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::reset() {
+giopStream::reset()
+{
   giopStream_Buffer* p = pd_input;
   while (p) {
     giopStream_Buffer* q = p->next;
@@ -111,20 +111,21 @@ giopStream::reset() {
   }
   inputFullyBuffered(0);
   inputMatchedId(0);
-  setDeadline(0,0);
+  clearDeadline();
 }
 
 
 ////////////////////////////////////////////////////////////////////////
 GIOP::Version
-giopStream::version() {
+giopStream::version()
+{
   return pd_impl->version();
 }
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::rdLock() {
-
+giopStream::rdLock()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   OMNIORB_ASSERT(!pd_rdlocked);
@@ -135,11 +136,11 @@ giopStream::rdLock() {
     CORBA::Boolean hastimeout = 0;
 
     // Now blocks.
-    if (!(pd_deadline_secs || pd_deadline_nanosecs))
+    if (!pd_deadline) {
       pd_strand->rdcond.wait();
+    }
     else {
-      hastimeout = !(pd_strand->rdcond.timedwait(pd_deadline_secs,
-						 pd_deadline_nanosecs));
+      hastimeout = !(pd_strand->rdcond.timedwait(pd_deadline));
     }
 
     if (pd_strand->rd_nwaiting >= 0)
@@ -161,8 +162,8 @@ giopStream::rdLock() {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::rdUnLock() {
-
+giopStream::rdUnLock()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   if (!pd_rdlocked) return;
@@ -189,8 +190,8 @@ giopStream::rdUnLock() {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::wrLock() {
-
+giopStream::wrLock()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   OMNIORB_ASSERT(!pd_wrlocked); 
@@ -201,11 +202,11 @@ giopStream::wrLock() {
     CORBA::Boolean hastimeout = 0;
 
     // Now blocks.
-    if (!(pd_deadline_secs || pd_deadline_nanosecs))
+    if (!pd_deadline) {
       pd_strand->wrcond.wait();
+    }
     else {
-      hastimeout = !(pd_strand->wrcond.timedwait(pd_deadline_secs,
-						 pd_deadline_nanosecs));
+      hastimeout = !(pd_strand->wrcond.timedwait(pd_deadline));
     }
 
     if (pd_strand->wr_nwaiting >= 0)
@@ -227,8 +228,8 @@ giopStream::wrLock() {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::wrUnLock() {
-
+giopStream::wrUnLock()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   if (!pd_wrlocked) return;
@@ -251,8 +252,8 @@ giopStream::wrUnLock() {
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-giopStream::rdLockNonBlocking() {
-
+giopStream::rdLockNonBlocking()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   OMNIORB_ASSERT(!pd_rdlocked);
@@ -268,8 +269,8 @@ giopStream::rdLockNonBlocking() {
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-giopStream::rdLockNonBlocking(giopStrand* strand) {
-
+giopStream::rdLockNonBlocking(giopStrand* strand)
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   if (strand->rd_nwaiting < 0)
@@ -282,8 +283,8 @@ giopStream::rdLockNonBlocking(giopStrand* strand) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::sleepOnRdLock() {
-
+giopStream::sleepOnRdLock()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   if (pd_strand->rd_nwaiting < 0) {
@@ -292,11 +293,11 @@ giopStream::sleepOnRdLock() {
     CORBA::Boolean hastimeout = 0;
 
     // Now blocks.
-    if (!(pd_deadline_secs || pd_deadline_nanosecs))
+    if (!pd_deadline) {
       pd_strand->rdcond.wait();
+    }
     else {
-      hastimeout = !(pd_strand->rdcond.timedwait(pd_deadline_secs,
-						 pd_deadline_nanosecs));
+      hastimeout = !(pd_strand->rdcond.timedwait(pd_deadline));
     }
 
     if (pd_strand->rd_nwaiting >= 0)
@@ -314,8 +315,8 @@ giopStream::sleepOnRdLock() {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::sleepOnRdLock(giopStrand* strand) {
-
+giopStream::sleepOnRdLock(giopStrand* strand)
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   if (strand->rd_nwaiting < 0) {
@@ -330,8 +331,8 @@ giopStream::sleepOnRdLock(giopStrand* strand) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::sleepOnRdLockAlways() {
-
+giopStream::sleepOnRdLockAlways()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   if (pd_strand->rd_nwaiting < 0)
@@ -344,11 +345,11 @@ giopStream::sleepOnRdLockAlways() {
   CORBA::Boolean hastimeout = 0;
 
   // Now blocks.
-  if (!(pd_deadline_secs || pd_deadline_nanosecs))
+  if (!pd_deadline) {
     pd_strand->rdcond.wait();
+  }
   else {
-      hastimeout = !(pd_strand->rdcond.timedwait(pd_deadline_secs,
-						 pd_deadline_nanosecs));
+      hastimeout = !(pd_strand->rdcond.timedwait(pd_deadline));
   }
 
   pd_strand->rd_n_justwaiting--;
@@ -368,8 +369,8 @@ giopStream::sleepOnRdLockAlways() {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::wakeUpRdLock(giopStrand* strand) {
-
+giopStream::wakeUpRdLock(giopStrand* strand)
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
 #if 1
@@ -387,8 +388,8 @@ giopStream::wakeUpRdLock(giopStrand* strand) {
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-giopStream::noLockWaiting(giopStrand* strand) {
-
+giopStream::noLockWaiting(giopStrand* strand)
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   return ((strand->rd_nwaiting == 0) && (strand->wr_nwaiting == 0));
@@ -396,8 +397,8 @@ giopStream::noLockWaiting(giopStrand* strand) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::markRdLock() {
-
+giopStream::markRdLock()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   OMNIORB_ASSERT(pd_rdlocked == 0);
@@ -406,8 +407,8 @@ giopStream::markRdLock() {
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-giopStream::RdLockIsHeld(giopStrand* strand) {
-
+giopStream::RdLockIsHeld(giopStrand* strand)
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   return ((strand->rd_nwaiting != 0));
@@ -437,7 +438,7 @@ giopStream::CommFailure::_raise(CORBA::ULong minor,
   if (status != CORBA::COMPLETED_NO) retry = 0;
 
 #ifndef OMNIORB_NO_EXCEPTION_LOGGING
-  if( omniORB::traceExceptions ) {
+  if (omniORB::traceExceptions) {
     {
       omniORB::logger l;
       l << message << ": ";
@@ -472,16 +473,16 @@ giopStream::CommFailure::_raise(CORBA::ULong minor,
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::get_octet_array(CORBA::Octet* b,int size,omni::alignment_t align) {
-
+giopStream::get_octet_array(CORBA::Octet* b,int size,omni::alignment_t align)
+{
   OMNIORB_ASSERT(impl());
   impl()->copyInputData(this,b,size,align);
 }
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::skipInput(CORBA::ULong size) {
-
+giopStream::skipInput(CORBA::ULong size)
+{
   OMNIORB_ASSERT(impl());
   impl()->skipInputData(this,size);
 }
@@ -490,8 +491,8 @@ giopStream::skipInput(CORBA::ULong size) {
 CORBA::Boolean
 giopStream::checkInputOverrun(CORBA::ULong itemSize, 
 			      CORBA::ULong nItems,
-			      omni::alignment_t align) {
-
+			      omni::alignment_t align)
+{
   OMNIORB_ASSERT(impl());
   size_t avail = impl()->inputRemaining(this);
   omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,align);
@@ -505,8 +506,8 @@ giopStream::checkInputOverrun(CORBA::ULong itemSize,
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::fetchInputData(omni::alignment_t align,size_t required) {
-
+giopStream::fetchInputData(omni::alignment_t align,size_t required)
+{
   OMNIORB_ASSERT(impl());
   OMNIORB_ASSERT(required == 0 ||
 		 (required <= 8 && ((size_t)align == required)));
@@ -518,8 +519,8 @@ giopStream::fetchInputData(omni::alignment_t align,size_t required) {
 ////////////////////////////////////////////////////////////////////////
 void
 giopStream::put_octet_array(const CORBA::Octet* b, int size,
-			    omni::alignment_t align) {
-
+			    omni::alignment_t align)
+{
   OMNIORB_ASSERT(impl());
   impl()->copyOutputData(this,(void*)b,size,align);
 }
@@ -529,8 +530,8 @@ giopStream::put_octet_array(const CORBA::Octet* b, int size,
 CORBA::Boolean
 giopStream::checkOutputOverrun(CORBA::ULong itemSize,
 			       CORBA::ULong nItems,
-			       omni::alignment_t align) {
-
+			       omni::alignment_t align)
+{
   OMNIORB_ASSERT(impl());
   size_t avail = impl()->outputRemaining(this);
   if (avail != ULONG_MAX) {
@@ -545,8 +546,8 @@ giopStream::checkOutputOverrun(CORBA::ULong itemSize,
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
 giopStream::reserveOutputSpaceForPrimitiveType(omni::alignment_t align,
-					       size_t required) {
-
+					       size_t required)
+{
   OMNIORB_ASSERT(impl());
   OMNIORB_ASSERT(required == 0 ||
 		 (required <= 8 && ((size_t)align == required)));
@@ -561,8 +562,8 @@ giopStream::reserveOutputSpaceForPrimitiveType(omni::alignment_t align,
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
 giopStream::maybeReserveOutputSpace(omni::alignment_t align,
-				    size_t required) {
-
+				    size_t required)
+{
   OMNIORB_ASSERT(impl());
 
   if (required > 8 || ((size_t)align != required)) {
@@ -580,23 +581,24 @@ giopStream::maybeReserveOutputSpace(omni::alignment_t align,
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::ULong
-giopStream::currentInputPtr() const {
-
+giopStream::currentInputPtr() const
+{
   OMNIORB_ASSERT(impl());
   return impl()->currentInputPtr(this);
 }
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::ULong
-giopStream::currentOutputPtr() const {
-
+giopStream::currentOutputPtr() const
+{
   OMNIORB_ASSERT(impl());
   return impl()->currentOutputPtr(this);
 }
 
 ////////////////////////////////////////////////////////////////////////
 giopStream_Buffer* 
-giopStream_Buffer::newBuffer(CORBA::ULong sz) {
+giopStream_Buffer::newBuffer(CORBA::ULong sz)
+{
   if (!sz) sz = giopStream::bufferSize;
 
   //  giopStream_Buffer* b = (giopStream_Buffer*)
@@ -613,15 +615,16 @@ giopStream_Buffer::newBuffer(CORBA::ULong sz) {
 
 ////////////////////////////////////////////////////////////////////////
 void 
-giopStream_Buffer::deleteBuffer(giopStream_Buffer* b) {
+giopStream_Buffer::deleteBuffer(giopStream_Buffer* b)
+{
   char* p = (char*)b;
   delete [] p;
 }
 
 ////////////////////////////////////////////////////////////////////////
 void 
-giopStream_Buffer::alignStart(omni::alignment_t align) {
-
+giopStream_Buffer::alignStart(omni::alignment_t align)
+{
   omni::ptr_arith_t p = omni::align_to((omni::ptr_arith_t)this + 
 				       sizeof(giopStream_Buffer),align);
   start = p - (omni::ptr_arith_t) this;
@@ -630,9 +633,12 @@ giopStream_Buffer::alignStart(omni::alignment_t align) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::releaseInputBuffer(giopStream_Buffer* p) {
+giopStream::releaseInputBuffer(giopStream_Buffer* p)
+{
+  if (!pd_rdlocked ||
+      pd_strand->spare ||
+      (p->end - p->start) < giopStream::bufferSize ) {
 
-  if (!pd_rdlocked || pd_strand->spare || (p->end - p->start) < giopStream::bufferSize ) {
     char* c = (char*)p;
     delete [] c;
     return;
@@ -645,8 +651,8 @@ giopStream::releaseInputBuffer(giopStream_Buffer* p) {
 void
 giopStream::errorOnReceive(int rc, const char* filename, CORBA::ULong lineno,
 			   giopStream_Buffer* buf,CORBA::Boolean heldlock,
-			   const char* message) {
-
+			   const char* message)
+{
   CORBA::ULong minor;
   CORBA::Boolean retry;
 
@@ -670,8 +676,8 @@ giopStream::errorOnReceive(int rc, const char* filename, CORBA::ULong lineno,
 CORBA::ULong
 giopStream::ensureSaneHeader(const char* filename, CORBA::ULong lineno,
 			     giopStream_Buffer* buf,
-			     CORBA::ULong begin) {
-
+			     CORBA::ULong begin)
+{
   CORBA::ULong minor;
   CORBA::Boolean retry;
 
@@ -707,10 +713,9 @@ giopStream::ensureSaneHeader(const char* filename, CORBA::ULong lineno,
 
 ////////////////////////////////////////////////////////////////////////
 giopStream_Buffer*
-giopStream::inputMessage() {
-
+giopStream::inputMessage()
+{
   OMNIORB_ASSERT(pd_rdlocked);
-
 
   if (pd_strand->state() == giopStrand::DYING) {
     CORBA::ULong minor;
@@ -750,8 +755,7 @@ giopStream::inputMessage() {
     int rsz = pd_strand->connection->Recv((void*)
 					  ((omni::ptr_arith_t)buf+buf->last),
 					  (size_t) (buf->end - buf->last),
-					  pd_deadline_secs,
-					  pd_deadline_nanosecs);
+					  pd_deadline);
     if (rsz > 0) {
       buf->last += rsz;
     }
@@ -786,8 +790,7 @@ giopStream::inputMessage() {
       int rsz = pd_strand->connection->Recv((void*)
 					    ((omni::ptr_arith_t)buf+buf->last),
 					    (size_t) total,
-					    pd_deadline_secs,
-					    pd_deadline_nanosecs);
+					    pd_deadline);
       if (rsz > 0) {
 	if (omniORB::trace(25)) {
 	  omniORB::logger log;
@@ -876,8 +879,8 @@ giopStream::inputMessage() {
 
 ////////////////////////////////////////////////////////////////////////
 giopStream_Buffer*
-giopStream::inputChunk(CORBA::ULong maxsize) {
-
+giopStream::inputChunk(CORBA::ULong maxsize)
+{
   OMNIORB_ASSERT(pd_rdlocked);
 
   giopStream_Buffer* buf;
@@ -913,9 +916,8 @@ giopStream::inputChunk(CORBA::ULong maxsize) {
   while (maxsize) {
     int rsz = pd_strand->connection->Recv((void*)
 					  ((omni::ptr_arith_t)buf+buf->last),
-					  (size_t) maxsize,
-					  pd_deadline_secs,
-					  pd_deadline_nanosecs);
+					  (size_t)maxsize,
+					  pd_deadline);
     if (rsz > 0) {
       buf->last += rsz;
       maxsize -= rsz;
@@ -940,8 +942,8 @@ giopStream::inputChunk(CORBA::ULong maxsize) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::inputCopyChunk(void* dest, CORBA::ULong size) {
-
+giopStream::inputCopyChunk(void* dest, CORBA::ULong size)
+{
   OMNIORB_ASSERT(pd_rdlocked);
 
   if (pd_strand->head) {
@@ -969,9 +971,8 @@ giopStream::inputCopyChunk(void* dest, CORBA::ULong size) {
   }
 
   while (size) {
-    int rsz = pd_strand->connection->Recv((void*)p,(size_t) size,
-					  pd_deadline_secs,
-					  pd_deadline_nanosecs);
+    int rsz = pd_strand->connection->Recv((void*)p, (size_t)size,
+					  pd_deadline);
     if (rsz > 0) {
       if (omniORB::trace(30)) {
 	dumpbuf((unsigned char*)p,rsz);
@@ -990,55 +991,10 @@ giopStream::inputCopyChunk(void* dest, CORBA::ULong size) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::sendChunk(giopStream_Buffer* buf) {
-
-  if (!pd_strand->connection) {
-    OMNIORB_ASSERT(pd_strand->address);
-      
-    if (pd_strand->state() != giopStrand::DYING) {
-      if (omniORB::trace(20)) {
-	omniORB::logger log;
-	log << "Client attempt to connect to "
-	    << pd_strand->address->address() << "\n";
-      }
-      unsigned long deadline_secs, deadline_nanosecs;
-
-      if (orbParameters::clientConnectTimeOutPeriod.secs ||
-	  orbParameters::clientConnectTimeOutPeriod.nanosecs) {
-
-	omni_thread::
-	  get_time(&deadline_secs,
-		   &deadline_nanosecs,
-		   orbParameters::clientConnectTimeOutPeriod.secs,
-		   orbParameters::clientConnectTimeOutPeriod.nanosecs);
-
-	if ((pd_deadline_secs && deadline_secs > pd_deadline_secs) ||
-	    (deadline_secs == pd_deadline_secs &&
-	     deadline_nanosecs > pd_deadline_nanosecs)) {
-
-	  pd_deadline_secs     = deadline_secs;
-	  pd_deadline_nanosecs = deadline_nanosecs;
-	}
-      }
-      else {
-	deadline_secs     = pd_deadline_secs;
-	deadline_nanosecs = pd_deadline_nanosecs;
-      }
-      giopActiveConnection* c = pd_strand->address->Connect(deadline_secs,
-							    deadline_nanosecs,
-							    pd_strand->flags);
-      if (c) pd_strand->connection = &(c->getConnection());
-    }
-    if (!pd_strand->connection) {
-      errorOnSend(TRANSIENT_ConnectFailed,__FILE__,__LINE__,0,
-		  "Unable to open new connection");
-    }
-    if (omniORB::trace(20)) {
-      omniORB::logger log;
-      log << "Client opened connection to " 
-	  << pd_strand->connection->peeraddress() << "\n";
-    }
-  }
+giopStream::sendChunk(giopStream_Buffer* buf)
+{
+  if (!pd_strand->connection)
+    openConnection();
 
   CORBA::ULong first = buf->start;
   size_t total;
@@ -1048,18 +1004,16 @@ giopStream::sendChunk(giopStream_Buffer* buf) {
     log << "sendChunk: to " 
 	<< pd_strand->connection->peeraddress() << " "
 	<< buf->last - buf->start << " bytes\n";
-  }
 
-  if (omniORB::trace(30)) {
-    dumpbuf((unsigned char*)buf+buf->start,buf->last-buf->start);
+    if (omniORB::trace(30))
+      dumpbuf((unsigned char*)buf+buf->start, buf->last-buf->start);
   }
 
   while ((total = buf->last - first)) {
     int ssz = pd_strand->connection->Send((void*)
 					  ((omni::ptr_arith_t)buf+first),
 					  total,
-					  pd_deadline_secs,
-					  pd_deadline_nanosecs);
+					  pd_deadline);
     if (ssz > 0) {
       first += ssz;
     }
@@ -1073,70 +1027,23 @@ giopStream::sendChunk(giopStream_Buffer* buf) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopStream::sendCopyChunk(void* buf,CORBA::ULong size) {
-
-  if (!pd_strand->connection) {
-    OMNIORB_ASSERT(pd_strand->address);
-    if (pd_strand->state() != giopStrand::DYING) {
-      if (omniORB::trace(20)) {
-	omniORB::logger log;
-	log << "Client attempt to connect to "
-	    << pd_strand->address->address() << "\n";
-      }
-      unsigned long deadline_secs, deadline_nanosecs;
-
-      if (orbParameters::clientConnectTimeOutPeriod.secs ||
-	  orbParameters::clientConnectTimeOutPeriod.nanosecs) {
-
-	omni_thread::
-	  get_time(&deadline_secs,
-		   &deadline_nanosecs,
-		   orbParameters::clientConnectTimeOutPeriod.secs,
-		   orbParameters::clientConnectTimeOutPeriod.nanosecs);
-
-	if ((pd_deadline_secs && deadline_secs > pd_deadline_secs) ||
-	    (deadline_secs == pd_deadline_secs &&
-	     deadline_nanosecs > pd_deadline_nanosecs)) {
-
-	  pd_deadline_secs     = deadline_secs;
-	  pd_deadline_nanosecs = deadline_nanosecs;
-	}
-      }
-      else {
-	deadline_secs     = pd_deadline_secs;
-	deadline_nanosecs = pd_deadline_nanosecs;
-      }
-      giopActiveConnection* c = pd_strand->address->Connect(deadline_secs,
-							    deadline_nanosecs);
-      if (c) pd_strand->connection = &(c->getConnection());
-    }
-    if (!pd_strand->connection) {
-      errorOnSend(TRANSIENT_ConnectFailed,__FILE__,__LINE__,0,
-		  "Unable to open new connection");
-    }
-    if (omniORB::trace(20)) {
-      omniORB::logger log;
-      log << "Client opened connection to " 
-	  << pd_strand->connection->peeraddress() << "\n";
-    }
-  }
+giopStream::sendCopyChunk(void* buf,CORBA::ULong size)
+{
+  if (!pd_strand->connection)
+    openConnection();
 
   if (omniORB::trace(25)) {
     omniORB::logger log;
     log << "sendCopyChunk: to " 
 	<< pd_strand->connection->peeraddress() << " "
 	<< size << " bytes\n";
-  }
 
-  if (omniORB::trace(30)) {
-    dumpbuf((unsigned char*)buf,size);
+    if (omniORB::trace(30))
+      dumpbuf((unsigned char*)buf,size);
   }
 
   while (size) {
-    int ssz = pd_strand->connection->Send(buf,
-					  size,
-					  pd_deadline_secs,
-					  pd_deadline_nanosecs);
+    int ssz = pd_strand->connection->Send(buf, size, pd_deadline);
     if (ssz > 0) {
       size -= ssz;
       buf = (void*)((omni::ptr_arith_t)buf + ssz);
@@ -1147,40 +1054,23 @@ giopStream::sendCopyChunk(void* buf,CORBA::ULong size) {
       // never reaches here.
     }
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////
 void
 giopStream::errorOnSend(int rc, const char* filename, CORBA::ULong lineno,
-			CORBA::Boolean heldlock, const char* message) {
-
-  CORBA::ULong minor;
+			CORBA::Boolean heldlock, const char* message)
+{
+  CORBA::ULong   minor;
   CORBA::Boolean retry;
 
   notifyCommFailure(heldlock,minor,retry);
   if (rc == 0) {
-    // Timeout.
+    // Timeout on send.
     // We do not use the return code from the function.
     pd_strand->state(giopStrand::DYING);
     retry = 0;
     minor = TRANSIENT_CallTimedout;
-  }
-  else if (rc == TRANSIENT_ConnectFailed) {
-    pd_strand->state(giopStrand::DYING);
-    minor = rc;
-
-    if (pd_deadline_secs || pd_deadline_nanosecs) {
-      // Did we timeout?
-      unsigned long s, ns;
-      omni_thread::get_time(&s, &ns);
-      if (s > pd_deadline_secs ||
-          (s == pd_deadline_secs && ns > pd_deadline_nanosecs)) {
-        
-        retry = 0;
-        minor = TRANSIENT_CallTimedout;
-      }
-    }
   }
   else {
     pd_strand->state(giopStrand::DYING);
@@ -1192,8 +1082,89 @@ giopStream::errorOnSend(int rc, const char* filename, CORBA::ULong lineno,
 }
 
 
+////////////////////////////////////////////////////////////////////////
+giopActiveConnection*
+giopStream::openConnection()
+{
+  OMNIORB_ASSERT(pd_strand->address);
+  OMNIORB_ASSERT(!pd_strand->connection);
+
+  CORBA::Boolean retry_after_timeout = 0;
+  CORBA::Boolean timed_out = 0;
+  const char*    message;
+
+  if (pd_strand->state() != giopStrand::DYING) {
+    if (omniORB::trace(20)) {
+      omniORB::logger log;
+      log << "Client attempt to connect to "
+	  << pd_strand->address->address() << "\n";
+    }
+
+    omni_time_t deadline;
+
+    if (orbParameters::clientConnectTimeOutPeriod) {
+
+      omni_thread::get_time(deadline,
+			    orbParameters::clientConnectTimeOutPeriod);
+
+      if (pd_deadline) {
+	if (deadline < pd_deadline)
+	  retry_after_timeout = 1;
+	else
+	  pd_deadline = deadline;
+      }
+    }
+    else {
+      deadline = pd_deadline;
+    }
+
+    giopActiveConnection* c;
+    c = pd_strand->address->Connect(deadline, pd_strand->flags, timed_out);
+
+    if (c) {
+      pd_strand->connection = &(c->getConnection());
+
+      if (omniORB::trace(20)) {
+	omniORB::logger log;
+	log << "Client opened connection to " 
+	    << pd_strand->connection->peeraddress() << "\n";
+      }
+      return c;
+    }
+    else if (timed_out) {
+      message = "Timed out opening new connection";
+    }
+    else {
+      message = "Unable to open new connection";
+    }
+  }
+  else {
+    message = "Connection is in dying state";
+  }
+
+  CORBA::ULong   minor;
+  CORBA::Boolean retry;
+
+  notifyCommFailure(0, minor, retry);
+  if (timed_out) {
+    retry = retry && retry_after_timeout;
+    minor = TRANSIENT_CallTimedout;
+  }
+  else {
+    minor = TRANSIENT_ConnectFailed;
+  }
+  pd_strand->state(giopStrand::DYING);
+
+  CommFailure::_raise(minor, (CORBA::CompletionStatus)completion(), retry,
+		      __FILE__, __LINE__, message, pd_strand);
+
+  return 0; // dummy return
+}
+
+
 /////////////////////////////////////////////////////////////////////////
-static inline char printable_char(char c) {
+static inline char printable_char(char c)
+{
   return (c < 32 || c > 126) ? '.' : c;
 }
 

@@ -516,9 +516,7 @@ omniObjRef::omniObjRef(const char* intfRepoId, omniIOR* ior,
 		       omniIdentity* id, _CORBA_Boolean static_repoId)
   : pd_refCount(1),
     pd_ior(ior),
-    pd_id(id),
-    pd_timeout_secs(0),
-    pd_timeout_nanosecs(0)
+    pd_id(id)
 {
   OMNIORB_ASSERT(intfRepoId);
   OMNIORB_ASSERT(ior);
@@ -618,7 +616,7 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
   call_desc.objref(this);
 
   omniCurrent* current;
-  unsigned long abs_secs = 0, abs_nanosecs = 0;
+  omni_time_t  abs_time;
 
   while (1) {
 
@@ -628,33 +626,27 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
     if (orbParameters::verifyObjectExistsAndType && do_assert)
       _assertExistsAndTypeVerified();
 
-    if (!(abs_secs || abs_nanosecs)) {
-      if (pd_timeout_secs || pd_timeout_nanosecs) {
-	omni_thread::get_time(&abs_secs,&abs_nanosecs,
-			      pd_timeout_secs, pd_timeout_nanosecs);
+    if (!abs_time) {
+      if (pd_timeout) {
+	omni_thread::get_time(abs_time, pd_timeout);
       }
       else if (orbParameters::supportPerThreadTimeOut &&
 	       (current = omniCurrent::get()) &&
-	       (current->timeout_secs() || current->timeout_nanosecs())) {
+	       (current->timeout())) {
     
 	if (current->timeout_absolute()) {
-	  abs_secs     = current->timeout_secs();
-	  abs_nanosecs = current->timeout_nanosecs();
+	  abs_time = current->timeout();
 	}
 	else {
-	  omni_thread::get_time(&abs_secs,&abs_nanosecs,
-				current->timeout_secs(),
-				current->timeout_nanosecs());
+	  omni_thread::get_time(abs_time, current->timeout());
 	}
       }
-      else if (orbParameters::clientCallTimeOutPeriod.secs ||
-	       orbParameters::clientCallTimeOutPeriod.nanosecs) {
+      else if (orbParameters::clientCallTimeOutPeriod) {
 
-	omni_thread::get_time(&abs_secs,&abs_nanosecs,
-			      orbParameters::clientCallTimeOutPeriod.secs,
-			      orbParameters::clientCallTimeOutPeriod.nanosecs);
+	omni_thread::get_time(abs_time,
+			      orbParameters::clientCallTimeOutPeriod);
       }
-      call_desc.setDeadline(abs_secs,abs_nanosecs);
+      call_desc.setDeadline(abs_time);
     }
 
     try {
@@ -754,8 +746,7 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
 	(retry_after_timeout || orbParameters::resetTimeOutOnRetries)) {
 
       // Reset the timeout next time around
-      abs_secs = 0;
-      abs_nanosecs = 0;
+      abs_time.assign(0,0);
     }
   }
 }

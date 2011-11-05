@@ -3,7 +3,7 @@
 // omniTransport.cc           Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,43 +26,6 @@
 //
 // Description:
 //
-
-/*
-  $Log$
-  Revision 1.1.6.4  2007/02/26 15:16:31  dgrisby
-  New socketSendBuffer parameter, defaulting to 16384 on Windows.
-  Avoids a bug in Windows where select() on send waits for all sent data
-  to be acknowledged.
-
-  Revision 1.1.6.3  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.2  2005/09/01 14:52:12  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:02:08  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.6  2002/09/04 23:29:30  dgrisby
-  Avoid memory corruption with multiple list removals.
-
-  Revision 1.1.4.5  2001/09/20 13:26:15  dpg1
-  Allow ORB_init() after orb->destroy().
-
-  Revision 1.1.4.4  2001/09/19 17:26:51  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.3  2001/08/17 17:12:41  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.2  2001/06/13 20:13:15  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 18:10:48  sll
-  Big checkin with the brand new internal APIs.
-
-
-  */
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/omniTransport.h>
@@ -284,13 +247,12 @@ public:
       throw orbOptions::BadParam(key(),value,
 				 "Expect n >= 0 in microsecs");
     }
-    SocketCollection::scan_interval_sec  = v / 1000000;
-    SocketCollection::scan_interval_nsec = (v % 1000000) * 1000;
+    SocketCollection::scan_interval.assign(v / 1000000, (v % 1000000) * 1000);
   }
 
   void dump(orbOptions::sequenceString& result) {
-    CORBA::ULong v = (SocketCollection::scan_interval_sec * 1000000 +
-		      SocketCollection::scan_interval_nsec / 1000);
+    CORBA::ULong v = (SocketCollection::scan_interval.s * 1000000 +
+		      SocketCollection::scan_interval.ns / 1000);
     orbOptions::addKVULong(key(),v,result);
   }
 

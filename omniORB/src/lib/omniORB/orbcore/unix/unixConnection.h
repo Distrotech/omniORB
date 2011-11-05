@@ -3,6 +3,7 @@
 // unixConnection.h           Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2011 Apasphere Ltd.
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -24,29 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.3  2005/01/13 21:10:16  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.2  2005/01/06 23:10:58  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:57  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.2  2001/08/07 15:42:17  sll
-  Make unix domain connections distinguishable on both the server and client
-  side.
-
-  Revision 1.1.2.1  2001/08/06 15:47:44  sll
-  Added support to use the unix domain socket as the local transport.
-
-*/
 
 #ifndef __UNIXCONNECTION_H__
 #define __UNIXCONNECTION_H__
@@ -61,12 +41,10 @@ class unixConnection : public giopConnection, public SocketHolder {
  public:
 
   int Send(void* buf, size_t sz,
-	   unsigned long deadline_secs = 0,
-	   unsigned long deadline_nanosecs = 0);
+	   const omni_time_t& deadline);
 
   int Recv(void* buf, size_t sz,
-	   unsigned long deadline_secs = 0,
-	   unsigned long deadline_nanosecs = 0);
+	   const omni_time_t& deadline);
 
   void Shutdown();
 

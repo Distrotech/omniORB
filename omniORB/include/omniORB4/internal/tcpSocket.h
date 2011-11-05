@@ -3,7 +3,7 @@
 // tcpSocket.h                Created on: 4 June 2010
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2010 Apasphere Ltd.
+//    Copyright (C) 2010-2011 Apasphere Ltd.
 //
 //    This file is part of the omniORB library
 //
@@ -69,48 +69,59 @@ public:
   // the socket.
 
 
-  static SocketHandle_t Connect(const char*   host,
-				CORBA::UShort port,
-				unsigned long deadline_secs,
-				unsigned long deadline_nanosecs,
-				CORBA::ULong  strand_flags);
+  static SocketHandle_t Connect(const char*   	   host,
+				CORBA::UShort 	   port,
+				const omni_time_t& deadline,
+				CORBA::ULong  	   strand_flags,
+				CORBA::Boolean&    timed_out);
   // Connect to specified host and port.
   //
-  // If deadline_secs and/or deadline_nanosecs are set, connect
-  // attempt can time out.
+  // If deadline is set, connect attempt can time out.
   //
   // strand_flags contains additional requirements on the connection.
   // See giopStrandFlags.h.
   //
   // Returns bound socket, or RC_INVALID_SOCKET on error or timeout.
+  // On timeout, timed_out is set true.
 
 
   static inline void
-  logConnectFailure(const char* message, LibcWrapper::AddrInfo* ai)
+  logConnectFailure(const char*            message,
+		    LibcWrapper::AddrInfo* ai)
   {
     if (omniORB::trace(25)) {
       omniORB::logger log;
       CORBA::String_var addr = ai->asString();
-      log << message << ": " << addr << "\n";
+      log << message << ": " << addr;
+      
+      CORBA::UShort port = addrToPort(ai->addr());
+      if (port)
+	log << ":" << port;
+
+      log << "\n";
     }
   }
 
   static inline void
-  logConnectFailure(const char* message, const char* host)
+  logConnectFailure(const char*   message,
+		    const char*   host,
+		    CORBA::UShort port=0)
   {
     if (omniORB::trace(25)) {
       omniORB::logger log;
-      log << message << ": " << host << "\n";
+      log << message << ": " << host;
+      if (port)
+	log << ":" << port;
+      log << "\n";
     }
   }
 
 
-  static inline int setAndCheckTimeout(unsigned long   deadline_secs,
-				       unsigned long   deadline_nanosecs,
-				       struct timeval& t)
+  static inline int setAndCheckTimeout(const omni_time_t& deadline,
+				       struct timeval&    t)
   {
-    if (deadline_secs || deadline_nanosecs) {
-      SocketSetTimeOut(deadline_secs,deadline_nanosecs,t);
+    if (deadline) {
+      SocketSetTimeOut(deadline, t);
       if (t.tv_sec == 0 && t.tv_usec == 0) {
 	// Already timed out.
 	return 1;

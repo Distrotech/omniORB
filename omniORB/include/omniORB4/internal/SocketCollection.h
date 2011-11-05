@@ -4,7 +4,7 @@
 //                            Author    : Sai Lai Lo (sll)
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2005-2009 Apasphere Ltd.
+//    Copyright (C) 2005-2011 Apasphere Ltd.
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,125 +26,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.18  2009/03/13 13:42:33  dgrisby
-  Need an extra include on Win2K. Thanks Sampo Ahokas.
-
-  Revision 1.1.4.17  2008/04/03 08:53:53  dgrisby
-  Define EBADF diferently for VxWorks. Thanks Ingo Thiele.
-
-  Revision 1.1.4.16  2007/07/31 16:36:50  dgrisby
-  Hard-code define of IPV6_V6ONLY on Windows.
-
-  Revision 1.1.4.15  2007/07/31 14:23:43  dgrisby
-  If the platform does not accept IPv4 connections on IPv6 sockets by
-  default, try to enable it by turning the IPV6_V6ONLY socket option
-  off. Should work for BSDs and Windows Vista.
-
-  Revision 1.1.4.14  2006/11/20 14:16:21  dgrisby
-  FreeBSD doesn't listen for IPv4 on IPv6 sockets. Thanks Arno Klaassen.
-
-  Revision 1.1.4.13  2006/10/09 13:08:58  dgrisby
-  Rename SOCKADDR_STORAGE define to OMNI_SOCKADDR_STORAGE, to avoid
-  clash on Win32 2003 SDK.
-
-  Revision 1.1.4.12  2006/05/16 15:43:52  dgrisby
-  Make sure IPv6 definitions are available on Win32.
-
-  Revision 1.1.4.11  2006/05/02 13:07:13  dgrisby
-  Idle giopMonitor SocketCollections would not exit at shutdown.
-
-  Revision 1.1.4.10  2006/03/25 18:54:03  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.4.9  2005/11/18 18:25:57  dgrisby
-  Race condition between connection deletion and Select.
-
-  Revision 1.1.4.8  2005/09/07 16:15:03  dgrisby
-  poll() does not work on Mac OS X.
-
-  Revision 1.1.4.7  2005/08/02 09:42:53  dgrisby
-  Two threads could be dispatched for one call, one by Peek, one by Select.
-
-  Revision 1.1.4.6  2005/06/24 14:31:31  dgrisby
-  Allow multiple threads to Peek() without clashing. Not yet tested on
-  Windows.
-
-  Revision 1.1.4.5  2005/03/02 12:10:50  dgrisby
-  setSelectable / Peek fixes.
-
-  Revision 1.1.4.4  2005/01/17 14:46:19  dgrisby
-  Windows SocketCollection implementation.
-
-  Revision 1.1.4.3  2005/01/13 21:09:57  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.2  2005/01/06 23:08:25  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:03:55  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.16  2003/02/17 01:45:50  dgrisby
-  Pipe to kick select thread (on Unix).
-
-  Revision 1.1.2.15  2002/10/04 11:11:45  dgrisby
-  Transport fixes: ENOTSOCK for Windows, SOMAXCONN in listen().
-
-  Revision 1.1.2.14  2002/09/08 22:12:22  dgrisby
-  Last checkin broke it.
-
-  Revision 1.1.2.13  2002/09/08 21:58:49  dgrisby
-  Support for MSVC 7. (Untested.)
-
-  Revision 1.1.2.12  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.2.11  2002/05/07 12:54:38  dgrisby
-  Fix inevitable Windows header brokenness.
-
-  Revision 1.1.2.10  2002/04/28 20:43:25  dgrisby
-  Windows, FreeBSD, ETS fixes.
-
-  Revision 1.1.2.9  2002/03/13 16:05:38  dpg1
-  Transport shutdown fixes. Reference count SocketCollections to avoid
-  connections using them after they are deleted. Properly close
-  connections when in thread pool mode.
-
-  Revision 1.1.2.8  2002/02/26 14:06:44  dpg1
-  Recent changes broke Windows.
-
-  Revision 1.1.2.7  2002/02/13 16:02:38  dpg1
-  Stability fixes thanks to Bastiaan Bakker, plus threading
-  optimisations inspired by investigating Bastiaan's bug reports.
-
-  Revision 1.1.2.6  2002/01/15 16:38:11  dpg1
-  On the road to autoconf. Dependencies refactored, configure.ac
-  written. No makefiles yet.
-
-  Revision 1.1.2.5  2001/12/03 13:39:54  dpg1
-  Explicit socket shutdown flag for Windows.
-
-  Revision 1.1.2.4  2001/08/24 16:43:25  sll
-  Switch to use Winsock 2. Removed reference to winsock.h. Let the pre-processor
-  define _WIN32_WINNT=0x0400 to select the right header.
-
-  Revision 1.1.2.3  2001/08/23 16:03:29  sll
-  Corrected typo __win32__, should be __WIN32__.
-
-  Revision 1.1.2.2  2001/08/23 10:13:14  sll
-  Cope with the different length type for getsockname and friends on
-  different solaris versions.
-
-  Revision 1.1.2.1  2001/07/31 16:16:26  sll
-  New transport interface to support the monitoring of active connections.
-
-*/
 
 #ifndef __SOCKETCOLLECTION_H__
 #define __SOCKETCOLLECTION_H__
@@ -319,8 +202,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 
 class SocketCollection;
 
-extern void SocketSetTimeOut(unsigned long abs_sec,
-			     unsigned long abs_nsec,struct timeval& t);
+extern void SocketSetTimeOut(const omni_time_t& deadline, struct timeval& t);
 
 extern int SocketSetnonblocking(SocketHandle_t sock);
 
@@ -449,8 +331,7 @@ public:
   // Remove the socket from this collection. Returns the socket which
   // has been removed. Decrements this collection's refcount.
 
-  static unsigned long scan_interval_sec;
-  static unsigned long scan_interval_nsec;
+  static omni_time_t   scan_interval;
   static unsigned      idle_scans;
 
 private:
@@ -459,8 +340,7 @@ private:
 
   // Absolute time at which we scan through the socket list choosing
   // the selectable ones.
-  unsigned long        pd_abs_sec;
-  unsigned long        pd_abs_nsec;
+  omni_time_t          pd_abs_time;
 
   // On platforms that support it, we use a pipe to wake up the select.
   int                  pd_pipe_read;

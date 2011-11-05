@@ -479,10 +479,10 @@ static
 SocketHandle_t
 doConnect(const char*   	 host,
 	  CORBA::UShort 	 port,
-	  unsigned long 	 deadline_secs,
-	  unsigned long 	 deadline_nanosecs,
+	  const omni_time_t&     deadline,
 	  CORBA::ULong  	 strand_flags,
-	  LibcWrapper::AddrInfo* ai)
+	  LibcWrapper::AddrInfo* ai,
+	  CORBA::Boolean&        timed_out)
 {
   SocketHandle_t sock;
 
@@ -546,10 +546,11 @@ doConnect(const char*   	 host,
   int rc;
 
   do {
-    if (tcpSocket::setAndCheckTimeout(deadline_secs, deadline_nanosecs, t)) {
+    if (tcpSocket::setAndCheckTimeout(deadline, t)) {
       // Already timed out
       tcpSocket::logConnectFailure("Connect timed out", ai);
       CLOSESOCKET(sock);
+      timed_out = 1;
       return RC_INVALID_SOCKET;
     }
 
@@ -562,6 +563,7 @@ doConnect(const char*   	 host,
 #else
       tcpSocket::logConnectFailure("Connect timed out", ai);
       CLOSESOCKET(sock);
+      timed_out = 1;
       return RC_INVALID_SOCKET;
 #endif
     }
@@ -597,11 +599,11 @@ doConnect(const char*   	 host,
 
 
 SocketHandle_t
-tcpSocket::Connect(const char*   host,
-		   CORBA::UShort port,
-		   unsigned long deadline_secs,
-		   unsigned long deadline_nanosecs,
-		   CORBA::ULong  strand_flags)
+tcpSocket::Connect(const char*        host,
+		   CORBA::UShort      port,
+		   const omni_time_t& deadline,
+		   CORBA::ULong       strand_flags,
+		   CORBA::Boolean&    timed_out)
 {
   OMNIORB_ASSERT(host);
   OMNIORB_ASSERT(port);
@@ -627,9 +629,8 @@ tcpSocket::Connect(const char*   host,
 	log << "Name '" << host << "' resolved: " << addr << "\n";
       }
     }
-    SocketHandle_t sock = doConnect(host, port,
-				    deadline_secs, deadline_nanosecs,
-				    strand_flags, ai);
+    SocketHandle_t sock = doConnect(host, port, deadline,
+				    strand_flags, ai, timed_out);
     if (sock != RC_INVALID_SOCKET)
       return sock;
 

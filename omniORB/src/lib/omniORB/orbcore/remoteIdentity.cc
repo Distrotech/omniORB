@@ -85,13 +85,13 @@ omniRemoteIdentity::dispatch(omniCallDescriptor& call_desc)
     return;
   }
 
-  if( omniORB::traceInvocations ) {
+  if (omniORB::traceInvocations) {
     omniORB::logger l;
     l << "Invoke '" << call_desc.op() << "' on remote: " << this << '\n';
   }
 
   IOP_C_Holder iop_client(pd_ior,key(),keysize(),pd_rope,&call_desc);
-  cdrStream& s = ((IOP_C&)iop_client).getStream();
+  cdrStream& s = iop_client->getStream();
 
  again:
   call_desc.initialiseCall(s);

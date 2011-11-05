@@ -3,7 +3,7 @@
 // GIOP_C.cc                  Created on: 08/02/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2008 Apasphere Ltd
+//    Copyright (C) 2003-2011 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,70 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.6.9  2008/02/14 12:37:50  dgrisby
-  New immediateAddressSwitch parameter.
-
-  Revision 1.1.6.8  2006/07/18 16:21:22  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.7  2006/03/26 20:59:28  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.6  2005/04/14 00:03:59  dgrisby
-  New traceInvocationReturns and traceTime options; remove logf function.
-
-  Revision 1.1.6.5  2005/04/11 12:09:42  dgrisby
-  Another merge.
-
-  Revision 1.1.6.4  2005/01/06 23:10:11  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.3  2003/11/06 11:56:56  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.6.2  2003/05/20 16:53:15  dgrisby
-  Valuetype marshalling support.
-
-  Revision 1.1.6.1  2003/03/23 21:02:32  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.9  2001/10/17 16:33:27  dpg1
-  New downcast mechanism for cdrStreams.
-
-  Revision 1.1.4.8  2001/09/10 17:43:44  sll
-  Stop idle counter inside initialise.
-
-  Revision 1.1.4.7  2001/09/04 14:38:51  sll
-  Added the boolean argument to notifyCommFailure to indicate if
-  omniTransportLock is held by the caller.
-
-  Revision 1.1.4.6  2001/09/03 16:54:06  sll
-  In initialise(), set deadline from the parameters in calldescriptor.
-
-  Revision 1.1.4.5  2001/09/03 13:28:09  sll
-  In the calldescriptor, in addition to the first address, record the current
-  address in use.
-
-  Revision 1.1.4.4  2001/08/03 17:41:17  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.4.3  2001/07/31 16:28:01  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.4.2  2001/05/11 14:30:56  sll
-  first_use status of the strand is now in use.
-
-  Revision 1.1.4.1  2001/04/18 18:10:52  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <giopRope.h>
@@ -135,15 +73,14 @@ void
 GIOP_C::initialise(const omniIOR* i, 
 		   const CORBA::Octet* k,
 		   int ksz,
-		   omniCallDescriptor* calldesc) {
+		   omniCallDescriptor* calldesc)
+{
   giopStream::reset();
   pd_strand->stopIdleCounter();
   state(IOP_C::Idle);
   ior(i);
   calldescriptor(calldesc);
-  unsigned long secs,nanosecs;
-  calldesc->getDeadline(secs,nanosecs);
-  setDeadline(secs,nanosecs);
+  setDeadline(calldesc->getDeadline());
   key(k);
   keysize(ksz);
   requestId(pd_strand->newSeqNumber());
@@ -288,8 +225,8 @@ GIOP_C::UnMarshallSystemException()
 
 ////////////////////////////////////////////////////////////////////////
 void
-GIOP_C::notifyCommFailure(CORBA::Boolean heldlock,
-			  CORBA::ULong& minor,
+GIOP_C::notifyCommFailure(CORBA::Boolean  heldlock,
+			  CORBA::ULong&   minor,
 			  CORBA::Boolean& retry) {
 
   OMNIORB_ASSERT(pd_calldescriptor);
@@ -337,7 +274,7 @@ GIOP_C::notifyCommFailure(CORBA::Boolean heldlock,
     // objects at the other end will not be able to call us.
     // The application may want to know this. We
     // should not silently retry and reconnect again because the
-    // callback objects would not the new connection.
+    // callback objects would not use the new connection.
     retry = 0;
   }
   else {

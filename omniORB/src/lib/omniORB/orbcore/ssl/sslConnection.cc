@@ -49,8 +49,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 /////////////////////////////////////////////////////////////////////////
 int
 sslConnection::Send(void* buf, size_t sz,
-		    unsigned long deadline_secs,
-		    unsigned long deadline_nanosecs) {
+		    const omni_time_t& deadline) {
 
   if (!pd_handshake_ok) {
     omniORB::logs(25, "Send failed because SSL handshake not yet completed.");
@@ -67,8 +66,8 @@ sslConnection::Send(void* buf, size_t sz,
 
     struct timeval t;
 
-    if (deadline_secs || deadline_nanosecs) {
-      SocketSetTimeOut(deadline_secs,deadline_nanosecs,t);
+    if (deadline) {
+      SocketSetTimeOut(deadline, t);
       if (t.tv_sec == 0 && t.tv_usec == 0) {
 	// Already timeout.
 	return 0;
@@ -144,8 +143,7 @@ sslConnection::Send(void* buf, size_t sz,
 /////////////////////////////////////////////////////////////////////////
 int
 sslConnection::Recv(void* buf, size_t sz,
-		    unsigned long deadline_secs,
-		    unsigned long deadline_nanosecs) {
+		    const omni_time_t& deadline) {
 
   if (!pd_handshake_ok) {
     omniORB::logs(25, "Send failed because SSL handshake not yet completed.");
@@ -165,8 +163,8 @@ sslConnection::Recv(void* buf, size_t sz,
 
     struct timeval t;
 
-    if (deadline_secs || deadline_nanosecs) {
-      SocketSetTimeOut(deadline_secs,deadline_nanosecs,t);
+    if (deadline) {
+      SocketSetTimeOut(deadline, t);
       if (t.tv_sec == 0 && t.tv_usec == 0) {
 	// Already timeout.
 	return 0;
@@ -297,23 +295,20 @@ sslConnection::gatekeeperCheckSpecific()
     log << "Perform SSL accept for new incoming connection " << peer << "\n";
   }
 
-  unsigned long deadline_secs, deadline_nanosecs;
+  omni_time_t deadline;
   struct timeval tv;
 
-  if (sslTransportImpl::sslAcceptTimeOut.secs ||
-      sslTransportImpl::sslAcceptTimeOut.nanosecs) {
+  if (sslTransportImpl::sslAcceptTimeOut) {
 
     SocketSetnonblocking(pd_socket);
-    omni_thread::get_time(&deadline_secs, &deadline_nanosecs,
-			  sslTransportImpl::sslAcceptTimeOut.secs,
-			  sslTransportImpl::sslAcceptTimeOut.nanosecs);
+    omni_thread::get_time(deadline, sslTransportImpl::sslAcceptTimeOut);
   }
 
   int timeout = 0;
   int go = 1;
 
   while(go && !pd_shutdown) {
-    if (tcpSocket::setAndCheckTimeout(deadline_secs, deadline_nanosecs, tv)) {
+    if (tcpSocket::setAndCheckTimeout(deadline, tv)) {
       // Timed out
       timeout = 1;
       break;

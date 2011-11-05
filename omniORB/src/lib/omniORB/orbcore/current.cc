@@ -131,7 +131,7 @@ omniCurrent::init()
 
 omniCurrent::omniCurrent(omni_thread* thread)
   : pd_callDescriptor(0),
-    pd_timeout_secs(0), pd_timeout_nanosecs(0), pd_timeout_absolute(0)
+    pd_timeout_absolute(0)
 {
   thread->set_value(thread_key, this);
 }

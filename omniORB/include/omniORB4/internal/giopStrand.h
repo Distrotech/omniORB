@@ -3,7 +3,7 @@
 // giopStrand.h               Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,61 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.6.4  2006/07/18 16:21:23  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.3  2006/07/02 22:52:05  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.6.2  2006/06/22 13:53:49  dgrisby
-  Add flags to strand.
-
-  Revision 1.1.6.1  2003/03/23 21:03:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.10  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.4.9  2001/09/19 17:26:46  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.8  2001/09/10 17:43:11  sll
-  Replaced the non-thread safe resetIdleCounter with startIdleCounter and
-  stopIdleCounter. Added orderly_closed to indicate that a stand is orderly
-  closed because a GIOP CloseConnection message has been received.
-
-  Revision 1.1.4.7  2001/08/29 17:51:06  sll
-  Updated description for gatekeeper_checked.
-
-  Revision 1.1.4.6  2001/08/17 17:10:05  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.5  2001/08/03 17:43:19  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.4.4  2001/07/31 16:28:01  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.4.3  2001/07/13 15:20:56  sll
-  New member safeDelete is now the only method to delete a strand.
-
-  Revision 1.1.4.2  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:19:00  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:04  sll
-  Added new files.
-
-  */
 
 #ifndef __GIOPSTRAND_H__
 #define __GIOPSTRAND_H__

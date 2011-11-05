@@ -3,7 +3,7 @@
 // callDescriptor.h           Created on: 12/98
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2003-2010 Apasphere Ltd
+//    Copyright (C) 2003-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -80,9 +80,8 @@ public:
       pd_current_address(0),
       pd_objref(0),
       pd_poa(0),
-      pd_localId(0),
-      pd_deadline_secs(0),
-      pd_deadline_nanosecs(0) {}
+      pd_localId(0)
+  {}
 
   virtual ~omniCallDescriptor() {}
 
@@ -177,14 +176,12 @@ public:
     pd_current_address = a;
   }
 
-  inline void getDeadline(unsigned long& secs, unsigned long& nanosecs) const {
-    secs = pd_deadline_secs;
-    nanosecs = pd_deadline_nanosecs;
+  inline const omni_time_t& getDeadline() const {
+    return pd_deadline;
   }
 
-  inline void setDeadline(unsigned long secs, unsigned long nanosecs) {
-    pd_deadline_secs = secs;
-    pd_deadline_nanosecs = nanosecs;
+  inline void setDeadline(omni_time_t& deadline) {
+    pd_deadline = deadline;
   }
 
   inline void containsValues(_CORBA_Boolean v) {
@@ -268,8 +265,7 @@ private:
 
   // This is a state holder for the call. Not manipulated by this class
   // other than the access functions. Initialised to 0 in ctor.
-  unsigned long                pd_deadline_secs;
-  unsigned long                pd_deadline_nanosecs;
+  omni_time_t                  pd_deadline;
 
 
   ///////////////////////
