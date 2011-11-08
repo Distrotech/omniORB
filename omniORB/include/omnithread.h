@@ -211,7 +211,7 @@ struct omni_time_t {
     unsigned long os  = o.s + o.ns / 1000000000;
     unsigned long ons = o.ns % 1000000000;
     unsigned long nns = ns + ons;
-    s += o.s + nns / 1000000000;
+    s += os + nns / 1000000000;
     ns = nns % 1000000000;
     return *this;
   }
