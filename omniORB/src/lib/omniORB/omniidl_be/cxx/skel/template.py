@@ -39,6 +39,7 @@ boilerplate = """\
 #include <omniORB4/callDescriptor.h>
 #include <omniORB4/callHandle.h>
 #include <omniORB4/objTracker.h>
+@ami_inc@
 
 OMNI_USING_NAMESPACE(omni)
 
@@ -51,6 +52,7 @@ static const char* @prefix@_library_version = @library@;
 ##
 ## Interface
 ##
+
 interface_POA = """\
 POA_@fqname@::~@POA_prefix@@name@() {}
 """
@@ -79,20 +81,20 @@ void @name@_Helper::marshalObjRef(::@name@_ptr obj, cdrStream& s) {
 
 interface_duplicate_narrow = """\
 void @name@_Helper::duplicate(::@name@_ptr obj) {
-  if( obj && !obj->_NP_is_nil() )  omni::duplicateObjRef(obj);
+  if (obj && !obj->_NP_is_nil())  omni::duplicateObjRef(obj);
 }
 
 @name@_ptr
 @name@::_duplicate(::@name@_ptr obj)
 {
-  if( obj && !obj->_NP_is_nil() )  omni::duplicateObjRef(obj);
+  if (obj && !obj->_NP_is_nil())  omni::duplicateObjRef(obj);
   return obj;
 }
 
 @name@_ptr
 @name@::_narrow(::CORBA::Object_ptr obj)
 {
-  if( !obj || obj->_NP_is_nil() || obj->_NP_is_pseudo() ) return _nil();
+  if (!obj || obj->_NP_is_nil() || obj->_NP_is_pseudo()) return _nil();
   _ptr_type e = (_ptr_type) obj->_PR_getobj()->_realNarrow(_PD_repoId);
   return e ? e : _nil();
 }
@@ -101,7 +103,7 @@ void @name@_Helper::duplicate(::@name@_ptr obj) {
 @name@_ptr
 @name@::_unchecked_narrow(::CORBA::Object_ptr obj)
 {
-  if( !obj || obj->_NP_is_nil() || obj->_NP_is_pseudo() ) return _nil();
+  if (!obj || obj->_NP_is_nil() || obj->_NP_is_pseudo()) return _nil();
   _ptr_type e = (_ptr_type) obj->_PR_getobj()->_uncheckedNarrow(_PD_repoId);
   return e ? e : _nil();
 }
@@ -143,7 +145,7 @@ void @name@_Helper::duplicate(::@name@_ptr obj) {
 @name@_ptr
 @name@::_narrow(::CORBA::AbstractBase_ptr obj)
 {
-  if( !obj || obj->_NP_is_nil() ) return _nil();
+  if (!obj || obj->_NP_is_nil()) return _nil();
   _ptr_type e = 0;
   
   ::CORBA::ValueBase* v = obj->_to_value();
@@ -162,7 +164,7 @@ void @name@_Helper::duplicate(::@name@_ptr obj) {
 @name@_ptr
 @name@::_unchecked_narrow(::CORBA::AbstractBase_ptr obj)
 {
-  if( !obj || obj->_NP_is_nil() ) return _nil();
+  if (!obj || obj->_NP_is_nil()) return _nil();
   _ptr_type e = 0;
   
   ::CORBA::ValueBase* v = obj->_to_value();
@@ -181,20 +183,20 @@ void @name@_Helper::duplicate(::@name@_ptr obj) {
 
 local_interface_duplicate_narrow = """\
 void @name@_Helper::duplicate(::@name@_ptr obj) {
-  if( obj && !obj->_NP_is_nil() )  obj->_NP_incrRefCount();
+  if (obj && !obj->_NP_is_nil())  obj->_NP_incrRefCount();
 }
 
 @name@_ptr
 @name@::_duplicate(::@name@_ptr obj)
 {
-  if( obj && !obj->_NP_is_nil() )  obj->_NP_incrRefCount();
+  if (obj && !obj->_NP_is_nil())  obj->_NP_incrRefCount();
   return obj;
 }
 
 @name@_ptr
 @name@::_narrow(::CORBA::Object_ptr obj)
 {
-  if( !obj || obj->_NP_is_nil() ) return _nil();
+  if (!obj || obj->_NP_is_nil()) return _nil();
   _ptr_type e = (_ptr_type) obj->_ptrToObjRef(_PD_repoId);
   if (e) {
     e->_NP_incrRefCount();
@@ -220,9 +222,9 @@ interface_nil = """\
   return &_the_nil_obj;
 #else
   static @objref_name@* _the_nil_ptr = 0;
-  if( !_the_nil_ptr ) {
+  if (!_the_nil_ptr) {
     omni::nilRefLock().lock();
-    if( !_the_nil_ptr ) {
+    if (!_the_nil_ptr) {
       _the_nil_ptr = new @objref_name@;
       registerNilCorbaObject(_the_nil_ptr);
     }
@@ -254,16 +256,16 @@ interface_objref = """\
 void*
 @fq_objref_name@::_ptrToObjRef(const char* id)
 {
-  if( id == ::@name@::_PD_repoId )
+  if (id == ::@name@::_PD_repoId)
     return (::@name@_ptr) this;
   @_ptrToObjRef_ptr@
-  if( id == ::CORBA::Object::_PD_repoId )
+  if (id == ::CORBA::Object::_PD_repoId)
     return (::CORBA::Object_ptr) this;
 
-  if( omni::strMatch(id, ::@name@::_PD_repoId) )
+  if (omni::strMatch(id, ::@name@::_PD_repoId))
     return (::@name@_ptr) this;
   @_ptrToObjRef_str@
-  if( omni::strMatch(id, ::CORBA::Object::_PD_repoId) )
+  if (omni::strMatch(id, ::CORBA::Object::_PD_repoId))
     return (::CORBA::Object_ptr) this;
 
   return 0;
@@ -278,12 +280,12 @@ if (_shortcut) {
 """
 
 interface_objref_repoID_ptr = """\
-if( id == ::@inherits_fqname@::_PD_repoId )
+if (id == ::@inherits_fqname@::_PD_repoId)
   return (::@inherits_fqname@_ptr) this;
 """
 
 interface_objref_repoID_str = """\
-if( omni::strMatch(id, ::@inherits_fqname@::_PD_repoId) )
+if (omni::strMatch(id, ::@inherits_fqname@::_PD_repoId))
   return (::@inherits_fqname@_ptr) this;
 """
 
@@ -336,16 +338,16 @@ local_interface_objref = """\
 void*
 @name@::_ptrToObjRef(const char* id)
 {
-  if( id == ::@name@::_PD_repoId )
+  if (id == ::@name@::_PD_repoId)
     return (::@name@_ptr) this;
   @_ptrToObjRef_ptr@
-  if( id == ::CORBA::Object::_PD_repoId )
+  if (id == ::CORBA::Object::_PD_repoId)
     return (::CORBA::Object_ptr) this;
 
-  if( omni::strMatch(id, ::@name@::_PD_repoId) )
+  if (omni::strMatch(id, ::@name@::_PD_repoId))
     return (::@name@_ptr) this;
   @_ptrToObjRef_str@
-  if( omni::strMatch(id, ::CORBA::Object::_PD_repoId) )
+  if (omni::strMatch(id, ::CORBA::Object::_PD_repoId))
     return (::CORBA::Object_ptr) this;
 
   return 0;
@@ -407,8 +409,8 @@ class @call_descriptor@
   : public omniCallDescriptor
 {
 public:
-  inline @call_descriptor@(@ctor_args@):
-     @base_ctor@
+  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen, _CORBA_Boolean upcall=0)
+    : omniCallDescriptor(lcfn, op_, oplen, @oneway@, _user_exns, @exn_len@, upcall)
   {
     @contains_values@
   }
@@ -421,6 +423,35 @@ public:
   @member_data@
 };
 """
+
+interface_proxy_class_ami = """\
+// Proxy call descriptor class. Mangled signature:
+//  @signature@
+class @call_descriptor@
+  : public omniAsyncCallDescriptor
+{
+public:
+  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen, _CORBA_Boolean upcall=0)
+    : omniAsyncCallDescriptor(lcfn, op_, oplen, @oneway@, _user_exns, @exn_len@, upcall)
+  {
+    @contains_values@
+  }
+
+  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen, _CORBA_Boolean upcall, _CORBA_Boolean delete_when_complete)
+    : omniAsyncCallDescriptor(lcfn, op_, oplen, @oneway@, _user_exns, @exn_len@, upcall, delete_when_complete)
+  {
+    @contains_values@
+  }
+  
+  @in_arguments_decl@
+  @out_arguments_decl@  
+  @user_exceptions_decl@
+  static const char* const _user_exns[];
+
+  @member_data@
+};
+"""
+
 
 interface_context_array = """\
 static const char*const @context_descriptor@[] = {
@@ -487,7 +518,7 @@ void @call_descriptor@::userException(cdrStream& s, _OMNI_NS(IOP_C)* iop_client,
 """
 
 interface_proxy_exn_handle = """\
-if ( omni::strMatch(repoId, @repoID_str@) ) {
+if (omni::strMatch(repoId, @repoID_str@)) {
   @exname@ _ex;
   _ex <<= s;
   if (iop_client) iop_client->RequestCompleted();
@@ -545,7 +576,7 @@ omniObjRef*
 ::CORBA::Boolean
 @pof_name@::is_a(const char* id) const
 {
-  if( omni::ptrStrMatch(id, ::@name@::_PD_repoId) )
+  if (omni::ptrStrMatch(id, ::@name@::_PD_repoId))
     return 1;
   @Other_repoIDs@
   return 0;
@@ -555,7 +586,7 @@ const @pof_name@ _the_pof_@idname@;
 """
 
 interface_pof_repoID = """\
-if( omni::ptrStrMatch(id, @inherited@::_PD_repoId) )
+if (omni::ptrStrMatch(id, @inherited@::_PD_repoId))
   return 1;
 """
 
@@ -586,16 +617,16 @@ interface_impl = """\
 void*
 @impl_fqname@::_ptrToInterface(const char* id)
 {
-  if( id == ::@name@::_PD_repoId )
+  if (id == ::@name@::_PD_repoId)
     return (::@impl_fqname@*) this;
   @_ptrToInterface_ptr@
-  if( id == ::CORBA::Object::_PD_repoId )
+  if (id == ::CORBA::Object::_PD_repoId)
     return (void*) 1;
 
-  if( omni::strMatch(id, ::@name@::_PD_repoId) )
+  if (omni::strMatch(id, ::@name@::_PD_repoId))
     return (::@impl_fqname@*) this;
   @_ptrToInterface_str@
-  if( omni::strMatch(id, ::CORBA::Object::_PD_repoId) )
+  if (omni::strMatch(id, ::CORBA::Object::_PD_repoId))
     return (void*) 1;
   return 0;
 }
@@ -610,13 +641,13 @@ const char*
 interface_impl_inherit_dispatch = """\
 
 #ifndef _MSC_VER
-if( @impl_inherited_name@::_dispatch(_handle) ) {
+if (@impl_inherited_name@::_dispatch(_handle)) {
   return 1;
 }
 #else
 // Work-around for incorrect MSVC code generation.
-if( ((@impl_inherited_name@*)this)->
-    @impl_inherited_name@::_dispatch(_handle) ) {
+if (((@impl_inherited_name@*)this)->
+    @impl_inherited_name@::_dispatch(_handle)) {
   return 1;
 }
 #endif
@@ -627,12 +658,12 @@ void @impl_fqname@::_interface_is_abstract() {}
 """
 
 interface_impl_repoID_ptr = """\
-if( id == ::@inherited_name@::_PD_repoId )
+if (id == ::@inherited_name@::_PD_repoId)
   return (::@impl_inherited_name@*) this;
 """
 
 interface_impl_repoID_str = """\
-if( omni::strMatch(id, ::@inherited_name@::_PD_repoId) )
+if (omni::strMatch(id, ::@inherited_name@::_PD_repoId))
   return (::@impl_inherited_name@*) this;
 """
 
@@ -654,7 +685,7 @@ _ctxt = ::CORBA::Context::unmarshalContext(iop_s);
 """
 
 interface_operation_dispatch = """\
-if( omni::strMatch(op, "@idl_operation_name@") ) {
+if (omni::strMatch(op, "@idl_operation_name@")) {
 
   @call_descriptor@ _call_desc(@call_desc_args@);
   @prepare_out_args@
@@ -663,9 +694,68 @@ if( omni::strMatch(op, "@idl_operation_name@") ) {
 }
 """
 
+
+##
+## Interface -- AMI
+##
+
+interface_ami_call_descriptor = """
+// AMI proxy call descriptor class:
+//  @if_name@::@op_name@
+class @call_descriptor@
+  : public @base_cd@
+{
+public:
+  inline @call_descriptor@()
+    : @base_cd@(@lcfn@, "@op_name@", @op_len@, 0, 0)
+  { }
+
+  inline @call_descriptor@(::@handler_cls@::_ptr_type handler)
+    : @base_cd@(@lcfn@, "@op_name@", @op_len@, 0, 1)
+  {
+    pd_handler = ::@handler_cls@::_duplicate(handler);
+  }
+
+  void completeCallback();
+
+private:
+  ::@handler_cls@::_var_type pd_handler;
+};
+
+
+void @call_descriptor@::completeCallback()
+{
+  if (!::CORBA::is_nil(pd_handler)) {
+    if (!exceptionOccurred()) {
+      pd_handler->@handler_op_name@(@callback_args@);
+    }
+    else {
+      ::Messaging::ExceptionHolder_var eh(new omniAMI::ExceptionHolder(this));
+      pd_handler->@handler_ex_name@(eh);
+    }
+  }
+}
+"""
+
+interface_ami_sendc = """\
+@cd_name@* _call_desc = new @cd_name@(@ami_handler@);
+@assign_args@
+_invoke_async(_call_desc);
+"""
+
+interface_ami_sendp = """\
+@cd_name@* _call_desc = new @cd_name@();
+@assign_args@
+_invoke_async(_call_desc);
+return 0; // *** HERE
+"""
+
+
+
 ##
 ## Struct
 ##
+
 struct = """\
 void
 @name@::operator>>= (cdrStream &_n) const
@@ -722,6 +812,7 @@ void
 ##
 ## const
 ##
+
 const_namespace = """\
 #if defined(HAS_Cplusplus_Namespace) && defined(_MSC_VER)
 // MSVC++ does not give the constant external linkage othewise.
@@ -748,6 +839,7 @@ _init_in_def_( const @type@ @name@ = @value@; )
 ##
 ## Exception
 ##
+
 exception = """\
 ::CORBA::Exception::insertExceptionToAny @scoped_name@::insertToAnyFn = 0;
 ::CORBA::Exception::insertExceptionToAnyNCP @scoped_name@::insertToAnyFnNCP = 0;
@@ -846,7 +938,7 @@ void
     // never reach here
   }
   length(_l);
-  for( _CORBA_ULong _i = 0; _i < _l; _i++ )
+  for (_CORBA_ULong _i = 0; _i < _l; _i++)
     pd_buf[_i] <<= _s;
 }
 """
@@ -871,7 +963,7 @@ void
     // never reach here
   }
   length(_l);
-  for( _CORBA_ULong _i = 0; _i < _l; _i++ )
+  for (_CORBA_ULong _i = 0; _i < _l; _i++)
     pd_buf[_i] <<= _s;
 }
 """
@@ -881,7 +973,7 @@ void
 @fqname@::operator>>= (cdrStream& _s) const
 {
   ::operator>>=(_CORBA_ULong(pd_len), _s);
-  for( _CORBA_ULong _i = 0; _i < pd_len; _i++ )
+  for (_CORBA_ULong _i = 0; _i < pd_len; _i++)
     pd_buf[_i] >>= _s;
 }
 

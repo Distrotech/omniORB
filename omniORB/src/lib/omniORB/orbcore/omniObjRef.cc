@@ -799,6 +799,7 @@ AsyncRequest::execute()
 
   try {
     pd_objref->_invoke(*pd_callDescriptor);
+
     if (omniORB::trace(25)) {
       omniORB::logger log;
       log << "Asynchronous invoke '" << pd_callDescriptor->op()
@@ -819,7 +820,35 @@ AsyncRequest::execute()
       log << "Unexpected exception performing asynchronous request '"
 	  << pd_callDescriptor->op() << "'\n";
     }
+    CORBA::UNKNOWN ex(UNKNOWN_UserException, CORBA::COMPLETED_NO);
+    pd_callDescriptor->storeException(ex);
   }
+
+  try {
+    pd_callDescriptor->setComplete();
+  }
+  catch (const CORBA::UserException& ex) {
+    if (omniORB::trace(1)) {
+      omniORB::logger log;
+      log << "Asynchronous complete callback for '" << pd_callDescriptor->op()
+	  << "' raised " << ex._name() << "\n";
+    }
+  }
+  catch (const CORBA::SystemException& ex) {
+    if (omniORB::trace(1)) {
+      omniORB::logger log;
+      log << "Asynchronous complete callback for '" << pd_callDescriptor->op()
+	  << "' raised CORBA::" << ex._name() << "\n";
+    }
+  }
+  catch (...) {
+    if (omniORB::trace(1)) {
+      omniORB::logger log;
+      log << "Unexpected exception performing complete callback for "
+	  << "asynchronous request '" << pd_callDescriptor->op() << "'\n";
+    }
+  }
+
   delete this;
 }
 

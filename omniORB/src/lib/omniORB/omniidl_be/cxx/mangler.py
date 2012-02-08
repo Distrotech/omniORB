@@ -45,6 +45,7 @@ IN_SEPARATOR            =    "_i"
 OUT_SEPARATOR           =    "_o"
 INOUT_SEPARATOR         =    "_n"
 EXCEPTION_SEPARATOR     =    "_e"
+ASYNC_TAG               =    "_z"
 
 # Canonical names for basic types
 name_map = {
@@ -177,7 +178,7 @@ def canonTypeName(type, decl = None, useScopedName = 0):
     return canon_name
 
 
-def produce_signature(returnType, parameters, raises, oneway):
+def produce_signature(returnType, parameters, raises, oneway, ami):
 
     returnType = types.Type(returnType)
     d_returnType = returnType.deref()
@@ -217,4 +218,8 @@ def produce_signature(returnType, parameters, raises, oneway):
     raises_str = "".join(raises_sigs)
 
     sig = sig + raises_str
+
+    if ami:
+        sig = sig + ASYNC_TAG
+
     return sig

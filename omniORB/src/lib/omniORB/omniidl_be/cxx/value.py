@@ -112,8 +112,8 @@ protected:
 
 private:
   // Not implemented
-  @name@(const @name@ &);
-  void operator=(const @name@ &);
+  @name@(const @name@&);
+  @name@& operator=(const @name@&);
 };
 """
 
@@ -863,7 +863,7 @@ public:
 protected:
   ~@name@();
 private:
-  void operator=(const @name@&);
+  @name@& operator=(const @name@&);
 
   @boxed_member@ _pd_boxed;
 };

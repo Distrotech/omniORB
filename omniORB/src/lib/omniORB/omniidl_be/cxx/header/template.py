@@ -433,8 +433,10 @@ class _objref_@name@ :
   @inherits@
 {
 public:
+  // IDL operations
   @operations@
 
+  // Constructors
   inline _objref_@name@() @init_shortcut@ { _PR_setobj(0); }  // nil
   _objref_@name@(omniIOR*, omniIdentity*);
 
@@ -783,21 +785,21 @@ public:
   inline @name@_var() : _pd_seq(0) {}
   inline @name@_var(@name@* _s) : _pd_seq(_s) {}
   inline @name@_var(const @name@_var& _s) {
-    if( _s._pd_seq )  _pd_seq = new @name@(*_s._pd_seq);
-    else              _pd_seq = 0;
+    if (_s._pd_seq)  _pd_seq = new @name@(*_s._pd_seq);
+    else             _pd_seq = 0;
   }
-  inline ~@name@_var() { if( _pd_seq )  delete _pd_seq; }
+  inline ~@name@_var() { if (_pd_seq)  delete _pd_seq; }
     
   inline @name@_var& operator = (@name@* _s) {
-    if( _pd_seq )  delete _pd_seq;
+    if (_pd_seq)  delete _pd_seq;
     _pd_seq = _s;
     return *this;
   }
   inline @name@_var& operator = (const @name@_var& _s) {
-    if( _s._pd_seq ) {
-      if( !_pd_seq )  _pd_seq = new @name@;
+    if (_s._pd_seq) {
+      if (!_pd_seq)  _pd_seq = new @name@;
       *_pd_seq = *_s._pd_seq;
-    } else if( _pd_seq ) {
+    } else if (_pd_seq) {
       delete _pd_seq;
       _pd_seq = 0;
     }
@@ -817,7 +819,7 @@ public:
   inline const @name@& in() const { return *_pd_seq; }
   inline @name@&       inout()    { return *_pd_seq; }
   inline @name@*&      out() {
-    if( _pd_seq ) { delete _pd_seq; _pd_seq = 0; }
+    if (_pd_seq) { delete _pd_seq; _pd_seq = 0; }
     return _pd_seq;
   }
   inline @name@* _retn() { @name@* tmp = _pd_seq; _pd_seq = 0; return tmp; }
@@ -1499,20 +1501,20 @@ public:
   @tie_name@(_omniT* t, ::PortableServer::POA_ptr p,_CORBA_Boolean r=1)
     : pd_obj(t), pd_poa(p), pd_rel(r) {}
   ~@tie_name@() {
-    if( pd_poa )  ::CORBA::release(pd_poa);
-    if( pd_rel )  delete pd_obj;
+    if (pd_poa)  ::CORBA::release(pd_poa);
+    if (pd_rel)  delete pd_obj;
   }
 
   _omniT* _tied_object() { return pd_obj; }
 
   void _tied_object(_omniT& t) {
-    if( pd_rel )  delete pd_obj;
+    if (pd_rel)  delete pd_obj;
     pd_obj = &t;
     pd_rel = 0;
   }
 
   void _tied_object(_omniT* t, _CORBA_Boolean r=1) {
-    if( pd_rel )  delete pd_obj;
+    if (pd_rel)  delete pd_obj;
     pd_obj = t;
     pd_rel = r;
   }
@@ -1521,8 +1523,8 @@ public:
   void _is_owner(_CORBA_Boolean io) { pd_rel = io;   }
 
   ::PortableServer::POA_ptr _default_POA() {
-    if( !pd_poa )  return ::PortableServer::POA::_the_root_poa();
-    else           return ::PortableServer::POA::_duplicate(pd_poa);
+    if (!pd_poa)  return ::PortableServer::POA::_the_root_poa();
+    else          return ::PortableServer::POA::_duplicate(pd_poa);
   }
 
   @callables@
@@ -1544,7 +1546,7 @@ public:
   @tie_name@(_omniT* t)
     : pd_obj(t),  pd_rel(release) {}
   ~@tie_name@() {
-    if( pd_rel )  delete pd_obj;
+    if (pd_rel)  delete pd_obj;
   }
 
   @callables@

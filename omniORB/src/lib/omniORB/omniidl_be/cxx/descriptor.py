@@ -60,14 +60,22 @@ def __init__(ast):
     HV = HashVisitor()
     ast.accept(HV)
 
+
 def call_descriptor(signature):
     return private_prefix + "_cd_" + get_signature_descriptor(signature)
+
 
 def context_descriptor(signature):
     return private_prefix + "_ctx_" + get_signature_descriptor(signature)
 
+
 def local_callback_fn(iname, operation_name, signature):
     return private_prefix + "_lcfn_" +\
+       get_interface_operation_descriptor(iname, operation_name, signature)
+
+
+def ami_call_descriptor(iname, operation_name, signature):
+    return private_prefix + "_ami_" +\
        get_interface_operation_descriptor(iname, operation_name, signature)
 
 
@@ -162,16 +170,13 @@ def unique():
 
 
 def get_signature_descriptor(signature):
-    global signature_descriptors
-    
     if not signature_descriptors.has_key(signature):
         signature_descriptors[signature] = unique()
 
     return signature_descriptors[signature]
 
-def get_interface_operation_descriptor(iname, operation_name, signature):
-    global iface_descriptors
 
+def get_interface_operation_descriptor(iname, operation_name, signature):
     assert isinstance(iname, id.Name)
 
     key = iname.hash()

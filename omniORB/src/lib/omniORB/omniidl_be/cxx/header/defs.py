@@ -206,7 +206,7 @@ def visitInterface(node):
         for n in node.declarations():
             n.accept(self)
 
-    # Output the this interface's corresponding class
+    # Output this interface's corresponding class
     Ibase = iface.I(I,Other_IDL)
     Ibase.hh(stream)
 

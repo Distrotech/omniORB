@@ -178,6 +178,8 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                           cb.attrType(),
                                           op_ident, op_scope, op_repoId,
                                           [], [], [])
+
+                    op._ami_declarator = dec
                     operations.append(op)
 
                     if cb.readonly():
@@ -197,6 +199,8 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                           idltype.Base(idltype.tk_void),
                                           op_ident, op_scope, op_repoId,
                                           params, [], [])
+
+                    op._ami_declarator = dec
                     operations.append(op)
                     
         return operations, clashes
@@ -241,7 +245,7 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
         """
         _handler(node) -> (handler_fwd, handler)
         
-        Build Handler valuetype.
+        Build ReplyHandler interface.
         """
 
         if node.inherits():
@@ -276,9 +280,6 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
 
         for cb in callables:
 
-            if cb.oneway():
-                continue
-
             op_scope  = handler_scope + [cb.identifier()]
             op_repoId = "IDL:%s:1.0" % idlutil.slashName(op_scope)
 
@@ -304,15 +305,23 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                   cb.identifier(), op_scope, op_repoId,
                                   params, [], [])
 
+            if hasattr(cb, "_ami_declarator"):
+                if cb.identifier().startswith("set"):
+                    cb._ami_declarator._ami_set_handler = op
+                else:
+                    cb._ami_declarator._ami_get_handler = op
+            else:
+                cb._ami_handler = op
+
             operations.append(op)
 
 
         # _excep methods
         exceps = []
 
-        for added_op in operations:
+        for cb in callables:
 
-            ident = added_op.identifier()
+            ident = cb.identifier()
 
             excep_ident = self._suffixName("_excep", ident, clashes)
 
@@ -323,11 +332,20 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
             op_scope  = handler_scope + [excep_ident]
             op_repoId = "IDL:%s:1.0" % idlutil.slashName(op_scope)
 
-            op = idlast.Operation(added_op.file(), added_op.line(),
-                                  added_op.mainFile(), [], [],
+            op = idlast.Operation(cb.file(), cb.line(),
+                                  cb.mainFile(), [], [],
                                   0, idltype.Base(idltype.tk_void),
                                   excep_ident, op_scope, op_repoId,
                                   params, [], [])
+
+            cb._ami_handler_excep = op
+
+            if hasattr(cb, "_ami_declarator"):
+                if cb.identifier().startswith("set"):
+                    cb._ami_declarator._ami_set_handler_excep = op
+                else:
+                    cb._ami_declarator._ami_get_handler_excep = op
+
             exceps.append(op)
             
 
@@ -471,8 +489,20 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                   op_ident, op_scope, op_repoId,
                                   [handler_param] + params,
                                   [], cb.contexts())
-
             operations.append(op)
+
+            if hasattr(cb, "_ami_declarator"):
+                op._ami_from = cb._ami_declarator
+
+                if cb.identifier().startswith("set"):
+                    cb._ami_declarator._ami_set_sendc = op
+                    op._ami_setter = 1
+                else:
+                    cb._ami_declarator._ami_get_sendc = op
+                    op._ami_setter = 0
+            else:
+                cb._ami_sendc = op
+                op._ami_from  = cb
 
 
             # sendp...
@@ -489,12 +519,24 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
 
             op = idlast.Operation(cb.file(), cb.line(),
                                   cb.mainFile(), [], [],
-                                  0, idltype.Base(idltype.tk_void),
+                                  0, poller_type,
                                   op_ident, op_scope, op_repoId,
-                                  [poller_param] + params,
-                                  [], cb.contexts())
+                                  params[:], [], cb.contexts())
 
             operations.append(op)
+
+            if hasattr(cb, "_ami_declarator"):
+                op._ami_from = cb._ami_declarator
+
+                if cb.identifier().startswith("set"):
+                    cb._ami_declarator._ami_set_sendp = op
+                    op._ami_setter = 1
+                else:
+                    cb._ami_declarator._ami_get_sendp = op
+                    op._ami_setter = 0
+            else:
+                cb._ami_sendp = op
+                op._ami_from  = cb
 
                 
         node._ami_ops = operations

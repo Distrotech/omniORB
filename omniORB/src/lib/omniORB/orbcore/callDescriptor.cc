@@ -168,6 +168,33 @@ omniCallDescriptor::removeInterceptor(omniCallDescriptor::LocalCallFn fn)
     entry = entry->next;
   }
 }
+
+
+//////////////////////////////////////////////////////////////////////
+///////////////////////// omniAsyncCallDescriptor ////////////////////
+//////////////////////////////////////////////////////////////////////
+
+omniAsyncCallDescriptor::
+~omniAsyncCallDescriptor()
+{
+  if (pd_exception)
+    delete pd_exception;
+
+  if (pd_cond)
+    delete pd_cond;
+}
+
+
+void
+omniAsyncCallDescriptor::
+completeCallback()
+{
+  int should_only_be_called_in_derived_class = 0;
+  OMNIORB_ASSERT(should_only_be_called_in_derived_class);
+}
+
+omni_tracedmutex omniAsyncCallDescriptor::sd_lock;
+
   
 
 //////////////////////////////////////////////////////////////////////

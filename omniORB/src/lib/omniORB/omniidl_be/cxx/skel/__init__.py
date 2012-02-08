@@ -37,12 +37,18 @@ from omniidl_be.cxx.skel import template
 def monolithic(stream, tree):
     """Creates one large skeleton with all code inside"""
 
+    if config.state['AMI']:
+        ami_inc = "#include <omniORB4/ami.h>"
+    else:
+        ami_inc = ""
+
     stream.out(template.boilerplate,
                program  = config.state['Program Name'],
                library  = config.state['Library Version'],
                basename = config.state['Basename'],
                hh       = config.state['HH Suffix'],
-               prefix   = config.state['Private Prefix'])
+               prefix   = config.state['Private Prefix'],
+               ami_inc  = ami_inc)
 
     skel = omniidl_be.cxx.skel.main.init(stream)
     tree.accept(skel)

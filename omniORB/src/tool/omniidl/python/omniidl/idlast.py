@@ -682,7 +682,7 @@ Functions:
         self.__readonly    = readonly
         self.__attrType    = attrType
         self.__declarators = declarators
-        self.__identifiers = map(lambda d: d.identifier(), declarators)
+        self.__identifiers = [ d.identifier() for d in declarators ]
         #print line, "Attribute init:", readonly, identifiers
 
     def accept(self, visitor): visitor.visitAttribute(self)

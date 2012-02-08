@@ -58,10 +58,14 @@ def init():
 class Interface:
     """Wrapper around an IDL interface"""
     def __init__(self, node):
-        self._node        = node
-        self._environment = id.lookup(node)
-        self._node_name   = id.Name(node.scopedName())
-        self._callables   = None
+        self._node          = node
+        self._environment   = id.lookup(node)
+        self._node_name     = id.Name(node.scopedName())
+        self._callables     = None
+        self._ami_callables = None
+        self._ami_handler   = None
+        self._ami_poller    = None
+
 
     def callables(self):
         """
@@ -72,20 +76,51 @@ class Interface:
             return self._callables
         
         # build a list of all the Callable objects
-        # The old backend processed all operations first
         self._callables = []
 
         for c in self._node.callables():
             if isinstance(c, idlast.Operation):
                 self._callables.append(call.operation(self, c))
-                
-        for c in self._node.callables():
-            if isinstance(c, idlast.Attribute):
+            else:
                 self._callables.extend(call.read_attributes(self, c))
                 if not c.readonly():
                     self._callables.extend(call.write_attributes(self, c))
             
         return self._callables
+
+    def ami_callables(self):
+        """
+        Return a list of Callable objects representing the AMI
+        pseudo-operations for this interface.
+        """
+        if self._ami_callables is not None:
+            return self._ami_callables
+        
+        self._ami_callables = []
+
+        if not hasattr(self._node, "_ami_ops"):
+            return self._ami_callables
+
+        for c in self._node._ami_ops:
+            self._ami_callables.append(call.operation(self, c))
+            
+        return self._ami_callables
+
+
+    def amiHandler(self):
+        """
+        Return Interface object corresponding to AMI handler, or None
+        if no AMI handler.
+        """
+        if self._ami_handler is not None:
+            return self._ami_handler
+
+        if not hasattr(self._node, "_ami_handler"):
+            return None
+
+        self._ami_handler = Interface(self._node._ami_handler)
+        return self._ami_handler
+
 
     def inherits(self):
         return map(lambda x:Interface(x), self._node.fullDecl().inherits())
@@ -277,6 +312,7 @@ class I(Class):
                         # Make new callable with ref to this interface
                         # instead of inherited interface
                         callable = call.Callable(self.interface(),
+                                                 c.node(),
                                                  c.operation_name(),
                                                  c.method_name(),
                                                  c.returnType(),
@@ -358,10 +394,45 @@ class _objref_I(Class):
         else:
             cls = _objref_Method
 
-        for callable in self.interface().callables():
+        intf = self.interface()
+
+        method_map = {}
+
+        for callable in intf.callables():
             method = cls(callable, self)
             self._methods.append(method)
             self._callables[method] = callable
+            method_map[callable.operation_name()] = method
+
+        self._ami_methods = []
+        for callable in intf.ami_callables():
+            method = cls(callable, self)
+            self._ami_methods.append(method)
+            self._callables[method] = callable
+
+            node       = callable.node()
+            ami_from   = node._ami_from
+            from_ident = ami_from.identifier()
+
+            if isinstance(ami_from, idlast.Declarator):
+                # Attribute
+                if node._ami_setter:
+                    from_op = "_set_" + from_ident
+                else:
+                    from_op = "_get_" + from_ident
+            else:
+                from_op = from_ident
+
+            from_method = method_map[from_op]
+            try:
+                from_method._ami_methods.append(method)
+
+            except AttributeError:
+                from_method._ami_methods = [method]
+
+
+    def ami_methods(self):
+        return self._ami_methods
 
 
     def hh(self, stream):
@@ -398,6 +469,13 @@ class _objref_I(Class):
             else:
                 methods.append(method.hh())
 
+        if self.ami_methods():
+            methods.append("\n// AMI methods")
+
+            for method in self.ami_methods():
+                methods.append(method.hh())
+
+
         if config.state['Shortcut']:
             shortcut = output.StringStream()
             shortcut.out(header_template.interface_shortcut,
@@ -414,6 +492,7 @@ class _objref_I(Class):
                    operations    = "\n".join(methods),
                    shortcut      = shortcut,
                    init_shortcut = init_shortcut)
+
 
     def cc(self, stream):
 
@@ -443,7 +522,8 @@ class _objref_I(Class):
                 stream.out(skel_template.interface_objref_repoID_str,
                            inherits_fqname = "CORBA::AbstractBase")
 
-        # build the inherits list
+        #
+        # Build the inherits list
         
         inherits_str_list = []
         for i in self.interface().inherits():
@@ -485,6 +565,9 @@ class _objref_I(Class):
                    init_shortcut    = init_shortcut,
                    release_shortcut = release_shortcut)
 
+        #
+        # Shortcut
+
         shortcut_mode = config.state['Shortcut']
 
         if shortcut_mode:
@@ -510,7 +593,13 @@ class _objref_I(Class):
                        basename       = self.interface().name().simple(),
                        fq_objref_name = self.name().fullyQualify(),
                        inherited      = str(inherited))
-            
+
+
+        #
+        # Methods
+
+        ami_descriptors = {}
+
         for method in self.methods():
             callable = self._callables[method]
 
@@ -519,10 +608,11 @@ class _objref_I(Class):
             signature = callable.signature()
 
             # we only need one descriptor for each _signature_ (not operation)
-            if _proxy_call_descriptors.has_key(signature):
+
+            if signature in _proxy_call_descriptors:
                 call_descriptor = _proxy_call_descriptors[signature]
             else:
-                call_descriptor = call.CallDescriptor(signature,callable)
+                call_descriptor = call.CallDescriptor(signature, callable)
                 call_descriptor.out_desc(stream)
                 _proxy_call_descriptors[signature] = call_descriptor
 
@@ -578,6 +668,29 @@ class _objref_I(Class):
                                            intf_env)
             method.cc(stream, body)
 
+            # Generate AMI descriptor
+            if callable.ami():
+                cd_name = call_descriptor.out_ami_descriptor(stream, callable,
+                                                             node_name,
+                                                             localcall_fn)
+
+                for ami_method in method._ami_methods:
+
+                    ami_callable = ami_method.callable()
+
+                    body = output.StringStream()
+
+                    if ami_callable.operation_name().startswith("sendc_"):
+                        call_descriptor.out_ami_sendc(body, ami_method,
+                                                      cd_name, intf_env)
+
+                    else:
+                        # sendp
+                        call_descriptor.out_ami_sendp(body, ami_method,
+                                                      cd_name, intf_env)
+
+                    ami_method.cc(stream, body)
+
 
 class _nil_I(Class):
     def __init__(self, I):
@@ -595,6 +708,7 @@ class _nil_I(Class):
                     # Make new callable with ref to this interface instead of
                     # inherited interface
                     callable = call.Callable(self.interface(),
+                                             c.node(),
                                              c.operation_name(),
                                              c.method_name(),
                                              c.returnType(),

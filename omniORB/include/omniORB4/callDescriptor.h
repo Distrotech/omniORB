@@ -1,9 +1,10 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORB
-// callDescriptor.h           Created on: 12/98
+// callDescriptor.h           Created on: 12/1998
 //                            Author    : David Riddoch (djr)
+//                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2003-2011 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -63,11 +64,13 @@ public:
   // n_user_excns -- number of user exceptions
   // is_upcall    -- true if this is an upcall to a servant
 
-  inline omniCallDescriptor(LocalCallFn lcfn, const char* op_,
-			    size_t op_len_, _CORBA_Boolean oneway,
+  inline omniCallDescriptor(LocalCallFn	      lcfn,
+			    const char*	      op_,
+			    size_t	      op_len_,
+			    _CORBA_Boolean    oneway,
 			    const char*const* user_excns_,
-			    int n_user_excns_,
-                            _CORBA_Boolean is_upcall_)
+			    int		      n_user_excns_,
+                            _CORBA_Boolean    is_upcall_)
     : pd_do_call(sd_interceptor_call ? sd_interceptor_call : lcfn),
       pd_local_call(lcfn),
       pd_op(op_), pd_oplen(op_len_),
@@ -302,26 +305,113 @@ private:
 class omniAsyncCallDescriptor : public omniCallDescriptor
 {
 public:
-  inline omniAsyncCallDescriptor(LocalCallFn lcfn, const char* op_,
-				 size_t op_len_, _CORBA_Boolean oneway,
+  // Constructor for normal synchronous calls
+  inline omniAsyncCallDescriptor(LocalCallFn	   lcfn,
+				 const char*	   op_,
+				 size_t		   op_len_,
+				 _CORBA_Boolean	   oneway,
 				 const char*const* user_excns_,
-				 int n_user_excns_,
-				 _CORBA_Boolean is_upcall_)
+				 int		   n_user_excns_,
+				 _CORBA_Boolean	   is_upcall_)
     : omniCallDescriptor(lcfn, op_, op_len_, oneway,
 			 user_excns_, n_user_excns_,
 			 is_upcall_),
-      pd_exception(0)
+      pd_exception(0),
+      pd_cond(0)
   {}
 
-  virtual ~omniAsyncCallDescriptor()
+  // Constructor for asynchronous calls
+  inline omniAsyncCallDescriptor(LocalCallFn	   lcfn,
+				 const char*	   op_,
+				 size_t		   op_len_,
+				 _CORBA_Boolean	   oneway,
+				 const char*const* user_excns_,
+				 int		   n_user_excns_,
+				 _CORBA_Boolean	   is_upcall_,
+				 _CORBA_Boolean	   delete_when_complete)
+    : omniCallDescriptor(lcfn, op_, op_len_, oneway,
+			 user_excns_, n_user_excns_,
+			 is_upcall_),
+      pd_exception(0),
+      pd_cond(0),
+      pd_complete(0),
+      pd_deleteWhenComplete(delete_when_complete)
+  {}
+
+  virtual ~omniAsyncCallDescriptor();
+
+  virtual void completeCallback();
+
+  inline void setComplete()
   {
-    if (pd_exception)
-      delete pd_exception;
+    {
+      omni_tracedmutex_lock l(sd_lock);
+      pd_complete = 1;
+
+      if (pd_cond)
+	pd_cond->broadcast();
+    }
+    try {
+      completeCallback();
+    }
+    catch (...) {
+      // Application code has let an exception escape. It will be
+      // logged by the invoker.
+      if (pd_deleteWhenComplete)
+	delete this;
+
+      throw;
+    }
+    if (pd_deleteWhenComplete)
+      delete this;
   }
 
+  inline bool isComplete()
+  {
+    omni_tracedmutex_lock l(sd_lock);
+    return pd_complete;
+  }
+
+  inline void wait()
+  {
+    omni_tracedmutex_lock l(sd_lock);
+    
+    if (pd_complete)
+      return;
+
+    if (!pd_cond)
+      pd_cond = new omni_tracedcondition(&sd_lock,
+					 "omniAsyncCallDescriptor::pd_cond");
+
+    while (!pd_complete)
+      pd_cond->wait();
+  }
+
+  inline _CORBA_Boolean wait(const omni_time_t& t)
+  {
+    omni_tracedmutex_lock l(sd_lock);
+
+    if (pd_complete)
+      return 1;
+
+    if (!pd_cond)
+      pd_cond = new omni_tracedcondition(&sd_lock,
+					 "omniAsyncCallDescriptor::pd_cond");
+
+    if (!pd_complete)
+      pd_cond->timedwait(t);
+
+    return pd_complete;
+  }
+    
   inline void storeException(const CORBA::Exception& ex)
   {
     pd_exception = CORBA::Exception::_duplicate(&ex);
+  }
+
+  inline _CORBA_Boolean exceptionOccurred()
+  {
+    return pd_exception ? 1 : 0;
   }
 
   inline void raiseException()
@@ -331,7 +421,16 @@ public:
   }
 
 private:
-  CORBA::Exception* pd_exception;
+  CORBA::Exception*       pd_exception;
+  omni_tracedcondition*   pd_cond;
+  _CORBA_Boolean          pd_complete;
+  _CORBA_Boolean          pd_deleteWhenComplete;
+
+  static omni_tracedmutex sd_lock;
+  
+  // Not implemented
+  omniAsyncCallDescriptor(const omniAsyncCallDescriptor&);
+  omniAsyncCallDescriptor& operator=(const omniAsyncCallDescriptor&);
 };
 
 

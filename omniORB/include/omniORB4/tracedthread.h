@@ -101,6 +101,7 @@ public:
 
   void wait();
   int timedwait(unsigned long secs, unsigned long nanosecs = 0);
+  inline int timedwait(const omni_time_t& t) { return timedwait(t.s, t.ns); }
   void signal();
   void broadcast();
 

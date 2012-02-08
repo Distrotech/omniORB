@@ -121,8 +121,8 @@ class Name:
         return map(mapID, self._scopedName)
     
     def fullyQualify(self, cxx = 1):
-        """fullyQualify(id.Name, cxx boolean, include_root boolean): string
-           Returns a fully qualified C++ name (initial root :: optional)"""
+        """fullyQualify(id.Name, cxx boolean): string
+           Returns a fully qualified C++ name"""
         if cxx: sn = self._map_cxx()
         else:   sn = self._scopedName
 

@@ -182,7 +182,8 @@ else """,
     kind = d_type.type().kind()
     
     if d_type.interface():
-        type_name = type_name.replace("_ptr", "")
+        if type_name.endswith("_ptr"):
+            type_name = type_name[:-4]
         if isinstance(d_type.type().decl(),idlast.Forward):
             # hack to denote an interface forward declaration
             # kind is used to index the dictionary below
@@ -339,7 +340,8 @@ def unmarshall(to, environment, type, decl, name, from_where, is_union=0):
     kind = d_type.type().kind()
 
     if d_type.interface():
-        type_name = type_name.replace("_ptr", "")
+        if type_name.endswith("_ptr"):
+            type_name = type_name[:-4]
         if isinstance(d_type.type().decl(),idlast.Forward):
             # hack to denote an interface forward declaration
             # kind is used to index the associative array below

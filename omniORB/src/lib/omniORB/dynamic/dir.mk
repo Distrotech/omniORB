@@ -1,6 +1,7 @@
 # dir.mk for omniORB dynamic library
 
 ORB_SRCS = \
+           ami.cc \
            valueBase.cc \
            valueFactory.cc \
            valueTracker.cc \

@@ -1,3 +1,31 @@
+Wed Feb  8 10:15:27 GMT 2012 dgrisby
+====================================
+
+- Callback-style AMI.
+
+include/omniORB4/GNUmakefile.in
+include/omniORB4/ami.h
+include/omniORB4/callDescriptor.h
+include/omniORB4/tracedthread.h
+src/lib/omniORB/dynamic/ami.cc
+src/lib/omniORB/dynamic/dir.mk
+src/lib/omniORB/omniidl_be/cxx/call.py
+src/lib/omniORB/omniidl_be/cxx/descriptor.py
+src/lib/omniORB/omniidl_be/cxx/header/defs.py
+src/lib/omniORB/omniidl_be/cxx/header/template.py
+src/lib/omniORB/omniidl_be/cxx/id.py
+src/lib/omniORB/omniidl_be/cxx/iface.py
+src/lib/omniORB/omniidl_be/cxx/mangler.py
+src/lib/omniORB/omniidl_be/cxx/skel/__init__.py
+src/lib/omniORB/omniidl_be/cxx/skel/template.py
+src/lib/omniORB/omniidl_be/cxx/skutil.py
+src/lib/omniORB/omniidl_be/cxx/value.py
+src/lib/omniORB/orbcore/callDescriptor.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/tool/omniidl/python/omniidl/idlast.py
+src/tool/omniidl/python/omniidl_be/ami.py
+
+
 Tue Nov  8 10:51:41 GMT 2011 dgrisby
 ====================================
 
