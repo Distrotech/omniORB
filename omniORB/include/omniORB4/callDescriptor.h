@@ -326,21 +326,23 @@ public:
 				 size_t		   op_len_,
 				 _CORBA_Boolean	   oneway,
 				 const char*const* user_excns_,
-				 int		   n_user_excns_,
-				 _CORBA_Boolean	   is_upcall_,
-				 _CORBA_Boolean	   delete_when_complete)
+				 int		   n_user_excns_)
     : omniCallDescriptor(lcfn, op_, op_len_, oneway,
-			 user_excns_, n_user_excns_,
-			 is_upcall_),
+			 user_excns_, n_user_excns_, 0),
       pd_exception(0),
       pd_cond(0),
-      pd_complete(0),
-      pd_deleteWhenComplete(delete_when_complete)
+      pd_complete(0)
   {}
 
   virtual ~omniAsyncCallDescriptor();
 
   virtual void completeCallback();
+
+  // Handler set / get. Object reference is a Messaging::ReplyHandler
+  // subclass.
+  virtual void 	      setHandler(omniObjRef* objref);
+  virtual omniObjRef* getHandler();
+
 
   inline void setComplete()
   {
@@ -351,19 +353,7 @@ public:
       if (pd_cond)
 	pd_cond->broadcast();
     }
-    try {
-      completeCallback();
-    }
-    catch (...) {
-      // Application code has let an exception escape. It will be
-      // logged by the invoker.
-      if (pd_deleteWhenComplete)
-	delete this;
-
-      throw;
-    }
-    if (pd_deleteWhenComplete)
-      delete this;
+    completeCallback();
   }
 
   inline bool isComplete()
@@ -420,11 +410,10 @@ public:
       pd_exception->_raise();
   }
 
-private:
+protected:
   CORBA::Exception*       pd_exception;
   omni_tracedcondition*   pd_cond;
   _CORBA_Boolean          pd_complete;
-  _CORBA_Boolean          pd_deleteWhenComplete;
 
   static omni_tracedmutex sd_lock;
   

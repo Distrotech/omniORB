@@ -54,6 +54,42 @@ private:
 };
 
 
+//
+// Mixin class implementing base Messaging::Poller methods
+
+class PollerImpl
+  : public virtual ::Messaging::Poller,
+    public virtual ::CORBA::DefaultValueRefCountBase
+{
+public:
+  PollerImpl(omniAsyncCallDescriptor* _cd)
+    : _pd_cd(_cd), _pd_is_from_poller(0), _pd_retrieved(0)
+  {}
+
+  ~PollerImpl();
+
+  // Standard interface
+
+  ::CORBA::Boolean         is_ready(::CORBA::ULong timeout);
+  ::CORBA::PollableSet_ptr create_pollable_set();
+  ::CORBA::Object_ptr      operation_target();
+  char*                    operation_name();
+
+  ::Messaging::ReplyHandler_ptr associated_handler();
+  void associated_handler(::Messaging::ReplyHandler_ptr v);
+
+  ::CORBA::Boolean         is_from_poller();
+
+protected:
+  void _wrongOperation();
+  void _checkResult(const char* op, ::CORBA::ULong timeout);
+
+  omniAsyncCallDescriptor* _pd_cd;
+  ::CORBA::Boolean         _pd_is_from_poller;
+  ::CORBA::Boolean         _pd_retrieved;
+};
+
+
 _CORBA_MODULE_END  // omniAMI
 
 

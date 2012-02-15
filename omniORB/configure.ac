@@ -247,6 +247,7 @@ AC_CONFIG_FILES(src/appl/GNUmakefile
                 src/appl/utils/genior/GNUmakefile
                 src/appl/utils/nameclt/GNUmakefile
                 src/GNUmakefile
+                src/examples/ami/GNUmakefile
                 src/examples/anyExample/GNUmakefile
                 src/examples/bidir/GNUmakefile
                 src/examples/boa/GNUmakefile

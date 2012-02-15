@@ -204,7 +204,6 @@ public:
 interface_Helper = """\
 #ifndef __@guard@__
 #define __@guard@__
-
 class @name@;
 class _objref_@name@;
 class _impl_@name@;
@@ -248,6 +247,13 @@ public:
 
   static inline _ptr_type _unmarshalObjRef(cdrStream& s) {
     omniObjRef* o = omniObjRef::_unMarshal(_PD_repoId,s);
+    if (o)
+      return (_ptr_type) o->_ptrToObjRef(_PD_repoId);
+    else
+      return _nil();
+  }
+
+  static inline _ptr_type _fromObjRef(omniObjRef* o) {
     if (o)
       return (_ptr_type) o->_ptrToObjRef(_PD_repoId);
     else

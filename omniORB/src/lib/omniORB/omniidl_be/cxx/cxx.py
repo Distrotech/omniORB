@@ -188,7 +188,8 @@ class Method:
 @proto@
 {
   @body@
-}""", proto = proto, body = body)
+}
+""", proto = proto, body = body)
 
 
 # dimsToString: takes a list of int dimensions (eg [1,2,3]) and a prefix string

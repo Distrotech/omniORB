@@ -45,6 +45,7 @@ from omniidl_be.cxx import id, config, ast
 
 def __init__(ast):
     global prefix, counter, signature_descriptors, iface_descriptors
+    global poller_impls
 
     prefix  = ""
     counter = 0
@@ -52,9 +53,11 @@ def __init__(ast):
     # Descriptors keyed by signature alone
     signature_descriptors = {}
 
-    # Descriptors keyed by interface and operation name (a two level
-    # hashtable)
+    # Descriptors keyed by interface and operation name
     iface_descriptors = {}
+
+    # Poller implementation classes
+    poller_impls = {}
 
     # initialise the prefix
     HV = HashVisitor()
@@ -70,13 +73,18 @@ def context_descriptor(signature):
 
 
 def local_callback_fn(iname, operation_name, signature):
-    return private_prefix + "_lcfn_" +\
+    return private_prefix + "_lcfn_" + \
        get_interface_operation_descriptor(iname, operation_name, signature)
 
+
+def ami_poller_impl(pname):
+    return private_prefix + "_poll_" + get_poller_impl(pname)
 
 def ami_call_descriptor(iname, operation_name, signature):
-    return private_prefix + "_ami_" +\
-       get_interface_operation_descriptor(iname, operation_name, signature)
+    desc = get_interface_operation_descriptor(iname, operation_name, signature)
+    return (private_prefix + "_amic_" + desc,
+            private_prefix + "_amip_" + desc)
+       
 
 
 ####################################################################
@@ -170,28 +178,43 @@ def unique():
 
 
 def get_signature_descriptor(signature):
-    if not signature_descriptors.has_key(signature):
-        signature_descriptors[signature] = unique()
+    try:
+        return signature_descriptors[signature]
 
-    return signature_descriptors[signature]
+    except KeyError:
+        desc = unique()
+        signature_descriptors[signature] = desc
+        return desc
 
 
 def get_interface_operation_descriptor(iname, operation_name, signature):
     assert isinstance(iname, id.Name)
 
     key = iname.hash()
-    if not iface_descriptors.has_key(key):
-        iface_descriptors[key] = {}
-
-    iface_table = iface_descriptors[key]
+    iface_table = iface_descriptors.setdefault(key, {})
     
     key = signature + "/" + operation_name
-    if iface_table.has_key(key):
+
+    try:
         return iface_table[key]
-    
-    descriptor = unique()
-    iface_table[key] = descriptor
-    return descriptor
+
+    except KeyError:
+        descriptor = unique()
+        iface_table[key] = descriptor
+        return descriptor
+
+
+def get_poller_impl(pname):
+    assert isinstance(pname, id.Name)
+
+    key = pname.hash()
+    try:
+        return poller_impls[key]
+
+    except KeyError:
+        impl_name = unique()
+        poller_impls[key] = impl_name
+        return impl_name
 
 
 # Takes an int and returns the int in hex, without leading 0x and with

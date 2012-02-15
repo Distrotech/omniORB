@@ -863,6 +863,10 @@ OMNI_NAMESPACE_END(omni)
 void
 omniObjRef::_invoke_async(omniAsyncCallDescriptor* call_desc)
 {
+  // Store objref in call descriptor straight away so calling code can
+  // request it from the AMI poller.
+  call_desc->objref(this);
+
   // *** HERE: do something about per-thread timeouts!
 
   AsyncRequest* req = new AsyncRequest(this, call_desc);

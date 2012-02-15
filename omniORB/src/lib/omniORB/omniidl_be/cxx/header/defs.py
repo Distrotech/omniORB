@@ -253,25 +253,26 @@ def visitForward(node):
     # Potentially forward declare BOA skeleton class
     class_sk = ""
     if config.state['BOA Skeletons']:
-        class_sk = "class _sk_" + name.unambiguous(environment) + ";"
+        class_sk = "class _sk_" + name.simple() + ";"
 
     # output the definition
     if node.abstract():
         stream.out(template.abstract_interface_Helper,
                    guard = guard,
                    class_sk_name = class_sk,
-                   name = name.unambiguous(environment))
+                   name = name.simple())
     elif node.local():
         stream.out(template.local_interface_Helper,
                    guard = guard,
                    class_sk_name = class_sk,
-                   name = name.unambiguous(environment))
+                   name = name.simple())
     else:
         stream.out(template.interface_Helper,
                    guard = guard,
                    class_sk_name = class_sk,
-                   name = name.unambiguous(environment))
-        
+                   name = name.simple())
+
+
 def visitConst(node):
     environment = id.lookup(node)
 

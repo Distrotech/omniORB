@@ -887,16 +887,17 @@ class ValueAbs (Decl, DeclRepoId):
 
 Functions:
 
-  inherits()     -- list of ValueAbs objects from which this inherits.
-  supports()     -- list of Interface objects which this supports.
-  contents()     -- list of Decl objects for declarations within this
-                    valuetype.
-  declarations() -- subset of contents() containing types, constants
-                    and exceptions.
-  callables()    -- subset of contents() containing Operations and
-                    Attributes.
-  statemembers() -- subset of contents() containing StateMembers.
-  factories()    -- subset of contents() containing Factory instances.
+  inherits()      -- list of ValueAbs objects from which this inherits.
+  supports()      -- list of Interface objects which this supports.
+  contents()      -- list of Decl objects for declarations within this
+                     valuetype.
+  declarations()  -- subset of contents() containing types, constants
+                     and exceptions.
+  callables()     -- subset of contents() containing Operations and
+                     Attributes.
+  all_callables() -- Operations and attributes including inherited ones.
+  statemembers()  -- subset of contents() containing StateMembers.
+  factories()     -- subset of contents() containing Factory instances.
   """
 
     def __init__(self, file, line, mainFile, pragmas, comments,
@@ -945,27 +946,39 @@ Functions:
     def statemembers(self): return self.__statemembers
     def factories(self):    return self.__factories
 
+    def all_callables(self):
+        r = []
+        # This loop is very inefficient, but the lists should be quite
+        # short.
+        for b in self.__inherits:
+            for c in b.all_callables():
+                if c not in r:
+                    r.append(c)
+        r.extend(self.__callables)
+        return r
+
 
 class Value (Decl, DeclRepoId):
     """valuetype declaration (Decl, DeclRepoId)
 
 Functions:
 
-  custom()       -- boolean: true if declared custom.
-  inherits()     -- list of valuetypes from which this inherits. The
-                    first may be a Value object or a ValueAbs object;
-                    any others will be ValueAbs objects.
-  truncatable()  -- boolean: true if the inherited Value is declared
-                    truncatable.
-  supports()     -- list of Interface objects which this supports.
-  contents()     -- list of Decl objects for all items declared within
-                    this valuetype.
-  declarations() -- subset of contents() containing types, constants
-                    and exceptions.
-  callables()    -- subset of contents() containing Operations and
-                    Attributes.
-  statemembers() -- subset of contents() containing StateMembers.
-  factories()    -- subset of contents() containing Factory instances.
+  custom()        -- boolean: true if declared custom.
+  inherits()      -- list of valuetypes from which this inherits. The
+                     first may be a Value object or a ValueAbs object;
+                     any others will be ValueAbs objects.
+  truncatable()   -- boolean: true if the inherited Value is declared
+                     truncatable.
+  supports()      -- list of Interface objects which this supports.
+  contents()      -- list of Decl objects for all items declared within
+                     this valuetype.
+  declarations()  -- subset of contents() containing types, constants
+                     and exceptions.
+  callables()     -- subset of contents() containing Operations and
+                     Attributes.
+  all_callables() -- Operations and attributes including inherited ones.
+  statemembers()  -- subset of contents() containing StateMembers.
+  factories()     -- subset of contents() containing Factory instances.
   """
 
     def __init__(self, file, line, mainFile, pragmas, comments,
@@ -1017,6 +1030,17 @@ Functions:
     def callables(self):    return self.__callables
     def statemembers(self): return self.__statemembers
     def factories(self):    return self.__factories
+
+    def all_callables(self):
+        r = []
+        # This loop is very inefficient, but the lists should be quite
+        # short.
+        for b in self.__inherits:
+            for c in b.all_callables():
+                if c not in r:
+                    r.append(c)
+        r.extend(self.__callables)
+        return r
 
 
 # Map of Decl objects, indexed by stringified scoped name, and

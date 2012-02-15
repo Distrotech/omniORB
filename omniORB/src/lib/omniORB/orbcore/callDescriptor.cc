@@ -193,6 +193,23 @@ completeCallback()
   OMNIORB_ASSERT(should_only_be_called_in_derived_class);
 }
 
+void
+omniAsyncCallDescriptor::
+setHandler(omniObjRef*)
+{
+  int should_only_be_called_in_derived_class = 0;
+  OMNIORB_ASSERT(should_only_be_called_in_derived_class);
+}
+
+omniObjRef*
+omniAsyncCallDescriptor::
+getHandler()
+{
+  int should_only_be_called_in_derived_class = 0;
+  OMNIORB_ASSERT(should_only_be_called_in_derived_class);
+  return 0;
+}
+
 omni_tracedmutex omniAsyncCallDescriptor::sd_lock;
 
   

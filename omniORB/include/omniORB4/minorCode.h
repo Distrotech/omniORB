@@ -163,6 +163,8 @@ OMNI_NAMESPACE_BEGIN(omni)
 #define OMNIORBMinorCode_122 OMNIORBMinorCode(122)
 #define OMNIORBMinorCode_123 OMNIORBMinorCode(123)
 #define OMNIORBMinorCode_124 OMNIORBMinorCode(124)
+#define OMNIORBMinorCode_125 OMNIORBMinorCode(125)
+#define OMNIORBMinorCode_126 OMNIORBMinorCode(126)
 
 #define OMNI_COMMA ,
 #define DeclareValue(name,value) name = value
@@ -301,7 +303,8 @@ code( INV_OBJREF_InvokeOnNilObjRef  	  , OMNIORBMinorCode_48 ) sep \
 code( INV_OBJREF_CorruptedObjRef    	  , OMNIORBMinorCode_54 ) sep \
 code( INV_OBJREF_InterfaceMisMatch  	  , OMNIORBMinorCode_55 ) sep \
 code( INV_OBJREF_NoPythonTypeForPseudoObj , OMNIORBMinorCode_104 ) sep \
-code( INV_OBJREF_ShortcutServantDeactivated,OMNIORBMinorCode_117 )
+code( INV_OBJREF_ShortcutServantDeactivated,OMNIORBMinorCode_117 ) sep \
+code( INV_OBJREF_IncorrectReplyHandler    , OMNIORBMinorCode_125 )
  
 enum INV_OBJREF_minor {
   DECLARE_INV_OBJREF_minors(DeclareValue,OMNI_COMMA)
@@ -401,7 +404,8 @@ enum BAD_TYPECODE_minor {
 // BAD_OPERATION
 #define DECLARE_BAD_OPERATION_minors(code,sep) \
 \
-code( BAD_OPERATION_UnRecognisedOperationName, OMNIORBMinorCode_38 )
+code( BAD_OPERATION_UnRecognisedOperationName, OMNIORBMinorCode_38 ) sep \
+code( BAD_OPERATION_WrongPollerOperation,      OMNIORBMinorCode_126 )
 
 enum BAD_OPERATION_minor {
   DECLARE_BAD_OPERATION_minors(DeclareValue,OMNI_COMMA)  

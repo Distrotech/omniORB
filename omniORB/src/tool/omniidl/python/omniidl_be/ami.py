@@ -338,13 +338,15 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                   excep_ident, op_scope, op_repoId,
                                   params, [], [])
 
-            cb._ami_handler_excep = op
+            
 
             if hasattr(cb, "_ami_declarator"):
                 if cb.identifier().startswith("set"):
                     cb._ami_declarator._ami_set_handler_excep = op
                 else:
                     cb._ami_declarator._ami_get_handler_excep = op
+            else:
+                cb._ami_handler_excep = op
 
             exceps.append(op)
             
@@ -379,12 +381,12 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
         poller_fwd = idlast.ValueForward(node.file(), node.line(),
                                          node.mainFile(), [], [],
                                          poller_ident, poller_scope,
-                                         poller_repoId, 0)
+                                         poller_repoId, 1)
 
-        poller = idlast.Value(node.file(), node.line(),
-                              node.mainFile(), [], [comment],
-                              poller_ident, poller_scope, poller_repoId,
-                              0, base_pollers, 0, [])
+        poller = idlast.ValueAbs(node.file(), node.line(),
+                                 node.mainFile(), [], [comment],
+                                 poller_ident, poller_scope, poller_repoId,
+                                 base_pollers, [])
         poller._ami_gen = 1
 
         operations = []
@@ -424,6 +426,14 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                                   0, idltype.Base(idltype.tk_void),
                                   cb.identifier(), op_scope, op_repoId,
                                   params, cb.raises(), [])
+
+            if hasattr(cb, "_ami_declarator"):
+                if cb.identifier().startswith("set"):
+                    cb._ami_declarator._ami_set_poller = op
+                else:
+                    cb._ami_declarator._ami_get_poller = op
+            else:
+                cb._ami_poller = op
 
             operations.append(op)
 

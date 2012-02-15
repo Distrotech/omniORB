@@ -431,14 +431,14 @@ class @call_descriptor@
   : public omniAsyncCallDescriptor
 {
 public:
-  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen, _CORBA_Boolean upcall=0)
+  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen, _CORBA_Boolean upcall)
     : omniAsyncCallDescriptor(lcfn, op_, oplen, @oneway@, _user_exns, @exn_len@, upcall)
   {
     @contains_values@
   }
 
-  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen, _CORBA_Boolean upcall, _CORBA_Boolean delete_when_complete)
-    : omniAsyncCallDescriptor(lcfn, op_, oplen, @oneway@, _user_exns, @exn_len@, upcall, delete_when_complete)
+  inline @call_descriptor@(LocalCallFn lcfn, const char* op_, size_t oplen)
+    : omniAsyncCallDescriptor(lcfn, op_, oplen, @oneway@, _user_exns, @exn_len@)
   {
     @contains_values@
   }
@@ -699,57 +699,155 @@ if (omni::strMatch(op, "@idl_operation_name@")) {
 ## Interface -- AMI
 ##
 
+interface_ami_poller_impl = """
+// Implementation class for @poller_name@
+class @poller_impl_name@
+  : public virtual @poller_name@,
+    public virtual omniAMI::PollerImpl
+{
+public:
+  @poller_impl_name@(omniAsyncCallDescriptor* _cd)
+    : omniAMI::PollerImpl(_cd) {}
+
+  @method_decls@
+};
+"""
+
 interface_ami_call_descriptor = """
-// AMI proxy call descriptor class:
+// AMI proxy call descriptor class for callback:
 //  @if_name@::@op_name@
-class @call_descriptor@
+class @call_descriptor_c@
   : public @base_cd@
 {
 public:
-  inline @call_descriptor@()
-    : @base_cd@(@lcfn@, "@op_name@", @op_len@, 0, 0)
-  { }
+  static const char* ami_op;
 
-  inline @call_descriptor@(::@handler_cls@::_ptr_type handler)
-    : @base_cd@(@lcfn@, "@op_name@", @op_len@, 0, 1)
+  inline @call_descriptor_c@(::@handler_cls@::_ptr_type handler)
+    : @base_cd@(@lcfn@, ami_op, @op_len@)
   {
     pd_handler = ::@handler_cls@::_duplicate(handler);
   }
 
+  inline @call_descriptor_c@()
+    : @base_cd@(@lcfn@, ami_op, @op_len@)
+  {
+  }
+
   void completeCallback();
 
-private:
+protected:
   ::@handler_cls@::_var_type pd_handler;
 };
 
+const char* @call_descriptor_c@::ami_op = "@op_name@";
 
-void @call_descriptor@::completeCallback()
+
+void @call_descriptor_c@::completeCallback()
 {
-  if (!::CORBA::is_nil(pd_handler)) {
+  try {
+    if (!::CORBA::is_nil(pd_handler)) {
+      if (!exceptionOccurred()) {
+        pd_handler->@handler_op_name@(@callback_args@);
+      }
+      else {
+        ::Messaging::ExceptionHolder_var eh(new omniAMI::ExceptionHolder(this));
+        pd_handler->@handler_ex_name@(eh);
+      }
+    }
+  }
+  catch (...) {
+    delete this;
+    throw;
+  }
+  delete this;
+}
+
+// AMI proxy call descriptor class for poller:
+//  @if_name@::@op_name@
+class @call_descriptor_p@
+  : public @call_descriptor_c@
+{
+public:
+  inline @call_descriptor_p@()
+    : @call_descriptor_c@(),
+      pd_poller(new @poller_impl_name@(this))
+  {
+  }
+
+  inline ::@poller_cls@* poller()
+  {
+    pd_poller->_add_ref();
+    return pd_poller.in();
+  }
+
+  void completeCallback();
+  void setHandler(omniObjRef* objref);
+  omniObjRef* getHandler();
+
+protected:
+  ::@poller_cls@::_var_type pd_poller;
+};
+
+void @call_descriptor_p@::completeCallback()
+{
+  ::@poller_cls@::_var_type poller_to_release(pd_poller._retn());
+
+  ::@handler_cls@::_var_type handler;
+  {
+    omni_tracedmutex_lock _l(sd_lock);
+    handler = ::@handler_cls@::_duplicate(pd_handler);
+  }
+  if (!::CORBA::is_nil(handler)) {
     if (!exceptionOccurred()) {
-      pd_handler->@handler_op_name@(@callback_args@);
+      handler->@handler_op_name@(@callback_args@);
     }
     else {
       ::Messaging::ExceptionHolder_var eh(new omniAMI::ExceptionHolder(this));
-      pd_handler->@handler_ex_name@(eh);
+      handler->@handler_ex_name@(eh);
     }
   }
+}
+
+void @call_descriptor_p@::setHandler(omniObjRef* objref)
+{
+  omni_tracedmutex_lock _l(sd_lock);
+
+  if (objref) {
+    pd_handler = ::@handler_cls@::_narrow(::Messaging::ReplyHandler::_fromObjRef(objref));
+    if (::CORBA::is_nil(pd_handler))
+      OMNIORB_THROW(INV_OBJREF, INV_OBJREF_IncorrectReplyHandler, ::CORBA::COMPLETED_NO);
+  }
+  else {
+    pd_handler = ::@handler_cls@::_nil();
+  }
+}
+
+omniObjRef* @call_descriptor_p@::getHandler()
+{
+  omni_tracedmutex_lock _l(sd_lock);
+  return pd_handler->_PR_getobj();
 }
 """
 
 interface_ami_sendc = """\
 @cd_name@* _call_desc = new @cd_name@(@ami_handler@);
 @assign_args@
-_invoke_async(_call_desc);
-"""
+_invoke_async(_call_desc);"""
 
 interface_ami_sendp = """\
 @cd_name@* _call_desc = new @cd_name@();
 @assign_args@
 _invoke_async(_call_desc);
-return 0; // *** HERE
-"""
+return _call_desc->poller();"""
 
+interface_ami_poller_method = """\
+_checkResult(@cd_name_c@::ami_op, @timeout_arg@);
+
+@cd_name_p@* _call_desc = (@cd_name_p@*)_pd_cd;
+@assign_res@"""
+
+interface_ami_poller_method_empty = """\
+_checkResult(@cd_name_c@::ami_op, @timeout_arg@);"""
 
 
 ##

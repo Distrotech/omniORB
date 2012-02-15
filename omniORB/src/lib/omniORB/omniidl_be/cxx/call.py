@@ -46,7 +46,7 @@ def init():
 # two such entities paired together.
 #
 #  .interface():      get the associated Interface object
-#  .operation_name(): get the IIOP operation name (eg get_colour)
+#  .operation_name(): get the IIOP operation name (eg _get_colour)
 #  .method_name():    get the C++ mapped method name (eg colour)
 #  .returnType():     idltype
 #  .parameters():     idlast.Parameter
@@ -343,7 +343,8 @@ class CallDescriptor:
         assign_res = []
 
         for n, argument in enumerate(self.__arguments):
-            arg_n = "_call_desc.arg_" + str(n)
+            arg_n = "_call_desc.arg_%d" % n
+
             argtype = types.Type(argument.paramType())
             ((h_is_const,h_is_ptr),(s_is_holder,s_is_var)) = \
                          _arg_info(argtype,argument.direction())
@@ -757,15 +758,19 @@ class CallDescriptor:
                        call_descriptor = self.__name)
 
 
-    def out_ami_descriptor(self, stream, callable, node_name, lcfn):
+    def out_ami_descriptor(self, stream, callable, node_name, lcfn,
+                           poller_impl_name):
+
         handler_if = callable.interface().amiHandler()
+        poller_val = callable.interface().amiPoller()
         
         handler_cls = handler_if.name().fullyQualify()
+        poller_cls  = poller_val.name().fullyQualify()
 
-        ami_cd_name = descriptor.\
-                      ami_call_descriptor(node_name,
-                                          callable.operation_name(),
-                                          self.__signature)
+        cds = descriptor.ami_call_descriptor(node_name,
+                                             callable.operation_name(),
+                                             self.__signature)
+        ami_cd_name_c, ami_cd_name_p = cds
 
         #
         # Callback handler
@@ -798,19 +803,24 @@ class CallDescriptor:
                     callback_args.append("arg_%d" % idx)
 
 
+        if_name = callable.interface().name().fullyQualify()
+        
         stream.out(template.interface_ami_call_descriptor,
-                   if_name         = callable.interface().name().fullyQualify(),
-                   call_descriptor = ami_cd_name,
-                   base_cd         = self.__name,
-                   lcfn            = lcfn,
-                   op_name         = op_name,
-                   handler_op_name = handler_op.identifier(),
-                   handler_ex_name = handler_ex.identifier(),
-                   op_len          = len(op_name) + 1,
-                   handler_cls     = handler_cls,
-                   callback_args   = ", ".join(callback_args))
+                   if_name           = if_name,
+                   call_descriptor_c = ami_cd_name_c,
+                   call_descriptor_p = ami_cd_name_p,
+                   base_cd           = self.__name,
+                   lcfn              = lcfn,
+                   op_name           = op_name,
+                   handler_op_name   = handler_op.identifier(),
+                   handler_ex_name   = handler_ex.identifier(),
+                   op_len            = len(op_name) + 1,
+                   handler_cls       = handler_cls,
+                   poller_cls        = poller_cls,
+                   poller_impl_name  = poller_impl_name,
+                   callback_args     = ", ".join(callback_args))
 
-        return ami_cd_name
+        return ami_cd_name_c, ami_cd_name_p
 
 
     def _ami_send_args(self, ami_args, environment):
@@ -826,11 +836,11 @@ class CallDescriptor:
             ((h_is_const,h_is_ptr),(s_is_holder,s_is_var)) = \
                          _arg_info(argtype,argument.direction())
 
-            argn = "_call_desc->arg_%d" % n
+            arg_n = "_call_desc->arg_%d" % n
 
             if s_is_holder:
                 assign_args.append("%s = %s;" %
-                                   (argn, arg_ident))
+                                   (arg_n, arg_ident))
             else:
                 d_type = argtype.deref(1)
 
@@ -860,7 +870,7 @@ class CallDescriptor:
                         rhs = "new %s(%s)" % (argtype.base(environment),
                                               arg_ident)
 
-                    assign_args.append("%s_ = %s;" % (argn, rhs))
+                    assign_args.append("%s_ = %s;" % (arg_n, rhs))
                     
                     if argument.is_out():
                         qual = "inout"
@@ -869,28 +879,28 @@ class CallDescriptor:
 
                     if h_is_ptr:
                         assign_args.append("%s = &%s_.%s();" %
-                                           (argn, argn, qual))
+                                           (arg_n, arg_n, qual))
                     else:
                         assign_args.append("%s = %s_.%s();" %
-                                           (argn, argn, qual))
+                                           (arg_n, arg_n, qual))
 
                 else:
                     if argtype.array():
                         assign_args.append("%s_copy(%s_, %s);" %
                                            (argtype.base(environment),
-                                            argn, arg_ident))
+                                            arg_n, arg_ident))
                     else:
-                        assign_args.append("%s_ = %s;" % (argn, arg_ident))
+                        assign_args.append("%s_ = %s;" % (arg_n, arg_ident))
 
                     if h_is_ptr:
-                        assign_args.append("%s = &%s_;" % (argn, argn))
+                        assign_args.append("%s = &%s_;" % (arg_n, arg_n))
                     else:
-                        assign_args.append("%s = %s_;" % (argn, argn))
+                        assign_args.append("%s = %s_;" % (arg_n, arg_n))
         
         return assign_args
 
 
-    def out_ami_sendc(self, stream, ami_method, cd_name, environment):
+    def out_ami_sendc(self, stream, ami_method, cd_names, environment):
 
         ami_args = iter(ami_method.arg_names())
         ami_args.next() # Skip handler arg
@@ -899,11 +909,11 @@ class CallDescriptor:
 
         stream.out(template.interface_ami_sendc,
                    assign_args = "\n".join(assign_args),
-                   cd_name = cd_name,
+                   cd_name = cd_names[0],
                    ami_handler = ami_method.arg_names()[0])
 
 
-    def out_ami_sendp(self, stream, ami_method, cd_name, environment):
+    def out_ami_sendp(self, stream, ami_method, cd_names, environment):
         
         ami_args = iter(ami_method.arg_names())
 
@@ -911,7 +921,64 @@ class CallDescriptor:
 
         stream.out(template.interface_ami_sendp,
                    assign_args = "\n".join(assign_args),
-                   cd_name = cd_name)
+                   cd_name = cd_names[1])
+
+
+    def out_ami_poller(self, stream, ami_method, poller_method, cd_names):
+        assign_res = []
+        ami_args       = iter(poller_method.arg_names())
+        timeout_arg    = ami_args.next()
+
+        if self.__has_return_value:
+            argtype = types.Type(self.__returntype)
+            (h_is_const,h_is_ptr),(s_is_holder,s_is_var) = _arg_info(argtype, 3)
+
+            if s_is_var:
+                assign_res.append("%s = _call_desc->result._retn();" %
+                                  ami_args.next())
+            else:
+                assign_res.append("%s = _call_desc->result;" %
+                                  ami_args.next()) 
+
+
+        for n, argument in enumerate(self.__arguments):
+            if not argument.is_out():
+                continue
+
+            arg_ident = ami_args.next()
+            arg_n     = "_call_desc->arg_%d" % n
+
+            argtype = types.Type(argument.paramType())
+            ((h_is_const,h_is_ptr),(s_is_holder,s_is_var)) = \
+                         _arg_info(argtype,argument.direction())
+
+            if s_is_holder:
+                if s_is_var:
+                    assign_res.append("%s = %s._retn();" % (arg_ident, arg_n))
+                else:
+                    assign_res.append("%s = %s;" % (arg_ident, arg_n))
+
+            else:
+                if s_is_var:
+                    assign_res.append("%s = %s_._retn();" % (arg_ident, arg_n))
+
+                else:
+                    if argtype.array():
+                        assign_res.append("%s_copy(%s, %s_);" %
+                                          (argtype.base(), arg_ident, arg_n))
+                    else:
+                        assign_res.append("%s = %s_;" % (arg_ident, arg_n))
+
+        if assign_res:
+            tmpl = template.interface_ami_poller_method
+        else:
+            tmpl = template.interface_ami_poller_method_empty
+            
+        stream.out(tmpl,
+                   cd_name_c   = cd_names[0],
+                   cd_name_p   = cd_names[1],
+                   timeout_arg = timeout_arg,
+                   assign_res  = "\n".join(assign_res))
 
 
 

@@ -121,6 +121,20 @@ class Interface:
         self._ami_handler = Interface(self._node._ami_handler)
         return self._ami_handler
 
+    def amiPoller(self):
+        """
+        Return Value object corresponding to AMI poller, or None if no
+        AMI poller.
+        """
+        if self._ami_poller is not None:
+            return self._ami_poller
+
+        if not hasattr(self._node, "_ami_poller"):
+            return None
+
+        from omniidl_be.cxx import value
+        self._ami_poller = value.ValueType(self._node._ami_poller)
+        return self._ami_poller
 
     def inherits(self):
         return map(lambda x:Interface(x), self._node.fullDecl().inherits())
@@ -382,6 +396,16 @@ class I(Class):
 
 
 
+class AMIPoller (cxx.Class):
+
+    def __init__(self, name):
+        cxx.Class.__init__(self, id.Name([name]))
+        self._environment = id.Environment()
+
+    def environment(self):
+        return self._environment
+
+
 class _objref_I(Class):
     def __init__(self, I):
         Class.__init__(self, I)
@@ -565,6 +589,7 @@ class _objref_I(Class):
                    init_shortcut    = init_shortcut,
                    release_shortcut = release_shortcut)
 
+
         #
         # Shortcut
 
@@ -593,6 +618,42 @@ class _objref_I(Class):
                        basename       = self.interface().name().simple(),
                        fq_objref_name = self.name().fullyQualify(),
                        inherited      = str(inherited))
+
+
+        #
+        # AMI poller
+
+        poller           = self.interface().amiPoller()
+        poller_impl_name = None
+        poller_methods   = {}
+        
+        if poller is not None:
+            astdecl = poller.astdecl()
+
+            poller_impl_name = descriptor.ami_poller_impl(poller.name())
+            poller_class = AMIPoller(poller_impl_name)
+
+            method_decls      = []
+            inherited_methods = []
+            direct_callables  = astdecl.callables()
+
+            for c in astdecl.all_callables():
+                op = call.operation(poller, c)
+                method_decl = _impl_Method(op, poller_class)
+                method_decls.append(method_decl.hh())
+
+                if c not in direct_callables:
+                    inherited_methods.append(method_decl)
+                else:
+                    poller_methods[op.operation_name()] = method_decl
+
+            stream.out(skel_template.interface_ami_poller_impl,
+                       poller_impl_name = poller_impl_name,
+                       poller_name      = poller.name().fullyQualify(),
+                       method_decls     = "\n".join(method_decls))
+
+            for method in inherited_methods:
+                method.cc(stream, "_wrongOperation();")
 
 
         #
@@ -670,9 +731,10 @@ class _objref_I(Class):
 
             # Generate AMI descriptor
             if callable.ami():
-                cd_name = call_descriptor.out_ami_descriptor(stream, callable,
-                                                             node_name,
-                                                             localcall_fn)
+                cd_names = call_descriptor.out_ami_descriptor(stream, callable,
+                                                              node_name,
+                                                              localcall_fn,
+                                                              poller_impl_name)
 
                 for ami_method in method._ami_methods:
 
@@ -680,14 +742,25 @@ class _objref_I(Class):
 
                     body = output.StringStream()
 
-                    if ami_callable.operation_name().startswith("sendc_"):
+                    ami_op_name = ami_callable.operation_name()
+                    if ami_op_name.startswith("sendc_"):
                         call_descriptor.out_ami_sendc(body, ami_method,
-                                                      cd_name, intf_env)
+                                                      cd_names, intf_env)
 
                     else:
                         # sendp
                         call_descriptor.out_ami_sendp(body, ami_method,
-                                                      cd_name, intf_env)
+                                                      cd_names, intf_env)
+
+                        poller_body   = output.StringStream()
+                        poller_method = poller_methods[ami_op_name[6:]]
+
+                        call_descriptor.out_ami_poller(poller_body,
+                                                       ami_method,
+                                                       poller_method,
+                                                       cd_names)
+
+                        poller_method.cc(stream, poller_body)
 
                     ami_method.cc(stream, body)
 
