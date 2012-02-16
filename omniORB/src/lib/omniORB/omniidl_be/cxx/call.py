@@ -71,14 +71,16 @@ class Callable:
         self.__contexts = contexts
 
         self.__ami = 0
-        try:
-            # interface may actually be a ValueType, not an Interface,
-            # and thus not have an ami_callables method.
-            if interface.ami_callables():
-                self.__ami = 1
 
-        except AttributeError:
-            pass
+        if not oneway:
+            try:
+                # interface may actually be a ValueType, not an Interface,
+                # and thus not have an ami_callables method.
+                if interface.ami_callables():
+                    self.__ami = 1
+
+            except AttributeError:
+                pass
 
         self.__signature = mangler.produce_signature(returnType, parameters,
                                                      raises, oneway,

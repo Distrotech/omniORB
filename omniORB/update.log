@@ -1,3 +1,11 @@
+Thu Feb 16 17:16:19 GMT 2012 dgrisby
+====================================
+
+- Avoid oneways in all AMI cases.
+
+src/lib/omniORB/omniidl_be/cxx/call.py
+
+
 Wed Feb 15 23:25:02 GMT 2012 dgrisby
 ====================================
 
