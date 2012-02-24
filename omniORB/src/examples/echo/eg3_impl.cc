@@ -49,12 +49,11 @@ int
 main(int argc, char **argv)
 {
   try {
-    CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
-
-    CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
+    CORBA::ORB_var          orb = CORBA::ORB_init(argc, argv);
+    CORBA::Object_var       obj = orb->resolve_initial_references("RootPOA");
     PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
 
-    Echo_i* myecho = new Echo_i();
+    PortableServer::Servant_var<Echo_i> myecho = new Echo_i();
 
     PortableServer::ObjectId_var myechoid = poa->activate_object(myecho);
 
@@ -62,31 +61,22 @@ main(int argc, char **argv)
     // the naming service.
     obj = myecho->_this();
 
-    CORBA::String_var x;
-    x = orb->object_to_string(obj);
-    cout << x << endl;
+    CORBA::String_var sior(orb->object_to_string(obj));
+    cout << (const char*)sior << endl;
 
-    if( !bindObjectToName(orb, obj) )
+    if (!bindObjectToName(orb, obj))
       return 1;
-
-    myecho->_remove_ref();
 
     PortableServer::POAManager_var pman = poa->the_POAManager();
     pman->activate();
 
     orb->run();
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught CORBA::" << ex._name() << endl;
   }
-  catch(CORBA::Exception& ex) {
+  catch (CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
-  }
-  catch(omniORB::fatalException& fe) {
-    cerr << "Caught omniORB::fatalException:" << endl;
-    cerr << "  file: " << fe.file() << endl;
-    cerr << "  line: " << fe.line() << endl;
-    cerr << "  mesg: " << fe.errmsg() << endl;
   }
   return 0;
 }
@@ -100,12 +90,11 @@ bindObjectToName(CORBA::ORB_ptr orb, CORBA::Object_ptr objref)
 
   try {
     // Obtain a reference to the root context of the Name service:
-    CORBA::Object_var obj;
-    obj = orb->resolve_initial_references("NameService");
+    CORBA::Object_var obj = orb->resolve_initial_references("NameService");
 
     // Narrow the reference returned.
     rootContext = CosNaming::NamingContext::_narrow(obj);
-    if( CORBA::is_nil(rootContext) ) {
+    if (CORBA::is_nil(rootContext)) {
       cerr << "Failed to narrow the root naming context." << endl;
       return 0;
     }
@@ -142,10 +131,9 @@ bindObjectToName(CORBA::ORB_ptr orb, CORBA::Object_ptr objref)
       // If the context already exists, this exception will be raised.
       // In this case, just resolve the name and assign testContext
       // to the object returned:
-      CORBA::Object_var obj;
-      obj = rootContext->resolve(contextName);
+      CORBA::Object_var obj = rootContext->resolve(contextName);
       testContext = CosNaming::NamingContext::_narrow(obj);
-      if( CORBA::is_nil(testContext) ) {
+      if (CORBA::is_nil(testContext)) {
         cerr << "Failed to narrow naming context." << endl;
         return 0;
       }
@@ -168,13 +156,8 @@ bindObjectToName(CORBA::ORB_ptr orb, CORBA::Object_ptr objref)
     //       Alternatively, bind() can be used, which will raise a
     //       CosNaming::NamingContext::AlreadyBound exception if the name
     //       supplied is already bound to an object.
-
-    // Amendment: When using OrbixNames, it is necessary to first try bind
-    // and then rebind, as rebind on it's own will throw a NotFoundexception if
-    // the Name has not already been bound. [This is incorrect behaviour -
-    // it should just bind].
   }
-  catch(CORBA::TRANSIENT& ex) {
+  catch (CORBA::TRANSIENT& ex) {
     cerr << "Caught system exception TRANSIENT -- unable to contact the "
          << "naming service." << endl
 	 << "Make sure the naming server is running and that omniORB is "
@@ -182,7 +165,7 @@ bindObjectToName(CORBA::ORB_ptr orb, CORBA::Object_ptr objref)
 
     return 0;
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught a CORBA::" << ex._name()
 	 << " while using the naming service." << endl;
     return 0;

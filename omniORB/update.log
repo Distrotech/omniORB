@@ -1,3 +1,28 @@
+Fri Feb 24 10:43:26 GMT 2012 dgrisby
+====================================
+
+- Rework pseudo-generated POA code.
+
+idl/poa.idl
+idl/poa_include.idl
+include/omniORB4/poa.h
+include/omniORB4/poa_defs.h
+include/omniORB4/poa_poa.h
+src/lib/omniORB/orbcore/poastubs.cc
+src/lib/omniORB/orbcore/portableserver.cc
+
+- Update examples.
+
+src/examples/dir.mak
+src/examples/dir.mk
+src/examples/echo/eg1.cc
+src/examples/echo/eg2_clt.cc
+src/examples/echo/eg2_impl.cc
+src/examples/echo/eg3_clt.cc
+src/examples/echo/eg3_impl.cc
+src/examples/echo/eg3_tieimpl.cc
+
+
 Fri Feb 24 10:40:15 GMT 2012 dgrisby
 ====================================
 

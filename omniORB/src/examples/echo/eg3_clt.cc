@@ -31,7 +31,7 @@ static CORBA::Object_ptr getObjectReference(CORBA::ORB_ptr orb);
 
 static void hello(Echo_ptr e)
 {
-  if( CORBA::is_nil(e) ) {
+  if (CORBA::is_nil(e)) {
     cerr << "hello: The object reference is nil!\n" << endl;
     return;
   }
@@ -61,21 +61,15 @@ main (int argc, char **argv)
 
     orb->destroy();
   }
-  catch(CORBA::TRANSIENT&) {
+  catch (CORBA::TRANSIENT&) {
     cerr << "Caught system exception TRANSIENT -- unable to contact the "
          << "server." << endl;
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught a CORBA::" << ex._name() << endl;
   }
-  catch(CORBA::Exception& ex) {
+  catch (CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
-  }
-  catch(omniORB::fatalException& fe) {
-    cerr << "Caught omniORB::fatalException:" << endl;
-    cerr << "  file: " << fe.file() << endl;
-    cerr << "  line: " << fe.line() << endl;
-    cerr << "  mesg: " << fe.errmsg() << endl;
   }
   return 0;
 }
@@ -94,7 +88,8 @@ getObjectReference(CORBA::ORB_ptr orb)
 
     // Narrow the reference returned.
     rootContext = CosNaming::NamingContext::_narrow(obj);
-    if( CORBA::is_nil(rootContext) ) {
+
+    if (CORBA::is_nil(rootContext)) {
       cerr << "Failed to narrow the root naming context." << endl;
       return CORBA::Object::_nil();
     }
@@ -103,9 +98,9 @@ getObjectReference(CORBA::ORB_ptr orb)
     cerr << "Caught NO_RESOURCES exception. You must configure omniORB "
 	 << "with the location" << endl
 	 << "of the naming service." << endl;
-    return 0;
+    return CORBA::Object::_nil();
   }
-  catch(CORBA::ORB::InvalidName& ex) {
+  catch (CORBA::ORB::InvalidName& ex) {
     // This should not happen!
     cerr << "Service required is invalid [does not exist]." << endl;
     return CORBA::Object::_nil();
@@ -127,23 +122,20 @@ getObjectReference(CORBA::ORB_ptr orb)
     // Resolve the name to an object reference.
     return rootContext->resolve(name);
   }
-  catch(CosNaming::NamingContext::NotFound& ex) {
+  catch (CosNaming::NamingContext::NotFound& ex) {
     // This exception is thrown if any of the components of the
     // path [contexts or the object] aren't found:
     cerr << "Context not found." << endl;
   }
-  catch(CORBA::TRANSIENT& ex) {
+  catch (CORBA::TRANSIENT& ex) {
     cerr << "Caught system exception TRANSIENT -- unable to contact the "
          << "naming service." << endl
 	 << "Make sure the naming server is running and that omniORB is "
 	 << "configured correctly." << endl;
-
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught a CORBA::" << ex._name()
 	 << " while using the naming service." << endl;
-    return 0;
   }
-
   return CORBA::Object::_nil();
 }
