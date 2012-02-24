@@ -234,6 +234,9 @@
 /* define if the compiler supports covariant return types */
 #undef OMNI_HAVE_COVARIANT_RETURNS
 
+/* define if __sync_add_and_fetch and __sync_sub_and_fetch are available */
+#undef OMNI_HAVE_SYNC_ADD_AND_FETCH
+
 /* define if long is the same type as int */
 #undef OMNI_LONG_IS_INT
 

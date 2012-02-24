@@ -369,12 +369,7 @@ AC_SUBST(ENABLE_STATIC, $omni_cv_enable_static)
 ])
 
 
-dnl This defaults to enabled, and is appropriate for development
-dnl For the release, the obvious chunk below should be replaced with:
-dnl               AC_HELP_STRING([--enable-thread-tracing],
-dnl                  [enable thread and mutex tracing (default disable-thread-tracing)]),
-dnl               omni_cv_enable_thread_tracing=$enableval)
-dnl               omni_cv_enable_thread_tracing=no)
+dnl Lock tracing
 AC_DEFUN([OMNI_DISABLE_THREAD_TRACING],
 [AC_CACHE_CHECK(whether to trace threads and locking,
 omni_cv_enable_thread_tracing,
@@ -437,11 +432,33 @@ AC_SUBST(ENABLE_LONGDOUBLE, $omni_cv_enable_longdouble)
 ])
 
 
+dnl Atomic operations
+
+AC_DEFUN([OMNI_SYNC_ADD_SUB_FETCH],
+[AC_CACHE_CHECK(whether __sync_add_and_fetch and __sync_sub_and_fetch are present,
+omni_cv_sync_add_and_fetch,
+[AC_LANG_PUSH(C++)
+ AC_LINK_IFELSE(AC_LANG_PROGRAM([], [[
+int a = 1;
+int b = __sync_add_and_fetch(&a, 1);
+int c = __sync_sub_and_fetch(&b, 1);
+]]),
+ [omni_cv_sync_add_and_fetch=yes],
+ [omni_cv_sync_add_and_fetch=no])
+ AC_LANG_POP(C++)
+])
+if test "$omni_cv_sync_add_and_fetch" = yes; then
+  AC_DEFINE(OMNI_HAVE_SYNC_ADD_AND_FETCH,,
+            [define if __sync_add_and_fetch and __sync_sub_and_fetch are available])
+fi
+])
+
+
 dnl Disable support for atomic operations even if they look like they
 dnl are available
 
 AC_DEFUN([OMNI_DISABLE_ATOMIC],
-[AC_CACHE_CHECK(whether to disable use of atomic operations,
+[AC_CACHE_CHECK(whether to use atomic operations when possible,
 omni_cv_enable_atomic,
 [AC_ARG_ENABLE(atomic,
                AC_HELP_STRING([--disable-atomic],

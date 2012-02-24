@@ -736,10 +736,10 @@ public:
   inline omni_refcount(int start) : count(start) {}
   inline ~omni_refcount() {}
 
-  // Atomically increment reference count
-  inline void inc() {
+  // Atomically increment reference count and return new value
+  inline int inc() {
     omni_mutex_lock l(lock);
-    ++count;
+    return ++count;
   }
 
   // Atomically decrement reference count and return new value

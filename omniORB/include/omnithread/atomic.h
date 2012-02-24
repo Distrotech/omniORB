@@ -29,14 +29,7 @@
 #define __omnithread_atomic_h_
 
 
-#if defined(__GNUG__)
-#  if (__GNUG__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUG__ > 4)
-#    define OMNI_ATOMIC_GCC_SYNC
-#  endif
-#endif
-
-
-#ifdef OMNI_ATOMIC_GCC_SYNC
+#ifdef OMNI_HAVE_SYNC_ADD_AND_FETCH
 
 #  define OMNI_REFCOUNT_DEFINED
 
@@ -45,9 +38,9 @@ public:
   inline omni_refcount(int start) : count(start) {}
   inline ~omni_refcount() {}
 
-  // Atomically increment reference count
-  inline void inc() {
-    __sync_fetch_and_add(&count, 1);
+  // Atomically increment reference count and return new value
+  inline int inc() {
+    return __sync_add_and_fetch(&count, 1);
   }
 
   // Atomically decrement reference count and return new value
