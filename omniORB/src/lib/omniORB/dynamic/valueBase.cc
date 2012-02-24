@@ -3,7 +3,7 @@
 // valueBase.cc               Created on: 2003/08/20
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2003-2006 Apasphere Ltd.
+//    Copyright (C) 2003-2012 Apasphere Ltd.
 //
 //    This file is part of the omniORB library
 //
@@ -22,38 +22,9 @@
 //    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //    02111-1307, USA
 //
-//
 // Description:
 //    ValueBase implementation
 //
-
-/*
-  $Log$
-  Revision 1.1.2.8  2006/01/19 17:21:59  dgrisby
-  Avoid member name conflict in DefaultValueRefCountBase.
-
-  Revision 1.1.2.7  2005/01/17 14:36:56  dgrisby
-  Heap allocate value refcount lock so it is not deallocated too early.
-
-  Revision 1.1.2.6  2005/01/06 16:39:25  dgrisby
-  DynValue and DynValueBox implementations; misc small fixes.
-
-  Revision 1.1.2.5  2004/10/13 17:58:21  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.4  2004/07/26 22:56:39  dgrisby
-  Support valuetypes in Anys.
-
-  Revision 1.1.2.3  2004/07/04 23:53:37  dgrisby
-  More ValueType TypeCode and Any support.
-
-  Revision 1.1.2.2  2003/11/06 11:56:56  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.2.1  2003/09/26 16:12:54  dgrisby
-  Start of valuetype support.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/valueType.h>
@@ -107,80 +78,32 @@ CORBA::ValueBase::~ValueBase() {}
 
 
 //////////////////////////////////////////////////////////////////////
-///////////////////// Reference count lock ///////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-static omni_tracedmutex* ref_count_lock = 0;
-
-#ifdef HAS_Cplusplus_Namespace
-namespace {
-#endif
-  class valueBaseLockTracker : public omniTrackedObject {
-  public:
-    valueBaseLockTracker();
-    virtual ~valueBaseLockTracker();
-  };
-#ifdef HAS_Cplusplus_Namespace
-};
-#endif
-
-valueBaseLockTracker::valueBaseLockTracker()
-{
-  OMNIORB_ASSERT(!ref_count_lock);
-  ref_count_lock = new omni_tracedmutex("valueBaseLockTracker::ref_count_lock");
-}
-
-valueBaseLockTracker::~valueBaseLockTracker()
-{
-  OMNIORB_ASSERT(ref_count_lock);
-  delete ref_count_lock;
-  ref_count_lock = 0;
-}
-
-static void init_lock()
-{
-  if (!ref_count_lock) {
-    valueBaseLockTracker* t = new valueBaseLockTracker();
-    registerTrackedObject(t);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
 ///////////////////// DefaultValueRefCountBase ///////////////////////
 //////////////////////////////////////////////////////////////////////
 
 void
 CORBA::DefaultValueRefCountBase::_add_ref()
 {
-  init_lock();
-  omni_tracedmutex_lock sync(*ref_count_lock);
-  _pd__refCount++;
+  _pd__refCount.inc();
 }
 
 void
 CORBA::DefaultValueRefCountBase::_remove_ref()
 {
-  init_lock();
-  {
-    omni_tracedmutex_lock sync(*ref_count_lock);
-    OMNIORB_ASSERT(_pd__refCount > 0);
+  if (_pd__refCount.dec() > 0)
+    return;
 
-    if (--_pd__refCount > 0)
-      return;
-  }
   delete this;
 }
 
 CORBA::ULong
 CORBA::DefaultValueRefCountBase::_refcount_value()
 {
-  init_lock();
-  omni_tracedmutex_lock sync(*ref_count_lock);
-  return _pd__refCount;
+  return _pd__refCount.value();
 }
 
 CORBA::DefaultValueRefCountBase::~DefaultValueRefCountBase() {
-  OMNIORB_ASSERT(_pd__refCount == 0);
+  OMNIORB_ASSERT(_pd__refCount.value() == 0);
 }
 
 
@@ -218,29 +141,22 @@ PortableServer::ValueRefCountBase::~ValueRefCountBase() {
 void
 CORBA::ValueFactoryBase::_add_ref()
 {
-  init_lock();
-  omni_tracedmutex_lock sync(*ref_count_lock);
-  _pd_refCount++;
+  _pd_refCount.inc();
 }
 
 void
 CORBA::ValueFactoryBase::_remove_ref()
 {
-  init_lock();
-  {
-    omni_tracedmutex_lock sync(*ref_count_lock);
-    OMNIORB_ASSERT(_pd_refCount > 0);
+  if (_pd_refCount.dec() > 0)
+    return;
 
-    if (--_pd_refCount > 0)
-      return;
-  }
   delete this;
 }
 
 CORBA::ValueFactoryBase::ValueFactoryBase() : _pd_refCount(1) {}
 
 CORBA::ValueFactoryBase::~ValueFactoryBase() {
-  OMNIORB_ASSERT(_pd_refCount == 0);
+  OMNIORB_ASSERT(_pd_refCount.value() == 0);
 }
 
 CORBA::ValueFactory

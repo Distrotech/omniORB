@@ -1,3 +1,24 @@
+Fri Feb 24 10:40:15 GMT 2012 dgrisby
+====================================
+
+- Only use gcc atomics if they're really available.
+
+acinclude.m4
+aclocal.m4
+configure.ac
+configure
+include/omniORB4/acconfig.h.in
+include/omnithread.h
+include/omnithread/atomic.h
+
+- Use omni_refcount in a few more places.
+
+include/omniORB4/CORBA_ValueBase.h
+include/omniORB4/internal/pseudo.h
+src/lib/omniORB/dynamic/pseudoBase.cc
+src/lib/omniORB/dynamic/valueBase.cc
+
+
 Thu Feb 16 17:16:19 GMT 2012 dgrisby
 ====================================
 

@@ -3,6 +3,7 @@
 // pseudoBase.cc              Created on: 9/1998
 //                            Author    : David Riddoch (djr)
 //
+//    Copyright (C) 2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -48,17 +49,16 @@ PseudoObjBase::~PseudoObjBase() {}
 void
 PseudoObjBase::decrRefCount()
 {
-  if( !pd_refCount ) {
-    if( omniORB::traceLevel > 0 ) {
+  if (!pd_refCount.value()) {
+    if (omniORB::trace(1)) {
       omniORB::logger log;
-      log <<
-	"omniORB: WARNING -- CORBA::release() has been called too many times\n"
-	" for a pseudo object.  The object has already been destroyed.\n";
+      log << "WARNING -- CORBA::release() has been called too many times "
+	"for a pseudo object.  The object has already been destroyed.\n";
     }
     return;
   }
-
-  if( --pd_refCount == 0 )
+  
+  if (pd_refCount.dec() == 0)
     delete this;
 }
 
