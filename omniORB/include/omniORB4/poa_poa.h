@@ -3,6 +3,7 @@
 // poa_poa.h                  Created on: 8/6/99
 //                            Author    : David Riddoch (djr)
 //
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -25,19 +26,7 @@
 //
 // Description:
 //
-
-/*
-  $Log$
-  Revision 1.2.2.1  2000/07/17 10:35:36  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:04  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/24 09:51:51  djr
-  Moved from omniORB2 + some new files.
-
-*/
+//    Hand-edited generated code for POA IDL.
 
 #ifndef __OMNIPOA_H__
 #error poa_poa.h should only be included by poa.h
@@ -52,8 +41,8 @@ _CORBA_MODULE_BEG
 
 
 class AdapterActivator :
-    public virtual PortableServer::_impl_AdapterActivator,
-    public virtual PortableServer::ServantBase
+  public virtual PortableServer::_impl_AdapterActivator,
+  public virtual PortableServer::ServantBase
 {
 public:
   virtual ~AdapterActivator();
@@ -65,8 +54,8 @@ public:
 
 
 class ServantManager :
-    public virtual PortableServer::_impl_ServantManager,
-    public virtual PortableServer::ServantBase
+  public virtual PortableServer::_impl_ServantManager,
+  public virtual PortableServer::ServantBase
 {
 public:
   virtual ~ServantManager();
@@ -78,8 +67,8 @@ public:
 
 
 class ServantActivator :
-    public virtual PortableServer::_impl_ServantActivator,
-    public virtual PortableServer::ServantBase
+  public virtual PortableServer::_impl_ServantActivator,
+  public virtual ServantManager
 {
 public:
   virtual ~ServantActivator();
@@ -91,8 +80,8 @@ public:
 
 
 class ServantLocator :
-    public virtual PortableServer::_impl_ServantLocator,
-    public virtual PortableServer::ServantBase
+  public virtual PortableServer::_impl_ServantLocator,
+  public virtual ServantManager
 {
 public:
   virtual ~ServantLocator();

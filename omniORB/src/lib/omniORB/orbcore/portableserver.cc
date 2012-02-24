@@ -3,7 +3,7 @@
 // portableserver.cc          Created on: 11/5/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2004-2007 Apasphere Ltd
+//    Copyright (C) 2004-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library
@@ -28,101 +28,6 @@
 //    Misc code from PortableServer module.
 //
  
-/*
-  $Log$
-  Revision 1.4.2.6  2007/04/05 15:38:02  dgrisby
-  Catch exceptions from servant destructor.
-
-  Revision 1.4.2.5  2006/07/18 16:21:21  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.4.2.4  2005/07/22 17:18:36  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.4.2.3  2005/01/06 23:10:40  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.4.2.2  2004/02/16 10:10:32  dgrisby
-  More valuetype, including value boxes. C++ mapping updates.
-
-  Revision 1.4.2.1  2003/03/23 21:02:05  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.11  2002/01/16 11:32:00  dpg1
-  Race condition in use of registerNilCorbaObject/registerTrackedObject.
-  (Reported by Teemu Torma).
-
-  Revision 1.2.2.10  2001/10/19 11:05:25  dpg1
-  ObjectId to/from wstring
-
-  Revision 1.2.2.9  2001/09/19 17:26:52  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.2.2.8  2001/08/15 10:26:14  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.2.2.7  2001/08/03 17:41:24  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.2.2.6  2001/06/07 16:24:11  dpg1
-  PortableServer::Current support.
-
-  Revision 1.2.2.5  2001/05/31 16:18:15  dpg1
-  inline string matching functions, re-ordered string matching in
-  _ptrToInterface/_ptrToObjRef
-
-  Revision 1.2.2.4  2001/04/18 18:18:05  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.2.2.3  2000/11/09 12:27:58  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.2.2.2  2000/09/27 18:04:43  sll
-  Use new string allocation functions. Updated to use the new calldescriptor.
-
-  Revision 1.2.2.1  2000/07/17 10:35:58  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:55  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.10  2000/06/27 16:23:25  sll
-  Merged OpenVMS port.
-
-  Revision 1.1.2.9  2000/06/22 10:40:17  dpg1
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.1.2.8  2000/04/27 10:52:12  dpg1
-  Interoperable Naming Service
-
-  omniInitialReferences::get() renamed to omniInitialReferences::resolve().
-
-  Revision 1.1.2.7  2000/01/03 18:43:32  djr
-  Fixed bug in ref counting of POA Policy objects.
-
-  Revision 1.1.2.6  1999/10/29 13:18:20  djr
-  Changes to ensure mutexes are constructed when accessed.
-
-  Revision 1.1.2.5  1999/10/27 17:32:16  djr
-  omni::internalLock and objref_rc_lock are now pointers.
-
-  Revision 1.1.2.4  1999/10/16 13:22:54  djr
-  Changes to support compiling on MSVC.
-
-  Revision 1.1.2.3  1999/10/14 16:22:16  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.1.2.2  1999/10/04 17:08:34  djr
-  Some more fixes/MSVC work-arounds.
-
-  Revision 1.1.2.1  1999/09/22 14:27:04  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #define ENABLE_CLIENT_IR_SUPPORT
 #include <omniORB4/CORBA.h>
 #include <poaimpl.h>
@@ -238,8 +143,6 @@ DEFINE_POLICY_OBJECT(RequestProcessingPolicy)
 ///////////////////////////// ServantBase ////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-static omni_tracedmutex ref_count_lock("ServantBase::ref_count_lock");
-
 PortableServer::ServantBase::~ServantBase() {}
 
 
@@ -264,27 +167,19 @@ PortableServer::ServantBase::_get_interface()
 void
 PortableServer::ServantBase::_add_ref()
 {
-  omni_tracedmutex_lock l(ref_count_lock);
-  // If the reference count is 0, then the object is either in the
-  // process of being deleted by _remove_ref, or has already been
-  // deleted. It is too late to be trying to _add_ref now. If the
-  // reference count is less than zero, then _remove_ref has been
-  // called too many times.
-  OMNIORB_USER_CHECK(_pd_refCount > 0);
-
-  _pd_refCount++;
+  _pd_refCount.inc();
 }
 
 
 void
 PortableServer::ServantBase::_remove_ref()
 {
-  ref_count_lock.lock();
-  int done = --_pd_refCount > 0;
-  ref_count_lock.unlock();
-  if( done )  return;
+  int val = _pd_refCount.dec();
 
-  if( _pd_refCount < 0 ) {
+  if (val > 0)
+    return;
+
+  if (val < 0) {
     omniORB::logs(1, "ServantBase has negative ref count!");
     return;
   }
@@ -302,8 +197,7 @@ PortableServer::ServantBase::_remove_ref()
 CORBA::ULong
 PortableServer::ServantBase::_refcount_value()
 {
-  omni_tracedmutex_lock l(ref_count_lock);
-  return _pd_refCount;
+  return _pd_refCount.value();
 }
 
 void*
