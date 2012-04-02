@@ -1,5 +1,6 @@
-// eg2_impl.cc - This is the source code of example 2 used in Chapter 2
-//               "The Basics" of the omniORB2 user guide.
+// eg2_impl.cc - This is a BOA version of the source code of example 2
+//               used in Chapter 2 "The Basics" of the omniORB2 user
+//               guide.
 //
 //               This is the object implementation.
 //
@@ -66,12 +67,6 @@ int main(int argc, char** argv)
   }
   catch(CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
-  }
-  catch(omniORB::fatalException& fe) {
-    cerr << "Caught omniORB::fatalException:" << endl;
-    cerr << "  file: " << fe.file() << endl;
-    cerr << "  line: " << fe.line() << endl;
-    cerr << "  mesg: " << fe.errmsg() << endl;
   }
   return 0;
 }

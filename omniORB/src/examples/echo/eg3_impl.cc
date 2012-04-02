@@ -62,7 +62,7 @@ main(int argc, char **argv)
     obj = myecho->_this();
 
     CORBA::String_var sior(orb->object_to_string(obj));
-    cout << (const char*)sior << endl;
+    cout << sior << endl;
 
     if (!bindObjectToName(orb, obj))
       return 1;

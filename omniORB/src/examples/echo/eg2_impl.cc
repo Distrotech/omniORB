@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     // stringified IOR.
     obj = myecho->_this();
     CORBA::String_var sior(orb->object_to_string(obj));
-    cout << (const char*)sior << endl;
+    cout << sior << endl;
 
     PortableServer::POAManager_var pman = poa->the_POAManager();
     pman->activate();
