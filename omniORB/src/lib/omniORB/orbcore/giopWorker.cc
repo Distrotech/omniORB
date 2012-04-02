@@ -44,10 +44,11 @@ OMNI_NAMESPACE_BEGIN(omni)
 class giopWorkerInfo
   : public omniInterceptors::assignUpcallThread_T::info_T {
 public:
-  giopWorkerInfo(giopWorker* worker) :
+  inline giopWorkerInfo(giopWorker* worker) :
     pd_worker(worker), pd_elmt(omniInterceptorP::assignUpcallThread) {}
 
   void run();
+  omni_thread* self();
   
 private:
   giopWorker*             pd_worker;
@@ -65,6 +66,12 @@ giopWorkerInfo::run()
   }
   else
     pd_worker->real_execute();
+}
+
+omni_thread*
+giopWorkerInfo::self()
+{
+  return pd_worker->selfThread();
 }
 
 

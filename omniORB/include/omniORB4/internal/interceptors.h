@@ -3,7 +3,7 @@
 // interceptors.h             Created on: 2002/03/21
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2006 Apasphere Ltd
+//    Copyright (C) 2006-2012 Apasphere Ltd
 //    Copyright (C) 2002 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,26 +27,6 @@
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.4.2  2006/07/18 16:21:23  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.4.1  2003/03/23 21:03:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2002/11/26 14:51:49  dgrisby
-  Implement missing interceptors.
-
-  Revision 1.1.2.2  2002/09/10 23:17:11  dgrisby
-  Thread interceptors.
-
-  Revision 1.1.2.1  2002/03/27 11:44:51  dpg1
-  Check in interceptors things left over from last week.
-
-*/
 
 #ifndef __INTERCEPTORS_H__
 #define __INTERCEPTORS_H__
@@ -83,6 +63,7 @@ public:
   static _core_attr elmT* createPolicy;
   static _core_attr elmT* createThread;
   static _core_attr elmT* assignUpcallThread;
+  static _core_attr elmT* assignAMIThread;
 
 #define VISIT_FUNCTION(name) \
   static inline void visit(omniInterceptors::name##_T::info_T& info) { \

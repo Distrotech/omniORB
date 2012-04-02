@@ -1918,7 +1918,7 @@ RemoveRefTask::execute()
   catch (...) {
     if (omniORB::trace(1)) {
       omniORB::logger log;
-      log << "ERROR: call to _remove_ref on servant " << (void*)pd_servant
+      log << "Error: call to _remove_ref on servant " << (void*)pd_servant
 	  << " threw an exception.\n";
     }
   }
@@ -2032,7 +2032,7 @@ omniOrbPOA::lastInvocationHasCompleted(omniLocalIdentity* id)
 	// we swallow it here.
 	if (omniORB::trace(1)) {
 	  omniORB::logger log;
-	  log << "ERROR: call to _remove_ref on servant " << (void*)servant
+	  log << "Error: call to _remove_ref on servant " << (void*)servant
 	      << " threw an exception.\n";
 	}
       }
@@ -3005,6 +3005,7 @@ public:
     pd_worker(worker), pd_elmt(omniInterceptorP::createThread) {}
 
   void run();
+  omni_thread* self();
   
 private:
   omniServantActivatorTaskQueue* pd_worker;
@@ -3024,6 +3025,12 @@ saTaskQueueCreateInfo::run()
     pd_worker->mid_run();
 }
 
+omni_thread*
+saTaskQueueCreateInfo::self()
+{
+  return pd_worker;
+}
+
 class saTaskQueueAssignInfo
   : public omniInterceptors::assignUpcallThread_T::info_T {
 public:
@@ -3031,6 +3038,7 @@ public:
     pd_worker(worker), pd_elmt(omniInterceptorP::assignUpcallThread) {}
 
   void run();
+  omni_thread* self();
   
 private:
   omniServantActivatorTaskQueue* pd_worker;
@@ -3048,6 +3056,12 @@ saTaskQueueAssignInfo::run()
   }
   else
     pd_worker->real_run();
+}
+
+omni_thread*
+saTaskQueueAssignInfo::self()
+{
+  return pd_worker;
 }
 
 OMNI_NAMESPACE_END(omni)

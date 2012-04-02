@@ -3,7 +3,7 @@
 // omniInterceptors.h         Created on: 22/09/2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2006-2010 Apasphere Ltd
+//    Copyright (C) 2006-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -286,6 +286,7 @@ public:
     class info_T {
     public:
       virtual void run() = 0;
+      virtual omni_thread* self() = 0;
     };
 
     typedef void (*interceptFunc)(info_T& info);
@@ -301,6 +302,7 @@ public:
     class info_T {
     public:
       virtual void run() = 0;
+      virtual omni_thread* self() = 0;
     };
 
     typedef void (*interceptFunc)(info_T& info);
@@ -309,6 +311,21 @@ public:
     void remove(interceptFunc);
   };
 
+  //////////////////////////////////////////////////////////////////
+  class assignAMIThread_T {
+  public:
+    
+    class info_T {
+    public:
+      virtual void run() = 0;
+      virtual omni_thread* self() = 0;
+    };
+
+    typedef void (*interceptFunc)(info_T& info);
+
+    void add(interceptFunc);
+    void remove(interceptFunc);
+  };
 
   //////////////////////////////////////////////////////////////////
   class invokeLocalCall_T {

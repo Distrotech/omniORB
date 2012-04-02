@@ -27,6 +27,7 @@
 #include <omniORB4/CORBA.h>
 #include <omniORB4/minorCode.h>
 #include <omniORB4/callDescriptor.h>
+#include <omniORB4/omniInterceptors.h>
 #include <objectTable.h>
 #include <objectAdapter.h>
 #include <excepthandler.h>
@@ -41,6 +42,7 @@
 #include <orbParameters.h>
 #include <shutdownIdentity.h>
 #include <invoker.h>
+#include <interceptors.h>
 
 OMNI_USING_NAMESPACE(omni)
 
@@ -468,7 +470,7 @@ omniObjRef::_systemExceptionHandler(void* new_handler,void* cookie)
 omniObjRef::~omniObjRef()
 {
   if( pd_refCount ) {
-    omniORB::logs(1, "ERROR -- an object reference has "
+    omniORB::logs(1, "Error: an object reference has "
 		  "been explicity deleted.");
   }
 
@@ -775,7 +777,8 @@ public:
     duplicateObjRef(objref);
   }
 
-  virtual void execute();
+  void execute();
+  void real_execute();
 
 protected:
   virtual ~AsyncRequest();
@@ -789,8 +792,52 @@ private:
   AsyncRequest& operator=(const AsyncRequest&);
 };
 
+
+class AsyncRequestInfo
+  : public omniInterceptors::assignAMIThread_T::info_T {
+public:
+  inline AsyncRequestInfo(AsyncRequest* worker)
+    : pd_worker(worker), pd_elmt(omniInterceptorP::assignAMIThread) {}
+
+  void run();
+  omni_thread* self();
+
+private:
+  AsyncRequest*           pd_worker;
+  omniInterceptorP::elmT* pd_elmt;
+};
+
+
+void
+AsyncRequestInfo::run()
+{
+  if (pd_elmt) {
+    omniInterceptors::assignAMIThread_T::interceptFunc f =
+      (omniInterceptors::assignAMIThread_T::interceptFunc)pd_elmt->func;
+    pd_elmt = pd_elmt->next;
+    f(*this);
+  }
+  else
+    pd_worker->real_execute();
+}
+
+omni_thread*
+AsyncRequestInfo::self()
+{
+  return pd_worker->selfThread();
+}
+
+
 void
 AsyncRequest::execute()
+{
+  AsyncRequestInfo info(this);
+  info.run();
+}
+
+
+void
+AsyncRequest::real_execute()
 {
   if (omniORB::trace(25)) {
     omniORB::logger log;

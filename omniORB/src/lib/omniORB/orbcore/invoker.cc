@@ -1,9 +1,9 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORB
-// invoker.h                  Created on: 11 Apr 2001
+// invoker.cc                 Created on: 11 Apr 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,78 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.8  2007/08/04 14:48:49  dgrisby
-  Report failures to start threads better.
-
-  Revision 1.1.4.7  2006/09/01 16:03:47  dgrisby
-  Merge minor updates from omni4_0_develop.
-
-  Revision 1.1.4.5  2006/07/02 22:52:04  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.4.4  2006/05/02 13:08:26  dgrisby
-  Time out waiting for invoker threads to exit; allow configutation of
-  idle thread timeout.
-
-  Revision 1.1.4.3  2005/07/26 08:58:54  dgrisby
-  Another minor merge.
-
-  Revision 1.1.4.2  2005/07/22 17:18:37  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:02:13  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.6  2002/09/11 20:40:15  dgrisby
-  Call thread interceptors from etherealiser queue.
-
-  Revision 1.1.2.5  2002/09/10 23:17:11  dgrisby
-  Thread interceptors.
-
-  Revision 1.1.2.4  2002/02/25 11:18:02  dpg1
-  Avoid thread churn in invoker.
-
-  Revision 1.1.2.3  2002/02/13 17:40:52  dpg1
-  Tweak to avoid destruction race in invoker.
-
-  Revision 1.1.2.2  2002/02/13 16:02:40  dpg1
-  Stability fixes thanks to Bastiaan Bakker, plus threading
-  optimisations inspired by investigating Bastiaan's bug reports.
-
-  Revision 1.1.2.1  2002/01/09 11:35:23  dpg1
-  Remove separate omniAsyncInvoker library to save library overhead.
-
-  Revision 1.1.2.7  2001/11/13 14:14:03  dpg1
-  AsyncInvoker properly waits for threads to finish.
-
-  Revision 1.1.2.6  2001/08/16 09:53:18  sll
-  Added stdlib.h to give abort a prototype.
-
-  Revision 1.1.2.5  2001/08/01 10:03:40  dpg1
-  AyncInvoker no longer maintains its own dedicated thread queue.
-  Derived classes must provide the implementation.
-
-  Revision 1.1.2.4  2001/07/31 15:56:48  sll
-  Make sure pd_nthreads is kept in sync with the actual no. of threads
-  serving the Anytime tasks.
-
-  Revision 1.1.2.3  2001/06/13 20:08:13  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.2.2  2001/05/01 16:03:16  sll
-  Silly typo in a switch statement causes random failure due to corrupted
-  link list.
-
-  Revision 1.1.2.1  2001/04/19 09:47:54  sll
-  New library omniAsyncInvoker.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/omniInterceptors.h>
@@ -120,6 +50,7 @@ public:
     pd_worker(worker), pd_elmt(omniInterceptorP::createThread) {}
 
   void run();
+  omni_thread* self();
 
 private:
   omniAsyncWorker*        pd_worker;
@@ -177,7 +108,7 @@ public:
     while (pd_task || pd_pool->pd_keep_working) {
 
       if (!pd_task) {
-	if ( !omniTaskLink::is_empty(pd_pool->pd_anytime_tq) ) {
+	if (!omniTaskLink::is_empty(pd_pool->pd_anytime_tq)) {
 	  pd_task = (omniTask*)pd_pool->pd_anytime_tq.next;
 	  pd_task->deq();
 	}
@@ -282,6 +213,11 @@ omniAsyncWorkerInfo::run()
     pd_worker->real_run();
 }
 
+omni_thread*
+omniAsyncWorkerInfo::self()
+{
+  return pd_worker;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////
