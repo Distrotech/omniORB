@@ -163,14 +163,13 @@ RequestImpl::RequestImpl(CORBA::Object_ptr target, const char* operation,
 
 RequestImpl::~RequestImpl()
 {
-  if( (pd_state == RS_DEFERRED) && omniORB::traceLevel > 0 ){
-    omniORB::logger log;
-    log <<
-      "WARNING -- The application has not collected the reponse of\n"
-      " a deferred DII request.  Use Request::get_response() or\n"
-      " poll_response().\n";
+  if (pd_state == RS_DEFERRED) {
+    omniORB::logs(1, "Warning: The application has not collected the "
+                  "reponse of a deferred DII request. Use "
+                  "Request::get_response() or poll_response().");
   }
-  if( pd_sysExceptionToThrow )  delete pd_sysExceptionToThrow;
+  if (pd_sysExceptionToThrow)
+    delete pd_sysExceptionToThrow;
 }
 
 

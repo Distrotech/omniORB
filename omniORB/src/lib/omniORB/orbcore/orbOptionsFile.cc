@@ -222,8 +222,9 @@ oldconfig_warning(const char* key, const char* newkey) {
     }
     if (omniORB::trace(2)) {
       omniORB::logger log;
-      log << "For the moment this is accepted to maintain backward compatibility.\n"
-	  << "omniORB: Please update to the new config file format ASAP.\n";
+      log << "For the moment this is accepted to maintain backward "
+          << "compatibility. Please update to the new config file format "
+          << "ASAP.\n";
     }
     said_warning = 1;
   }

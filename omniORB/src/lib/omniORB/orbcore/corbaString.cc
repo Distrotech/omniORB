@@ -343,30 +343,3 @@ _CORBA_Sequence_String::operator <<= (cdrStream& s)
     p = s.unmarshalString();
   }
 }
-
-#if 0
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-void
-_CORBA_String_helper::
-unmarshal_zero_length_string()
-{
-  if (orbParameters::strictIIOP) {
-    if (omniORB::trace(1)) {
-      omniORB::log << "Error: received an invalid zero length string.\n"
-		   << "       CORBA::MARSHAL is thrown.\n";
-      omniORB::log.flush();
-    }
-    OMNIORB_THROW(MARSHAL, MARSHAL_StringNotEndWithNull, CORBA::COMPLETED_NO);
-  }
-  else {
-    if (omniORB::trace(1)) {
-      omniORB::log << "Warning: received an invalid zero length string.\n"
-		   << "         Substituted with a proper empty string.\n";
-      omniORB::log.flush();
-    }
-  }
-}
-#endif

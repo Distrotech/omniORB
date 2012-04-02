@@ -618,9 +618,9 @@ omniIOR::unmarshal_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent& c,
       }
     default:
       {
-
-	omniORB::logs(1," decode TAG_SSL_SEC_TRANS "
-		      "WARNING: Wrong component size, attempt to decode it as the Visibroker non-compilant format");
+	omniORB::logs(1, " decode TAG_SSL_SEC_TRANS "
+		      "Warning: Wrong component size. Attempt to decode "
+                      "it as the Visibroker non-compilant format");
 	CORBA::ULong v;
 	v <<= e; target_supports = v;
 	v <<= e; target_requires = v;
@@ -631,7 +631,8 @@ omniIOR::unmarshal_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent& c,
   }
   catch (...) {
     omniORB::logs(1," decode TAG_SSL_SEC_TRANS "
-		  "WARNING: fail to decode the component. The format neither conforms to the standard or is visibroker proprietory.");
+		  "Warning: fail to decode the component. The format neither "
+                  "conforms to the standard or is Visibroker proprietory.");
     return;
   }
 

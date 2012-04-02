@@ -1125,7 +1125,7 @@ parse_BOA_args(int& argc, char** argv, const char* boa_identifier)
     if( omniORB::trace(1) && strcmp(boa_identifier, myBoaId()) ) {
       if( omniORB::trace(1) ) {
 	omniORB::logger l;
-	l << "WARNING -- using BOAid " << boa_identifier 
+	l << "Warning: using BOAid " << boa_identifier 
 	  << " (should be " << myBoaId() << ")." << "\n";
       }
     }
@@ -1161,7 +1161,7 @@ parse_BOA_args(int& argc, char** argv, const char* boa_identifier)
 	if( strcmp(argv[idx + 1], myBoaId()) ) {
 	  if( omniORB::trace(1) ) {
 	    omniORB::logger l;
-	    l << "WARNING -- using BOAid " << boa_identifier 
+	    l << "Warning: using BOAid " << boa_identifier 
 	      << " (should be " << myBoaId() << ")." << "\n";
 	  }
 	}

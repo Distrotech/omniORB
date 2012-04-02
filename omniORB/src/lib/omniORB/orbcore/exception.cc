@@ -390,9 +390,8 @@ omniExHandlers_iterator::remove(omniObjRef* p)
 CORBA::Boolean 
 _CORBA_use_nil_ptr_as_nil_objref()
 {
-  omniORB::logs(10, "WARNING -- a nil (0) pointer is wrongly used as a\n"
-		" nil object reference.");
-
+  omniORB::logs(10, "Warning: a nil (0) pointer is wrongly used as a "
+		"nil object reference.");
   return 1;
 }
 
@@ -422,9 +421,8 @@ _CORBA_marshal_sequence_range_check_error(cdrStream& s)
 void
 _CORBA_invoked_nil_pseudo_ref()
 {
-  omniORB::logs(1, "ERROR -- the application attempted to invoke an"
-		" operation\n"
-		" on a nil pseudo-object reference.");
+  omniORB::logs(1, "Error: the application attempted to invoke an"
+		" operation on a nil pseudo-object reference.");
   OMNIORB_THROW(INV_OBJREF,INV_OBJREF_InvokeOnNilObjRef, CORBA::COMPLETED_NO);
 }
 
@@ -432,11 +430,11 @@ _CORBA_invoked_nil_pseudo_ref()
 CORBA::Boolean
 _CORBA_use_nil_ptr_as_nil_pseudo_objref(const char* objType)
 {
-  if( omniORB::trace(1) ) {
+  if (omniORB::trace(1)) {
     omniORB::logger l;
-    l << "WARNING -- a nil (0) pointer is wrongly used as a\n"
-      << " nil CORBA::" << objType << " object reference.\n"
-      << " Use CORBA::" << objType << "::_nil()\n";
+    l << "Warning: a nil (0) pointer is wrongly used as a "
+      << "nil CORBA::" << objType << " object reference. "
+      << "Use CORBA::" << objType << "::_nil()\n";
   }
   return 1;
 }
@@ -445,9 +443,8 @@ _CORBA_use_nil_ptr_as_nil_pseudo_objref(const char* objType)
 void
 _CORBA_invoked_nil_objref()
 {
-  omniORB::logs(1, "ERROR -- the application attempted to invoke an"
-		" operation\n"
-		" on a nil reference.");
+  omniORB::logs(1, "Error: the application attempted to invoke an "
+		"operation on a nil reference.");
 
   OMNIORB_THROW(INV_OBJREF,INV_OBJREF_InvokeOnNilObjRef, CORBA::COMPLETED_NO);
 }
@@ -456,6 +453,6 @@ _CORBA_invoked_nil_objref()
 void
 _CORBA_bad_param_freebuf()
 {
-  omniORB::logs(1, "ERROR -- an invalid buffer pointer is passed to freebuf\n"
+  omniORB::logs(1, "Error: an invalid buffer pointer is passed to freebuf "
 		" of string or object sequence");
 }

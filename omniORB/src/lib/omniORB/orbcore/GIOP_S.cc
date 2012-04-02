@@ -317,7 +317,7 @@ GIOP_S::handleRequest() {
       if( i == pd_n_user_excns ) { \
 	if( omniORB::trace(1) ) { \
 	  omniORB::logger l; \
-	  l << "WARNING -- method '" << operation() \
+	  l << "Warning: method '" << operation() \
 	    << "' on: " << pd_key \
 	    << " raised the exception: " << repoid << '\n'; \
 	} \
@@ -387,7 +387,7 @@ GIOP_S::handleRequest() {
 #ifdef HAVE_STD
   catch (const std::bad_alloc&) {
     // We keep logging as simple as possible to avoid too much allocation.
-    omniORB::logs(1, "ERROR -- upcall raised std::bad_alloc.");
+    omniORB::logs(1, "Error: upcall raised std::bad_alloc.");
 
     if (response_expected()) {
       CORBA::NO_MEMORY ex(NO_MEMORY_BadAlloc,
@@ -399,8 +399,8 @@ GIOP_S::handleRequest() {
   catch (const std::exception& std_ex) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
-      l << "WARNING -- method '" << operation() << "' raised an unexpected\n"
-	<< " std::exception (not a CORBA exception):\n "
+      l << "Warning: method '" << operation() << "' raised an unexpected "
+	<< "std::exception (not a CORBA exception): "
 	<< std_ex.what() << "\n";
     }
     if (response_expected()) {
@@ -414,7 +414,7 @@ GIOP_S::handleRequest() {
   catch (const omni_thread_fatal& thr_ex) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
-      l << "WARNING -- method '" << operation() << "' raised an "
+      l << "Warning: method '" << operation() << "' raised an "
 	<< "omni_thread_fatal exception (error " << thr_ex.error << ").\n";
     }
     if (response_expected()) {
@@ -427,7 +427,7 @@ GIOP_S::handleRequest() {
   catch(...) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
-      l << "WARNING -- method '" << operation() << "' raised an unexpected "
+      l << "Warning: method '" << operation() << "' raised an unexpected "
 	"exception (not a CORBA exception).\n";
     }
     if (response_expected()) {

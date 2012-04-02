@@ -324,9 +324,9 @@ omni::releaseObjRef(omniObjRef* objref)
 
   if( rc < 0 ) {
     omniORB::logs(1,
-      "ERROR -- trying to release an object with reference count <= 0.\n"
-      " CORBA::release() may have been called too many times on an object\n"
-      " reference.");
+      "Error: trying to release an object with reference count <= 0. "
+      "CORBA::release() may have been called too many times on an object "
+      "reference.");
     return;
   }
 

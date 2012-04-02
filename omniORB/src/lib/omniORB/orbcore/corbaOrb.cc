@@ -1350,7 +1350,7 @@ public:
     if( strcmp(value, myOrbId()) ) {
       if( omniORB::trace(1) ) {
 	omniORB::logger l;
-	l << "WARNING -- using ORBid " << value
+	l << "Warning: using ORBid " << value
 	  << " (should be " << ORB_ID_STRING << ")." << "\n";
       }
     }
@@ -1557,8 +1557,8 @@ public:
     if (sigaction(SIGPIPE,&act,0) < 0) {
       if( omniORB::trace(1) ) {
 	omniORB::logger l;
-	l << "WARNING -- ORB_init() cannot install the\n"
-	  " SIG_IGN handler for signal SIGPIPE. (errno = " << errno << ")\n";
+	l << "Warning: ORB_init() cannot install the "
+	  "SIG_IGN handler for signal SIGPIPE. (errno = " << errno << ")\n";
       }
     }
 # elif defined(HAVE_SIGVEC)
@@ -1569,8 +1569,8 @@ public:
     if (sigvec(SIGPIPE,&act,0) < 0) {
       if( omniORB::trace(1) ) {
 	omniORB::logger l;
-	l << "WARNING -- ORB_init() cannot install the\n"
-	  " SIG_IGN handler for signal SIGPIPE. (errno = " << errno << ")\n";
+	l << "Warning: ORB_init() cannot install the "
+	  "SIG_IGN handler for signal SIGPIPE. (errno = " << errno << ")\n";
       }
     }
 # endif // HAVE_SIGACTION

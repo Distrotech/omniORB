@@ -81,11 +81,10 @@ omniCallDescriptor::userException(cdrStream& stream, IOP_C* iop_c,
 
   if (omniORB::trace(1)) {
     omniORB::logger l;
-    l << "WARNING -- server returned user-defined exception for an\n"
-      " operation which the client thinks has none declared.  Could the\n"
-      " server and client have been compiled with different versions of\n"
-      " the IDL?\n"
-      "  Exception repository id: " << repoId << "\n";
+    l << "Warning: server returned user-defined exception for an "
+      "operation which the client thinks has none declared.  Could the "
+      "server and client have been compiled with different versions of "
+      "the IDL?  Exception repository id: " << repoId << "\n";
   }
 
   if (iop_c) iop_c->RequestCompleted(1);
@@ -109,7 +108,7 @@ omniCallDescriptor::validateUserException(const CORBA::UserException& ex)
     }
     if (omniORB::trace(1)) {
       omniORB::logger log;
-      log << "WARNING -- local call raised unexpected user exception '"
+      log << "Warning: local call raised unexpected user exception '"
 	  << repoId << "'.\n";
 
       OMNIORB_THROW(UNKNOWN, UNKNOWN_UserException, CORBA::COMPLETED_MAYBE);

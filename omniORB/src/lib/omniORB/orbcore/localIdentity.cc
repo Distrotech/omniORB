@@ -158,7 +158,7 @@ omniLocalIdentity::dispatch(omniCallDescriptor& call_desc)
   catch (...) {
     if( omniORB::trace(1) ) {
       omniORB::logger l;
-      l << "WARNING -- method '" << call_desc.op() << "' raised an unknown "
+      l << "Warning: method '" << call_desc.op() << "' raised an unknown "
 	"exception (not a legal CORBA exception).\n";
     }
     OMNIORB_THROW(UNKNOWN,UNKNOWN_UserException, CORBA::COMPLETED_MAYBE);

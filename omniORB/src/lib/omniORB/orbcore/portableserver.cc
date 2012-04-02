@@ -190,7 +190,7 @@ PortableServer::ServantBase::_remove_ref()
     delete this;
   }
   catch (...) {
-    omniORB::logs(1, "ERROR: Servant destructor threw an exception.");
+    omniORB::logs(1, "Error: Servant destructor threw an exception.");
   }
 }
 

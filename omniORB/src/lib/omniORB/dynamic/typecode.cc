@@ -5210,23 +5210,21 @@ TypeCode_offsetTable::lookupOffset(CORBA::Long offset)
   // Visibroker's Java ORB gives out TypeCode indirections which are not
   // a multiple of 4. Rounding them up seems to solve the problem ...
 
-  if( orbParameters::acceptMisalignedTcIndirections && (offset & 0x3) ) {
-    if( omniORB::traceLevel > 1 ) {
-      omniORB::logger log;
-      log << "omniORB: WARNING - received TypeCode with mis-aligned indirection.\n";
-    }
+  if (orbParameters::acceptMisalignedTcIndirections && (offset & 0x3)) {
+    omniORB::logs(1, "Warning: received TypeCode with "
+                  "mis-aligned indirection.");
     offset = (offset + 3) & 0xfffffffc;
   }
 
   // Otherwise, just look in this table directly
   TypeCode_offsetEntry* entry = pd_table;
 
-  while (entry != 0)
-    {
-      if( (CORBA::Long)entry->pd_offset == offset )
-	return entry->pd_typecode;
-      entry = entry->pd_next;
-    }
+  while (entry != 0) {
+    if ((CORBA::Long)entry->pd_offset == offset)
+      return entry->pd_typecode;
+
+    entry = entry->pd_next;
+  }
 
   return 0;
 }
@@ -5251,15 +5249,13 @@ TypeCode_offsetTable::lookupTypeCode(const TypeCode_base*  tc,
   // Otherwise, just look in this table directly
   TypeCode_offsetEntry* entry = pd_table;
 
-  while (entry != 0)
-    {
-      if (entry->pd_typecode == tc)
-	{
-	  offset = entry->pd_offset;
-	  return 1;
-	}
-      entry = entry->pd_next;
+  while (entry != 0) {
+    if (entry->pd_typecode == tc) {
+      offset = entry->pd_offset;
+      return 1;
     }
+    entry = entry->pd_next;
+  }
 
   return 0;
 }
@@ -5673,8 +5669,6 @@ TypeCode_base*
 TypeCode_collector::duplicateRef(TypeCode_base* tc)
 {
   omni_tracedmutex_lock l(*refcount_lock);
-
-  //  if (tc->pd_tck == CORBA::tk_null) abort();
 
   tc->pd_ref_count++;
 
@@ -6622,8 +6616,8 @@ checkValidTypeCode(const CORBA::TypeCode_ptr tc)
   CORBA::TCKind k = ToConstTcBase_Checked(tc)->NP_kind();
   if (k == CORBA::tk_null || k == CORBA::tk_void || k == CORBA::tk_except)
     OMNIORB_THROW(BAD_TYPECODE,
-		  BAD_TYPECODE_IllegitimateMember,
-		  CORBA::COMPLETED_NO);
+         	  BAD_TYPECODE_IllegitimateMember,
+                  CORBA::COMPLETED_NO);
 }
 
 CORBA::TypeCode_ptr

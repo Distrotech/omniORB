@@ -279,7 +279,7 @@ omni_tracedcondition::~omni_tracedcondition()
   if (pd_n_waiters) {
     if (omniORB::trace(1)) {
       omniORB::logger log;
-      log << "WARNING -- omni_tracedcondition " << pd_logname
+      log << "Warning: omni_tracedcondition " << pd_logname
 	  << " was deleted, but there are still threads waiting on it.\n";
     }
   }

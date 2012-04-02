@@ -52,23 +52,29 @@ usage_string = """\
   -Wbh=<suffix>     Specify suffix for generated header files
   -Wbs=<suffix>     Specify suffix for generated stub files
   -Wbd=<suffix>     Specify suffix for generated dynamic files
-  -Wba              Generate code for TypeCodes and Any
+
+  -Wba              Generate code for TypeCode and Any
   -Wbtp             Generate 'tie' implementation skeletons
   -Wbtf             Generate flattened 'tie' implementation skeletons
-  -Wbsplice-modules Splice together multiply opened modules into one 
+  -Wbami            Generate code for AMI
   -Wbexample        Generate example implementation code
-  -WbF              Generate code fragments (for experts only)
+
+  -Wbinline         Generate code for #included files inline with the main file
+  -Wbuse-quotes     Use quotes in #includes: "foo" rather than <foo>
+  -Wbkeep-inc-path  Preserve IDL #include path in header #includes
+
+  -Wbvirtual-objref Use virtual functions in object references
+  -Wbimpl-mapping   Use 'impl' mapping for object reference methods
+
+  -Wbsplice-modules Splice together multiply opened modules into one 
   -WbBOA            Generate BOA compatible skeletons
   -Wbold            Generate old CORBA 2.1 signatures for skeletons
-  -Wbold_prefix     Map C++ reserved words with prefix _ instead of _cxx_
-  -Wbinline         Generate code for #included files inline with the main file
-  -Wbkeep_inc_path  Preserve IDL #include path in header #includes
-  -Wbuse_quotes     Use quotes in #includes: "foo" rather than <foo>
-  -Wbdll_includes   Extra support for #included IDL in DLLs
-  -Wbguard_prefix   Prefix for include guards in generated headers
-  -Wbvirtual_objref Use virtual functions in object references
-  -Wbimpl_mapping   Use 'impl' mapping for object reference methods
-  -Wbami            Generate code for AMI"""
+  -Wbold-prefix     Map C++ reserved words with prefix _ instead of _cxx_
+
+  -Wbdll-includes   Extra support for #included IDL in DLLs
+  -Wbguard-prefix   Prefix for include guards in generated headers
+  -WbF              Generate code fragments (for experts only)
+"""
 
 def process_args(args):
     for arg in args:
@@ -96,19 +102,19 @@ def process_args(args):
         elif arg == "old":
             config.state['Old Signatures']    = 1
 
-        elif arg == "old_prefix":
+        elif arg == "old-prefix" or arg == "old_prefix":
             config.state['Reserved Prefix']   = "_"
 
-        elif arg == "keep_inc_path":
+        elif arg == "keep-inc-path" or arg == "keep_inc_path":
             config.state['Keep Include Path'] = 1
 
-        elif arg == "use_quotes":
+        elif arg == "use-quotes" or arg == "use_quotes":
             config.state['Use Quotes']        = 1
 
-        elif arg == "virtual_objref":
+        elif arg == "virtual-objref" or arg == "virtual_objref":
             config.state['Virtual Objref Methods'] = 1
 
-        elif arg == "impl_mapping":
+        elif arg == "impl-mapping" or arg == "impl_mapping":
             config.state['Impl Mapping'] = 1
 
         elif arg == "debug":
@@ -140,11 +146,11 @@ def process_args(args):
             else:
                 util.fatalError('Unknown shortcut option "%s"' % arg[9:])
 
-        elif arg == "dll_includes":
+        elif arg == "dll-includes" or arg == "dll_includes":
             config.state['DLLIncludes']       = 1
 
-        elif arg[:len('guard_prefix=')] == "guard_prefix=":
-            config.state['GuardPrefix']       = arg[len('guard_prefix='):]
+        elif arg[:13] == "guard-prefix=" or arg[:13] == "guard_prefix=":
+            config.state['GuardPrefix']       = arg[14:]
 
         elif arg == "ami":
             config.state['AMI']               = 1

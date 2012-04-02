@@ -50,11 +50,9 @@ void
 PseudoObjBase::decrRefCount()
 {
   if (!pd_refCount.value()) {
-    if (omniORB::trace(1)) {
-      omniORB::logger log;
-      log << "WARNING -- CORBA::release() has been called too many times "
-	"for a pseudo object.  The object has already been destroyed.\n";
-    }
+    omniORB::logs(1, "Warning: CORBA::release() has been called too many times "
+                  "for a pseudo object. The object has already "
+                  "been destroyed.");
     return;
   }
   

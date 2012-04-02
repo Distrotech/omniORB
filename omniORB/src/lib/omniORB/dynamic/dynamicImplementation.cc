@@ -197,18 +197,14 @@ PortableServer::DynamicImplementation::_dispatch(omniCallHandle& handle)
 
   switch( sreq.state() ){
   case omniServerRequest::SR_READY:
-    if( omniORB::trace(1) ){
-      omniORB::logger log;
-      log <<
-	"omniORB: WARNING -- A Dynamic Implementation Routine\n"
-	" (DynamicImplementation::invoke()) failed to call arguments()\n"
-	" on the ServerRequest object. BAD_INV_ORDER is thrown.\n";
-    }
+    omniORB::logs(1, "Warning: A Dynamic Implementation Routine "
+                  "(DynamicImplementation::invoke) failed to call arguments() "
+                  "on the ServerRequest object. BAD_INV_ORDER is thrown.");
     OMNIORB_THROW(BAD_INV_ORDER,
 		  BAD_INV_ORDER_ArgumentsNotCalled,
 		  CORBA::COMPLETED_NO);
 
-
+    
   case omniServerRequest::SR_GOT_PARAMS:
   case omniServerRequest::SR_GOT_CTX:
   case omniServerRequest::SR_GOT_RESULT:
@@ -217,27 +213,20 @@ PortableServer::DynamicImplementation::_dispatch(omniCallHandle& handle)
     break;
 
   case omniServerRequest::SR_DSI_ERROR:
-    if( omniORB::trace(1) ){
-      omniORB::logger log;
-      log <<
-	"omniORB: WARNING -- A Dynamic Implementation Routine\n"
-	" (DynamicImplementation::invoke()) did not properly implement\n"
-	" the Dynamic Skeleton Interface.\n";
-    }
+    omniORB::logs(1, "Warning: A Dynamic Implementation Routine "
+                  "(DynamicImplementation::invoke) did not properly implement "
+                  "the Dynamic Skeleton Interface.");
     OMNIORB_THROW(BAD_INV_ORDER,
 		  BAD_INV_ORDER_ErrorInDynamicImplementation,
 		  CORBA::COMPLETED_NO);
 
   case omniServerRequest::SR_ERROR:
-    if( omniORB::trace(1) ) {
-      omniORB::logger log;
-      log <<
-	"omniORB: WARNING -- A system exception was thrown when\n"
-	" unmarshalling arguments for a DSI servant.  However the Dynamic\n"
-	" Implementation Routine (DynamicImplementation::invoke()) did not\n"
-	" propagate the exception or pass it to the server request.\n"
-	" CORBA::MARSHAL is being passed back to the client anyway.\n";
-    }
+    omniORB::logs(1, "Warning: A system exception was thrown when "
+                  "unmarshalling arguments for a DSI servant. However the "
+                  "Dynamic Implementation Routine "
+                  "(DynamicImplementation::invoke) did not propagate the "
+                  "exception or pass it to the server request. "
+                  "CORBA::MARSHAL is being passed back to the client anyway.");
     OMNIORB_THROW(MARSHAL,
 		  MARSHAL_ExceptionInDSINotPropagated,
 		  CORBA::COMPLETED_MAYBE);

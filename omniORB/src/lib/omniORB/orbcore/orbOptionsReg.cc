@@ -346,8 +346,8 @@ void parseOldConfigReg(orbOptions& opt, HKEY rootkey) {
   }
   if (omniORB::trace(2)) {
     omniORB::logger l;
-    l << "For the moment this is accepted to maintain backward compatibility.\n"
-      << "omniORB: Please update to the new registry format ASAP.\n";
+    l << "For the moment this is accepted to maintain backward compatibility. "
+      << "Please update to the new registry format ASAP.\n";
   }
 
   DWORD index = 0;

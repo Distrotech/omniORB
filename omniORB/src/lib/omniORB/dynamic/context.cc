@@ -384,14 +384,10 @@ ContextImpl::decrRefCount()
   {
     omni_tracedmutex_lock sync(pd_lock);
 
-    if( !pd_refCount ) {
-      if( omniORB::traceLevel > 0 ) {
-	omniORB::logger log;
-	log <<
-	  "omniORB: WARNING -- CORBA::release() was called too many times\n"
-	  " for a CORBA::Context object - the object has already been\n"
-	  " destroyed.\n";
-      }
+    if (!pd_refCount) {
+      omniORB::logs(1, "Warning: CORBA::release() was called too many times "
+                    "for a CORBA::Context object - the object has already "
+                    "been destroyed.");
       return;
     }
 

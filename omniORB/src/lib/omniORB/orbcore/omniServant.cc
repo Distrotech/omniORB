@@ -104,7 +104,7 @@ omniServant::~omniServant()
   if( !pd_activations.empty() ) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
-      l << "ERROR -- A servant has been deleted that is still activated.\n";
+      l << "Error: a servant has been deleted that is still activated.\n";
       omni::internalLock->lock();
 
       omnivector<omniObjTableEntry*>::iterator i    = pd_activations.begin();
