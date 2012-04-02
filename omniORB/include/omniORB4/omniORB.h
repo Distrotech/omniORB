@@ -507,7 +507,7 @@ _CORBA_MODULE_BEG
   class LOCATION_FORWARD {                                              //
   public:                                                               //
     inline LOCATION_FORWARD(CORBA::Object_ptr objref,                   //
-			    CORBA::Boolean permanent)                   //
+			    CORBA::Boolean permanent=0)                 //
       : pd_objref(objref), pd_permanent(permanent) {}                   //
                                                                         //
     inline CORBA::Object_ptr get_obj() const { return pd_objref; }      //
