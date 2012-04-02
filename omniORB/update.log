@@ -1,3 +1,11 @@
+Mon Apr  2 20:19:51 BST 2012 dgrisby
+====================================
+
+- Missing static interceptor pointer from previous change.
+
+src/lib/omniORB/orbcore/interceptors.cc
+
+
 Mon Apr  2 10:52:34 BST 2012 dgrisby
 ====================================
 

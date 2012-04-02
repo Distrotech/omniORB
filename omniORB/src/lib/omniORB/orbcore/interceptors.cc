@@ -3,7 +3,7 @@
 // interceptors.cc            Created on: 22/09/2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -59,6 +59,7 @@ omniInterceptorP::elmT* omniInterceptorP::createORBServer        = 0;
 omniInterceptorP::elmT* omniInterceptorP::createPolicy           = 0;
 omniInterceptorP::elmT* omniInterceptorP::createThread           = 0;
 omniInterceptorP::elmT* omniInterceptorP::assignUpcallThread     = 0;
+omniInterceptorP::elmT* omniInterceptorP::assignAMIThread        = 0;
 
 
 static void list_add(omniInterceptorP::elmT** ep, void* func)
