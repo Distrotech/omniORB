@@ -13,27 +13,32 @@
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORB004.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
 <HR>
-<H1 CLASS="chapter"><A NAME="htoc40">Chapter&#XA0;3</A>&#XA0;&#XA0;C++ language mapping</H1><P>Now that you are familiar with the basics, it is important to
+<H1 CLASS="chapter"><A NAME="htoc47">Chapter&#XA0;3</A>&#XA0;&#XA0;C++ language mapping</H1><P>Now that you are familiar with the basics, it is important to
 familiarise yourself with the standard IDL to C++ language mapping.
-The mapping is described in detail in&#XA0;[<A HREF="omniORB014.html#cxxmapping">OMG03</A>]. If you have
+The mapping is described in detail in&#XA0;[<A HREF="omniORB016.html#cxxmapping">OMG03</A>]. If you have
 not done so, you should obtain a copy of the document and use that as
 the programming guide to omniORB.</P><P>The specification is not an easy read. The alternative is to use one
-of the books on CORBA programming that has begun to appear. For
-instance, Henning and Vinoski&#X2019;s &#X2018;Advanced CORBA Programming with
-C++&#X2019;&#XA0;[<A HREF="omniORB014.html#henning1999">HV99</A>] includes many example code bits to illustrate
-how to use the C++ mapping.</P><H2 CLASS="section"><A NAME="toc16"></A><A NAME="htoc41">3.1</A>&#XA0;&#XA0;omniORB 2 BOA compatibility</H2><P>
-<A NAME="sec:BOAcompat"></A></P><P>If you use the <TT>-WbBOA</TT> option to omniidl, it will generate
-skeleton code with the same interface as the old omniORB 2 BOA
-mapping, as well as code to be used with the POA. Note that since the
-major problem with the BOA specification was that server code was not
-portable between ORBs, it is unlikely that omniORB 4.1&#X2019;s BOA
+of the books on CORBA programming. For instance, Henning and Vinoski&#X2019;s
+&#X2018;Advanced CORBA Programming with C++&#X2019;&#XA0;[<A HREF="omniORB016.html#henning1999">HV99</A>] includes many
+example code fragments to illustrate how to use the C++ mapping.</P><H2 CLASS="section"><A NAME="toc16"></A><A NAME="htoc48">3.1</A>&#XA0;&#XA0;omniORB 2 BOA compatibility</H2><P>
+<A NAME="sec:BOAcompat"></A></P><P>Before the Portable Object Adapter (POA) specification, many of the
+details of how servant objects should be implemented and registered
+with the system were unspecified, so server-side code was not portable
+between ORBs. The POA specification rectifies that. For compatibility,
+omniORB 4 still supports the old omniORB 2.x BOA mapping, but you
+should always use the POA mapping for new code. BOA code and POA code
+can coexist within a single program. </P><P>If you use the <TT>-WbBOA</TT> option to omniidl, it will generate
+skeleton code with (nearly) the same interface as the old omniORB 2
+BOA mapping, as well as code to be used with the POA. Note that since
+the major problem with the BOA specification was that server code was
+not portable between ORBs, it is unlikely that omniORB&#X2019;s BOA
 compatibility will help you much if you are moving from a different
 BOA-based ORB.</P><P>The BOA compatibility permits the majority of BOA code to compile
 without difficulty. However, there are a number of constructs which
 relied on omniORB 2 implementation details which no longer work.</P><UL CLASS="itemize"><LI CLASS="li-itemize">omniORB 2 did not use distinct types for object references and
 servants, and often accepted a pointer to a servant when the CORBA
 specification says it should only accept an object reference. Such
-code will not compile under omniORB 4.1.</LI><LI CLASS="li-itemize">The reverse is true for <TT>BOA::obj_is_ready()</TT>. It now only
+code will not compile under omniORB 4.</LI><LI CLASS="li-itemize">The reverse is true for <TT>BOA::obj_is_ready()</TT>. It now only
 works when passed a pointer to a servant object, not an object
 reference. The more commonly used mechanism of calling
 <TT>_obj_is_ready(boa)</TT> on the servant object still works as
@@ -62,15 +67,15 @@ I::S I_impl::op() {
 supported. All of the facilities it offered can be implemented with
 the POA interfaces, and the <TT>omniORB::LOCATION_FORWARD</TT>
 exception (see section&#XA0;<A HREF="omniORB004.html#sec:locationForward">4.8</A>). Code which used the
-old interfaces will have to be rewritten.</LI></UL><H2 CLASS="section"><A NAME="toc17"></A><A NAME="htoc42">3.2</A>&#XA0;&#XA0;omniORB 3.0 compatibility</H2><P>omniORB 4.1 is almost completely source-code compatible with omniORB
+old interfaces will have to be rewritten.</LI></UL><H2 CLASS="section"><A NAME="toc17"></A><A NAME="htoc49">3.2</A>&#XA0;&#XA0;omniORB 3.0 compatibility</H2><P>omniORB 4 is almost completely source-code compatible with omniORB
 3.0. There are two main cases where code may have to change. The first
 is code that uses the omniORB API, some aspects of which have
 changed. The omniORB configuration file also has a new format. See the
 next chapter for details of the new API and configuration file.</P><P>The second case of code that may have to change is code using the
 Dynamic Any interfaces. The standard changed quite significantly
 between CORBA 2.2 and CORBA 2.3; omniORB 3.0 supported the old CORBA
-2.2 interfaces; omniORB 4.1 uses the new mapping. The changes are
-largely syntax changes, rather than semantic differences.</P><H2 CLASS="section"><A NAME="toc18"></A><A NAME="htoc43">3.3</A>&#XA0;&#XA0;omniORB 4.0 compatibility</H2><P>omniORB 4.1 is source-code compatible with omniORB 4.0, with four
+2.2 interfaces; omniORB 4 uses the new mapping. The changes are
+largely syntax changes, rather than semantic differences.</P><H2 CLASS="section"><A NAME="toc18"></A><A NAME="htoc50">3.3</A>&#XA0;&#XA0;omniORB 4.0 compatibility</H2><P>omniORB 4.2 is source-code compatible with omniORB 4.0, with four
 exceptions:</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">As required by the 1.1 version of the CORBA C++ mapping
 specification, the <TT>RefCountServantBase</TT> class has been
 deprecated, and the reference counting functionality moved into
@@ -99,7 +104,17 @@ means that code that worked with omniORB 4.0 may now fail with 4.1,
 with the Any seeing modified data or the process crashing due to
 accessing deleted data. To avoid this situation, use the alternative
 Any insertion operator using a const reference, which copies the
-sequence.</P></LI></OL><HR>
+sequence.</P></LI></OL><H2 CLASS="section"><A NAME="toc19"></A><A NAME="htoc51">3.4</A>&#XA0;&#XA0;omniORB 4.1 compatibility</H2><P>omniORB 4.2 is source-code compatible with omniORB 4.1 with one
+exception:</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">When omniORB 4.1 and earlier detected a timeout condition, they
+would throw the <TT>CORBA::TRANSIENT</TT> system exception. omniORB
+4.2 supports the <TT>CORBA::TIMEOUT</TT> system exception that was
+introduced with the CORBA Messaging specification. Application code
+that caught <TT>CORBA::TRANSIENT</TT> to handle timeout situations
+should be updated to catch <TT>CORBA::TIMEOUT</TT>
+instead. Alternatively, to avoid code changes, omniORB can be
+configured to throw <TT>CORBA::TRANSIENT</TT> for timeouts, by setting
+the <TT>throwTransientOnTimeout</TT> parameter to <TT>1</TT>. See
+section&#XA0;<A HREF="omniORB004.html#sec:clientconf">4.4</A>.</LI></OL><HR>
 <A HREF="omniORB002.html"><IMG SRC="previous_motif.gif" ALT="Previous"></A>
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORB004.html"><IMG SRC="next_motif.gif" ALT="Next"></A>

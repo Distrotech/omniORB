@@ -230,7 +230,7 @@ The product is the files: echo.hh and echoSK.cc
 Documentation
 =============
 
-You must read the omniORB and the naming service user guides. Follow
+You should read the omniORB and the naming service user guides. Follow
 the instructions in the guides to complete the configuration process.
 
 

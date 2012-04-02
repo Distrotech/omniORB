@@ -272,70 +272,13 @@ still work with Visual C++ 5 but that has not been tested.
        http://www.cygwin.com/
 
 
-    The toolkit is big and you don't need all of it to compile
-    omniORB. Alternatively, you can download a cutdown version from:
-
-       http://omniorb.sourceforge.net/att_packages/gnu-win32-lite.zip
-
-    The utilities in this version are all you need to build omniORB.
-
-    Assume that you have downloaded the toolkit and have
-    unpacked/installed it in some sensible subdirectory, say
-    C:\gnuwin32, you then have to go through the following checklist:
-
-      1. In a command prompt window, make sure that you have the
-         environment variables and path setup properly to use MS
-         Visual C++.
-
-	 The easiest way is to call the vcvars.bat file created by the
-	 Visual Studio installer.
-
-      2. If you have unpacked gnu-win32-lite.zip in C:\gnuwin32, add
-         C:\gnuwin32\bin to your Path environment variable. 
-
-         Warning: If you have installed posix utilities from the
-         Windows resource kits, make sure that C:\gnuwin32 is searched
-         before the directory containing these utilities.
-
-         If you have installed the full Cygwin toolkit, just follow
-         its installation instructions and you can skip 3.
-
-      3. Now you have to run a small script *once* to setup in your
-         registry the necessary 'mount' points. Basically, it tells
-         the gnuwin32 runtime how to translate a path such as /bin/sh
-         to the real path name Win32 (e.g. C:\gnuwin32\bin\sh.exe)
-         understands.
-
-         Just execute this command in a command prompt window:
-  
-            C:\gnuwin32\bin\checkmounts C:\gnuwin32
-
-        If all goes well, this is what you see:
-
-            C:\> C:\gnuwin32\bin\checkmounts C:\gnuwin32
-            no /bin/sh.exe, mounting c:\gnuwin32\bin as /bin
-            Completed successfully.
-
-      4. Now you are ready. You can now build the distribution by
-         following the instructions below.
-
     Python
     ------
 
-    omniidl requires Python 1.5.2 or later. You can download the full
-    Python distribution from
+    omniidl requires Python 2.5, 2.6 or 2.7. You can download the full
+    Python distribution from:
 
-     http://www.python.org/download/download_windows.html
-
-
-    Alternatively, for Windows on x86, you can install a minimal
-    version of Python which contains just the functionality required
-    by omniidl. Download it from Sourceforge, via
-
-       http://omniorb.sourceforge.net/att_packages/omnipython-x86_win32.zip
-
-    Unpack the zip file at the top of the omniORB tree. It places
-    files in the bin, lib and include directories.
+       http://www.python.org/download/download_windows.html
 
 
   B. Choose the right platform configuration file
@@ -360,17 +303,8 @@ still work with Visual C++ 5 but that has not been tested.
      where <platform> is the platform you just chose in config.mk,
      e.g. <top>\mk\platforms\x86_win32_vs_10.mk.
 
-     If you are using the omnipython minimal distribution, uncomment
-     the line which reads
-
-       PYTHON = $(ABSTOP)/$(BINDIR)/omnipython
-
-     otherwise, set PYTHON to the location of your Python executable.
-     Note that you must use a Unix-style Cygwin path.
-
-     If you are using the mingw compiler, you must patch the
-     omnipython distribution using the patch in the patches/
-     directory.
+     Set PYTHON to the location of your Python executable. Note that
+     you must use a Unix-style Cygwin path.
 
 
   D. Building and installing
