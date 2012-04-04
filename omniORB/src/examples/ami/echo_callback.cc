@@ -48,8 +48,8 @@ int main(int argc, char** argv)
   try {
     CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
 
-    if( argc != 2 ) {
-      cerr << "usage:  eg2_clt <object reference>" << endl;
+    if (argc != 2) {
+      cerr << "usage: echo_callback <object reference>" << endl;
       return 1;
     }
 

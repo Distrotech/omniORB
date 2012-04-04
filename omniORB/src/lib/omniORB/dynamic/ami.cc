@@ -51,6 +51,8 @@ raise_exception()
 //
 // Poller
 
+const char* omniAMI::PollerImpl::_PD_repoId = "omni:AMI/PollerImpl/1.0";
+
 omniAMI::PollerImpl::
 ~PollerImpl()
 {
@@ -81,8 +83,7 @@ CORBA::PollableSet_ptr
 omniAMI::PollerImpl::
 create_pollable_set()
 {
-  // *** HERE
-  OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
+  return new PollableSetImpl(this);
 }
 
 
@@ -177,4 +178,203 @@ _checkResult(const char* op, CORBA::ULong timeout)
 
   if (_pd_cd->exceptionOccurred())
     _pd_cd->raiseException();
+}
+
+
+//
+// PollableSet
+
+omniAMI::PollableSetImpl::
+PollableSetImpl(PollerImpl* poller)
+  : pd_cond(&omniAsyncCallDescriptor::sd_lock),
+    pd_dii_pollable(0),
+    pd_ref_count(1)
+{
+  omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+  if (poller->_PR_cd()->addToSet(&pd_cond)) {
+    poller->_add_ref();
+    pd_ami_pollers.length(1);
+    pd_ami_pollers[0] = poller;
+  }
+  else {
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PollableAlreadyInPollableSet,
+                  CORBA::COMPLETED_NO);
+  }
+}
+
+omniAMI::PollableSetImpl::
+~PollableSetImpl()
+{
+  omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+  for (CORBA::ULong i=0; i != pd_ami_pollers.length(); ++i)
+    pd_ami_pollers[i]->_PR_cd()->remFromSet(&pd_cond);
+}
+
+
+CORBA::DIIPollable*
+omniAMI::PollableSetImpl::
+create_dii_pollable()
+{
+  OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
+}
+
+
+void
+omniAMI::PollableSetImpl::
+add_pollable(CORBA::Pollable* potential)
+{
+  PollerImpl* impl = 
+    potential ? (PollerImpl*)potential->_ptrToValue(PollerImpl::_PD_repoId) : 0;
+
+  if (impl) {
+    omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+    if (impl->_PR_cd()->addToSet(&pd_cond)) {
+      impl->_add_ref();
+
+      CORBA::ULong len = pd_ami_pollers.length();
+      pd_ami_pollers.length(len+1);
+      pd_ami_pollers[len] = impl;
+    }
+    else {
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PollableAlreadyInPollableSet,
+                    CORBA::COMPLETED_NO);
+    }
+  }
+  else {
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidPollerType,
+                  CORBA::COMPLETED_NO);
+  }
+}
+
+
+CORBA::Pollable*
+omniAMI::PollableSetImpl::
+get_ready_pollable(CORBA::ULong timeout)
+{
+  omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+  CORBA::Pollable* pollable = getAndRemoveReadyPollable();
+  if (pollable)
+    return pollable;
+
+  if (timeout == 0)
+    OMNIORB_THROW(NO_RESPONSE, NO_RESPONSE_ReplyNotAvailableYet,
+                  CORBA::COMPLETED_NO);
+
+  if (timeout == 0xffffffff) {
+    do {
+      pd_cond.wait();
+
+      pollable = getAndRemoveReadyPollable();
+      if (pollable)
+        return pollable;
+
+    } while(1);
+  }
+
+  omni_time_t timeout_tt(timeout / 1000, (timeout % 1000) * 1000000);
+  omni_time_t deadline;
+  omni_thread::get_time(deadline, timeout_tt);
+
+  pd_cond.timedwait(deadline);
+
+  pollable = getAndRemoveReadyPollable();
+  if (!pollable)
+    OMNIORB_THROW(TIMEOUT, TIMEOUT_NoPollerResponseInTime, CORBA::COMPLETED_NO);
+
+  return pollable;
+}
+
+
+void
+omniAMI::PollableSetImpl::
+remove(CORBA::Pollable* potential)
+{
+  omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+  PollerImpl* impl = 
+    potential ? (PollerImpl*)potential->_ptrToValue(PollerImpl::_PD_repoId) : 0;
+
+  if (!impl)
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidPollerType,
+                  CORBA::COMPLETED_NO);
+
+
+  CORBA::ULong len = pd_ami_pollers.length();
+
+  for (CORBA::ULong i=0; i != len; ++i) {
+    PollerImpl* poller = pd_ami_pollers[i];
+      
+    if (poller == impl) {
+      if (i + 1 < len) {
+        // Swap last item in sequence with this one
+        pd_ami_pollers[i] = pd_ami_pollers[len-1];
+      }
+      pd_ami_pollers.length(len-1);
+      return;
+    }
+  }
+  throw UnknownPollable();
+}
+
+
+CORBA::UShort
+omniAMI::PollableSetImpl::
+number_left()
+{
+  omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+  if (pd_ami_pollers.length() > 0xffff)
+    return 0xffff; // Yikes!
+
+  return pd_ami_pollers.length();
+}
+
+
+CORBA::Pollable*
+omniAMI::PollableSetImpl::
+getAndRemoveReadyPollable()
+{
+  ASSERT_OMNI_TRACEDMUTEX_HELD(omniAsyncCallDescriptor::sd_lock, 1);
+
+  CORBA::ULong len = pd_ami_pollers.length();
+  if (len == 0)
+    throw NoPossiblePollable();
+
+  for (CORBA::ULong i=0; i != len; ++i) {
+    PollerImpl* poller = pd_ami_pollers[i];
+      
+    if (poller->_PR_cd()->lockedIsComplete()) {
+      poller->_add_ref();
+
+      if (i + 1 < len) {
+        // Swap last item in sequence with this one
+        pd_ami_pollers[i] = pd_ami_pollers[len-1];
+      }
+      pd_ami_pollers.length(len-1);
+      return poller;
+    }
+  }
+  return 0;
+}
+
+
+void
+omniAMI::PollableSetImpl::
+_add_ref()
+{
+  pd_ref_count.inc();
+}
+
+void
+omniAMI::PollableSetImpl::
+_remove_ref()
+{
+  if (pd_ref_count.dec() > 0)
+    return;
+
+  delete this;
 }

@@ -3,7 +3,7 @@
 // minorCode.h                Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -165,6 +165,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 #define OMNIORBMinorCode_124 OMNIORBMinorCode(124)
 #define OMNIORBMinorCode_125 OMNIORBMinorCode(125)
 #define OMNIORBMinorCode_126 OMNIORBMinorCode(126)
+#define OMNIORBMinorCode_127 OMNIORBMinorCode(127)
 
 #define OMNI_COMMA ,
 #define DeclareValue(name,value) name = value
@@ -252,7 +253,8 @@ code( BAD_PARAM_StringIsTooLong              , OMNIORBMinorCode_100 ) sep \
 code( BAD_PARAM_SequenceIsTooLong            , OMNIORBMinorCode_101 ) sep \
 code( BAD_PARAM_WrongUnionMemberSelected     , OMNIORBMinorCode_107 ) sep \
 code( BAD_PARAM_InvalidFixedPointLimits      , OMNIORBMinorCode_109 ) sep \
-code( BAD_PARAM_AttemptToMarshalAbstractValue, OMNIORBMinorCode_115 )
+code( BAD_PARAM_AttemptToMarshalAbstractValue, OMNIORBMinorCode_115 ) sep \
+code( BAD_PARAM_InvalidPollerType            , OMNIORBMinorCode_127 )
 
 enum BAD_PARAM_minor {
   DECLARE_BAD_PARAM_minors(DeclareValue,OMNI_COMMA)

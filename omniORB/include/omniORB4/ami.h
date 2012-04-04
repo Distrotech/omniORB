@@ -29,6 +29,17 @@
 #ifndef _OMNIORB_AMI_H_
 #define _OMNIORB_AMI_H_
 
+#ifdef _dyn_attr
+# error "A local CPP macro _dyn_attr has already been defined."
+#endif
+
+#if defined(_OMNIORB_DYNAMIC_LIBRARY)
+#  define _dyn_attr
+#else
+#  define _dyn_attr _OMNIORB_NTDLL_IMPORT
+#endif
+
+
 _CORBA_MODULE omniAMI
 _CORBA_MODULE_BEG
 
@@ -51,6 +62,10 @@ public:
 
 private:
   omniAsyncCallDescriptor* pd_cd;
+
+  // Not implemented
+  ExceptionHolder(const ExceptionHolder&);
+  ExceptionHolder& operator=(const ExceptionHolder&);
 };
 
 
@@ -80,6 +95,11 @@ public:
 
   ::CORBA::Boolean         is_from_poller();
 
+  // omniORB internal
+
+  inline omniAsyncCallDescriptor* _PR_cd() { return _pd_cd; }
+  static _dyn_attr const char* _PD_repoId;
+
 protected:
   void _wrongOperation();
   void _checkResult(const char* op, ::CORBA::ULong timeout);
@@ -87,6 +107,48 @@ protected:
   omniAsyncCallDescriptor* _pd_cd;
   ::CORBA::Boolean         _pd_is_from_poller;
   ::CORBA::Boolean         _pd_retrieved;
+};
+
+
+//
+// PollableSet implementation
+
+typedef _CORBA_Value_Element<
+  PollerImpl, ::Messaging::Poller_Helper> PollerImplElmt;
+
+typedef _CORBA_Unbounded_Sequence_Value<
+  PollerImpl, PollerImplElmt, ::Messaging::Poller_Helper> PollerImplSeq;
+
+
+class PollableSetImpl
+  : public virtual ::CORBA::PollableSet
+{
+public:
+  PollableSetImpl(PollerImpl* poller);
+  ~PollableSetImpl();
+
+  // Standard interface
+
+  ::CORBA::DIIPollable* create_dii_pollable();
+  void                  add_pollable(::CORBA::Pollable* potential);
+  ::CORBA::Pollable*    get_ready_pollable(::CORBA::ULong timeout);
+  void                  remove(::CORBA::Pollable* potential);
+  ::CORBA::UShort       number_left();
+
+  void _add_ref();
+  void _remove_ref();
+
+private:
+  omni_tracedcondition  pd_cond;
+  PollerImplSeq         pd_ami_pollers;
+  ::CORBA::DIIPollable* pd_dii_pollable;
+  omni_refcount         pd_ref_count;
+
+  ::CORBA::Pollable*    getAndRemoveReadyPollable();
+
+  // Not implemented
+  PollableSetImpl(const PollableSetImpl&);
+  PollableSetImpl& operator=(const PollableSetImpl&);
 };
 
 

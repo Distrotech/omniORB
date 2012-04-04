@@ -317,7 +317,8 @@ public:
 			 user_excns_, n_user_excns_,
 			 is_upcall_),
       pd_exception(0),
-      pd_cond(0)
+      pd_cond(0),
+      pd_set_cond(0)
   {}
 
   // Constructor for asynchronous calls
@@ -331,6 +332,7 @@ public:
 			 user_excns_, n_user_excns_, 0),
       pd_exception(0),
       pd_cond(0),
+      pd_set_cond(0),
       pd_complete(0)
   {}
 
@@ -352,6 +354,9 @@ public:
 
       if (pd_cond)
 	pd_cond->broadcast();
+
+      if (pd_set_cond)
+        pd_set_cond->broadcast();
     }
     completeCallback();
   }
@@ -359,6 +364,12 @@ public:
   inline bool isComplete()
   {
     omni_tracedmutex_lock l(sd_lock);
+    return pd_complete;
+  }
+
+  inline bool lockedIsComplete()
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);
     return pd_complete;
   }
 
@@ -410,13 +421,36 @@ public:
       pd_exception->_raise();
   }
 
-protected:
-  CORBA::Exception*       pd_exception;
-  omni_tracedcondition*   pd_cond;
-  _CORBA_Boolean          pd_complete;
+  inline _CORBA_Boolean addToSet(omni_tracedcondition* set_cond)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);
+
+    if (pd_set_cond)
+      return 0;
+    
+    pd_set_cond = set_cond;
+    return 1;
+  }
+
+  inline _CORBA_Boolean remFromSet(omni_tracedcondition* set_cond)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);
+
+    if (pd_set_cond != set_cond)
+      return 0;
+
+    pd_set_cond = 0;
+    return 1;
+  }
 
   static omni_tracedmutex sd_lock;
   
+protected:
+  CORBA::Exception*       pd_exception;
+  omni_tracedcondition*   pd_cond;
+  omni_tracedcondition*   pd_set_cond;
+  _CORBA_Boolean          pd_complete;
+
   // Not implemented
   omniAsyncCallDescriptor(const omniAsyncCallDescriptor&);
   omniAsyncCallDescriptor& operator=(const omniAsyncCallDescriptor&);

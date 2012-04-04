@@ -1,3 +1,19 @@
+Wed Apr  4 20:37:38 BST 2012 dgrisby
+====================================
+
+- PollableSet implementation.
+
+include/omniORB4/ami.h
+include/omniORB4/callDescriptor.h
+include/omniORB4/minorCode.h
+src/examples/ami/dir.mk
+src/examples/ami/echo_callback.cc
+src/examples/ami/echo_pollable_set.cc
+src/examples/ami/echo_poller.cc
+src/lib/omniORB/dynamic/ami.cc
+src/lib/omniORB/omniidl_be/cxx/skel/template.py
+
+
 Mon Apr  2 20:19:51 BST 2012 dgrisby
 ====================================
 

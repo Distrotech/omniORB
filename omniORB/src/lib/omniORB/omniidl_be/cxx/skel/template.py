@@ -709,8 +709,18 @@ public:
   @poller_impl_name@(omniAsyncCallDescriptor* _cd)
     : omniAMI::PollerImpl(_cd) {}
 
+  void* _ptrToValue(const char* _id);
+
   @method_decls@
 };
+
+void* @poller_impl_name@::_ptrToValue(const char* _id)
+{
+  if (_id == omniAMI::PollerImpl::_PD_repoId)
+    return (void*)(omniAMI::PollerImpl*)this;
+
+  return @poller_name@::_ptrToValue(_id);
+}
 """
 
 interface_ami_call_descriptor = """
