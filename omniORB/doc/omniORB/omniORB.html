@@ -786,9 +786,9 @@ class that contains an implementation of each of the operations
 defined in the interface. As used above, the tie template takes
 ownership of the <TT>Echo_i</TT> instance, and deletes it when the tie
 object goes out of scope. The tie constructor has an optional boolean
-argument (defaulted to true) which indicates whether or not it should
-delete the servant object. For full details of using tie templates,
-see the CORBA C++ mapping specification.</P><!--TOC section Source Listings-->
+argument (defaulted to <TT>true</TT>) which indicates whether or not it
+should delete the servant object. For full details of using tie
+templates, see the CORBA C++ mapping specification.</P><!--TOC section Source Listings-->
 <H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc40">2.12</A>&#XA0;&#XA0;Source Listings</H2><!--SEC END --><!--TOC subsection eg1.cc-->
 <H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc41">2.12.1</A>&#XA0;&#XA0;eg1.cc</H3><!--SEC END --><DIV CLASS="lstlisting"><I>// eg1.cc - This is the source code of example 1 used in Chapter 2</I>
 <I>//          "The Basics" of the omniORB user guide.</I>
@@ -1647,7 +1647,7 @@ and the sequence was deleted. In omniORB 4.1, the sequence pointer
 is stored by the Any, and the sequence is deleted later when the Any
 is destroyed.<P>For most uses, this change is not visible to application code.
 However, if a sequence is constructed using an application-supplied
-buffer with the release flag set to false (meaning that the
+buffer with the release flag set to <TT>false</TT> (meaning that the
 application continues to own the buffer), it is now important that
 the buffer is not deleted or modified while the Any exists, since
 the Any continues to refer to the buffer contents. This change
@@ -1722,25 +1722,25 @@ level 10</TD><TD VALIGN=top ALIGN=left>execution and exception traces</TD></TR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>level 40</TD><TD VALIGN=top ALIGN=left>dump complete contents of each GIOP message</TD></TR>
 </TABLE><P>The trace level is cumulative, so at level 40, all trace
 messages are output.</P><P><TT>traceExceptions</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If the <TT>traceExceptions</TT> parameter is set true, all system
+<TT>0</TT></P><P>If the <TT>traceExceptions</TT> parameter is set <TT>true</TT>, all system
 exceptions are logged as they are thrown, along with details about
 where the exception is thrown from. This parameter is enabled by
 default if the traceLevel is set to 10 or more.</P><P><TT>traceInvocations</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If the <TT>traceInvocations</TT> parameter is set true, all local and
-remote invocations are logged, in addition to any logging that may
+<TT>0</TT></P><P>If the <TT>traceInvocations</TT> parameter is set <TT>true</TT>, all local
+and remote invocations are logged, in addition to any logging that may
 have been selected with <TT>traceLevel</TT>.</P><P><TT>traceInvocationReturns</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If the <TT>traceInvocationReturns</TT> parameter is set true, a log
-message is output as an operation invocation returns. In conjunction
-with <TT>traceInvocations</TT> and <TT>traceTime</TT> (described below),
-this provides a simple way of timing CORBA calls within your
-application.</P><P><TT>traceThreadId</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>1</TT></P><P>If <TT>traceThreadId</TT> is set true, all trace messages are prefixed
-with the id of the thread outputting the message. This can be handy
-for making sense of multi-threaded code, but it adds overhead to the
-logging so it can be disabled.</P><P><TT>traceTime</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>1</TT></P><P>If <TT>traceTime</TT> is set true, all trace messages are prefixed with
-the time. This is useful, but on some platforms it adds a very large
-overhead, so it can be turned off.</P><P><TT>traceFile</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If the <TT>traceInvocationReturns</TT> parameter is set <TT>true</TT>, a
+log message is output as an operation invocation returns. In
+conjunction with <TT>traceInvocations</TT> and <TT>traceTime</TT>
+(described below), this provides a simple way of timing CORBA calls
+within your application.</P><P><TT>traceThreadId</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>1</TT></P><P>If <TT>traceThreadId</TT> is set <TT>true</TT>, all trace messages are
+prefixed with the id of the thread outputting the message. This can be
+handy for making sense of multi-threaded code, but it adds overhead to
+the logging so it can be disabled.</P><P><TT>traceTime</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>1</TT></P><P>If <TT>traceTime</TT> is set <TT>true</TT>, all trace messages are
+prefixed with the time. This is useful, but on some platforms it adds
+a very large overhead, so it can be turned off.</P><P><TT>traceFile</TT> &#XA0;&#XA0; <I>default</I> =
 </P><P>omniORB&#X2019;s tracing is normally sent to stderr. If <TT>traceFile</TT> it
 set, the specified file name is used for trace messages.</P><!--TOC subsection Tracing API-->
 <H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc60">4.2.1</A>&#XA0;&#XA0;Tracing API</H3><!--SEC END --><P>The tracing parameters can be modified at runtime by assigning to the
@@ -1760,8 +1760,8 @@ to infinite recursion as outputting a log message caused other log
 messages to be generated, and so on.</P><!--TOC section Miscellaneous global options-->
 <H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc61">4.3</A>&#XA0;&#XA0;Miscellaneous global options</H2><!--SEC END --><P>These options control miscellaneous features that affect the whole ORB
 runtime.</P><P><TT>dumpConfiguration</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If set true, the ORB dumps the values of all configuration parameters
-at start-up.</P><P><TT>scanGranularity</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If set <TT>true</TT>, the ORB dumps the values of all configuration
+parameters at start-up.</P><P><TT>scanGranularity</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>5</TT></P><P>As explained in chapter&#XA0;<A HREF="#chap:connections">6</A>, omniORB regularly
 scans incoming and outgoing connections, so it can close unused
 ones. This value is the granularity in seconds at which the ORB
@@ -1772,14 +1772,14 @@ performs its scans. A value of zero turns off the scanning altogether.</P><P><TT
 <TT>wstring</TT>. See chapter&#XA0;<A HREF="#chap:codesets">8</A>.</P><P><TT>copyValuesInLocalCalls</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1</TT></P><P>Determines whether valuetype parameters in local calls are copied or
 not. See chapter&#XA0;<A HREF="#chap:valuetype">11</A>.</P><P><TT>abortOnInternalError</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If this is set true, internal fatal errors will abort immediately,
-rather than throwing the <TT>omniORB::fatalException</TT> exception.
-This can be helpful for tracking down bugs, since it leaves the call
-stack intact.</P><P><TT>abortOnNativeException</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If this is set <TT>true</TT>, internal fatal errors will abort
+immediately, rather than throwing the <TT>omniORB::fatalException</TT>
+exception. This can be helpful for tracking down bugs, since it
+leaves the call stack intact.</P><P><TT>abortOnNativeException</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>On Windows, &#X2018;native&#X2019; exceptions such as segmentation faults and divide
 by zero appear as C++ exceptions that can be caught with <TT>catch
-(...)</TT>. Setting this parameter to true causes such exceptions to
-abort the process instead.</P><P><TT>maxSocketSend</TT><BR>
+(...)</TT>. Setting this parameter to <TT>true</TT> causes such exceptions
+to abort the process instead.</P><P><TT>maxSocketSend</TT><BR>
 <TT>maxSocketRecv</TT><BR>
 
 On some platforms, calls to send() and recv() have a limit on the
@@ -1796,8 +1796,8 @@ socket send buffer is left at the system default.</P><P>On Windows, the default 
 other platforms the default is -1.</P><P><TT>validateUTF8</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>When transmitting a string that is supposed to be UTF-8, omniORB
 usually passes it directly, assuming that it is valid. With this
-parameter set true, omniORB checks that all UTF-8 strings are valid,
-and throws DATA_CONVERSION if not.</P><!--TOC section Client side options-->
+parameter set <TT>true</TT>, omniORB checks that all UTF-8 strings are
+valid, and throws DATA_CONVERSION if not.</P><!--TOC section Client side options-->
 <H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc62">4.4</A>&#XA0;&#XA0;Client side options</H2><!--SEC END --><P>
 <A NAME="sec:clientconf"></A></P><P>These options control aspects of client-side behaviour.</P><P><TT>InitRef</TT> &#XA0;&#XA0; <I>default</I> =
 <TT><I>none</I></TT></P><P>Specify objects available from
@@ -1821,18 +1821,19 @@ omniORB 4.0 and later use milliseconds for timeouts.</P><P><TT>clientConnectTime
 established to the server. A value of zero means that the normal call
 timeout is used. See section&#XA0;<A HREF="#sec:timeoutAPI">6.3.1</A> for more information
 about timeouts.</P><P><TT>supportPerThreadTimeOut</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If this parameter is set true, timeouts can be set on a per thread
-basis, as well as globally and per object. Checking per-thread storage
-has a noticeable performance impact, so it is turned off by default.</P><P><TT>resetTimeoutOnRetries</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If true, the call timeout is reset when an exception handler causes a
-call to be retried. If false, the timeout is not reset, and therefore
-applies to the call as a whole, rather than to each individual call
-attempt.</P><P><TT>throwTransientOnTimeout</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If this parameter is set <TT>true</TT>, timeouts can be set on a per
+thread basis, as well as globally and per object. Checking per-thread
+storage has a noticeable performance impact, so it is turned off by
+default.</P><P><TT>resetTimeoutOnRetries</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If <TT>true</TT>, the call timeout is reset when an exception handler
+causes a call to be retried. If <TT>false</TT>, the timeout is not
+reset, and therefore applies to the call as a whole, rather than to
+each individual call attempt.</P><P><TT>throwTransientOnTimeout</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>omniORB 4.2 supports the <TT>CORBA::TIMEOUT</TT> exception that is part
 of the CORBA Messaging specification. By default, that is the
 exception thrown when timeouts occur. Previous omniORB releases did
 not have the <TT>CORBA::TIMEOUT</TT> exception, and instead used
-<TT>CORBA::TRANSIENT</TT>. If this parameter is set true, omniORB
+<TT>CORBA::TRANSIENT</TT>. If this parameter is set <TT>true</TT>, omniORB
 follows the old behaviour of throwing <TT>CORBA::TRANSIENT</TT> when a
 timeout occurs.</P><P><TT>outConScanPeriod</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>120</TT></P><P>Idle timeout in seconds for outgoing (i.e. client initiated)
@@ -1843,38 +1844,39 @@ the ORB closes it. See section&#XA0;<A HREF="#sec:connShutdown">6.5</A>.</P><P><
 server, the ORB opens additional connections to the server, up to the
 maximum specified by this parameter. If the maximum is reached,
 threads are blocked until a connection becomes free for them to use.</P><P><TT>oneCallPerConnection</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>1</TT></P><P>When this parameter is set to true (the default), the ORB will only
-send a single call on a connection at a time. If multiple client
+<TT>1</TT></P><P>When this parameter is set to <TT>true</TT> (the default), the ORB will
+only send a single call on a connection at a time. If multiple client
 threads invoke on the same server, multiple connections are opened, up
 to the limit specified by
 <TT>maxGIOPConnectionPerServer</TT>. With this parameter set to
-false, the ORB will allow concurrent calls on a single
+<TT>false</TT>, the ORB will allow concurrent calls on a single
 connection. This saves connection resources, but requires slightly
 more management work for both client and server. Some server-side ORBs
 (including omniORB versions before 4.0) serialise all incoming calls
 on a single connection.</P><P><TT>maxInterleavedCallsPerConnection</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>5</TT></P><P>The maximum number of calls that can be interleaved on a connection.
 If more concurrent calls are made, they are queued.</P><P><TT>offerBiDirectionalGIOP</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If set true, the client will indicate to servers that it is willing to
-accept callbacks on client-initiated connections using bidirectional
-GIOP, provided the relevant POA policies are set. See
+<TT>0</TT></P><P>If set <TT>true</TT>, the client will indicate to servers that it is
+willing to accept callbacks on client-initiated connections using
+bidirectional GIOP, provided the relevant POA policies are set. See
 section&#XA0;<A HREF="#sec:bidir">6.8</A>.</P><P><TT>diiThrowsSysExceptions</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If this is true, DII functions throw system exceptions; if it is
-false, system exceptions that occur are passed through the
+<TT>0</TT></P><P>If this is <TT>true</TT>, DII functions throw system exceptions; if it
+is <TT>false</TT>, system exceptions that occur are passed through the
 <TT>Environment</TT> object.</P><P><TT>verifyObjectExistsAndType</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1</TT></P><P>By default, omniORB uses the GIOP <TT>LOCATE_REQUEST</TT> message to
 verify the existence of an object prior to the first invocation. In
 the case that the full type of the object is not known, it instead
 calls the <TT>_is_a()</TT> operation to check the object&#X2019;s type. Some ORBs
 have bugs that mean one or other of these operations fail. Setting
-this parameter false prevents omniORB from making these calls.</P><P><TT>giopTargetAddressMode</TT> &#XA0;&#XA0; <I>default</I> =
+this parameter <TT>false</TT> prevents omniORB from making these calls.</P><P><TT>giopTargetAddressMode</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>GIOP 1.2 supports three addressing modes for contacting objects. This
 parameter selects the mode that omniORB uses. A value of 0 means
 <TT>GIOP::KeyAddr</TT>; 1 means <TT>GIOP::ProfileAddr</TT>; 2 means
 <TT>GIOP::ReferenceAddr</TT>.</P><P><TT>immediateAddressSwitch</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If true, the client will immediately switch to use a new address to
-contact an object after a failure. If false (the default), the current
-address will be retried in certain circumstances.</P><P><TT>bootstrapAgentHostname</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If <TT>true</TT>, the client will immediately switch to use a new
+address to contact an object after a failure. If <TT>false</TT> (the
+default), the current address will be retried in certain
+circumstances.</P><P><TT>bootstrapAgentHostname</TT> &#XA0;&#XA0; <I>default</I> =
 <TT><I>none</I></TT></P><P>If set, this parameter indicates the hostname to use for look-ups
 using the obsolete Sun bootstrap agent. This mechanism is superseded
 by the interoperable naming service.</P><P><TT>bootstrapAgentPort</TT> &#XA0;&#XA0; <I>default</I> =
@@ -1905,9 +1907,9 @@ timeout.</P><P><TT>inConScanPeriod</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>180</TT></P><P>Idle timeout in seconds for incoming connections. If a connection has
 been idle for this amount of time, the ORB closes it. See
 section&#XA0;<A HREF="#sec:connShutdown">6.5</A>.</P><P><TT>threadPerConnectionPolicy</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>1</TT></P><P>If true (the default), the ORB dedicates one server thread to each
-incoming connection. Setting it false means the server should use a
-thread pool.</P><P><TT>maxServerThreadPerConnection</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>1</TT></P><P>If <TT>true</TT> (the default), the ORB dedicates one server thread to
+each incoming connection. Setting it <TT>false</TT> means the server
+should use a thread pool.</P><P><TT>maxServerThreadPerConnection</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>100</TT></P><P>If the client multiplexes several concurrent requests on a single
 connection, omniORB uses extra threads to service them. This parameter
 specifies the maximum number of threads that are allowed to service a
@@ -1916,11 +1918,11 @@ single connection at any one time.</P><P><TT>maxServerThreadPoolSize</TT> &#XA0;
 tasks, including dispatching calls in the thread pool mode. This
 number does not include threads dispatched under the thread per
 connection server mode.</P><P><TT>threadPerConnectionUpperLimit</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>10000</TT></P><P>If the <TT>threadPerConnectionPolicy</TT> parameter is true, the ORB can
-automatically transition to thread pool mode if too many connections
-arrive. This parameter sets the number of connections at which thread
-pooling is started. The default of 10000 is designed to mean that it
-never happens.</P><P><TT>threadPerConnectionLowerLimit</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>10000</TT></P><P>If the <TT>threadPerConnectionPolicy</TT> parameter is <TT>true</TT>, the
+ORB can automatically transition to thread pool mode if too many
+connections arrive. This parameter sets the number of connections at
+which thread pooling is started. The default of 10000 is designed to
+mean that it never happens.</P><P><TT>threadPerConnectionLowerLimit</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>9000</TT></P><P>If thread pooling was started because the number of connections hit
 the upper limit, this parameter determines when thread per connection
 should start again.</P><P><TT>threadPoolWatchConnection</TT> &#XA0;&#XA0; <I>default</I> =
@@ -1943,10 +1945,10 @@ should watch. This parameter is specified in microseconds.</P><P><TT>connectionW
 <TT>0</TT></P><P>When a thread handles an incoming call, it unmarshals the arguments
 then marks the connection as watchable by the connection watching
 thread, in case the client sends a concurrent call on the same
-connection. If this parameter is set to the default false, the
+connection. If this parameter is set to the default <TT>false</TT>, the
 connection is not actually watched until the next connection watch
 period (determined by the <TT>connectionWatchPeriod</TT> parameter). If
-this parameter is set true, the connection watching thread is
+this parameter is set <TT>true</TT>, the connection watching thread is
 immediately signalled to watch the connection. That leads to faster
 interactive response to clients that multiplex calls, but adds
 significant overhead along the call chain.</P><P>Note that this setting has no effect on Windows, since it has no
@@ -1976,12 +1978,13 @@ out after the specified number of milliseconds, by raising a
 <TT>1</TT></P><P>The POA specification requires that object ids in POAs with the
 PERSISTENT and SYSTEM_ID policies are unique between instantiations
 of the POA. Older versions of omniORB did not comply with that, and
-reused object ids. With this value true, the POA has the correct
-behaviour; with false, the POA uses the old scheme for compatibility.</P><P><TT>idleThreadTimeout</TT> &#XA0;&#XA0; <I>default</I> =
+reused object ids. With this value <TT>true</TT>, the POA has the
+correct behaviour; with <TT>false</TT>, the POA uses the old scheme for
+compatibility.</P><P><TT>idleThreadTimeout</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>10</TT></P><P>When a thread created by omniORB becomes idle, it is kept alive for a
 while, in case a new thread is required. Once a thread has been idle
 for the number of seconds specified in this parameter, it exits.</P><P><TT>supportBootstrapAgent</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If set true, servers support the Sun bootstrap agent protocol.</P><!--TOC subsection Main thread selection-->
+<TT>0</TT></P><P>If set <TT>true</TT>, servers support the Sun bootstrap agent protocol.</P><!--TOC subsection Main thread selection-->
 <H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc64">4.5.1</A>&#XA0;&#XA0;Main thread selection</H3><!--SEC END --><P>There is one server-side parameter that must be set with an API
 function, rather than a normal configuration parameter:</P><DIV CLASS="lstlisting"><B>namespace</B> omniORB {
   <B>void</B> setMainThread();
@@ -1995,15 +1998,15 @@ must have been created by omnithread, or
 does not, the function throws <TT>CORBA::INITIALIZE</TT>.</P><P>Note that calls are only actually dispatched to the &#X2018;main&#X2019; thread if
 <TT>ORB::run()</TT> or <TT>ORB::perform_work()</TT> is called from that thread.</P><!--TOC section GIOP and interoperability options-->
 <H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc65">4.6</A>&#XA0;&#XA0;GIOP and interoperability options</H2><!--SEC END --><P>These options control omniORB&#X2019;s use of GIOP, and cover some areas
-where omniORB can work around buggy behaviour by other ORBs.</P><P><TT>maxGIOPVerson</TT> &#XA0;&#XA0; <I>default</I> =
+where omniORB can work around buggy behaviour by other ORBs.</P><P><TT>maxGIOPVersion</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1.2</TT></P><P>Choose the maximum GIOP version the ORB should support. Valid values
 are 1.0, 1.1 and 1.2.</P><P><TT>giopMaxMsgSize</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>2097152</TT></P><P>The largest message, in bytes, that the ORB will send or receive, to
 avoid resource starvation. If the limit is exceeded, a <TT>MARSHAL</TT>
 exception is thrown. The size must be &gt;= 8192.</P><P><TT>strictIIOP</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>1</TT></P><P>If true, be strict about interpretation of the IIOP specification; if
-false, permit some buggy behaviour to pass.</P><P><TT>lcdMode</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If true, select &#X2018;Lowest Common Denominator&#X2019; mode. This disables
+<TT>1</TT></P><P>If <TT>true</TT>, be strict about interpretation of the IIOP
+specification; if <TT>false</TT>, permit some buggy behaviour to pass.</P><P><TT>lcdMode</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If <TT>true</TT>, select &#X2018;Lowest Common Denominator&#X2019; mode. This disables
 various IIOP and GIOP features that are known to cause problems with
 some ORBs.</P><P><TT>tcAliasExpand</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>This flag is used to indicate whether TypeCodes associated with Anys
@@ -2014,11 +2017,11 @@ performance penalty when inserting into an Any if <TT>tcAliasExpand</TT>
 is set to 1.</P><P><TT>useTypeCodeIndirections</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1</TT></P><P>TypeCode Indirections reduce the size of marshalled TypeCodes, and are
 essential for recursive types, but some old ORBs do not support them.
-Setting this flag to false prevents the use of indirections (and,
-therefore, prevents the use of recursive TypeCodes).</P><P><TT>acceptMisalignedTcIndirections</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If true, try to fix a mis-aligned indirection in a typecode. This is
-used to work around a bug in some old versions of Visibroker&#X2019;s Java
-ORB.</P><!--TOC section System Exception Handlers-->
+Setting this flag to <TT>false</TT> prevents the use of indirections
+(and, therefore, prevents the use of recursive TypeCodes).</P><P><TT>acceptMisalignedTcIndirections</TT> &#XA0;&#XA0; <I>default</I> =
+<TT>0</TT></P><P>If <TT>true</TT>, try to fix a mis-aligned indirection in a
+typecode. This is used to work around a bug in some old versions of
+Visibroker&#X2019;s Java ORB.</P><!--TOC section System Exception Handlers-->
 <H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc66">4.7</A>&#XA0;&#XA0;System Exception Handlers</H2><!--SEC END --><P>By default, all system exceptions that are raised during an operation
 invocation, with the exception of some cases of
 <TT>CORBA::TRANSIENT</TT>, are propagated to the application code. Some
@@ -2570,8 +2573,8 @@ timeout for a specific object reference.
 thread. The calling thread must have an <TT>omni_thread</TT> associated
 with it. Setting any timeout value to zero disables it.</P><P>Accessing per-thread state is a relatively expensive operation, so per
 thread timeouts are disabled by default. The
-<TT>supportPerThreadTimeOut</TT> parameter must be set true to enable
-them.</P><P>To choose the timeout value to use for a call, the ORB first looks to
+<TT>supportPerThreadTimeOut</TT> parameter must be set <TT>true</TT> to
+enable them.</P><P>To choose the timeout value to use for a call, the ORB first looks to
 see if there is a timeout for the object reference, then to the
 calling thread, and finally to the global timeout.</P><P>When a client has no existing connection to communicate with a server,
 it must open a new connection before performing the
@@ -2922,12 +2925,12 @@ normal model where the server opens a new connection for the callback.
 This is important for negotiating firewalls, since they tend not to
 allow connections back on arbitrary ports.</P><P>There are several steps required for bidirectional GIOP to be enabled
 for a callback. Both the client and server must be configured
-correctly. On the client side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>offerBiDirectionalGIOP</TT> parameter must be set to true. 
+correctly. On the client side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>offerBiDirectionalGIOP</TT> parameter must be set to <TT>true</TT>. 
 </LI><LI CLASS="li-itemize">The client transport rule for the target server must contain the
 <TT>bidir</TT> action.
 </LI><LI CLASS="li-itemize">The POA containing the callback object (or objects) must have
 been created with a <TT>BidirectionalPolicy</TT> value of
-<TT>BOTH</TT>.</LI></UL><P>On the server side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>acceptBiDirectionalGIOP</TT> parameter must be set to true. 
+<TT>BOTH</TT>.</LI></UL><P>On the server side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>acceptBiDirectionalGIOP</TT> parameter must be set to <TT>true</TT>. 
 </LI><LI CLASS="li-itemize">The server transport rule for the requesting client must contain
 the <TT>bidir</TT> action.
 </LI><LI CLASS="li-itemize">The POA hosting the object contacted by the client must have
@@ -3224,7 +3227,7 @@ to.
 <H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc128">Chapter&#XA0;9</A>&#XA0;&#XA0;Interceptors</H1><!--SEC END --><P>
 <A NAME="chap:interceptors"></A></P><P>omniORB supports interceptors that allow the application to insert
 processing in various points along the call chain, and in various
-other locations. It does not yet support the standard Portable
+other locations. It does not (yet) support the standard Portable
 Interceptors API.</P><P>The interceptor interfaces are defined in a single header,
 <TT>include/omniORB4/omniInterceptors.h</TT>. Each interception point
 consists of a singleton object with <TT>add()</TT> and <TT>remove()</TT> methods,
@@ -3255,10 +3258,10 @@ and the definition of an &#X2018;interceptor info&#X2019; class. For example:</P
 };</DIV><P>You can see that the interceptors themselves are functions
 that take the <TT>info_T</TT> object as their argument and return
 boolean. Interceptors are called in the order they are registered;
-normally, all interceptor functions return true, meaning that
+normally, all interceptor functions return <TT>true</TT>, meaning that
 processing should continue with subsequent interceptors. If an
-interceptor returns false, later interceptors are not called. You
-should only do that if you really know what you are doing.</P><P>Notice that the <TT>info_T</TT> contains references to omniORB internal
+interceptor returns <TT>false</TT>, later interceptors are not
+called. You should only do that if you really know what you are doing.</P><P>Notice that the <TT>info_T</TT> contains references to omniORB internal
 data types. The definitions of these types can be found in other
 header files within <TT>include/omniORB4</TT> and
 <TT>include/omniORB4/internal</TT>.</P><!--TOC section Interceptor registration-->
@@ -3281,13 +3284,26 @@ so you can see an example of its use in the
 Called when decoding an IOR. The application can use this to get out
 whatever information they put into IORs with encodeIOR. Again, see
 <TT>extractSupportedComponents()</TT> in
-<TT>src/lib/omniORB/orbcore/ior.cc</TT> for an example.</DD><DT CLASS="dt-description"><B>clientSendRequest</B></DT><DD CLASS="dd-description"><BR>
+<TT>src/lib/omniORB/orbcore/ior.cc</TT> for an example.</DD><DT CLASS="dt-description"><B>clientOpenConnection</B></DT><DD CLASS="dd-description"><BR>
+Called as a client opens a new connection to a server, after the
+connection is opened but before it is used to send a request. The
+interceptor function can set the <TT>info_T</TT>&#X2019;s <TT>reject</TT> member
+to <TT>true</TT> to cause the client to immediately close the new
+connection and throw CORBA::TRANSIENT to the calling code. In that
+case, the interceptor function can also set the <TT>why</TT> member to
+provide a message that is logged.</DD><DT CLASS="dt-description"><B>clientSendRequest</B></DT><DD CLASS="dd-description"><BR>
 Called just before a request header is sent over the network. The
 application can use it to insert service contexts in the header. See
 the <TT>setCodeSetServiceContext()</TT> function in
 <TT>src/lib/omniORB/orbcore/cdrStream.cc</TT> for an example of its use.</DD><DT CLASS="dt-description"><B>clientReceiveReply</B></DT><DD CLASS="dd-description"><BR>
 Called as the client receives a reply, just after unmarshalling the
-reply header. Called for normal replies and exceptions.</DD><DT CLASS="dt-description"><B>serverReceiveRequest</B></DT><DD CLASS="dd-description"><BR>
+reply header. Called for normal replies and exceptions.</DD><DT CLASS="dt-description"><B>serverAcceptConnection</B></DT><DD CLASS="dd-description"><BR>
+Called when a server accepts a new incoming connection, but before it
+reads any data from it. The interceptor function can set the
+<TT>info_T</TT>&#X2019;s <TT>reject</TT> member to <TT>true</TT> to cause the
+server to immediately close the new connection. In that case, the
+interceptor function can also set the <TT>why</TT> member to provide a
+message that is logged.</DD><DT CLASS="dt-description"><B>serverReceiveRequest</B></DT><DD CLASS="dd-description"><BR>
 Called when the server receives a request, just after unmarshalling
 the request header. See the <TT>getCodeSetServiceContext()</TT> function in
 <TT>src/lib/omniORB/orbcore/cdrStream.cc</TT> for an example.</DD><DT CLASS="dt-description"><B>serverSendReply</B></DT><DD CLASS="dd-description"><BR>
@@ -3321,10 +3337,9 @@ assigned to perform upcalls. In the thread per connection model, the
 thread stays assigned to performing upcalls for the entire lifetime of
 the underlying network connection; in the thread pool model, threads
 are assigned for upcalls on a per call basis, so this interceptor is
-triggered for every incoming call<SUP><A NAME="text16" HREF="#note16">1</A></SUP>. As
-with the <TT>createThread</TT> interceptor, the interceptor function
-must call the <TT>info_T</TT>&#X2019;s <TT>run()</TT> method to pass control to the
-upcall.<P>When a thread finishes its assignment of processing upcalls, it
+triggered for every incoming call<SUP><A NAME="text16" HREF="#note16">1</A></SUP>. As with the <TT>createThread</TT> interceptor, the
+interceptor function must call the <TT>info_T</TT>&#X2019;s <TT>run()</TT> method to
+pass control to the upcall.<P>When a thread finishes its assignment of processing upcalls, it
 returns to the pool (even in thread per connection mode), so the same
 thread can be reassigned to perform more upcalls, or reused for a
 different purpose.</P></DD><DT CLASS="dt-description"><B>assignAMIThread</B></DT><DD CLASS="dd-description"><BR>
@@ -3357,8 +3372,9 @@ operation name and, if cast to the concrete subclass defined by the
 IDL compiler, the call arguments and return values too.</P><!--BEGIN NOTES chapter-->
 <HR CLASS="footnoterule"><DL CLASS="thefootnotes"><DT CLASS="dt-thefootnotes">
 <A NAME="note16" HREF="#text16">1</A></DT><DD CLASS="dd-thefootnotes">Except that with the
-<TT>threadPoolWatchConnection</TT> parameter set true, a thread can
-perform multiple upcalls even when thread pool mode is active.
+<TT>threadPoolWatchConnection</TT> parameter set <TT>true</TT>, a thread
+can perform multiple upcalls even when thread pool mode is
+active.
 </DD></DL>
 <!--END NOTES-->
 <!--TOC chapter Type Any and TypeCode-->
@@ -3895,8 +3911,8 @@ what omniORB does.</P><DIV CLASS="lstlisting"><B>class</B> Object{
     CORBA::Boolean _is_a(<B>const</B> <B>char</B>* type_id);
 };</DIV><P>The <TT>_is_a()</TT> operation is part of the <TT>CORBA::Object</TT>
 interface and must be implemented by every object. The input argument
-is a RepoId. The function returns true(1) if the object is really an
-instance of that type, including if that type is a base type of the
+is a RepoId. The function returns <TT>true</TT> if the object is really
+an instance of that type, including if that type is a base type of the
 most derived type of that object.</P><P>In the situation above, the ORB would invoke the <TT>_is_a()</TT>
 operation on the object and ask if the object is of type A
 <EM>before</EM> it processes any application invocation on the object.</P><P>Notice that the <TT>_is_a()</TT> call is <EM>not</EM> performed when the IOR

@@ -3,7 +3,7 @@
 // giopStream.cc              Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -31,9 +31,13 @@
 #include <exceptiondefs.h>
 #include <giopStream.h>
 #include <giopStrand.h>
+#include <giopRope.h>
 #include <giopStreamImpl.h>
 #include <omniORB4/minorCode.h>
+#include <omniORB4/omniInterceptors.h>
 #include <orbParameters.h>
+#include <interceptors.h>
+#include <GIOP_C.h>
 #include <stdio.h>
 
 OMNI_NAMESPACE_BEGIN(omni)
@@ -1124,6 +1128,18 @@ giopStream::openConnection()
     if (c) {
       pd_strand->connection = &(c->getConnection());
 
+      if (omniInterceptorP::clientOpenConnection) {
+        GIOP_C* giop_c = GIOP_C::downcast(this);
+        OMNIORB_ASSERT(giop_c);
+        omniInterceptors::clientOpenConnection_T::info_T info(*giop_c);
+        omniInterceptorP::visit(info);
+        if (info.reject) {
+          errorOnSend(TRANSIENT_ConnectFailed, __FILE__, __LINE__, 0,
+                      info.why ? info.why :
+                      (const char*)"Interceptor rejected new "
+                      "client connection");
+        }
+      }
       if (omniORB::trace(20)) {
 	omniORB::logger log;
 	log << "Client opened connection to " 

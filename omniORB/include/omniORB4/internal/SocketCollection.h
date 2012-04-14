@@ -4,7 +4,7 @@
 //                            Author    : Sai Lai Lo (sll)
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2005-2011 Apasphere Ltd.
+//    Copyright (C) 2005-2012 Apasphere Ltd.
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -51,8 +51,8 @@
 #   define USE_POLL
 #endif
 
+// Darwin implementation of poll() appears to be broken
 #if defined(__darwin__)
-    // Darwin implementation of poll() is completely broken
 #   undef USE_POLL
 #endif
 
@@ -69,6 +69,12 @@
 #endif
 
 #if defined(__freebsd__) || defined(__netbsd__)
+#   undef OMNI_IPV6_SOCKETS_ACCEPT_IPV4_CONNECTIONS
+#endif
+
+// By default, Linux does accept IPv4 connections on IPv6, but some
+// distributions misconfigure it not to.
+#if defined(__linux__) || defined(IPV6_V6ONLY)
 #   undef OMNI_IPV6_SOCKETS_ACCEPT_IPV4_CONNECTIONS
 #endif
 
@@ -100,7 +106,7 @@
 #  define CLOSESOCKET(sock)  closesocket(sock)
 #  define SHUTDOWNSOCKET(sock) ::shutdown(sock,2)
 #  define ERRNO              ::WSAGetLastError()
-#  define EINPROGRESS        WSAEWOULDBLOCK
+#  define RC_EINPROGRESS     WSAEWOULDBLOCK
 #  define RC_EINTR           WSAEINTR
 #  define RC_EBADF           WSAENOTSOCK
 
@@ -178,6 +184,7 @@ extern "C" int select (int,fd_set*,fd_set*,fd_set*,struct timeval *);
 
 #  define ERRNO              errno
 #  define RC_EINTR           EINTR
+#  define RC_EINPROGRESS     EINPROGRESS
 #  if defined (__vxWorks__)
 #    define RC_EBADF         S_iosLib_INVALID_FILE_DESCRIPTOR  
 #  else

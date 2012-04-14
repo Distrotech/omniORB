@@ -3,7 +3,7 @@
 // giopStream.h                   Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2011 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -83,9 +83,7 @@ public:
   // No thread safety precondition
 
   inline operator giopStrand& () { return *pd_strand; }
-  // No thread safety precondition
-
-  inline giopStrand& strand() { return *pd_strand; }
+  inline giopStrand& strand()    { return *pd_strand; }
   // No thread safety precondition
 
   inline giopStreamImpl* impl() const { return pd_impl; }

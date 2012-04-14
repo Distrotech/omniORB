@@ -3,7 +3,7 @@
 // giopEndpoint.h             Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2000      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -42,6 +42,7 @@ class giopEndpoint;
 class giopActiveCollection;   // Singleton to act on a bunch of 
                               // giopActiveConnection.
 class giopServer;
+class giopStrand;
 
 class giopConnection {
 public:
@@ -65,11 +66,11 @@ public:
   // connection type. By default returns zero to indicate no peer
   // identification is possible.
 
-  _CORBA_Boolean gatekeeperCheck();
+  _CORBA_Boolean gatekeeperCheck(giopStrand* strand);
   // For a passive connection, check if the peer is permitted to
   // connect. Returns true if permitted; false if not.
 
-  virtual _CORBA_Boolean gatekeeperCheckSpecific();
+  virtual _CORBA_Boolean gatekeeperCheckSpecific(giopStrand* strand);
   // Transport-specific additional gatekeeper check. Called by
   // gatekeeperCheck().
 

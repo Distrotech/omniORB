@@ -3,7 +3,7 @@
 // tcpTransportImpl.cc        Created on: 29 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2009 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -278,6 +278,7 @@ void ifaddrs_get_ifinfo(omnivector<const char*>& addrs)
 #    define ifc_req  lifc_req
 #    define ifr_addr lifr_addr
 #    define ifr_name lifr_name
+#    define USING_LIFCONF
 #  else
 #    ifdef __aix__
 #      define OMNI_SIOCGIFCONF OSIOCGIFCONF
@@ -307,6 +308,12 @@ void unix_get_ifinfo(omnivector<const char*>& addrs)
     char* buf = (char*) malloc(len);
     ifc.ifc_len = len;
     ifc.ifc_buf = buf;
+
+#ifdef USING_LIFCONF
+    ifc.lifc_family = AF_UNSPEC;
+    ifc.lifc_flags  = 0;
+#endif
+
     if ( ioctl(sock, OMNI_SIOCGIFCONF, &ifc) < 0 ) {
       if ( errno != EINVAL || lastlen != 0 ) {
 	if ( omniORB::trace(1) ) {
@@ -314,6 +321,7 @@ void unix_get_ifinfo(omnivector<const char*>& addrs)
 	  log << "Warning: ioctl SIOCGICONF failed.\n"
 	      << "Unable to obtain the list of all interface addresses.\n";
 	}
+	free(buf);
 	return;
       }
     }

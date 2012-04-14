@@ -3,7 +3,7 @@
 // cs-UTF-8.cc                Created on: 20/10/2000
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2008 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,71 +26,6 @@
 //
 // Description:
 //    Unicode / ISO 10646 UTF-8 code set
-
-/*
-  $Log$
-  Revision 1.1.4.5  2008/08/08 16:52:56  dgrisby
-  Option to validate untransformed UTF-8; correct data conversion minor
-  codes; better logging for MessageErrors.
-
-  Revision 1.1.4.4  2006/04/28 18:40:46  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.3  2005/12/08 14:22:31  dgrisby
-  Better string marshalling performance; other minor optimisations.
-
-  Revision 1.1.4.2  2005/01/06 23:10:14  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:02:20  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.13  2001/10/17 16:47:09  dpg1
-  New minor codes
-
-  Revision 1.1.2.12  2001/08/24 10:10:44  dpg1
-  Fix braindead bound check bug in string unmarshalling.
-
-  Revision 1.1.2.11  2001/08/17 17:12:36  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.2.10  2001/08/03 17:41:20  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.2.9  2001/07/26 16:37:20  dpg1
-  Make sure static initialisers always run.
-
-  Revision 1.1.2.8  2001/04/18 18:18:09  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.7  2000/12/05 17:43:31  dpg1
-  Check for input over-run in string and wstring unmarshalling.
-
-  Revision 1.1.2.6  2000/11/22 14:38:00  dpg1
-  Code set marshalling functions now take a string length argument.
-
-  Revision 1.1.2.5  2000/11/17 19:12:07  dpg1
-  Better choice of exceptions in UTF-8.
-
-  Revision 1.1.2.4  2000/11/16 12:33:44  dpg1
-  Minor fixes to permit use of UShort as WChar.
-
-  Revision 1.1.2.3  2000/11/10 15:41:36  dpg1
-  Native code sets throw BAD_PARAM if they are given a null transmission
-  code set.
-
-  Revision 1.1.2.2  2000/11/03 18:49:17  sll
-  Separate out the marshalling of byte, octet and char into 3 set of distinct
-  marshalling functions.
-  Renamed put_char_array and get_char_array to put_octet_array and
-  get_octet_array.
-  New string marshal member functions.
-
-  Revision 1.1.2.1  2000/10/27 15:42:09  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/linkHacks.h>
@@ -359,8 +294,9 @@ NCS_C_UTF_8::unmarshalChar(cdrStream& stream, omniCodeSet::TCS_C* tcs)
     OMNIORB_THROW(DATA_CONVERSION, 
 		  DATA_CONVERSION_BadInput,
 		  (CORBA::CompletionStatus)stream.completion());
-
-  return 0; // For broken compilers
+#ifdef NEED_DUMMY_RETURN
+  return 0;
+#endif
 }
 
 _CORBA_ULong
@@ -539,8 +475,9 @@ TCS_C_UTF_8::unmarshalChar(cdrStream& stream)
     OMNIORB_THROW(DATA_CONVERSION, 
 		  DATA_CONVERSION_BadInput,
 		  (CORBA::CompletionStatus)stream.completion());
-
-  return 0; // For broken compilers
+#ifdef NEED_DUMMY_RETURN
+  return 0;
+#endif
 }
 
 _CORBA_ULong

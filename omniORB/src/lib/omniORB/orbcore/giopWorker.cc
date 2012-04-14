@@ -3,6 +3,7 @@
 // giopWorker.cc              Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -95,7 +96,7 @@ giopWorker::real_execute()
 
   if (!pd_strand->gatekeeper_checked) {
 
-    if (!pd_strand->connection->gatekeeperCheck()) {
+    if (!pd_strand->connection->gatekeeperCheck(pd_strand)) {
       {
 	omni_tracedmutex_lock sync(*omniTransportLock);
 	pd_strand->safeDelete();

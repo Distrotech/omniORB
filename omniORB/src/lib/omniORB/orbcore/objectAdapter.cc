@@ -3,7 +3,7 @@
 // objectAdapter.cc           Created on: 5/3/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 1996,1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,131 +26,6 @@
 //
 // Description:
 //
-
-/*
- $Log$
- Revision 1.5.2.12  2007/06/03 19:21:39  dgrisby
- POAManager deactivate would not meet its detached object if all
- objects were busy, leading to a hang in POA destruction.
-
- Revision 1.5.2.11  2006/10/09 09:47:12  dgrisby
- Only delete giopServer if all threads are successfully shut down.
-
- Revision 1.5.2.10  2006/07/18 16:21:21  dgrisby
- New experimental connection management extension; ORB core support
- for it.
-
- Revision 1.5.2.9  2006/04/18 14:14:41  dgrisby
- Compatibility with 4.0's fail-if-multiple option.
-
- Revision 1.5.2.8  2006/04/10 12:50:35  dgrisby
- More endPointPublish; support for deprecated endPointNoListen,
- endPointPublishAllIFs.
-
- Revision 1.5.2.7  2006/04/09 19:52:31  dgrisby
- More IPv6, endPointPublish parameter.
-
- Revision 1.5.2.6  2006/03/25 18:54:03  dgrisby
- Initial IPv6 support.
-
- Revision 1.5.2.5  2006/02/22 14:56:36  dgrisby
- New endPointPublishHostname and endPointResolveNames parameters.
-
- Revision 1.5.2.4  2005/11/17 17:03:26  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.5.2.3  2005/09/01 14:52:12  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.5.2.2  2005/01/06 23:10:34  dgrisby
- Big merge from omni4_0_develop.
-
- Revision 1.5.2.1  2003/03/23 21:02:12  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.16  2002/08/21 19:55:42  dgrisby
- Add endPointPublishAllIFs option.
-
- Revision 1.2.2.15  2002/03/27 11:44:53  dpg1
- Check in interceptors things left over from last week.
-
- Revision 1.2.2.14  2002/03/18 12:38:27  dpg1
- Lower trace(0) to trace(1), propagate fatalException.
-
- Revision 1.2.2.13  2001/09/20 09:27:44  dpg1
- Remove assertion failure on exit if not all POAs are deleted.
-
- Revision 1.2.2.12  2001/08/21 11:02:16  sll
- orbOptions handlers are now told where an option comes from. This
- is necessary to process DefaultInitRef and InitRef correctly.
-
- Revision 1.2.2.11  2001/08/20 15:08:36  sll
- Changed option name endpoint* to endPoint*.
-
- Revision 1.2.2.10  2001/08/17 17:12:39  sll
- Modularise ORB configuration parameters.
-
- Revision 1.2.2.9  2001/08/03 17:41:23  sll
- System exception minor code overhaul. When a system exeception is raised,
- a meaning minor code is provided.
-
- Revision 1.2.2.8  2001/07/31 16:34:53  sll
- New function listMyEndpoints(). Remove explicit instantiation of
- giopServer, do it via interceptor.
-
- Revision 1.2.2.7  2001/06/11 18:01:18  sll
- Fixed silly mistake in debugging message.
-
- Revision 1.2.2.6  2001/05/31 16:18:13  dpg1
- inline string matching functions, re-ordered string matching in
- _ptrToInterface/_ptrToObjRef
-
- Revision 1.2.2.5  2001/04/18 18:18:07  sll
- Big checkin with the brand new internal APIs.
-
- Revision 1.2.2.4  2000/11/09 12:27:57  dpg1
- Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
- Revision 1.2.2.3  2000/10/03 17:39:46  sll
- DefaultLoopback now works.
-
- Revision 1.2.2.2  2000/09/27 18:17:19  sll
- Use the new omniIOR class in defaultLoopBack().
-
- Revision 1.2.2.1  2000/07/17 10:35:55  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:25:57  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.8  2000/06/22 10:40:15  dpg1
- exception.h renamed to exceptiondefs.h to avoid name clash on some
- platforms.
-
- Revision 1.1.2.7  2000/04/27 10:50:49  dpg1
- Interoperable Naming Service
-
- Include initRefs.h instead of bootstrap_i.h.
-
- Revision 1.1.2.6  2000/03/03 09:44:04  djr
- Fix to prevent tracedmutex assertion failure.
-
- Revision 1.1.2.5  1999/10/27 17:32:12  djr
- omni::internalLock and objref_rc_lock are now pointers.
-
- Revision 1.1.2.4  1999/10/14 16:22:12  djr
- Implemented logging when system exceptions are thrown.
-
- Revision 1.1.2.3  1999/09/24 17:11:13  djr
- New option -ORBtraceInvocations and omniORB::traceInvocations.
-
- Revision 1.1.2.2  1999/09/24 15:01:34  djr
- Added module initialisers, and sll's new scavenger implementation.
-
- Revision 1.1.2.1  1999/09/22 14:26:55  djr
- Major rewrite of orbcore to support POA.
-
-*/
 
 #include <omniORB4/CORBA.h>
 
@@ -504,9 +379,13 @@ omniObjAdapter::shutdown()
 {
   omni_tracedmutex_lock sync(oa_lock);
 
-  OMNIORB_ASSERT(num_active_oas == 0);
-
   omniORB::logs(10, "Shutting-down all incoming endpoints.");
+
+  if (num_active_oas != 0 && omniORB::trace(1)) {
+    omniORB::logger log;
+    log << "Warning: " << num_active_oas
+        << " active object adapters at endpoint shutdown time.\n";
+  }
 
   if ( !oa_servers.empty() ) {
 

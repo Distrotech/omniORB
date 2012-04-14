@@ -3,7 +3,7 @@
 // corbaFixed.cc              Created on: 07/02/2001
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2005 Apasphere Ltd
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,54 +27,6 @@
 // Description:
 //
 //    Implementation of the fixed point type
-
-// $Log$
-// Revision 1.1.4.3  2005/03/30 23:36:10  dgrisby
-// Another merge from omni4_0_develop.
-//
-// Revision 1.1.4.2  2005/01/06 23:10:12  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:02:23  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.1.2.12  2003/02/25 12:35:20  dgrisby
-// Typo in assertion.
-//
-// Revision 1.1.2.11  2002/11/25 21:07:25  dgrisby
-// Add new to_string() function to Fixed.
-//
-// Revision 1.1.2.10  2002/07/12 10:17:30  dgrisby
-// Bug in fixed point unmarshal.
-//
-// Revision 1.1.2.9  2002/01/21 17:40:05  dpg1
-// Lost sign in Fixed->double conversion. (Thanks Slava Garelin)
-//
-// Revision 1.1.2.8  2001/11/14 17:13:43  dpg1
-// Long double support.
-//
-// Revision 1.1.2.7  2001/11/08 16:33:51  dpg1
-// Local servant POA shortcut policy.
-//
-// Revision 1.1.2.6  2001/10/17 16:44:06  dpg1
-// Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-//
-// Revision 1.1.2.5  2001/08/17 13:47:32  dpg1
-// Small bug fixes.
-//
-// Revision 1.1.2.4  2001/08/03 17:41:18  sll
-// System exception minor code overhaul. When a system exeception is raised,
-// a meaning minor code is provided.
-//
-// Revision 1.1.2.3  2001/06/13 20:12:32  sll
-// Minor updates to make the ORB compiles with MSVC++.
-//
-// Revision 1.1.2.2  2001/04/09 15:18:46  dpg1
-// Tweak fixed point to make life easier for omniORBpy.
-//
-// Revision 1.1.2.1  2001/03/13 10:32:10  dpg1
-// Fixed point support.
-//
 
 #include <omniORB4/CORBA.h>
 #include <exceptiondefs.h>
@@ -177,7 +129,7 @@ CORBA::Fixed::Fixed(CORBA::Double val) :
 		  CORBA::COMPLETED_NO);
   }
   char buffer[80];
-  int len = sprintf(buffer, "%.31f", val);
+  int len = sprintf(buffer, "%.31f", (double)val);
   OMNIORB_ASSERT(len < 79);
 
   NP_fromString(buffer);

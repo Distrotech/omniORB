@@ -3,6 +3,7 @@
 // omnipy30_sysdep.h          Created on: 2000/03/07
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -34,6 +35,14 @@
 
 #define PY_OMNISERVANT_BASE omniPy::Py_omniServant
 
+// Some compilers will do some flow analysis and might get tricked if
+// a function always throws an exception.
+
+#ifdef NEED_DUMMY_RETURN
+#  define NEED_DUMMY_THROW
+#elif defined(__DECCXX)
+#  define NEED_DUMMY_THROW
+#endif
 
 // Things that are broken
 

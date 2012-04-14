@@ -3,7 +3,7 @@
 // sslConnection.cc           Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005-2010 Apasphere Ltd
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -285,7 +285,7 @@ sslConnection::peeridentity() {
 
 /////////////////////////////////////////////////////////////////////////
 _CORBA_Boolean
-sslConnection::gatekeeperCheckSpecific()
+sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
 {
   // Perform SSL accept
 
@@ -307,7 +307,7 @@ sslConnection::gatekeeperCheckSpecific()
   int timeout = 0;
   int go = 1;
 
-  while(go && !pd_shutdown) {
+  while (go && !pd_shutdown) {
     if (tcpSocket::setAndCheckTimeout(deadline, tv)) {
       // Timed out
       timeout = 1;

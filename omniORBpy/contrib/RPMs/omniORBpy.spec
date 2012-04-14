@@ -16,7 +16,7 @@ Version:   %{version_full}
 Release:   1%{?dist}
 License:   GPL / LGPL
 Group:     System/Libraries
-Source0:   %{name}-%{version}.tar.gz
+Source0:   %{name}-%{version}.tar.bz2
 Prefix:    /usr
 URL:       http://omniorb.sourceforge.net/
 BuildRequires: gcc-c++
@@ -80,7 +80,7 @@ Developer documentation and examples.
 
 %prep 
 
-%setup -n %{name} #-%{version}
+%setup -n %{name}-%{version}
 
 # Needs to know where omniORB was installed if it is not in /usr.
 # If necessary, use the configure option --with-omniorb=%{_prefix}

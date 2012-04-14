@@ -3,7 +3,7 @@
 // sslContext.cc              Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2009 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,69 +27,6 @@
 // Description:
 //	*** PROPRIETORY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.6  2009/05/06 16:14:51  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.5  2008/02/14 13:50:03  dgrisby
-  Initialise openssl only if necessary. Thanks Teemu Torma.
-
-  Revision 1.1.4.4  2005/09/05 17:12:20  dgrisby
-  Merge again. Mainly SSL transport changes.
-
-  Revision 1.1.4.3  2005/03/30 23:35:59  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.2  2005/01/06 23:10:53  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:59  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.12  2002/12/19 12:23:02  dgrisby
-  Don't set SSL verify depth to 1.
-
-  Revision 1.1.2.11  2002/12/19 11:49:33  dgrisby
-  Vladimir Panov's SSL fixes.
-
-  Revision 1.1.2.10  2002/04/16 12:44:27  dpg1
-  Fix SSL accept bug, clean up logging.
-
-  Revision 1.1.2.9  2002/02/25 11:17:14  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.1.2.8  2002/02/11 17:10:18  dpg1
-  Cast result of pthread_self().
-
-  Revision 1.1.2.7  2001/09/13 16:45:03  sll
-  Changed thread id callback function for the openssl library.
-  Only provide one for non-win32 platform and use pthread_self() directly.
-
-  Revision 1.1.2.6  2001/09/13 15:36:01  sll
-  Provide hooks to openssl for thread safety.
-  Switched to select v2 or v3 methods but accept only v3 or tls v1 protocol.
-  Added extra method set_supported_versions.
-
-  Revision 1.1.2.5  2001/09/13 15:22:12  sll
-  Correct test macro for WIN32.
-
-  Revision 1.1.2.4  2001/08/03 17:41:25  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.2.3  2001/07/26 16:37:21  dpg1
-  Make sure static initialisers always run.
-
-  Revision 1.1.2.2  2001/06/20 18:53:34  sll
-  Rearrange the declaration of for-loop index variable to work with old and
-  standard C++.
-
-  Revision 1.1.2.1  2001/06/11 18:11:06  sll
-  *** empty log message ***
-
-*/
 
 #include <omniORB4/CORBA.h>
 
@@ -119,6 +56,7 @@ const char* sslContext::key_file = 0;
 const char* sslContext::key_file_password = 0;
 int         sslContext::verify_mode = (SSL_VERIFY_PEER |
 				       SSL_VERIFY_FAIL_IF_NO_PEER_CERT);
+int       (*sslContext::verify_callback)(int,X509_STORE_CTX *) = 0;
 
 sslContext* sslContext::singleton = 0;
 
@@ -179,7 +117,7 @@ sslContext::internal_initialise() {
   set_DH();
   set_ephemeralRSA();
   // Allow the user to overwrite the SSL verification types.
-  SSL_CTX_set_verify(pd_ctx,set_verify_mode(),NULL);
+  SSL_CTX_set_verify(pd_ctx, set_verify_mode(), verify_callback);
   if (pd_ssl_owner)
     thread_setup();
 }
@@ -247,7 +185,7 @@ sslContext::set_certificate() {
     }
   }
 
-  if(!(SSL_CTX_use_certificate_file(pd_ctx,pd_keyfile,SSL_FILETYPE_PEM))) {
+  if(!(SSL_CTX_use_certificate_chain_file(pd_ctx, pd_keyfile))) {
     report_error();
     OMNIORB_THROW(INITIALIZE,INITIALIZE_TransportError,CORBA::COMPLETED_NO);
   }

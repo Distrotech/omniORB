@@ -3,7 +3,7 @@
 // tcpSocket.cc               Created on: 4 June 2010
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2010 Apasphere Ltd.
+//    Copyright (C) 2010-2012 Apasphere Ltd.
 //
 //    This file is part of the omniORB library
 //
@@ -535,7 +535,7 @@ doConnect(const char*   	 host,
   if (::connect(sock,ai->addr(),ai->addrSize()) == RC_SOCKET_ERROR) {
 
     int err = ERRNO;
-    if (err && err != EINPROGRESS) {
+    if (err && err != RC_EINPROGRESS) {
       tcpSocket::logConnectFailure("Failed to connect", ai);
       CLOSESOCKET(sock);
       return RC_INVALID_SOCKET;
@@ -722,13 +722,19 @@ tcpSocket::addrToURI(sockaddr* addr, const char* prefix)
     addrstr = inet_ntop(AF_INET, &addr_in->sin_addr, dest, sizeof(dest));
   }
 #if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
+  else if (addr->sa_family == AF_INET6) {
     sockaddr_in6* addr_in6 = (sockaddr_in6*)addr;
     port = ntohs(addr_in6->sin6_port);
     addrstr = inet_ntop(AF_INET6, &addr_in6->sin6_addr, dest, sizeof(dest));
   }
 #endif
+  else {
+    if (omniORB::trace(1)) {
+      omniORB::logger log;
+      log << "Unknown address family " << addr->sa_family << " in sockaddr.\n";
+    }
+    return CORBA::string_dup("**invalid**");
+  }
   OMNIORB_ASSERT(addrstr);
 
   return omniURI::buildURI(prefix, addrstr, port);
@@ -745,13 +751,19 @@ tcpSocket::addrToURI(sockaddr* addr, const char* prefix)
     port = ntohs(addr_in->sin_port);
   }
 #if defined(OMNI_SUPPORT_IPV6)
-  else {
-    OMNIORB_ASSERT(addr->sa_family == AF_INET6);
+  else if (addr->sa_family == AF_INET6) {
     addrlen = sizeof(sockaddr_in6);
     sockaddr_in6* addr_in6 = (sockaddr_in6*)addr;
     port = ntohs(addr_in6->sin6_port);
   }
 #endif
+  else {
+    if (omniORB::trace(1)) {
+      omniORB::logger log;
+      log << "Unknown address family " << addr->sa_family << " in sockaddr.\n";
+    }
+    return CORBA::string_dup("**invalid**");
+  }
   OMNIORB_ASSERT(addrlen);
 
   int result = getnameinfo(addr, addrlen, dest, sizeof(dest), 0, 0,

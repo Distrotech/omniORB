@@ -3,7 +3,7 @@
 // sslContext.h               Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005-2008 Apasphere Ltd
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,42 +27,6 @@
 // Description:
 //	*** PROPRIETORY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.5  2008/02/14 13:50:03  dgrisby
-  Initialise openssl only if necessary. Thanks Teemu Torma.
-
-  Revision 1.1.4.4  2006/01/10 12:24:04  dgrisby
-  Merge from omni4_0_develop pre 4.0.7 release.
-
-  Revision 1.1.4.3  2005/09/05 17:12:20  dgrisby
-  Merge again. Mainly SSL transport changes.
-
-  Revision 1.1.4.2  2005/01/06 23:08:22  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:04:02  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.5  2002/09/05 14:29:01  dgrisby
-  Link force mechanism wasn't working with gcc.
-
-  Revision 1.1.2.4  2002/02/25 11:17:11  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.1.2.3  2001/09/14 11:10:35  sll
-  Do the right dllimport for win32.
-
-  Revision 1.1.2.2  2001/09/13 15:36:00  sll
-  Provide hooks to openssl for thread safety.
-  Switched to select v2 or v3 methods but accept only v3 or tls v1 protocol.
-  Added extra method set_supported_versions.
-
-  Revision 1.1.2.1  2001/06/11 18:11:07  sll
-  *** empty log message ***
-
-*/
 
 #ifndef __SSLCONTEXT_H__
 #define __SSLCONTEXT_H__
@@ -96,13 +60,18 @@ class sslContext {
 
   SSL_CTX* get_SSL_CTX() const { return pd_ctx; }
   
-  // These four parameters must be set or else the default way to
+  // These three parameters must be set or else the default way to
   // initialise a sslContext singleton will not be used.
   static _core_attr const char* certificate_authority_file; // In PEM format
   static _core_attr const char* key_file;                   // In PEM format
   static _core_attr const char* key_file_password;
-  static _core_attr int         verify_mode;
 
+  // These parameters can be overriden to adjust the verify mode and
+  // verify callback passed to SSL_CTX_set_verify.
+  static _core_attr int         verify_mode;
+  static _core_attr int       (*verify_callback)(int, X509_STORE_CTX*);
+
+  // sslContext singleton object.
   static _core_attr sslContext* singleton;
 
   virtual ~sslContext();

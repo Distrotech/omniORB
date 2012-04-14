@@ -3,7 +3,7 @@
 // giopEndpoint.cc            Created on: 29 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -33,6 +33,8 @@
 #include <omniORB4/giopEndpoint.h>
 #include <omniORB4/omniURI.h>
 #include <omniORB4/linkHacks.h>
+#include <omniORB4/omniInterceptors.h>
+#include <interceptors.h>
 #include <initialiser.h>
 #include <orbOptions.h>
 #include <orbParameters.h>
@@ -237,7 +239,7 @@ giopConnection::peeridentity() {
 
 ////////////////////////////////////////////////////////////////////////
 _CORBA_Boolean
-giopConnection::gatekeeperCheck()
+giopConnection::gatekeeperCheck(giopStrand* strand)
 {
   transportRules::sequenceString actions;
   CORBA::ULong matchedRule;
@@ -278,6 +280,15 @@ giopConnection::gatekeeperCheck()
     }
   }
 
+  if (acceptconnection && omniInterceptorP::serverAcceptConnection) {
+    omniInterceptors::serverAcceptConnection_T::info_T info(*strand);
+    omniInterceptorP::visit(info);
+    if (info.reject) {
+      acceptconnection = 0;
+      why = info.why ? info.why : (const char*)"an interceptor rejected it";
+    }
+  }
+
   if (!acceptconnection) {
     if (omniORB::trace(2)) {
       omniORB::logger log;
@@ -294,7 +305,7 @@ giopConnection::gatekeeperCheck()
     return 0;
   }
 
-  if (!gatekeeperCheckSpecific())
+  if (!gatekeeperCheckSpecific(strand))
     return 0;
 
   if (omniORB::trace(5)) {
@@ -313,7 +324,7 @@ giopConnection::gatekeeperCheck()
 
 ////////////////////////////////////////////////////////////////////////
 _CORBA_Boolean
-giopConnection::gatekeeperCheckSpecific()
+giopConnection::gatekeeperCheckSpecific(giopStrand* strand)
 {
   // Can be overridden by derived class.
   return 1;

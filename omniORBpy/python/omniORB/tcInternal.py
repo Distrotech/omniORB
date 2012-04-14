@@ -3,7 +3,7 @@
 # tcInternal.py              Created on: 1999/06/24
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2010 Apasphere Ltd
+#    Copyright (C) 2002-2012 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -592,6 +592,7 @@ class TypeCode_enum (TypeCode_base):
     def __repr__(self):
         return 'CORBA.TypeCode("%s")' % self.id()
 
+
 # sequence:
 class TypeCode_sequence (TypeCode_base):
     def __init__(self, desc, parent):
@@ -612,7 +613,9 @@ class TypeCode_sequence (TypeCode_base):
     def get_compact_typecode(self):
         return TypeCode_sequence(getCompactDescriptor(self._d), None)
 
-    def length(self):       return self._d[2]
+    def length(self):
+        return self._d[2]
+
     def content_type(self):
         if self._p is None and removeIndirections is not None:
             return createTypeCode(self._d[1], self)
@@ -644,8 +647,14 @@ class TypeCode_array (TypeCode_base):
     def get_compact_typecode(self):
         return TypeCode_sequence(getCompactDescriptor(self._d), None)
 
-    def length(self):       return self._d[2]
-    def content_type(self): return createTypeCode(self._d[1])
+    def length(self):
+        return self._d[2]
+
+    def content_type(self):
+        if self._p is None and removeIndirections is not None:
+            return createTypeCode(self._d[1], self)
+        else:
+            return createTypeCode(self._d[1], self._p)
 
     def __repr__(self):
         return "orb.create_array_tc(length=%d, element_type=%s)" % (
@@ -673,7 +682,12 @@ class TypeCode_alias (TypeCode_base):
 
     def id(self):           return self._d[1]
     def name(self):         return self._d[2]
-    def content_type(self): return createTypeCode(self._d[3])
+
+    def content_type(self):
+        if self._p is None and removeIndirections is not None:
+            return createTypeCode(self._d[3], self)
+        else:
+            return createTypeCode(self._d[3], self._p)
 
     def __repr__(self):
         return 'CORBA.TypeCode("%s")' % self.id()
@@ -794,7 +808,12 @@ class TypeCode_value_box (TypeCode_base):
 
     def id(self):           return self._d[2]
     def name(self):         return self._d[3]
-    def content_type(self): return createTypeCode(self._d[4])
+
+    def content_type(self):
+        if self._p is None and removeIndirections is not None:
+            return createTypeCode(self._d[4], self)
+        else:
+            return createTypeCode(self._d[4], self._p)
 
     def __repr__(self):
         return 'CORBA.TypeCode("%s")' % self.id()

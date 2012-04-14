@@ -96,7 +96,7 @@ and the sequence was deleted. In omniORB 4.1, the sequence pointer
 is stored by the Any, and the sequence is deleted later when the Any
 is destroyed.<P>For most uses, this change is not visible to application code.
 However, if a sequence is constructed using an application-supplied
-buffer with the release flag set to false (meaning that the
+buffer with the release flag set to <TT>false</TT> (meaning that the
 application continues to own the buffer), it is now important that
 the buffer is not deleted or modified while the Any exists, since
 the Any continues to refer to the buffer contents. This change

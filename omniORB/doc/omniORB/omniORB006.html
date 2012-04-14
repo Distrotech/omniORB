@@ -93,8 +93,8 @@ timeout for a specific object reference.
 thread. The calling thread must have an <TT>omni_thread</TT> associated
 with it. Setting any timeout value to zero disables it.</P><P>Accessing per-thread state is a relatively expensive operation, so per
 thread timeouts are disabled by default. The
-<TT>supportPerThreadTimeOut</TT> parameter must be set true to enable
-them.</P><P>To choose the timeout value to use for a call, the ORB first looks to
+<TT>supportPerThreadTimeOut</TT> parameter must be set <TT>true</TT> to
+enable them.</P><P>To choose the timeout value to use for a call, the ORB first looks to
 see if there is a timeout for the object reference, then to the
 calling thread, and finally to the global timeout.</P><P>When a client has no existing connection to communicate with a server,
 it must open a new connection before performing the
@@ -428,12 +428,12 @@ normal model where the server opens a new connection for the callback.
 This is important for negotiating firewalls, since they tend not to
 allow connections back on arbitrary ports.</P><P>There are several steps required for bidirectional GIOP to be enabled
 for a callback. Both the client and server must be configured
-correctly. On the client side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>offerBiDirectionalGIOP</TT> parameter must be set to true. 
+correctly. On the client side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>offerBiDirectionalGIOP</TT> parameter must be set to <TT>true</TT>. 
 </LI><LI CLASS="li-itemize">The client transport rule for the target server must contain the
 <TT>bidir</TT> action.
 </LI><LI CLASS="li-itemize">The POA containing the callback object (or objects) must have
 been created with a <TT>BidirectionalPolicy</TT> value of
-<TT>BOTH</TT>.</LI></UL><P>On the server side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>acceptBiDirectionalGIOP</TT> parameter must be set to true. 
+<TT>BOTH</TT>.</LI></UL><P>On the server side, these conditions must be met:</P><UL CLASS="itemize"><LI CLASS="li-itemize">The <TT>acceptBiDirectionalGIOP</TT> parameter must be set to <TT>true</TT>. 
 </LI><LI CLASS="li-itemize">The server transport rule for the requesting client must contain
 the <TT>bidir</TT> action.
 </LI><LI CLASS="li-itemize">The POA hosting the object contacted by the client must have

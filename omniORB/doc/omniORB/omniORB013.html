@@ -64,8 +64,8 @@ what omniORB does.</P><DIV CLASS="lstlisting"><B>class</B> Object{
     CORBA::Boolean _is_a(<B>const</B> <B>char</B>* type_id);
 };</DIV><P>The <TT>_is_a()</TT> operation is part of the <TT>CORBA::Object</TT>
 interface and must be implemented by every object. The input argument
-is a RepoId. The function returns true(1) if the object is really an
-instance of that type, including if that type is a base type of the
+is a RepoId. The function returns <TT>true</TT> if the object is really
+an instance of that type, including if that type is a base type of the
 most derived type of that object.</P><P>In the situation above, the ORB would invoke the <TT>_is_a()</TT>
 operation on the object and ask if the object is of type A
 <EM>before</EM> it processes any application invocation on the object.</P><P>Notice that the <TT>_is_a()</TT> call is <EM>not</EM> performed when the IOR

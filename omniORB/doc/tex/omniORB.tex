@@ -1504,9 +1504,9 @@ class that contains an implementation of each of the operations
 defined in the interface. As used above, the tie template takes
 ownership of the \type{Echo\_i} instance, and deletes it when the tie
 object goes out of scope. The tie constructor has an optional boolean
-argument (defaulted to true) which indicates whether or not it should
-delete the servant object. For full details of using tie templates,
-see the CORBA C++ mapping specification.
+argument (defaulted to \code{true}) which indicates whether or not it
+should delete the servant object. For full details of using tie
+templates, see the CORBA C++ mapping specification.
 
 
 \clearpage
@@ -1694,7 +1694,7 @@ exceptions:
 
   For most uses, this change is not visible to application code.
   However, if a sequence is constructed using an application-supplied
-  buffer with the release flag set to false (meaning that the
+  buffer with the release flag set to \code{false} (meaning that the
   application continues to own the buffer), it is now important that
   the buffer is not deleted or modified while the Any exists, since
   the Any continues to refer to the buffer contents.  This change
@@ -1856,7 +1856,7 @@ messages are output.
 
 \confopt{traceExceptions}{0}
 
-If the \code{traceExceptions} parameter is set true, all system
+If the \code{traceExceptions} parameter is set \code{true}, all system
 exceptions are logged as they are thrown, along with details about
 where the exception is thrown from. This parameter is enabled by
 default if the traceLevel is set to 10 or more.
@@ -1864,33 +1864,33 @@ default if the traceLevel is set to 10 or more.
 
 \confopt{traceInvocations}{0}
 
-If the \code{traceInvocations} parameter is set true, all local and
-remote invocations are logged, in addition to any logging that may
+If the \code{traceInvocations} parameter is set \code{true}, all local
+and remote invocations are logged, in addition to any logging that may
 have been selected with \code{traceLevel}.
 
 
 \confopt{traceInvocationReturns}{0}
 
-If the \code{traceInvocationReturns} parameter is set true, a log
-message is output as an operation invocation returns. In conjunction
-with \code{traceInvocations} and \code{traceTime} (described below),
-this provides a simple way of timing CORBA calls within your
-application.
+If the \code{traceInvocationReturns} parameter is set \code{true}, a
+log message is output as an operation invocation returns. In
+conjunction with \code{traceInvocations} and \code{traceTime}
+(described below), this provides a simple way of timing CORBA calls
+within your application.
 
 
 \confopt{traceThreadId}{1}
 
-If \code{traceThreadId} is set true, all trace messages are prefixed
-with the id of the thread outputting the message. This can be handy
-for making sense of multi-threaded code, but it adds overhead to the
-logging so it can be disabled.
+If \code{traceThreadId} is set \code{true}, all trace messages are
+prefixed with the id of the thread outputting the message. This can be
+handy for making sense of multi-threaded code, but it adds overhead to
+the logging so it can be disabled.
 
 
 \confopt{traceTime}{1}
 
-If \code{traceTime} is set true, all trace messages are prefixed with
-the time. This is useful, but on some platforms it adds a very large
-overhead, so it can be turned off.
+If \code{traceTime} is set \code{true}, all trace messages are
+prefixed with the time. This is useful, but on some platforms it adds
+a very large overhead, so it can be turned off.
 
 
 \confopt{traceFile}{}
@@ -1941,8 +1941,8 @@ runtime.
 
 \confopt{dumpConfiguration}{0}
 
-If set true, the ORB dumps the values of all configuration parameters
-at start-up.
+If set \code{true}, the ORB dumps the values of all configuration
+parameters at start-up.
 
 
 \confopt{scanGranularity}{5}
@@ -1973,17 +1973,17 @@ not. See chapter~\ref{chap:valuetype}.
 
 \confopt{abortOnInternalError}{0}
 
-If this is set true, internal fatal errors will abort immediately,
-rather than throwing the \type{omniORB::fatalException} exception.
-This can be helpful for tracking down bugs, since it leaves the call
-stack intact.
+If this is set \code{true}, internal fatal errors will abort
+immediately, rather than throwing the \type{omniORB::fatalException}
+exception.  This can be helpful for tracking down bugs, since it
+leaves the call stack intact.
 
 \confopt{abortOnNativeException}{0}
 
 On Windows, `native' exceptions such as segmentation faults and divide
 by zero appear as C++ exceptions that can be caught with \code{catch
-(...)}. Setting this parameter to true causes such exceptions to
-abort the process instead.
+  (...)}. Setting this parameter to \code{true} causes such exceptions
+to abort the process instead.
 
 
 \vspace{\baselineskip}\par
@@ -2020,8 +2020,8 @@ other platforms the default is -1.
 
 When transmitting a string that is supposed to be UTF-8, omniORB
 usually passes it directly, assuming that it is valid. With this
-parameter set true, omniORB checks that all UTF-8 strings are valid,
-and throws DATA\_CONVERSION if not.
+parameter set \code{true}, omniORB checks that all UTF-8 strings are
+valid, and throws DATA\_CONVERSION if not.
 
 
 \section{Client side options}
@@ -2077,17 +2077,18 @@ about timeouts.
 
 \confopt{supportPerThreadTimeOut}{0}
 
-If this parameter is set true, timeouts can be set on a per thread
-basis, as well as globally and per object. Checking per-thread storage
-has a noticeable performance impact, so it is turned off by default.
+If this parameter is set \code{true}, timeouts can be set on a per
+thread basis, as well as globally and per object. Checking per-thread
+storage has a noticeable performance impact, so it is turned off by
+default.
 
 
 \confopt{resetTimeoutOnRetries}{0}
 
-If true, the call timeout is reset when an exception handler causes a
-call to be retried. If false, the timeout is not reset, and therefore
-applies to the call as a whole, rather than to each individual call
-attempt.
+If \code{true}, the call timeout is reset when an exception handler
+causes a call to be retried. If \code{false}, the timeout is not
+reset, and therefore applies to the call as a whole, rather than to
+each individual call attempt.
 
 \confopt{throwTransientOnTimeout}{0}
 
@@ -2095,7 +2096,7 @@ omniORB 4.2 supports the \code{CORBA::TIMEOUT} exception that is part
 of the CORBA Messaging specification. By default, that is the
 exception thrown when timeouts occur. Previous omniORB releases did
 not have the \code{CORBA::TIMEOUT} exception, and instead used
-\code{CORBA::TRANSIENT}. If this parameter is set true, omniORB
+\code{CORBA::TRANSIENT}. If this parameter is set \code{true}, omniORB
 follows the old behaviour of throwing \code{CORBA::TRANSIENT} when a
 timeout occurs.
 
@@ -2118,12 +2119,12 @@ threads are blocked until a connection becomes free for them to use.
 
 \confopt{oneCallPerConnection}{1}
 
-When this parameter is set to true (the default), the ORB will only
-send a single call on a connection at a time. If multiple client
+When this parameter is set to \code{true} (the default), the ORB will
+only send a single call on a connection at a time. If multiple client
 threads invoke on the same server, multiple connections are opened, up
 to the limit specified by
 \code{maxGIOP\dsc{}ConnectionPerServer}. With this parameter set to
-false, the ORB will allow concurrent calls on a single
+\code{false}, the ORB will allow concurrent calls on a single
 connection. This saves connection resources, but requires slightly
 more management work for both client and server. Some server-side ORBs
 (including omniORB versions before 4.0) serialise all incoming calls
@@ -2137,16 +2138,16 @@ If more concurrent calls are made, they are queued.
 
 \confopt{offerBiDirectionalGIOP}{0}
 
-If set true, the client will indicate to servers that it is willing to
-accept callbacks on client-initiated connections using bidirectional
-GIOP, provided the relevant POA policies are set. See
+If set \code{true}, the client will indicate to servers that it is
+willing to accept callbacks on client-initiated connections using
+bidirectional GIOP, provided the relevant POA policies are set. See
 section~\ref{sec:bidir}.
 
 
 \confopt{diiThrowsSysExceptions}{0}
 
-If this is true, DII functions throw system exceptions; if it is
-false, system exceptions that occur are passed through the
+If this is \code{true}, DII functions throw system exceptions; if it
+is \code{false}, system exceptions that occur are passed through the
 \type{Environment} object.
 
 
@@ -2157,7 +2158,7 @@ verify the existence of an object prior to the first invocation. In
 the case that the full type of the object is not known, it instead
 calls the \op{\_is\_a} operation to check the object's type. Some ORBs
 have bugs that mean one or other of these operations fail. Setting
-this parameter false prevents omniORB from making these calls.
+this parameter \code{false} prevents omniORB from making these calls.
 
 
 \confopt{giopTargetAddressMode}{0}
@@ -2170,9 +2171,10 @@ parameter selects the mode that omniORB uses. A value of 0 means
 
 \confopt{immediateAddressSwitch}{0}
 
-If true, the client will immediately switch to use a new address to
-contact an object after a failure. If false (the default), the current
-address will be retried in certain circumstances.
+If \code{true}, the client will immediately switch to use a new
+address to contact an object after a failure. If \code{false} (the
+default), the current address will be retried in certain
+circumstances.
 
 
 \confopt{bootstrapAgentHostname}{\textit{none}}
@@ -2244,9 +2246,9 @@ section~\ref{sec:connShutdown}.
 
 \confopt{threadPerConnectionPolicy}{1}
 
-If true (the default), the ORB dedicates one server thread to each
-incoming connection. Setting it false means the server should use a
-thread pool.
+If \code{true} (the default), the ORB dedicates one server thread to
+each incoming connection. Setting it \code{false} means the server
+should use a thread pool.
 
 
 \confopt{maxServerThreadPerConnection}{100}
@@ -2267,11 +2269,11 @@ connection server mode.
 
 \confopt{threadPerConnectionUpperLimit}{10000}
 
-If the \code{threadPerConnectionPolicy} parameter is true, the ORB can
-automatically transition to thread pool mode if too many connections
-arrive. This parameter sets the number of connections at which thread
-pooling is started. The default of 10000 is designed to mean that it
-never happens.
+If the \code{threadPerConnectionPolicy} parameter is \code{true}, the
+ORB can automatically transition to thread pool mode if too many
+connections arrive. This parameter sets the number of connections at
+which thread pooling is started. The default of 10000 is designed to
+mean that it never happens.
 
 
 \confopt{threadPerConnectionLowerLimit}{9000}
@@ -2310,10 +2312,10 @@ should watch. This parameter is specified in microseconds.
 When a thread handles an incoming call, it unmarshals the arguments
 then marks the connection as watchable by the connection watching
 thread, in case the client sends a concurrent call on the same
-connection. If this parameter is set to the default false, the
+connection. If this parameter is set to the default \code{false}, the
 connection is not actually watched until the next connection watch
 period (determined by the \code{connectionWatchPeriod} parameter).  If
-this parameter is set true, the connection watching thread is
+this parameter is set \code{true}, the connection watching thread is
 immediately signalled to watch the connection. That leads to faster
 interactive response to clients that multiplex calls, but adds
 significant overhead along the call chain.
@@ -2372,8 +2374,9 @@ out after the specified number of milliseconds, by raising a
 The POA specification requires that object ids in POAs with the
 PERSISTENT and SYSTEM\_ID policies are unique between instantiations
 of the POA. Older versions of omniORB did not comply with that, and
-reused object ids. With this value true, the POA has the correct
-behaviour; with false, the POA uses the old scheme for compatibility.
+reused object ids. With this value \code{true}, the POA has the
+correct behaviour; with \code{false}, the POA uses the old scheme for
+compatibility.
 
 \confopt{idleThreadTimeout}{10}
 
@@ -2383,7 +2386,7 @@ for the number of seconds specified in this parameter, it exits.
 
 \confopt{supportBootstrapAgent}{0}
 
-If set true, servers support the Sun bootstrap agent protocol.
+If set \code{true}, servers support the Sun bootstrap agent protocol.
 
 
 \subsection{Main thread selection}
@@ -2419,7 +2422,7 @@ These options control omniORB's use of GIOP, and cover some areas
 where omniORB can work around buggy behaviour by other ORBs.
 
 
-\confopt{maxGIOPVerson}{1.2}
+\confopt{maxGIOPVersion}{1.2}
 
 Choose the maximum GIOP version the ORB should support. Valid values
 are 1.0, 1.1 and 1.2.
@@ -2433,13 +2436,13 @@ exception is thrown. The size must be >= 8192.
 
 \confopt{strictIIOP}{1}
 
-If true, be strict about interpretation of the IIOP specification; if
-false, permit some buggy behaviour to pass.
+If \code{true}, be strict about interpretation of the IIOP
+specification; if \code{false}, permit some buggy behaviour to pass.
 
 
 \confopt{lcdMode}{0}
 
-If true, select `Lowest Common Denominator' mode. This disables
+If \code{true}, select `Lowest Common Denominator' mode. This disables
 various IIOP and GIOP features that are known to cause problems with
 some ORBs.
 
@@ -2458,15 +2461,15 @@ is set to 1.
 
 TypeCode Indirections reduce the size of marshalled TypeCodes, and are
 essential for recursive types, but some old ORBs do not support them.
-Setting this flag to false prevents the use of indirections (and,
-therefore, prevents the use of recursive TypeCodes).
+Setting this flag to \code{false} prevents the use of indirections
+(and, therefore, prevents the use of recursive TypeCodes).
 
 
 \confopt{acceptMisalignedTcIndirections}{0}
 
-If true, try to fix a mis-aligned indirection in a typecode. This is
-used to work around a bug in some old versions of Visibroker's Java
-ORB.
+If \code{true}, try to fix a mis-aligned indirection in a
+typecode. This is used to work around a bug in some old versions of
+Visibroker's Java ORB.
 
 
 \vspace{2\baselineskip}
@@ -3345,8 +3348,8 @@ with it. Setting any timeout value to zero disables it.
 
 Accessing per-thread state is a relatively expensive operation, so per
 thread timeouts are disabled by default. The
-\code{supportPerThreadTimeOut} parameter must be set true to enable
-them.
+\code{supportPerThreadTimeOut} parameter must be set \code{true} to
+enable them.
 
 To choose the timeout value to use for a call, the ORB first looks to
 see if there is a timeout for the object reference, then to the
@@ -3943,7 +3946,7 @@ correctly. On the client side, these conditions must be met:
 
 \begin{itemize}
 
-\item The \code{offerBiDirectionalGIOP} parameter must be set to true. 
+\item The \code{offerBiDirectionalGIOP} parameter must be set to \code{true}. 
 \item The client transport rule for the target server must contain the
       \code{bidir} action.
 \item The POA containing the callback object (or objects) must have
@@ -3956,7 +3959,7 @@ correctly. On the client side, these conditions must be met:
 
 \begin{itemize}
 
-\item The \code{acceptBiDirectionalGIOP} parameter must be set to true. 
+\item The \code{acceptBiDirectionalGIOP} parameter must be set to \code{true}. 
 \item The server transport rule for the requesting client must contain
       the \code{bidir} action.
 \item The POA hosting the object contacted by the client must have
@@ -4468,7 +4471,7 @@ entirely of data and no code, since they are driven by look-up tables.
 
 omniORB supports interceptors that allow the application to insert
 processing in various points along the call chain, and in various
-other locations. It does not yet support the standard Portable
+other locations. It does not (yet) support the standard Portable
 Interceptors API.
 
 The interceptor interfaces are defined in a single header,
@@ -4507,10 +4510,10 @@ class omniInterceptors {
 \noindent You can see that the interceptors themselves are functions
 that take the \code{info\_T} object as their argument and return
 boolean. Interceptors are called in the order they are registered;
-normally, all interceptor functions return true, meaning that
+normally, all interceptor functions return \code{true}, meaning that
 processing should continue with subsequent interceptors. If an
-interceptor returns false, later interceptors are not called. You
-should only do that if you really know what you are doing.
+interceptor returns \code{false}, later interceptors are not
+called. You should only do that if you really know what you are doing.
 
 Notice that the \code{info\_T} contains references to omniORB internal
 data types. The definitions of these types can be found in other
@@ -4559,6 +4562,17 @@ whatever information they put into IORs with encodeIOR. Again, see
 \file{src/lib/omniORB/orbcore/ior.cc} for an example.
 
 
+\item[clientOpenConnection]\mbox{}\\
+%
+Called as a client opens a new connection to a server, after the
+connection is opened but before it is used to send a request. The
+interceptor function can set the \code{info\_T}'s \code{reject} member
+to \code{true} to cause the client to immediately close the new
+connection and throw CORBA::TRANSIENT to the calling code. In that
+case, the interceptor function can also set the \code{why} member to
+provide a message that is logged.
+
+
 \item[clientSendRequest]\mbox{}\\
 %
 Called just before a request header is sent over the network. The
@@ -4571,6 +4585,16 @@ the \op{setCodeSet\dsc{}ServiceContext} function in
 %
 Called as the client receives a reply, just after unmarshalling the
 reply header. Called for normal replies and exceptions.
+
+
+\item[serverAcceptConnection]\mbox{}\\
+%
+Called when a server accepts a new incoming connection, but before it
+reads any data from it. The interceptor function can set the
+\code{info\_T}'s \code{reject} member to \code{true} to cause the
+server to immediately close the new connection. In that case, the
+interceptor function can also set the \code{why} member to provide a
+message that is logged.
 
 
 \item[serverReceiveRequest]\mbox{}\\
@@ -4642,11 +4666,11 @@ thread stays assigned to performing upcalls for the entire lifetime of
 the underlying network connection; in the thread pool model, threads
 are assigned for upcalls on a per call basis, so this interceptor is
 triggered for every incoming call\footnote{Except that with the
-  \code{threadPoolWatchConnection} parameter set true, a thread can
-  perform multiple upcalls even when thread pool mode is active.}. As
-with the \code{createThread} interceptor, the interceptor function
-must call the \type{info\_T}'s \op{run} method to pass control to the
-upcall.
+  \code{threadPoolWatchConnection} parameter set \code{true}, a thread
+  can perform multiple upcalls even when thread pool mode is
+  active.}. As with the \code{createThread} interceptor, the
+interceptor function must call the \type{info\_T}'s \op{run} method to
+pass control to the upcall.
 
 When a thread finishes its assignment of processing upcalls, it
 returns to the pool (even in thread per connection mode), so the same
@@ -5609,8 +5633,8 @@ class Object{
 
 The \op{\_is\_a} operation is part of the \intf{CORBA::Object}
 interface and must be implemented by every object. The input argument
-is a RepoId. The function returns true(1) if the object is really an
-instance of that type, including if that type is a base type of the
+is a RepoId. The function returns \code{true} if the object is really
+an instance of that type, including if that type is a base type of the
 most derived type of that object.
 
 In the situation above, the ORB would invoke the \op{\_is\_a}

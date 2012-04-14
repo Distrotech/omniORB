@@ -1,3 +1,22 @@
+Sat Apr 14 10:43:59 BST 2012 dgrisby
+====================================
+
+- Merge from 4_1 branch, up to revision 6093.
+
+configure.ac
+configure
+contrib/RPMs/omniORBpy.spec
+doc/omniORBpy.pdf
+doc/omniORBpy/omniORBpy.html
+doc/omniORBpy/omniORBpy001.html
+doc/omniORBpy/omniORBpy004.html
+doc/tex/omniORBpy.tex
+modules/omnipy_sysdep.h
+modules/pyServant.cc
+python/COS/dir.mk
+python/omniORB/tcInternal.py
+
+
 Fri Feb 24 17:09:40 GMT 2012 dgrisby
 ====================================
 

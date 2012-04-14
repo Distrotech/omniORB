@@ -4,7 +4,7 @@
 //                            Author 1  : Sai Lai Lo (sll)
 //                            Author 2  : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -454,6 +454,15 @@ SocketCollection::Select() {
   }
   else {
     // Negative return means error
+#ifdef __VMS
+    if (ERRNO == EVMSERR && vaxc$errno == 316) {
+      errno = EBADF;
+      if (omniORB::trace(1)) {
+	omniORB::logger log;
+	log << "vaxc$errno==" << vaxc$errno << "\n";
+      }
+    }
+#endif
     if (ERRNO == RC_EBADF) {
       omniORB::logs(20, "poll() returned EBADF.");
 
@@ -463,8 +472,12 @@ SocketCollection::Select() {
     }
     else if (ERRNO != RC_EINTR) {
       if (omniORB::trace(20)) {
+#ifdef __VMS
+	perror("Error return from poll()");
+#else
 	omniORB::logger l;
 	l << "Error return from poll(). errno = " << (int)ERRNO << "\n";
+#endif
       }
       return 0;
     }
@@ -922,6 +935,7 @@ SocketHolder::clearSelectable()
   OMNIORB_ASSERT(pd_belong_to);
   omni_tracedmutex_lock l(pd_belong_to->pd_collection_lock);
   pd_selectable = 0;
+  pd_belong_to->pd_changed = 1;
 }
 
 
@@ -1161,10 +1175,12 @@ SocketCollection::Select() {
     pd_fd_set_n = 0;
 
 #ifdef UnixArchitecture
-    if (pd_pipe_read >= 0 && FD_ISSET(pd_pipe_read, &rfds)) {
-      char data;
-      read(pd_pipe_read, &data, 1);
-      pd_pipe_full = 0;
+    if (pd_pipe_read >= 0) {
+      if (FD_ISSET(pd_pipe_read, &rfds)) {
+	char data;
+	read(pd_pipe_read, &data, 1);
+	pd_pipe_full = 0;
+      }
       pd_fd_set_n = pd_pipe_read + 1;
     }
 #endif
@@ -1205,6 +1221,15 @@ SocketCollection::Select() {
   }
   else {
     // Negative return means error
+#ifdef __VMS
+    if (ERRNO == EVMSERR && vaxc$errno == 316) {
+      errno = EBADF;
+      if (omniORB::trace(1)) {
+	omniORB::logger log;
+	log << "vaxc$errno==" << vaxc$errno << "\n";
+      }
+    }
+#endif
     if (ERRNO == RC_EBADF) {
       omniORB::logs(20, "select() returned EBADF.");
 
@@ -1214,8 +1239,12 @@ SocketCollection::Select() {
     }
     else if (ERRNO != RC_EINTR) {
       if (omniORB::trace(1)) {
+#ifdef __VMS
+        perror("Error return from select()");
+#else
 	omniORB::logger l;
 	l << "Error return from select(). errno = " << (int)ERRNO << "\n";
+#endif
       }
       return 0;
     }
@@ -1291,6 +1320,7 @@ SocketHolder::clearSelectable()
   OMNIORB_ASSERT(pd_belong_to);
   omni_tracedmutex_lock l(pd_belong_to->pd_collection_lock);
   pd_selectable = 0;
+  pd_belong_to->pd_changed = 1;
 
 #ifdef UnixArchitecture
   if (pd_belong_to->pd_idle_count == 0) {
@@ -1488,6 +1518,10 @@ SocketCollection::removeSocket(SocketHolder* s)
       s->pd_next->pd_prev = s->pd_prev;
 
     s->pd_belong_to = 0;
+    
+    // Force rescan of sockets ASAP
+    pd_changed = 1;
+    pd_abs_time.assign(0,0);
   }
   if (refcount == 0) delete this;
 }

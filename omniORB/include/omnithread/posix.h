@@ -1,7 +1,7 @@
 //				Package : omnithread
 // omnithread/posix.h		Created : 7/94 tjr
 //
-//    Copyright (C) 2002-2009 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 1994-1997 Olivetti & Oracle Research Laboratory
 //
 //    This file is part of the omnithread library
@@ -33,11 +33,6 @@
 #ifndef EXC_HANDLING
 #define EXC_HANDLING
 #endif
-#endif
-
-#ifdef __VMS
-#define pthread_mutex_lock PTHREAD_MUTEX_LOCK
-#define pthread_mutex_unlock PTHREAD_MUTEX_UNLOCK
 #endif
 
 #ifndef __POSIX_NT__

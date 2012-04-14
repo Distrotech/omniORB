@@ -3,7 +3,7 @@
 // uri.cc                     Created on: 2000/04/03
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2011 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -892,8 +892,10 @@ corbalocURIHandler::locToObject(const char*& c, unsigned int cycles,
 
     return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
   }
+#ifdef NEED_DUMMY_RETURN
   OMNIORB_ASSERT(0);
   return 0;
+#endif
 }
 
 
@@ -994,9 +996,11 @@ corbanameURIHandler::toObject(const char* uri, unsigned int cycles)
     }
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_BadURIOther, CORBA::COMPLETED_NO);
   }
+#ifdef NEED_DUMMY_RETURN
   // Never reach here
   OMNIORB_ASSERT(0);
   return 0;
+#endif
 }
 
 

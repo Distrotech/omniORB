@@ -3,6 +3,7 @@
 // sslConnection.h            Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -55,7 +56,7 @@ public:
 
   const char *peeridentity();
 
-  _CORBA_Boolean gatekeeperCheckSpecific();
+  _CORBA_Boolean gatekeeperCheckSpecific(giopStrand* strand);
 
   void setSelectable(int now = 0,CORBA::Boolean data_in_buffer = 0);
 

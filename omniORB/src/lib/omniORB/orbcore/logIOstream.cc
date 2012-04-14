@@ -3,7 +3,7 @@
 // logIOstream.cc             Created on: 31/3/1998
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2009 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 1998-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,100 +26,6 @@
 //
 // Description:
 //      
- 
-/*
-  $Log$
-  Revision 1.11.2.8  2009/02/17 14:32:48  dgrisby
-  Gracefully handle null string pointer in logger.
-
-  Revision 1.11.2.7  2008/08/08 16:52:56  dgrisby
-  Option to validate untransformed UTF-8; correct data conversion minor
-  codes; better logging for MessageErrors.
-
-  Revision 1.11.2.6  2008/02/05 16:43:20  dgrisby
-  Flush log file.
-
-  Revision 1.11.2.5  2006/04/28 18:40:46  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.11.2.4  2005/09/19 18:26:33  dgrisby
-  Merge from omni4_0_develop again.
-
-  Revision 1.11.2.3  2005/04/14 00:03:59  dgrisby
-  New traceInvocationReturns and traceTime options; remove logf function.
-
-  Revision 1.11.2.2  2005/01/06 23:10:32  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.11.2.1  2003/03/23 21:02:12  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.8.2.10  2002/10/30 16:49:03  dgrisby
-  Log flush broken when using log function.
-
-  Revision 1.8.2.9  2002/01/15 16:38:13  dpg1
-  On the road to autoconf. Dependencies refactored, configure.ac
-  written. No makefiles yet.
-
-  Revision 1.8.2.8  2002/01/09 11:39:23  dpg1
-  New omniORB::setLogFunction() function.
-
-  Revision 1.8.2.7  2001/09/19 17:30:04  dpg1
-  New traceThreadId option to add omni_thread id to log messages.
-
-  Revision 1.8.2.6  2001/08/17 17:07:06  sll
-  Remove the use of omniORB::logStream.
-
-  Revision 1.8.2.5  2001/08/15 10:26:12  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.8.2.4  2001/08/03 17:41:22  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.8.2.3  2001/05/11 14:25:53  sll
-  Added operator for omniORB::logger to report system exception status and
-  minor code.
-
-  Revision 1.8.2.2  2000/09/27 17:35:49  sll
-  Updated include/omniORB3 to include/omniORB4
-
-  Revision 1.8.2.1  2000/07/17 10:35:55  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.9  2000/07/13 15:25:57  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.7.6.2  1999/09/28 10:54:33  djr
-  Removed pretty-printing of object keys from object adapters.
-
-  Revision 1.7.6.1  1999/09/22 14:26:54  djr
-  Major rewrite of orbcore to support POA.
-
-  Revision 1.6  1999/09/01 12:57:46  djr
-  Added atomic logging class omniORB::logger, and methods logf() and logs().
-
-  Revision 1.5  1999/03/11 16:25:54  djr
-  Updated copyright notice
-
-  Revision 1.4  1999/01/07 15:59:13  djr
-  Corrected minor bug in fprintf format.
-
-  Revision 1.3  1998/08/14 13:48:52  sll
-  Added pragma hdrstop to control pre-compile header if the compiler feature
-  is available.
-
-  Revision 1.2  1998/04/18 10:11:47  sll
-  Corrected typo (_log instead of log).
-
-  Revision 1.1  1998/04/07 20:24:40  sll
-  Initial revision
-
-  */
-
-// Implement omniORB::logger using stderr.
-
-
 
 // Macros to handle std namespace and streams header files
 
@@ -350,7 +256,7 @@ omniORB::logger::operator<<(const omniLocalIdentity* id)
                                            *this << " (deactivating OA)";break;
     case omniObjTableEntry::ETHEREALISING: *this << " (etherealising)";  break;
     case omniObjTableEntry::DEAD:          *this << " (dead)";           break;
-    default:                               *this << " (???)";
+    default:                               *this << " (???" ")";
     }
   }
   else
@@ -515,11 +421,14 @@ omniORB::do_logs(const char* mesg)
 
   sprintf(cbuf, "%s\n", mesg);
 
-  if (logfunc())
+  if (logfunc()) {
     logfunc()(buf);
-  else
+  }
+  else {
     fputs(buf, logfile ? logfile : stderr);
-
+    if ((const char*)logfilename)
+      fflush(logfile);
+  }
   if (buf != inlinebuf) delete[] buf;
 }
 

@@ -3,7 +3,7 @@
 // poa.cc                     Created on: 14/4/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library
@@ -2214,49 +2214,56 @@ omniOrbPOA::do_destroy(CORBA::Boolean etherealize_objects)
 
   // Deactivate all objects in the active object map.
 
-  omniObjTableEntry* obj_list = 0;
+  omniObjTableEntry*                   obj_list = 0;
+  PortableServer::ServantActivator_ptr sa;
+  PortableServer::Servant              defaultServant;
 
-  pd_lock.lock();
-  if( pd_activeObjList )  pd_activeObjList->reRootOAObjList(&obj_list);
-  PortableServer::ServantActivator_ptr sa = pd_servantActivator;
-  pd_lock.unlock();
-
-  omni::internalLock->lock();
-  deactivate_objects(obj_list);
-
-  if( omniORB::trace(10) ) {
-    omniORB::logger l;
-    l << "Waiting for requests to complete on POA(" << (char*) pd_name
-      << ").\n";
+  {
+    omni_tracedmutex_lock sync(pd_lock);
+    if( pd_activeObjList )  pd_activeObjList->reRootOAObjList(&obj_list);
+    sa = pd_servantActivator;
   }
 
-  pd_rq_state = (int) PortableServer::POAManager::INACTIVE;
+  {
+    omni_tracedmutex_lock sync(*omni::internalLock);
 
-  waitForAllRequestsToComplete(1);
+    deactivate_objects(obj_list);
 
-  if( omniORB::trace(10) ) {
-    omniORB::logger l;
-    l << "Requests on POA(" << (char*) pd_name << ") completed.\n";
+    if( omniORB::trace(10) ) {
+      omniORB::logger l;
+      l << "Waiting for requests to complete on POA(" << (char*) pd_name
+        << ").\n";
+    }
+
+    pd_rq_state = (int) PortableServer::POAManager::INACTIVE;
+
+    waitForAllRequestsToComplete(1);
+
+    if( omniORB::trace(10) ) {
+      omniORB::logger l;
+      l << "Requests on POA(" << (char*) pd_name << ") completed.\n";
+    }
+
+    complete_object_deactivation(obj_list);
   }
 
-  complete_object_deactivation(obj_list);
-  omni::internalLock->unlock();
+  {
+    omni_tracedmutex_lock sync(pd_lock);
 
-  // Apparent destruction of POA occurs before etherealisations.
-  pd_lock.lock();
-  pd_destroyed = 1;
-  PortableServer::Servant defaultServant = pd_defaultServant;
-  pd_defaultServant = 0;
+    // Apparent destruction of POA occurs before etherealisations.
+    pd_destroyed = 1;
+    defaultServant = pd_defaultServant;
+    pd_defaultServant = 0;
 
-  if( omniORB::trace(10) ) {
-    omniORB::logger l;
-    l << "Etherealising POA(" << (char*) pd_name << ")'s objects.\n";
+    if( omniORB::trace(10) ) {
+      omniORB::logger l;
+      l << "Etherealising POA(" << (char*) pd_name << ")'s objects.\n";
+    }
+
+    // Signal so that any detached objects waiting to etherealise
+    // can proceed.
+    pd_deathSignal.broadcast();
   }
-
-  // Signal so that any detached objects waiting to etherealise
-  // can proceed.
-  pd_deathSignal.broadcast();
-  pd_lock.unlock();
 
   // Etherealise the objects.
   this->etherealise_objects(obj_list, etherealize_objects, sa);
@@ -2267,25 +2274,28 @@ omniOrbPOA::do_destroy(CORBA::Boolean etherealize_objects)
 
   if( defaultServant )  defaultServant->_remove_ref();
 
-  poa_lock.lock();
-  pd_lock.lock();
-  pd_destroyed = 2;
-  if( pd_parent ) {
-    pd_parent->lose_child(this);
-    pd_parent = 0;
-    if (theINSPOA == this) {
-      if (theRootPOA)
-	theRootPOA->decrRefCount();
-      theINSPOA = 0;
+  {
+    omni_tracedmutex_lock sync(poa_lock);
+    {
+      omni_tracedmutex_lock sync2(pd_lock);
+
+      pd_destroyed = 2;
+      if( pd_parent ) {
+        pd_parent->lose_child(this);
+        pd_parent = 0;
+        if (theINSPOA == this) {
+          if (theRootPOA)
+            theRootPOA->decrRefCount();
+          theINSPOA = 0;
+        }
+      }
+      else {
+        OMNIORB_ASSERT(theRootPOA == this);
+        theRootPOA = 0;
+      }
     }
+    pd_deathSignal.broadcast();
   }
-  else {
-    OMNIORB_ASSERT(theRootPOA == this);
-    theRootPOA = 0;
-  }
-  poa_lock.unlock();
-  pd_deathSignal.broadcast();
-  pd_lock.unlock();
 
   try { adapterInactive(); } catch(...) {}
 
@@ -3773,10 +3783,13 @@ transfer_and_check_policies(omniOrbPOA::Policies& pout,
 	if( seen.req_processing ) {
 	  if( (pout.req_processing == omniOrbPOA::RPP_ACTIVE_OBJ_MAP &&
 	       p->value() != PortableServer::USE_ACTIVE_OBJECT_MAP_ONLY) ||
+
 	      (pout.req_processing == omniOrbPOA::RPP_DEFAULT_SERVANT &&
 	       p->value() != PortableServer::USE_DEFAULT_SERVANT) ||
+
 	      (pout.req_processing == omniOrbPOA::RPP_SERVANT_MANAGER &&
 	       p->value() != PortableServer::USE_SERVANT_MANAGER) )
+
 	    throw PortableServer::POA::InvalidPolicy(i);
 	}
 	switch( p->value() ) {

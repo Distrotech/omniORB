@@ -3,7 +3,7 @@
 // omniInternal.cc            Created on: 25/2/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 1996,1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -1556,7 +1556,7 @@ public:
       l << "Error: the object table still contains "
 	<< numObjectsInTable << " entr"
 	<< (numObjectsInTable == 1 ? "y" : "ies")
-	<< " at ORB shutdown time.";
+	<< " at ORB shutdown time.\n";
     }
     OMNIORB_ASSERT(numObjectsInTable == 0);
     delete [] objectTable;

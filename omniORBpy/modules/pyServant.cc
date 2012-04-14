@@ -3,7 +3,7 @@
 // pyServant.cc               Created on: 1999/07/29
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2010 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -297,6 +297,9 @@ Py_omniServant::_default_POA()
       // The call raised a Python exception
       omniORB::logs(1, "Python servant raised an exception in _default_POA.");
       omniPy::handlePythonException();
+#ifdef NEED_DUMMY_THROW
+      throw 0;
+#endif
     }
   }
   return 0;

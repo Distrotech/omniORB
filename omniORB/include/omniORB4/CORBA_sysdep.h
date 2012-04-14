@@ -3,7 +3,7 @@
 // CORBA_sysdep.h             Created on: 30/1/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2009 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -88,8 +88,10 @@ typedef size_t omni_ptr_arith_t;
 // Processor dependencies
 //
 
+// __VFP_FP__ means that the floating point format in use is that of the ARM 
+// VFP unit, which is native-endian IEEE-754.
 #if defined(__arm__)
-#  if defined(__armv5teb__)
+#  if defined(__armv5teb__) || defined(__VFP_FP__)
 #    define NO_OMNI_MIXED_ENDIAN_DOUBLE
 #  else
 #    define OMNI_MIXED_ENDIAN_DOUBLE
@@ -123,7 +125,6 @@ typedef size_t omni_ptr_arith_t;
 
 #if defined(__DECCXX)
 // DEC C++ compiler
-#  define NEED_DUMMY_RETURN
 #  if __DECCXX_VER < 60000000
 //    Compaq C++ 5.x
 //    Work-around for OpenVMS VAX Compaq C++ 5.6 compiler problem with
@@ -133,6 +134,7 @@ typedef size_t omni_ptr_arith_t;
 #     ifdef __VMS
 #       pragma message disable CANTCOMPLETE
 #     endif
+#     define NEED_DUMMY_RETURN
 #     define OMNI_OPERATOR_REFPTR_REQUIRES_TYPEDEF
 #     define OMNI_PREMATURE_INSTANTIATION
 //    Extra macros from the Compaq C++ 5.x patch (in <top>/patches/) to be
@@ -183,6 +185,12 @@ typedef size_t omni_ptr_arith_t;
 
 
 #if defined(__aix__) && defined(__xlC__)
+#  define OMNI_NO_INLINE_FRIENDS
+#  define NEED_DUMMY_RETURN
+#endif
+
+
+#if defined(__clang__)
 #  define OMNI_NO_INLINE_FRIENDS
 #endif
 

@@ -3,7 +3,7 @@
 // unixAddress.cc             Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2006-2011 Apasphere Ltd
+//    Copyright (C) 2006-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -35,6 +35,10 @@
 #include <stdio.h>
 #include <omniORB4/linkHacks.h>
 #include <sys/un.h>
+
+#if defined(USE_FAKE_INTERRUPTABLE_RECV)
+#  include <orbParameters.h>
+#endif
 
 OMNI_EXPORT_LINK_FORCE_SYMBOL(unixAddress);
 
@@ -110,7 +114,7 @@ unixAddress::Connect(const omni_time_t& deadline,
                      sizeof(raddr)) == RC_SOCKET_ERROR) {
 
     int err = ERRNO;
-    if (err && err != EINPROGRESS) {
+    if (err && err != RC_EINPROGRESS) {
       omniORB::logs(25, "Failed to connect to Unix socket.");
       CLOSESOCKET(sock);
       return 0;
