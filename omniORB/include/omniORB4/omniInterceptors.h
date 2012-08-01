@@ -413,6 +413,7 @@ public:
   createPolicy_T             createPolicy;
   createThread_T             createThread;
   assignUpcallThread_T       assignUpcallThread;
+  assignAMIThread_T          assignAMIThread;
   invokeLocalCall_T          invokeLocalCall;
 
   //////////////////////////////////////////////////////////////////

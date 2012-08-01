@@ -124,6 +124,7 @@ INTERCEPTOR_IMPLEMENTATION(createORBServer)
 INTERCEPTOR_IMPLEMENTATION(createPolicy)
 INTERCEPTOR_IMPLEMENTATION(createThread)
 INTERCEPTOR_IMPLEMENTATION(assignUpcallThread)
+INTERCEPTOR_IMPLEMENTATION(assignAMIThread)
 
 #undef INTERCEPTOR_IMPLEMENTATION
 
@@ -175,6 +176,7 @@ public:
       list_del(&omniInterceptorP::createPolicy);
       list_del(&omniInterceptorP::createThread);
       list_del(&omniInterceptorP::assignUpcallThread);
+      list_del(&omniInterceptorP::assignAMIThread);
     }
   }
 
