@@ -3,7 +3,7 @@
 # idlast.py                 Created on: 1999/10/27
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2003-2011 Apasphere Ltd
+#    Copyright (C) 2003-2012 Apasphere Ltd
 #    Copyright (C) 1999      AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -93,6 +93,12 @@ Functions:
         self.__pragmas      = pragmas
         self.__comments     = comments
 
+    def __repr__(self):
+        return "AST(%r, %r, %r, %r" % (self.__file,
+                                       self.__declarations,
+                                       self.__pragmas,
+                                       self.__comments)
+
     def file(self):            return self.__file
     def declarations(self):    return self.__declarations
     def pragmas(self):         return self.__pragmas
@@ -174,10 +180,14 @@ Functions:
         self.__file = file
         self.__line = line
 
+    def __repr__(self):
+        return "Pragma(%r)" % self.__text
+
     def text(self)    : return self.__text
     def __str__(self) : return self.__text
     def file(self)    : return self.__file
     def line(self)    : return self.__line
+
 
 class Comment :
     """Class containing information about a comment
@@ -194,11 +204,13 @@ Functions:
         self.__file = file
         self.__line = line
 
+    def __repr__(self):
+        return "Comment(%r)" % self.__text
+
     def text(self)    : return self.__text
     def __str__(self) : return self.__text
     def file(self)    : return self.__file
     def line(self)    : return self.__line
-
 
 
 
@@ -228,6 +240,10 @@ Functions:
 
         self.__definitions  = definitions
         self._continuations = []
+
+    def __repr__(self):
+        return "Module(%s, %r)" % ("::".join(self.scopedName()),
+                                   self.definitions())
 
     def accept(self, visitor): visitor.visitModule(self)
 
@@ -265,6 +281,10 @@ Functions:
         self.__contents     = []
         self.__declarations = []
         self.__callables    = []
+
+    def __repr__(self):
+        return "Interface(%s, %r)" % ("::".join(self.scopedName()),
+                                      self.contents())
 
     def _setContents(self, contents):
         self.__contents     = contents
@@ -317,6 +337,9 @@ Functions:
         self._fullDecl  = None
         self._more      = []
 
+    def __repr__(self):
+        return "Forward(%s)" % "::".join(self.scopedName())
+
     def accept(self, visitor): visitor.visitForward(self)
 
     def abstract(self): return self.__abstract
@@ -345,7 +368,10 @@ Functions:
         self.__constType = constType
         self.__constKind = constKind
         self.__value     = value
-        #print line, "Const init:", constType, identifier, value
+
+    def __repr__(self):
+        return "Const(%s, %r)" % ("::".join(self.scopedName()),
+                                  self.value())
 
     def accept(self, visitor): visitor.visitConst(self)
 
@@ -373,6 +399,10 @@ Functions:
 
         self.__sizes = sizes
         self.__alias = None
+
+    def __repr__(self):
+        return "Declarator(%s, %s)" % ("::".join(self.scopedName()),
+                                       self.sizes())
 
     def _setAlias(self, alias): self.__alias = alias
 
@@ -409,6 +439,10 @@ Functions:
         self.__constrType  = constrType
         self.__declarators = declarators
 
+    def __repr__(self):
+        return "Typedef(%s, %r)" % (self.aliasType(),
+                                    self.declarators())
+
     def accept(self, visitor): visitor.visitTypedef(self)
 
     def aliasType(self):   return self.__aliasType
@@ -435,6 +469,10 @@ Functions:
         self.__constrType  = constrType
         self.__declarators = declarators
 
+    def __repr__(self):
+        return "Member(%s, %r)" % (self.memberType(),
+                                   self.declarators())
+
     def accept(self, visitor): visitor.visitMember(self)
 
     def memberType(self):  return self.__memberType
@@ -458,6 +496,10 @@ Functions:
         DeclRepoId.__init__(self, identifier, scopedName, repoId)
 
         self.__recursive = recursive
+
+    def __repr__(self):
+        return "Struct(%s, %r)" % ("::".join(self.scopedName()),
+                                   self.members())
 
     def _setMembers(self, members):
         self.__members = members
@@ -484,6 +526,9 @@ Functions:
         self._fullDecl = None
         self._more     = []
 
+    def __repr__(self):
+        return "StructForward(%s)" % "::".join(self.scopedName())
+
     def accept(self, visitor): visitor.visitStructForward(self)
 
     def fullDecl(self): return self._fullDecl
@@ -504,7 +549,10 @@ Function:
         DeclRepoId.__init__(self, identifier, scopedName, repoId)
 
         self.__members    = members
-        #print line, "Exception init:", identifier, members
+
+    def __repr__(self):
+        return "Exception(%s, %r)" % ("::".join(self.scopedName()),
+                                      self.members())
 
     def accept(self, visitor): visitor.visitException(self)
 
@@ -530,6 +578,10 @@ Functions:
         self.__default   = default
         self.__value     = value
         self.__labelKind = labelKind
+
+    def __repr__(self):
+        return "CaseLabel(%r, %r)" % (self.default(),
+                                      self.value())
 
     def accept(self, visitor): visitor.visitCaseLabel(self)
 
@@ -558,6 +610,11 @@ Functions:
         self.__caseType   = caseType
         self.__constrType = constrType
         self.__declarator = declarator
+
+    def __repr__(self):
+        return "UnionCase(%r, %r, %r)" % (self.labels(),
+                                          self.caseType(),
+                                          self.declarator())
 
     def accept(self, visitor): visitor.visitUnionCase(self)
 
@@ -590,6 +647,11 @@ Functions:
         self.__constrType = constrType
         self.__recursive  = recursive
 
+    def __repr__(self):
+        return "Union(%s, %r, %r)" % ("::".join(self.scopedName()),
+                                      self.switchType(),
+                                      self.cases())
+
     def _setCases(self, cases):
         self.__cases = cases
 
@@ -617,6 +679,9 @@ Functions:
         self._fullDecl = None
         self._more     = []
 
+    def __repr__(self):
+        return "UnionForward(%s)" % "::".join(self.scopedName())
+
     def accept(self, visitor): visitor.visitUnionForward(self)
 
     def fullDecl(self): return self._fullDecl
@@ -636,6 +701,9 @@ Function:
         DeclRepoId.__init__(self, identifier, scopedName, repoId)
 
         self.__value = value
+
+    def __repr__(self):
+        return "Enumerator(%s)" % "::".join(self.scopedName())
 
     def accept(self, visitor): visitor.visitEnumerator(self)
 
@@ -657,6 +725,10 @@ Function:
         DeclRepoId.__init__(self, identifier, scopedName, repoId)
 
         self.__enumerators = enumerators
+
+    def __repr__(self):
+        return "Enumerator(%s, %r)" % ("::".join(self.scopedName()),
+                                       self.enumerators())
 
     def accept(self, visitor): visitor.visitEnum(self)
 
@@ -684,6 +756,11 @@ Functions:
         self.__declarators = declarators
         self.__identifiers = [ d.identifier() for d in declarators ]
         #print line, "Attribute init:", readonly, identifiers
+
+    def __repr__(self):
+        return "Attribute(%r, %r, %r)" % (self.readonly(),
+                                          self.attrType(),
+                                          self.declarators())
 
     def accept(self, visitor): visitor.visitAttribute(self)
 
@@ -716,9 +793,16 @@ Functions:
         self.__identifier = identifier
         #print line, "Parameter init:", identifier
 
+    def __repr__(self):
+        return "Parameter(%s, %r, %r)" % (self.dirtext(),
+                                          self.paramType(),
+                                          self.identifier())
+
     def accept(self, visitor): visitor.visitParameter(self)
 
     def direction(self):  return self.__direction
+    def dirtext(self):    return ((self.__is_in and "in" or "") +
+                                  (self.__is_out and "out" or ""))
     def is_in(self):      return self.__is_in
     def is_out(self):     return self.__is_out
     def paramType(self):  return self.__paramType
@@ -750,6 +834,13 @@ Functions:
         self.__contexts   = contexts
         #print line, "Operation init:", identifier, raises, contexts
 
+    def __repr__(self):
+        return "Operation(%r %r, %r, %r, %r)" % (self.identifier(),
+                                                 self.oneway(),
+                                                 self.returnType(),
+                                                 self.parameters(),
+                                                 self.raises())
+
     def accept(self, visitor): visitor.visitOperation(self)
 
     def oneway(self):     return self.__oneway
@@ -771,6 +862,9 @@ No non-inherited functions."""
 
         Decl.__init__(self, file, line, mainFile, pragmas, comments)
         DeclRepoId.__init__(self, identifier, scopedName, repoId)
+
+    def __repr__(self):
+        return "Native(%s)" % "::".join(self.scopedName())
 
     def accept(self, visitor): visitor.visitNative(self)
 
@@ -795,6 +889,12 @@ Functions:
         self.__memberType   = memberType
         self.__constrType   = constrType
         self.__declarators  = declarators
+
+    def __repr__(self):
+        return "StateMember(%r, %r, %r)" % ((self.memberAccess()
+                                             and "private" or "public"),
+                                            self.memberType(),
+                                            self.declarators())
 
     def accept(self, visitor): visitor.visitStateMember(self)
 
@@ -822,6 +922,11 @@ Functions:
         self.__identifier = identifier
         self.__parameters = parameters
         self.__raises     = raises
+
+    def __repr__(self):
+        return "Factory(%r, %r, %r)" % (self.identifier(),
+                                        self.parameters(),
+                                        self.raises())
 
     def accept(self, visitor): visitor.visitFactory(self)
 
@@ -851,6 +956,9 @@ Function:
         self._fullDecl  = None
         self._more      = []
 
+    def __repr__(self):
+        return "ValueForward(%s)" % "::".join(self.scopedName())
+
     def accept(self, visitor): visitor.visitValueForward(self)
 
     def abstract(self): return self.__abstract
@@ -875,6 +983,10 @@ Functions:
 
         self.__boxedType  = boxedType
         self.__constrType = constrType
+
+    def __repr__(self):
+        return "ValueBox(%s, %r)" % ("::".join(self.scopedName()),
+                                     self.boxedType())
 
     def accept(self, visitor): visitor.visitValueBox(self)
 
@@ -914,6 +1026,10 @@ Functions:
         self.__callables    = []
         self.__statemembers = []
         self.__factories    = []
+
+    def __repr__(self):
+        return "ValueAbs(%s, %r)" % ("::".join(self.scopedName()),
+                                     self.contents())
 
     def _setContents(self, contents):
         self.__contents     = contents
@@ -997,6 +1113,10 @@ Functions:
         self.__callables    = []
         self.__statemembers = []
         self.__factories    = []
+
+    def __repr__(self):
+        return "Value(%s, %r)" % ("::".join(self.scopedName()),
+                                  self.contents())
 
     def _setContents(self, contents):
         self.__contents     = contents

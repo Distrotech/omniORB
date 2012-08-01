@@ -3,7 +3,7 @@
 # idltype.py                Created on: 1999/10/27
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2003-2005 Apasphere Ltd
+#    Copyright (C) 2003-2012 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -89,6 +89,11 @@ tk_local_interface    = 33
 ot_structforward      = 100
 ot_unionforward       = 101
 
+kind_map = {}
+for name, value in globals().items():
+    if name.startswith("tk_") or name.startswith("ot_"):
+        kind_map[value] = name
+
 
 class Error:
     """Exception class used by IdlType internals."""
@@ -144,6 +149,9 @@ No non-inherited functions."""
 
         Type.__init__(self, kind, 0)
 
+    def __repr__(self):
+        return "Base(%s)" % kind_map.get(self.kind(), "???")
+
     def accept(self, visitor): visitor.visitBaseType(self)
 
 
@@ -165,6 +173,9 @@ Function:
         Type.__init__(self, tk_string, 0)
         self.__bound = bound
 
+    def __repr__(self):
+        return "String(%d)" % self.bound()
+
     def accept(self, visitor): visitor.visitStringType(self)
     def bound(self): return self.__bound
 
@@ -178,6 +189,9 @@ Function:
     def __init__(self, bound):
         Type.__init__(self, tk_wstring, 0)
         self.__bound = bound
+
+    def __repr__(self):
+        return "WString(%d)" % self.bound()
 
     def accept(self, visitor): visitor.visitWStringType(self)
     def bound(self): return self.__bound
@@ -202,6 +216,9 @@ Functions:
         self.__seqType = seqType
         self.__bound   = bound
 
+    def __repr__(self):
+        return "Sequence(%r, %d)" % (self.seqType(), self.bound())
+
     def accept(self, visitor): visitor.visitSequenceType(self)
     def seqType(self): return self.__seqType
     def bound(self):   return self.__bound
@@ -221,6 +238,9 @@ Functions:
         Type.__init__(self, tk_fixed, 0)
         self.__digits = digits
         self.__scale  = scale
+
+    def __repr__(self):
+        return "Fixed(%d, %d)" % (self.digits(), self.scale())
 
     def accept(self, visitor): visitor.visitFixedType(self)
     def digits(self): return self.__digits
@@ -251,6 +271,10 @@ Functions:
         Type.__init__(self, kind, local)
         self.__decl       = decl
         self.__scopedName = scopedName
+
+    def __repr__(self):
+        return "Declared(%s, %s)" % (kind_map.get(self.kind(), "???"),
+                                     "::".join(self.scopedName()))
 
     def accept(self, visitor): visitor.visitDeclaredType(self)
 

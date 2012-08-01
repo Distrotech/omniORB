@@ -1,3 +1,49 @@
+Wed Aug  1 11:27:20 BST 2012 dgrisby
+====================================
+
+- Missing interceptor.
+
+include/omniORB4/omniInterceptors.h
+src/lib/omniORB/orbcore/interceptors.cc
+
+- Examples clean-up.
+
+src/examples/anyExample/anyExample_clt.cc
+src/examples/anyExample/anyExample_impl.cc
+src/examples/bidir/bd_client.cc
+src/examples/bidir/bd_server.cc
+src/examples/bidir/bd_shutdown.cc
+src/examples/boa/dir.mk
+src/examples/boa/eg2_clt.cc
+src/examples/boa/eg2_impl.cc
+src/examples/call_back/cb_client.cc
+src/examples/call_back/cb_server.cc
+src/examples/call_back/cb_shutdown.cc
+src/examples/dii/echo_diiclt.cc
+src/examples/dsi/echo_dsiimpl.cc
+src/examples/echo/eg2_clt.cc
+src/examples/echo/eg2_impl.cc
+src/examples/poa/implicit_activation/eg1.cc
+src/examples/poa/persistent_objref/eg2_impl.cc
+src/examples/poa/servant_manager/servant_activator.cc
+src/examples/poa/servant_manager/servant_locator.cc
+src/examples/ssl_echo/eg2_clt.cc
+src/examples/ssl_echo/eg2_impl.cc
+src/examples/thread/diner.cc
+src/examples/valuetype/simple/vclient.cc
+src/examples/valuetype/simple/vserver.cc
+
+- Log ORB destruction.
+
+src/lib/omniORB/orbcore/corbaOrb.cc
+
+- __repr__ for AST types; AMI tracking.
+
+src/tool/omniidl/python/omniidl/idlast.py
+src/tool/omniidl/python/omniidl/idltype.py
+src/tool/omniidl/python/omniidl_be/ami.py
+
+
 Sat Apr 14 10:43:59 BST 2012 dgrisby
 ====================================
 

@@ -3,7 +3,7 @@
 # ami.py                    Created on: 2011/01/18
 #			    Author    : Duncan Grisby
 #
-#    Copyright (C) 2011 Apasphere Ltd
+#    Copyright (C) 2011-2012 Apasphere Ltd
 #
 #  This file is part of omniidl.
 #
@@ -432,8 +432,11 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
                     cb._ami_declarator._ami_set_poller = op
                 else:
                     cb._ami_declarator._ami_get_poller = op
+
+                op._ami_from = cb._ami_declarator
             else:
                 cb._ami_poller = op
+                op._ami_from   = cb
 
             operations.append(op)
 
@@ -442,6 +445,7 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
         idlast.registerDecl(poller.scopedName(), poller)
 
         node._ami_poller = poller
+        poller._ami_from = node
 
         return poller_fwd, poller
 
