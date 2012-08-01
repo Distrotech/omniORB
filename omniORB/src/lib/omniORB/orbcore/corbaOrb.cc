@@ -583,6 +583,8 @@ omniOrbORB::destroy()
       return;
     }
 
+    omniORB::logs(5, "Destroy ORB...");
+
     // Call detach method of the initialisers in reverse order.
     omni_hooked_initialiser_.detach();
     omni_invoker_initialiser_.detach();
@@ -616,6 +618,7 @@ omniOrbORB::destroy()
     orb_count--;
   }
   CORBA::release(orb);
+  omniORB::logs(5, "ORB destroyed.");
 }
 
 
