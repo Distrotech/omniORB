@@ -5,8 +5,8 @@
 //
 // Usage: eg2_impl
 //
-//        On startup, the object reference is printed to cerr as a
-//        stringified IOR. This string should be used as the argument to 
+//        On startup, the object reference is printed to cout as a
+//        stringified IOR. This string should be used as the argument to
 //        eg2_clt.
 //
 
@@ -18,6 +18,7 @@
 #else
 #  include <iostream.h>
 #endif
+
 
 class Echo_i : public POA_Echo
 {

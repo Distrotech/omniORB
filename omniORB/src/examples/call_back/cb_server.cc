@@ -38,12 +38,12 @@ void
 server_thread::run(void* arg)
 {
   try {
-    while( !dying ) {
+    while (!dying) {
       omni_thread::sleep(pd_period);
       pd_client->call_back(pd_mesg);
     }
   }
-  catch(...) {
+  catch (...) {
     cout << "cb_server: Lost a client!" << endl;
   }
 
@@ -52,7 +52,7 @@ server_thread::run(void* arg)
   mu.lock();
   int do_signal = --num_active_servers == 0;
   mu.unlock();
-  if( do_signal )  sigobj.signal();
+  if (do_signal)  sigobj.signal();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ server_i::~server_i()
 void
 server_i::one_time(cb::CallBack_ptr cb, const char* mesg)
 {
-  if( CORBA::is_nil(cb) ) {
+  if (CORBA::is_nil(cb)) {
     cerr << "Received a nil callback.\n";
     return;
   }
@@ -101,7 +101,7 @@ void
 server_i::_cxx_register(cb::CallBack_ptr cb, const char* mesg,
 		      CORBA::UShort period_secs)
 {
-  if( CORBA::is_nil(cb) ) {
+  if (CORBA::is_nil(cb) ) {
     cerr << "Received a nil callback.\n";
     return;
   }
@@ -122,13 +122,13 @@ server_i::shutdown()
 {
   omni_mutex_lock sync(mu);
 
-  if( !dying ) {
+  if (!dying ) {
     cout << "cb_server: I am being shutdown!" << endl;
 
     // Tell the servers to exit, and wait for them to do so.
     dying = 1;
 
-    while( num_active_servers > 0 )  sigobj.wait();
+    while (num_active_servers > 0 )  sigobj.wait();
 
     // Shutdown the ORB (but do not wait for completion).  This also
     // causes the main thread to unblock from CORBA::ORB::run().
@@ -161,17 +161,11 @@ int main(int argc, char** argv)
     cout << "cb_server: Returned from orb->run()." << endl;
     orb->destroy();
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught CORBA::" << ex._name() << endl;
   }
-  catch(CORBA::Exception& ex) {
+  catch (CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
-  }
-  catch(omniORB::fatalException& fe) {
-    cerr << "Caught omniORB::fatalException:" << endl;
-    cerr << "  file: " << fe.file() << endl;
-    cerr << "  line: " << fe.line() << endl;
-    cerr << "  mesg: " << fe.errmsg() << endl;
   }
   return 0;
 }

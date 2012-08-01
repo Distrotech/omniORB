@@ -26,7 +26,7 @@ public:
 
 static void do_single(cb::Server_ptr server, cb::CallBack_ptr cb)
 {
-  if( CORBA::is_nil(server) ) {
+  if (CORBA::is_nil(server)) {
     cerr << "cb_client: The server reference is nil!" << endl;
     return;
   }
@@ -40,7 +40,7 @@ static void do_single(cb::Server_ptr server, cb::CallBack_ptr cb)
 static void do_register(cb::Server_ptr server, cb::CallBack_ptr cb,
 			int period, int time_to_shutdown)
 {
-  if( CORBA::is_nil(server) ) {
+  if (CORBA::is_nil(server)) {
     cerr << "cb_client: The server reference is nil!" << endl;
     return;
   }
@@ -59,15 +59,13 @@ static void do_register(cb::Server_ptr server, cb::CallBack_ptr cb,
 int main(int argc, char** argv)
 {
   try {
-
     CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
 
-    if( argc != 2 && argc != 4 ) {
+    if (argc != 2 && argc != 4) {
       cerr << "usage:  cb_client <object reference> [<call-back period>"
 	" <time to shutdown>]" << endl;
       return 1;
     }
-
 
     {
       // Get the reference the server.
@@ -85,29 +83,25 @@ int main(int argc, char** argv)
       cb::CallBack_var callback = mycallback->_this();  // *implicit activation*
       mycallback->_remove_ref();
 
-      if( argc == 2 )  do_single(server, callback);
-      else             do_register(server, callback, atoi(argv[2]),
-				   atoi(argv[3]));
+      if (argc == 2)
+        do_single(server, callback);
+      else
+        do_register(server, callback, atoi(argv[2]),
+                    atoi(argv[3]));
 
     }
     // Clean-up.  This also destroys the call-back object.
     orb->destroy();
   }
-  catch(CORBA::TRANSIENT&) {
+  catch (CORBA::TRANSIENT&) {
     cerr << "Caught system exception TRANSIENT -- unable to contact the "
          << "server." << endl;
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught a CORBA::" << ex._name() << endl;
   }
-  catch(CORBA::Exception& ex) {
+  catch (CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
-  }
-  catch(omniORB::fatalException& fe) {
-    cerr << "Caught omniORB::fatalException:" << endl;
-    cerr << "  file: " << fe.file() << endl;
-    cerr << "  line: " << fe.line() << endl;
-    cerr << "  mesg: " << fe.errmsg() << endl;
   }
   return 0;
 }

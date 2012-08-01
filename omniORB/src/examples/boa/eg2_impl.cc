@@ -62,10 +62,10 @@ int main(int argc, char** argv)
     // boa->destroy();
     // orb->destroy();
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught CORBA::" << ex._name() << endl;
   }
-  catch(CORBA::Exception& ex) {
+  catch (CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
   }
   return 0;

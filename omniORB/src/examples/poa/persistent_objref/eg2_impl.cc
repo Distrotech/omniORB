@@ -2,7 +2,7 @@
 //                  <top>/src/examples/echo/eg2_impl.cc
 //               except that the object reference is the same each time.
 //
-// Usage: eg2_impl -ORBpoa_iiop_port <portnum>
+// Usage: eg2_impl -ORBendPoint giop:tcp::<portnum>
 //
 //        On startup, the object reference is printed to stderr as a
 //        stringified IOR. This string should be used as the argument to 
@@ -44,7 +44,7 @@ char* Echo_i::echoString(const char* mesg)
 
 void usage()
 {
-  cerr << "usage:  eg2_impl -ORBendPoint ..." << endl;
+  cerr << "usage:  eg2_impl -ORBendPoint giop:tcp::<port>" << endl;
   exit(-1);
 }
 
@@ -52,12 +52,11 @@ void usage()
 int main(int argc, char** argv)
 {
   try {
-    
-    if( argc < 3 )  usage();
+    if (argc < 3)  usage();
 
     CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
 
-    if( argc != 1 )  usage();
+    if (argc != 1)  usage();
 
     {
       CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
@@ -91,17 +90,11 @@ int main(int argc, char** argv)
     }
     orb->destroy();
   }
-  catch(CORBA::SystemException& ex) {
+  catch (CORBA::SystemException& ex) {
     cerr << "Caught CORBA::" << ex._name() << endl;
   }
-  catch(CORBA::Exception& ex) {
+  catch (CORBA::Exception& ex) {
     cerr << "Caught CORBA::Exception: " << ex._name() << endl;
-  }
-  catch(omniORB::fatalException& fe) {
-    cerr << "Caught omniORB::fatalException:" << endl;
-    cerr << "  file: " << fe.file() << endl;
-    cerr << "  line: " << fe.line() << endl;
-    cerr << "  mesg: " << fe.errmsg() << endl;
   }
   return 0;
 }

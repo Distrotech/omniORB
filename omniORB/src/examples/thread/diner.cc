@@ -13,38 +13,6 @@
 //     of them is absent.
 //       
 //
-
-/*
- $Log$
- Revision 1.7.2.3  2005/06/08 09:35:33  dgrisby
- Update examples / utils for cleanliness and use of new C++ mapping.
-
- Revision 1.7.2.2  2005/01/06 23:09:40  dgrisby
- Big merge from omni4_0_develop.
-
- Revision 1.7.2.1  2003/03/23 21:02:55  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.6  1999/03/11 16:26:15  djr
- Updated copyright notice
-
- Revision 1.5  1997/12/09 20:21:58  sll
- Replaced macro __NT__ with __WIN32__
-
-// Revision 1.4  1997/06/03  10:59:49  tjr
-// new omnithread interface using exceptions and lock class for mutex & sem.
-//
-// Revision 1.3  1995/08/17  10:22:27  tjr
-// new thread stuff
-//
-// Revision 1.2  1995/03/13  16:26:44  sll
-// Added mutex around output to STDERR stream.
-//
-// Revision 1.1  1995/01/25  11:54:48  sll
-// Initial revision
-//
- */
-
 #include <omniORB4/CORBA_sysdep.h> // for HAVE_STD
 
 #ifdef HAVE_STD

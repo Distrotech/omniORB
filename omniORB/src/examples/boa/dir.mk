@@ -1,5 +1,5 @@
 
-CXXSRCS = eg2_impl.cc eg2_clt.cc
+CXXSRCS = eg2_impl.cc
 
 DIR_CPPFLAGS = $(CORBA_CPPFLAGS)
 
@@ -10,18 +10,14 @@ OMNIORB_IDL += -WbBOA
 
 
 eg2_impl   = $(patsubst %,$(BinPattern),eg2_impl)
-eg2_clt    = $(patsubst %,$(BinPattern),eg2_clt)
 
 
-all:: $(eg2_impl) $(eg2_clt)
+all:: $(eg2_impl)
 
-export:: $(eg2_impl) $(eg2_clt)
+export:: $(eg2_impl)
 
 clean::
-	$(RM) $(eg2_impl) $(eg2_clt)
+	$(RM) $(eg2_impl)
 
 $(eg2_impl): eg2_impl.o $(CORBA_STATIC_STUB_OBJS) $(CORBA_LIB_DEPEND)
-	@(libs="$(CORBA_LIB_NODYN)"; $(CXXExecutable))
-
-$(eg2_clt): eg2_clt.o $(CORBA_STATIC_STUB_OBJS) $(CORBA_LIB_DEPEND)
 	@(libs="$(CORBA_LIB_NODYN)"; $(CXXExecutable))

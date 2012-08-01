@@ -11,7 +11,6 @@
 
 #ifdef HAVE_STD
 #  include <iostream>
-#  include <fstream>
    using namespace std;
 #else
 #  include <iostream.h>

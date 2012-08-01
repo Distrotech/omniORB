@@ -17,8 +17,8 @@ int main(int argc, char** argv)
   OneFactory* onef = new OneFactory();
   orb->register_value_factory("IDL:ValueTest/One:1.0", onef);
 
-  if( argc != 2 ) {
-    cerr << "usage:  vclient <object reference>" << endl;
+  if (argc != 2) {
+    cerr << "usage: vclient <object reference>" << endl;
     return 1;
   }
 
