@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     return 1;
   }
   if (stat(sslContext::key_file,&sb) < 0) {
-    cerr << "Cannot open key file"
+    cerr << "Cannot open key file: "
 	 << sslContext::key_file << endl;
     return 1;
   }

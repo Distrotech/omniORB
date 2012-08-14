@@ -25,7 +25,7 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
 
 #include <omniORB4/CORBA.h>
@@ -116,6 +116,7 @@ sslContext::internal_initialise() {
   set_CA();
   set_DH();
   set_ephemeralRSA();
+
   // Allow the user to overwrite the SSL verification types.
   SSL_CTX_set_verify(pd_ctx, set_verify_mode(), verify_callback);
   if (pd_ssl_owner)
@@ -306,6 +307,11 @@ sslContext::set_DH() {
 void
 sslContext::set_ephemeralRSA() {
 
+  // Default implementation does nothing. To support low-grade
+  // ephemeral RSA key exchange, use a subclass with code like the
+  // following:
+
+#if 0
   RSA *rsa;
 
   rsa = RSA_generate_key(512,RSA_F4,NULL,NULL);
@@ -314,6 +320,7 @@ sslContext::set_ephemeralRSA() {
     OMNIORB_THROW(INITIALIZE,INITIALIZE_TransportError,CORBA::COMPLETED_NO);
   }
   RSA_free(rsa);
+#endif
 }
 
 
