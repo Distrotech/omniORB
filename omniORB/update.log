@@ -1,3 +1,21 @@
+Thu Aug 16 10:40:35 BST 2012 dgrisby
+====================================
+
+- UTF-8 validation fix.
+
+src/lib/omniORB/orbcore/cs-UTF-8.cc
+
+
+Tue Aug 14 10:52:07 BST 2012 dgrisby
+====================================
+
+- No longer set low-grade ephemeral RSA keys. Fix SSL example error messages.
+
+src/examples/ssl_echo/eg2_clt.cc
+src/examples/ssl_echo/eg2_impl.cc
+src/lib/omniORB/orbcore/ssl/sslContext.cc
+
+
 Wed Aug  1 11:27:20 BST 2012 dgrisby
 ====================================
 
