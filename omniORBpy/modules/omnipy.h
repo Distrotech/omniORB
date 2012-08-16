@@ -1068,6 +1068,9 @@ public:
     inline PyObject* change(PyObject* o) {
       Py_XDECREF(obj_); obj_ = o; return o;
     }
+    inline PyObject* obj() {
+      return obj_;
+    }
   private:
     PyObject* obj_;
   };

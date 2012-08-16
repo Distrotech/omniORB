@@ -241,17 +241,18 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"iis", &maj, &min, &mod))
       return 0;
 
-    if (maj != 3 || min != 0) {
+    // 3.0 stubs are still compatible with 4.2, so we accept either.
+    if (!((maj == 4 && min == 2) ||
+          (maj == 3 && min == 0))) {
+
       if (omniORB::trace(1)) {
 	omniORB::logger l;
-        l << "\n"
-	  << "omniORBpy: WARNING! _omnipy module version "
+        l << "WARNING! _omnipy module version "
 	  << OMNIPY_MAJOR << "." << OMNIPY_MINOR
-          << " expects stubs version 3.0.\n"
-	  << "omniORBpy: Stubs in " << mod << " are version "
-	  << maj << "." << min << ".\n"
-	  << "omniORBpy: You may experience strange errors "
-	  << "until you fix the mismatch\n";
+          << " expects stubs version 4.2. "
+	  << "Stubs in " << mod << " are version "
+	  << maj << "." << min << ". "
+	  << "You may experience strange errors until you fix the mismatch\n";
       }
     }
     Py_INCREF(Py_None);

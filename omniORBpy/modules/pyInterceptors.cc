@@ -3,7 +3,7 @@
 // pyInterceptors.cc          Created on: 2003/05/27
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2003-2006 Apasphere Ltd.
+//    Copyright (C) 2003-2012 Apasphere Ltd.
 //
 //    This file is part of the omniORBpy library
 //
@@ -24,25 +24,7 @@
 //    MA 02111-1307, USA
 //
 // Description:
-//    Python request interceptors
-
-// $Id$
-// $Log$
-// Revision 1.1.4.3  2006/06/05 11:51:00  dgrisby
-// Track ORB core interceptor change.
-//
-// Revision 1.1.4.2  2005/07/22 17:41:08  dgrisby
-// Update from omnipy2_develop.
-//
-// Revision 1.1.4.1  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.2.2  2003/07/26 23:17:43  dgrisby
-// Avoid spurious warning about lack of return value.
-//
-// Revision 1.1.2.1  2003/05/28 10:13:01  dgrisby
-// Preliminary interceptor support. General clean-up.
-//
+//    Python interceptors
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
@@ -65,6 +47,8 @@ static PyObject* serverReceiveRequestFns      = 0;
 static PyObject* serverReceiveRequestCredsFns = 0;
 static PyObject* serverSendReplyFns           = 0;
 static PyObject* serverSendExceptionFns       = 0;
+static PyObject* assignUpcallThreadFns        = 0;
+static PyObject* assignAMIThreadFns           = 0;
 
 
 static inline
@@ -358,6 +342,79 @@ pyServerSendExceptionFn(omniInterceptors::serverSendException_T::info_T& info)
   return 1;
 }
 
+
+template<class infoT>
+static
+void
+assignThreadFn(infoT& info, PyObject* fns)
+{
+  OMNIORB_ASSERT(fns);
+
+  omnipyThreadCache::lock _t;
+
+  PyObject*           post_list = PyList_New(0);
+  omniPy::PyRefHolder post_list_holder(post_list);
+
+  int i;
+  for (i=0; i < PyList_GET_SIZE(fns); ++i) {
+    PyObject* interceptor = PyList_GET_ITEM(fns, i);
+    PyObject* result      = PyObject_CallObject(interceptor, 0);
+
+    if (!result)
+      omniPy::handlePythonException();
+    
+    if (result == Py_None) {
+      // Simple function
+      Py_DECREF(result);
+    }
+    else if (PyCallable_Check(result)) {
+      // A generator function. Call next() on it once
+      PyList_Append(post_list, result);
+
+      result = PyObject_CallMethod(result, (char*)"next", 0);
+      if (!result)
+        omniPy::handlePythonException();
+
+      Py_DECREF(result);
+    }
+    else {
+      Py_DECREF(result);
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
+    }
+  }
+  info.run();
+
+  // Reverse-iterate over functions
+  for (i = PyList_GET_SIZE(post_list) - 1; i >= 0; --i) {
+
+    PyObject* gen    = PyList_GET_ITEM(post_list, i);
+    PyObject* result = PyObject_CallMethod(gen, (char*)"next", 0);
+
+    if (result) {
+      // Not expecting this -- next() should have raise StopIteration
+      Py_DECREF(result);
+    }
+    else {
+      PyErr_Clear();
+    }
+  }
+}
+
+static
+void
+pyAssignUpcallThreadFn(omniInterceptors::assignUpcallThread_T::info_T& info)
+{
+  assignThreadFn(info, assignUpcallThreadFns);
+}
+
+static
+void
+pyAssignAMIThreadFn(omniInterceptors::assignAMIThread_T::info_T& info)
+{
+  assignThreadFn(info, assignAMIThreadFns);
+}
+
+
 void
 omniPy::
 registerInterceptors()
@@ -378,7 +435,14 @@ registerInterceptors()
 
   if (serverSendExceptionFns)
     interceptors->serverSendException.add(pyServerSendExceptionFn);
+
+  if (assignUpcallThreadFns)
+    interceptors->assignUpcallThread.add(pyAssignUpcallThreadFn);
+
+  if (assignAMIThreadFns)
+    interceptors->assignAMIThread.add(pyAssignAMIThreadFn);
 }
+
 
 #define CHECK_ORB_NOT_INITIALISED() \
   do { \
@@ -535,6 +599,59 @@ extern "C" {
     return Py_None;
   }
 
+  static char addAssignUpcallThread_doc [] =
+  "addAssignUpcallThread(interceptor) -> None\n"
+  "\n"
+  "Install an interceptor for when a thread is assigned to perform upcalls.\n";
+
+  static PyObject* pyInterceptor_addAssignUpcallThread(PyObject* self,
+                                                       PyObject* args)
+  {
+    PyObject* interceptor;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &interceptor))
+      return 0;
+
+    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(interceptor),
+			  BAD_PARAM_WrongPythonType);
+
+    CHECK_ORB_NOT_INITIALISED();
+
+    if (!assignUpcallThreadFns)
+      assignUpcallThreadFns = PyList_New(0);
+
+    PyList_Append(assignUpcallThreadFns, interceptor);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  static char addAssignAMIThread_doc [] =
+  "addAssignAMIThread(interceptor) -> None\n"
+  "\n"
+  "Install an interceptor for when a thread is assigned to perform AMI calls.\n";
+
+  static PyObject* pyInterceptor_addAssignAMIThread(PyObject* self,
+                                                    PyObject* args)
+  {
+    PyObject* interceptor;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &interceptor))
+      return 0;
+
+    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(interceptor),
+			  BAD_PARAM_WrongPythonType);
+
+    CHECK_ORB_NOT_INITIALISED();
+
+    if (!assignAMIThreadFns)
+      assignAMIThreadFns = PyList_New(0);
+
+    PyList_Append(assignAMIThreadFns, interceptor);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+
   static PyMethodDef pyInterceptor_methods[] = {
     {(char*)"addClientSendRequest",
      pyInterceptor_addClientSendRequest,
@@ -560,6 +677,16 @@ extern "C" {
      pyInterceptor_addServerSendException,
      METH_VARARGS,
      addServerSendException_doc},
+
+    {(char*)"addAssignUpcallThread",
+     pyInterceptor_addAssignUpcallThread,
+     METH_VARARGS,
+     addAssignUpcallThread_doc},
+
+    {(char*)"addAssignAMIThread",
+     pyInterceptor_addAssignAMIThread,
+     METH_VARARGS,
+     addAssignAMIThread_doc},
 
     {NULL,NULL}
   };
