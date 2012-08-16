@@ -33,7 +33,7 @@
 
 #  define OMNI_REFCOUNT_DEFINED
 
-class omni_refcount {
+class _OMNITHREAD_NTDLL_ omni_refcount {
 public:
   inline omni_refcount(int start) : count(start) {}
   inline ~omni_refcount() {}
@@ -59,6 +59,38 @@ private:
 };
 
 #endif // OMNI_ATOMIC_GCC_SYNC
+
+
+#if defined(_MSC_VER) && !defined(OMNI_REFCOUNT_DEFINED)
+
+#  define OMNI_REFCOUNT_DEFINED
+
+class _OMNITHREAD_NTDLL_ omni_refcount {
+public:
+  inline omni_refcount(int start) : count(start) {}
+  inline ~omni_refcount() {}
+
+  // Atomically increment reference count and return new value
+  inline int inc() {
+    return InterlockedIncrement(&count);
+  }
+
+  // Atomically decrement reference count and return new value
+  inline int dec() {
+    return InterlockedDecrement(&count);
+  }
+
+  // Return snapshot of current value. Real count may have changed by
+  // the time the value is looked at!
+  inline int value() {
+    return count;
+  }
+
+private:
+  volatile LONG count;
+};
+
+#endif // _MSC_VER
 
 
 #endif // __omnithread_atomic_h_

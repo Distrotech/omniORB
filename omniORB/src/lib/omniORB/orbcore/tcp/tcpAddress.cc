@@ -116,7 +116,7 @@ tcpAddress::Poke() const {
 
   if (::connect(sock,ai->addr(),ai->addrSize()) == RC_SOCKET_ERROR) {
 
-    if (ERRNO != EINPROGRESS) {
+    if (ERRNO != RC_EINPROGRESS) {
       CLOSESOCKET(sock);
       return 0;
     }

@@ -27,5 +27,4 @@
 
 OMNI_USING_NAMESPACE(omni)
 
-#define USE_core_stub_in_nt_dll
 #include <omniORB4/messagingSK.cc>

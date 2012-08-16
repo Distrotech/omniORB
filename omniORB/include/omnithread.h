@@ -729,9 +729,9 @@ OMNI_THREAD_EXPOSE:
 
 #ifndef OMNI_REFCOUNT_DEFINED
 
-#define OMNI_REFCOUNT_DEFAULT
+#  define OMNI_REFCOUNT_DEFAULT
 
-class omni_refcount {
+class _OMNITHREAD_NTDLL_ omni_refcount {
 public:
   inline omni_refcount(int start) : count(start) {}
   inline ~omni_refcount() {}

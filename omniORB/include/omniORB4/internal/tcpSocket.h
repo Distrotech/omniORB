@@ -31,6 +31,7 @@
 #define __TCPSOCKET_h__
 
 #include <SocketCollection.h>
+#include <orbParameters.h>
 #include <omniORB4/omniServer.h>
 
 

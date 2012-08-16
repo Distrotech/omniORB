@@ -31,6 +31,17 @@
 #ifndef __OMNIORB_CALLDESCRIPTOR_H__
 #define __OMNIORB_CALLDESCRIPTOR_H__
 
+#ifdef _core_attr
+# error "A local CPP macro _core_attr has already been defined."
+#endif
+
+#if defined(_OMNIORB_LIBRARY)
+#     define _core_attr
+#else
+#     define _core_attr _OMNIORB_NTDLL_IMPORT
+#endif
+
+
 class omniObjRef;
 class omniServant;
 class omniCurrent;
@@ -275,7 +286,7 @@ private:
   // Call interceptors //
   ///////////////////////
 
-  static LocalCallFn           sd_interceptor_call;
+  static _core_attr LocalCallFn sd_interceptor_call;
   // Function used in place of the normal local call function if
   // interceptors are registered. Initialises the interceptor stack
   // and calls the first interceptor in the stack.
@@ -283,8 +294,8 @@ private:
   static void setupInterception(omniCallDescriptor* cd, omniServant* servant);
   // Function assigned to sd_interceptor_call when interceptors are registered.
 
-  static InterceptorFn*        sd_interceptor_stack;
-  InterceptorFn*               pd_interceptor_stack;
+  static _core_attr InterceptorFn* sd_interceptor_stack;
+  InterceptorFn*                   pd_interceptor_stack;
   // Global interceptor stack and this call descriptor's pointer into it.
 
 
@@ -443,7 +454,7 @@ public:
     return 1;
   }
 
-  static omni_tracedmutex sd_lock;
+  static _core_attr omni_tracedmutex sd_lock;
   
 protected:
   CORBA::Exception*       pd_exception;
@@ -518,5 +529,7 @@ public:
   // exception, so the other members won't get called.
   void marshalArguments(cdrStream&);
 };
+
+#undef _core_attr
 
 #endif  // __OMNIORB_CALLDESCRIPTOR_H__

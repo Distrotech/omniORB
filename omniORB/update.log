@@ -1,3 +1,19 @@
+Thu Aug 16 10:45:16 BST 2012 dgrisby
+====================================
+
+- Windows fixes and atomics support.
+
+include/omniORB4/callDescriptor.h
+include/omniORB4/internal/tcpSocket.h
+include/omnithread.h
+include/omnithread/atomic.h
+src/lib/omniORB/dir.mk
+src/lib/omniORB/dynamic/messagingstub.cc
+src/lib/omniORB/omniidl_be/cxx/dynskel/typecode.py
+src/lib/omniORB/orbcore/ssl/sslAddress.cc
+src/lib/omniORB/orbcore/tcp/tcpAddress.cc
+
+
 Thu Aug 16 10:40:35 BST 2012 dgrisby
 ====================================
 
