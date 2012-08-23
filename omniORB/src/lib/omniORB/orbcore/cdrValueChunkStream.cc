@@ -3,7 +3,7 @@
 // cdrValueChunkStream.cc     Created on: 2003/03/26
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2003-2007 Apasphere Ltd.
+//    Copyright (C) 2003-2012 Apasphere Ltd.
 //
 //    This file is part of the omniORB library
 //
@@ -47,7 +47,14 @@ cdrValueChunkStream::
 {
   if (!pd_exception) {
     if (pd_reader && pd_nestLevel > 0) {
-      endInputValue();
+      try {
+        endInputValue();
+      }
+      catch (...) {
+        copyStateToActual();
+        pd_valueTracker = 0;
+        throw;
+      }
     }
     OMNIORB_ASSERT(pd_nestLevel == 0);
   }
@@ -291,6 +298,13 @@ reserveOutputSpaceForPrimitiveType(omni::alignment_t align, size_t required)
 	// Not got to the end of the current buffer yet
 	return 1;
       }
+
+      // If there is room for any data in the current buffer, it will
+      // be "lost" when the buffer is changed below. Increase
+      // pd_remaining to reflect the octets that would have fitted in
+      // the current buffer, but were not used.
+      pd_remaining += (omni::ptr_arith_t)pd_outb_end - p1;
+
       copyStateToActual();
       if (!pd_actual.reserveOutputSpaceForPrimitiveType(align, required))
 	OMNIORB_THROW(MARSHAL, MARSHAL_CannotReserveOutputSpace,
@@ -379,6 +393,13 @@ maybeReserveOutputSpace(omni::alignment_t align, size_t required)
       // Not got to the end of the current buffer yet
       return 1;
     }
+
+    // If there is room for any data in the current buffer, it will
+    // be "lost" when the buffer is changed below. Increase
+    // pd_remaining to reflect the octets that would have fitted in
+    // the current buffer, but were not used.
+    pd_remaining += (omni::ptr_arith_t)pd_outb_end - p1;
+
     copyStateToActual();
     if (!pd_actual.maybeReserveOutputSpace(align, required))
       OMNIORB_THROW(MARSHAL, MARSHAL_CannotReserveOutputSpace,
@@ -561,8 +582,7 @@ declareArrayLength(omni::alignment_t align, size_t size)
     // Number of octets remaining is the number we required, minus the
     // number we can fit into the current buffer with the required
     // alignment.
-    omni::ptr_arith_t mask = ~((ptr_arith_t)align - 1);
-    pd_remaining = end - ((omni::ptr_arith_t)pd_outb_end & mask);
+    pd_remaining = end - (omni::ptr_arith_t)pd_outb_end;
 
     if (omniORB::trace(25)) {
       omniORB::logger l;
