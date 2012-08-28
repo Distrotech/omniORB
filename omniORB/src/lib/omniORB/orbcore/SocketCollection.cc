@@ -1363,7 +1363,7 @@ SocketHolder::Peek()
 	  // Set timeout for condition wait
 	  omni_thread::get_time(deadline, SocketCollection::scan_interval);
 	}
-	int signalled = pd_peek_cond->timedwait(s, ns);
+	int signalled = pd_peek_cond->timedwait(deadline);
 	
 	if (pd_selectable && !pd_peeking) {
 	  // OK to go ahead and peek

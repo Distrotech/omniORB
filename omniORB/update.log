@@ -1,3 +1,11 @@
+Tue Aug 28 09:44:09 BST 2012 dgrisby
+====================================
+
+- Missed edit in select() version of SocketCollection.
+
+src/lib/omniORB/orbcore/SocketCollection.cc
+
+
 Fri Aug 24 10:47:16 BST 2012 dgrisby
 ====================================
 
