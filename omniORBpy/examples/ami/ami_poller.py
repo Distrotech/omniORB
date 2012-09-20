@@ -25,11 +25,29 @@ if eo is None:
     print "Object reference is not an Example::Echo"
     sys.exit(1)
 
-# Invoke the echoString operation
-message = "Hello from Python"
-result  = eo.echoString(message)
+# Invoke the echoString operation using polling AMI
+print "Send..."
+poller = eo.sendp_echoString("Hello with a poller")
 
-print "I said '%s'. The object said '%s'." % (message,result)
+# Poll with a timeout of 100 ms
+while not poller.is_ready(100):
+    print "Not ready..."
 
-# Destroy the ORB to clean up
+result = poller.echoString(0)
+print "The result was:", result
+
+# Invoke again
+print "Send 2..."
+poller = eo.sendp_echoString("Hello again")
+
+# Poll with a timeout of 1 second
+try:
+    result = poller.echoString(1000)
+
+except CORBA.TIMEOUT:
+    print "Timed out"
+
+else:
+    print "The second result was:", result
+
 orb.destroy()

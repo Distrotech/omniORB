@@ -185,11 +185,11 @@ objref_operation = """
 
 objref_ami_sendc = """
     def @ami_opname@(self, ami_handler, *args):
-        return _omnipy.invoke_sendc(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, ami_handler, args)"""
+        return _omnipy.invoke_sendc(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@", ami_handler)"""
 
 objref_ami_sendp = """
     def @ami_opname@(self, *args):
-        return _0_@modname@._impl_@poller_class@(_omnipy.invoke_sendp(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args))"""
+        return _0_@modname@._impl_@poller_class@(_omnipy.invoke_sendp(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@"))"""
 
 objref_methods = """
     __methods__ = @methods@"""
@@ -517,7 +517,7 @@ class _impl_@vname@ (@vname@, omniORB.ami.PollerImpl):
 
 ami_poller_op = """\
     def @poller_opname@(self, ami_timeout):
-        return _omnipy.poll(self._poller, "@opname@", ami_timeout)
+        return self._poller.poll("@opname@", ami_timeout)
 """
 
 ami_poller_register = """
@@ -1055,11 +1055,15 @@ class PythonVisitor:
             if isinstance(ami_from, idlast.Declarator):
                 # Attribute
                 if c._ami_setter:
-                    from_op = "_set_" + from_ident
+                    from_op  = "_set_" + from_ident
+                    excep_op = ami_from._ami_set_handler_excep.identifier()
                 else:
-                    from_op = "_get_" + from_ident
+                    from_op  = "_get_" + from_ident
+                    excep_op = ami_from._ami_get_handler_excep.identifier()
             else:
-                from_op = from_ident
+                from_op  = from_ident
+                excep_op = ami_from._ami_handler_excep.identifier()
+
 
             send = c.identifier().split("_")[0]
             if send == "sendc":
@@ -1067,6 +1071,7 @@ class PythonVisitor:
                             ami_opname = ami_opname,
                             opname     = mangle(from_op),
                             r_opname   = from_op,
+                            excep_name = excep_op,
                             ifid       = ifid,
                             modname    = self.modname)
             else:
@@ -1076,6 +1081,7 @@ class PythonVisitor:
                             ami_opname   = ami_opname,
                             opname       = mangle(from_op),
                             r_opname     = from_op,
+                            excep_name   = excep_op,
                             ifid         = ifid,
                             modname      = self.modname,
                             poller_class = poller_class)

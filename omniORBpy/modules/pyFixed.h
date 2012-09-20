@@ -28,17 +28,9 @@
 // Description:
 //    Implementation of Fixed type for Python
 
-// $Id$
-// $Log$
-// Revision 1.1.4.2  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.1  2001/04/09 15:22:16  dpg1
-// Fixed point support.
-//
+#ifndef _pyFixed_h_
+#define _pyFixed_h_
+
 
 #if defined(__cygwin__) && defined(DL_IMPORT)
 # undef DL_IMPORT
@@ -57,3 +49,5 @@ extern "C" {
 #define omnipyFixed_Check(op) ((op)->ob_type == &omnipyFixed_Type)
 
 }
+
+#endif // _pyFixed_h_

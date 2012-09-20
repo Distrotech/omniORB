@@ -3,7 +3,7 @@
 // omnipy.h                   Created on: 2000/02/24
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -45,6 +45,7 @@
 #include <orbParameters.h>
 #include <omniORBpy.h>
 #include "omnipy_sysdep.h"
+#include "pyThreadCache.h"
 
 #undef minor
 
@@ -268,6 +269,7 @@ public:
     PyObject_DelAttr(obj, name);
   }
 
+
   ////////////////////////////////////////////////////////////////////////////
   // Module initialisation functions                                        //
   ////////////////////////////////////////////////////////////////////////////
@@ -278,6 +280,99 @@ public:
   static void initPOACurrentFunc (PyObject* d);
   static void initInterceptorFunc(PyObject* d);
   static void initomniFunc       (PyObject* d);
+  static void initFixed          (PyObject* d);
+  static void initCallDescriptor (PyObject* d);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // PyRefHolder holds a references to a Python object                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class PyRefHolder {
+  public:
+    inline PyRefHolder(PyObject* obj=0)    : obj_(obj) {}
+    inline PyRefHolder(PyObject* obj, int) : obj_(obj) { Py_XINCREF(obj); }
+
+    inline ~PyRefHolder() { Py_XDECREF(obj_); }
+
+    inline PyObject* retn() {
+      PyObject* r = obj_;
+      obj_ = 0;
+      return r;
+    }
+
+    inline PyObject* dup() {
+      Py_XINCREF(obj_);
+      return obj_;
+    }
+
+    inline PyRefHolder& operator=(PyObject* obj)
+    {
+      if (obj != obj_) {
+        Py_XDECREF(obj_);
+        obj_ = obj;
+      }
+      return *this;
+    }
+
+    inline PyObject* change(PyObject* obj) {
+      if (obj != obj_) {
+        Py_XDECREF(obj_);
+        obj_ = obj;
+      }
+      return obj;
+    }
+
+    inline PyObject* obj() {
+      return obj_;
+    }
+
+    inline CORBA::Boolean valid() {
+      return obj_ != 0;
+    }
+
+    // Cast operators for various concrete Python types, to allow
+    // PyObjectHolder to be passed in Python API functions.
+    inline operator PyObject*()       { return obj_; }
+    inline operator PyIntObject*()    { return (PyIntObject*)obj_; }
+    inline operator PyVarObject*()    { return (PyVarObject*)obj_; }
+    inline operator PyListObject*()   { return (PyListObject*)obj_; }
+    inline operator PyTupleObject*()  { return (PyTupleObject*)obj_; }
+    inline operator PyStringObject*() { return (PyStringObject*)obj_; }
+
+    // Pointer operator used in some Python macros like PyInt_Check.
+    inline PyObject* operator->()     { return obj_; }
+
+  private:
+    PyObject* obj_;
+
+    // Not implemented
+    PyRefHolder(const PyRefHolder&);
+    PyRefHolder& operator=(const PyRefHolder&);
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // InterpreterUnlocker releases the Python interpreter lock               //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class InterpreterUnlocker {
+  public:
+    inline InterpreterUnlocker() {
+      tstate_ = PyEval_SaveThread();
+    }
+    inline ~InterpreterUnlocker() {
+      PyEval_RestoreThread(tstate_);
+    }
+    inline void lock() {
+      PyEval_RestoreThread(tstate_);
+    }
+    inline void unlock() {
+      tstate_ = PyEval_SaveThread();
+    }
+  private:
+    PyThreadState* tstate_;
+  };
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -635,6 +730,7 @@ public:
   static
   PyObject* unmarshalTypeCode(cdrStream& stream);
 
+
   ////////////////////////////////////////////////////////////////////////////
   // Context support functions                                              //
   ////////////////////////////////////////////////////////////////////////////
@@ -672,66 +768,197 @@ public:
   static
   void Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt);
 
-  class Py_omniCallDescriptor : public omniCallDescriptor {
+
+  class Py_omniCallDescriptor : public omniAsyncCallDescriptor {
   public:
 
-    inline Py_omniCallDescriptor(const char* op, int op_len,
-				 CORBA::Boolean oneway,
-				 PyObject* in_d, PyObject* out_d,
-				 PyObject* exc_d, PyObject* ctxt_d,
-				 PyObject* args, CORBA::Boolean is_upcall)
+    struct InvokeArgs {
+      const char*    op;
+      int            op_len;
+      CORBA::Boolean oneway;
+      PyObject*      in_d;
+      PyObject*      out_d;
+      PyObject*      exc_d;
+      PyObject*      ctxt_d;
+      PyObject*      args;
+      PyObject*      excep_name;
+      PyObject*      callback;
+      CORBA::Boolean contains_values;
+      omniObjRef*    oobjref;
 
-      : omniCallDescriptor(Py_localCallBackFunction, op, op_len,
-			   oneway, 0, 0, is_upcall),
-      in_d_(in_d),
-      out_d_(out_d),
-      exc_d_(exc_d),
-      ctxt_d_(ctxt_d),
-      args_(args),
-      result_(0),
-      in_marshal_(0)
+      inline CORBA::Boolean error() { return args == 0; }
+
+      inline InvokeArgs(PyObject* pyargs)
+      {
+        PyObject* pyobjref;
+        PyObject* op_str;
+        PyObject* desc;
+
+        op_str = PyTuple_GET_ITEM(pyargs, 1);
+        op     = PyString_AS_STRING(op_str);
+        op_len = PyString_GET_SIZE(op_str) + 1;
+
+        desc   = PyTuple_GET_ITEM(pyargs, 2);
+        in_d   = PyTuple_GET_ITEM(desc, 0);
+        out_d  = PyTuple_GET_ITEM(desc, 1);
+        exc_d  = PyTuple_GET_ITEM(desc, 2);
+        oneway = (out_d == Py_None);
+
+        OMNIORB_ASSERT(PyTuple_Check(in_d));
+        OMNIORB_ASSERT(out_d == Py_None || PyTuple_Check(out_d));
+        OMNIORB_ASSERT(exc_d == Py_None || PyDict_Check(exc_d));
+
+        int desclen = PyTuple_GET_SIZE(desc);
+
+        if (desclen >= 4) {
+          ctxt_d = PyTuple_GET_ITEM(desc, 3);
+          if (ctxt_d == Py_None) {
+            ctxt_d = 0;
+          }
+          else {
+            OMNIORB_ASSERT(PyList_Check(ctxt_d));
+          }
+        }
+        else
+          ctxt_d = 0;
+
+        contains_values = 0;
+
+        if (desclen == 5) {
+          PyObject* v = PyTuple_GET_ITEM(desc, 4);
+          if (v != Py_None)
+            contains_values = 1;
+        }
+
+        args = PyTuple_GET_ITEM(pyargs, 3);
+
+        OMNIORB_ASSERT(PyTuple_Check(args));
+
+        int arg_len = PyTuple_GET_SIZE(in_d) + (ctxt_d ? 1:0);
+
+        if (PyTuple_GET_SIZE(args) != arg_len) {
+          char* err = new char[80];
+          sprintf(err, "Operation requires %d argument%s; %d given",
+                  arg_len, (arg_len == 1) ? "" : "s",
+                  (int)PyTuple_GET_SIZE(args));
+
+          PyErr_SetString(PyExc_TypeError, err);
+          delete [] err;
+          args = 0;
+          return;
+        }
+
+        // AMI callback excep method name
+        if (PyTuple_GET_SIZE(pyargs) > 4)
+          excep_name = PyTuple_GET_ITEM(pyargs, 4);
+        else
+          excep_name = 0;
+
+        // AMI callback object
+        if (PyTuple_GET_SIZE(pyargs) > 5)
+          callback = PyTuple_GET_ITEM(pyargs, 5);
+        else
+          callback = 0;
+
+        // Object reference to invoke upon
+        pyobjref = PyTuple_GET_ITEM(pyargs, 0);
+
+        CORBA::Object_ptr cxxobjref =
+          (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+        
+        oobjref = cxxobjref->_PR_getobj();
+      }
+    };
+
+    // Synchronous call
+    inline Py_omniCallDescriptor(InvokeArgs& a)
+      : omniAsyncCallDescriptor(Py_localCallBackFunction,
+                                a.op, a.op_len, a.oneway, 0, 0, 0),
+        in_d_      (a.in_d,   1),
+        out_d_     (a.out_d,  1),
+        exc_d_     (a.exc_d,  1),
+        ctxt_d_    (a.ctxt_d, 1),
+        args_      (a.args,   1),
+        result_    (0),
+        excep_name_(0),
+        callback_  (0),
+        poller_    (0),
+        unlocker_  (0),
+        in_marshal_(0)
     {
-      OMNIORB_ASSERT(PyTuple_Check(in_d));
-      tstate_ = 0;
-      in_l_   = PyTuple_GET_SIZE(in_d_);
-      if (oneway) {
-	OMNIORB_ASSERT(out_d_ == Py_None);
-	out_l_ = -1;
-      }
-      else {
-	OMNIORB_ASSERT(PyTuple_Check(out_d));
-	out_l_ = PyTuple_GET_SIZE(out_d_);
-      }
-      if (args_) {
-	OMNIORB_ASSERT(!is_upcall);
-	Py_INCREF(args_);
-      }
+      init();
+    }
+
+    // Asynchronous call
+    inline Py_omniCallDescriptor(InvokeArgs& a, CORBA::Boolean need_poller)
+      : omniAsyncCallDescriptor(Py_localCallBackFunction,
+                                a.op, a.op_len, a.oneway, 0, 0),
+        in_d_      (a.in_d,   1),
+        out_d_     (a.out_d,  1),
+        exc_d_     (a.exc_d,  1),
+        ctxt_d_    (a.ctxt_d, 1),
+        args_      (a.args,   1),
+        result_    (0),
+        excep_name_(a.excep_name, 1),
+        callback_  (a.callback,   1),
+        poller_    (need_poller ? makePoller() : 0),
+        unlocker_  (0),
+        in_marshal_(0)
+    {
+      init();
+    }
+
+    // Upcall
+    inline Py_omniCallDescriptor(const char*    op, int op_len,
+				 CORBA::Boolean oneway,
+				 PyObject*      in_d,
+                                 PyObject*      out_d,
+				 PyObject*      exc_d,
+                                 PyObject*      ctxt_d)
+
+      : omniAsyncCallDescriptor(Py_localCallBackFunction, op, op_len,
+                                oneway, 0, 0, 1),
+        in_d_      (in_d,   1),
+        out_d_     (out_d,  1),
+        exc_d_     (exc_d,  1),
+        ctxt_d_    (ctxt_d, 1),
+        args_      (0),
+        result_    (0),
+        excep_name_(0),
+        callback_  (0),
+        poller_    (0),
+        unlocker_  (0),
+        in_marshal_(0)
+    {
+      init();
     }
 
     virtual ~Py_omniCallDescriptor();
 
-    inline void releaseInterpreterLock() {
-      OMNIORB_ASSERT(!tstate_);
-      tstate_ = PyEval_SaveThread();
-    }
+    inline void unlocker(InterpreterUnlocker* ul) { unlocker_ = ul; }
+    inline InterpreterUnlocker* unlocker()        { return unlocker_; }
 
-    inline void reacquireInterpreterLock() {
-      OMNIORB_ASSERT(tstate_);
-      PyEval_RestoreThread(tstate_);
-      tstate_ = 0;
-    }
+    inline PyObject* args()   { return args_.obj(); }
+    inline PyObject* in_d()   { return in_d_.obj(); }
+    inline PyObject* out_d()  { return out_d_.obj(); }
+    inline PyObject* exc_d()  { return exc_d_.obj(); }
 
-    inline void ensureInterpreterLock() {
-      if (tstate_) {
-        PyEval_RestoreThread(tstate_);
-        tstate_ = 0;
-      }
-    }
-
-    inline PyObject* args() { return args_; }
-
+    inline PyObject* result() { return result_.retn(); }
     // Extract and take ownership of stored results
-    inline PyObject* result() { PyObject* r = result_; result_ = 0; return r; }
+
+    inline void setDescriptors(PyObject*& in_d,  int& in_l,
+                               PyObject*& out_d, int& out_l,
+                               PyObject*& exc_d,
+                               PyObject*& ctxt_d)
+    {
+      in_d   = in_d_.obj();
+      in_l   = in_l_;
+      out_d  = out_d_.obj();
+      out_l  = out_l_;
+      exc_d  = exc_d_.obj();
+      ctxt_d = ctxt_d_.obj();
+    }
+
 
     //
     // Client side methods
@@ -744,12 +971,51 @@ public:
 
     inline void systemException(const CORBA::SystemException& ex,
 				PyObject* info = 0) {
-      if (tstate_) {
-	PyEval_RestoreThread(tstate_);
-	tstate_ = 0;
-      }
       handleSystemException(ex, info);
     }
+
+
+    //
+    // AMI
+
+    virtual void completeCallback();
+
+    PyObject* raisePyException();
+    // Raise a Python exception corresponding to the exception held in
+    // pd_exception.
+
+    inline PyObject* callback()
+    {
+      if (callback_.valid()) {
+        return callback_.dup();
+      }
+      else {
+        Py_INCREF(Py_None);
+        return Py_None;
+      }
+    }
+
+    inline void callback(PyObject* cb)
+    {
+      if (cb != Py_None) {
+        Py_INCREF(cb);
+        callback_ = cb;
+      }
+      else
+        callback_ = 0;
+    }
+
+    inline PyObject* poller()
+    {
+      if (poller_.valid()) {
+        return poller_.dup();
+      }
+      else {
+        Py_INCREF(Py_None);
+        return Py_None;
+      }
+    }
+
 
     //
     // Server side methods
@@ -757,31 +1023,57 @@ public:
     virtual void unmarshalArguments(cdrStream& stream);
 
     // Throws BAD_PARAM if result is bad. _Always_ consumes result.
-    void         setAndValidateReturnedValues(PyObject* result);
+    void setAndValidateReturnedValues(PyObject* result);
 
     // Simply set the returned values
-    void         setReturnedValues(PyObject* result) { result_ = result; }
+    void setReturnedValues(PyObject* result) { result_ = result; }
 
     // Marshal the returned values, and release the stored result
     virtual void marshalReturnedValues(cdrStream& stream);
 
-  public:
-    PyObject*      in_d_;
-    int            in_l_;
-    PyObject*      out_d_;
-    int            out_l_;
-    PyObject*      exc_d_;
-    PyObject*      ctxt_d_;
-
   private:
-    PyObject*      args_;
-    PyObject*      result_;
+    PyRefHolder          in_d_;
+    int                  in_l_;
+    PyRefHolder          out_d_;
+    int                  out_l_;
+    PyRefHolder          exc_d_;
+    PyRefHolder          ctxt_d_;
 
-    PyThreadState* tstate_;
-    CORBA::Boolean in_marshal_;
+    PyRefHolder          args_;
+    PyRefHolder          result_;
+    PyRefHolder          excep_name_;
+    PyRefHolder          callback_;
+    PyRefHolder          poller_;
 
+    InterpreterUnlocker* unlocker_;
+    CORBA::Boolean       in_marshal_;
+
+    inline void init()
+    {
+      in_l_  = PyTuple_GET_SIZE(in_d_);
+      out_l_ = is_oneway() ? -1 : PyTuple_GET_SIZE(out_d_);
+    }
+
+    PyObject* makePoller();
+
+    // Not implemented
     Py_omniCallDescriptor(const Py_omniCallDescriptor&);
     Py_omniCallDescriptor& operator=(const Py_omniCallDescriptor&);
+  };
+
+  class CDInterpreterUnlocker : public InterpreterUnlocker {
+  public:
+    inline CDInterpreterUnlocker(Py_omniCallDescriptor& cd)
+      : InterpreterUnlocker(), cd_(&cd)
+    {
+      cd_->unlocker(this);
+    }
+    inline ~CDInterpreterUnlocker()
+    {
+      cd_->unlocker(0);
+    }
+  private:
+    Py_omniCallDescriptor* cd_;
   };
 
 
@@ -954,7 +1246,7 @@ public:
     // Returns 0 so callers can do "return ex.setPyExceptionState()".
     PyObject* setPyExceptionState();
 
-    // DECREF the contained Python exception object. Caller must huld
+    // DECREF the contained Python exception object. Caller must hold
     // the Python interpreter lock.
     void decrefPyException();
 
@@ -974,6 +1266,11 @@ public:
     virtual CORBA::Exception* _NP_duplicate()         	     const;
     virtual const char*       _NP_typeId()            	     const;
 
+    static const char* _PD_typeId;
+
+    static PyUserException* _downcast(CORBA::Exception* ex);
+    static const PyUserException* _downcast(const CORBA::Exception* ex);
+
   private:
     PyObject* 	   desc_;          // Descriptor tuple
     PyObject* 	   exc_;           // The exception object
@@ -981,28 +1278,6 @@ public:
 				   // this object is deleted.
   };
 
-
-  ////////////////////////////////////////////////////////////////////////////
-  // InterpreterUnlocker releases the Python interpreter lock               //
-  ////////////////////////////////////////////////////////////////////////////
-
-  class InterpreterUnlocker {
-  public:
-    inline InterpreterUnlocker() {
-      tstate_ = PyEval_SaveThread();
-    }
-    inline ~InterpreterUnlocker() {
-      PyEval_RestoreThread(tstate_);
-    }
-    inline void lock() {
-      PyEval_RestoreThread(tstate_);
-    }
-    inline void unlock() {
-      tstate_ = PyEval_SaveThread();
-    }
-  private:
-    PyThreadState* tstate_;
-  };
 
   ////////////////////////////////////////////////////////////////////////////
   // ValueTrackerClearer safely clears a ValueTracker                       //
@@ -1049,30 +1324,6 @@ public:
 						      size_t required);
     _CORBA_Boolean maybeReserveOutputSpace(omni::alignment_t align,
 					   size_t required);
-  };
-
-  ////////////////////////////////////////////////////////////////////////////
-  // PyRefHolder holds a references to a Python object                      //
-  ////////////////////////////////////////////////////////////////////////////
-
-  class PyRefHolder {
-  public:
-    inline PyRefHolder(PyObject* obj) : obj_(obj) {}
-
-    inline ~PyRefHolder() {
-      Py_XDECREF(obj_);
-    }
-    inline PyObject* retn() {
-      PyObject* r = obj_; obj_ = 0; return r;
-    }
-    inline PyObject* change(PyObject* o) {
-      Py_XDECREF(obj_); obj_ = o; return o;
-    }
-    inline PyObject* obj() {
-      return obj_;
-    }
-  private:
-    PyObject* obj_;
   };
 
 };

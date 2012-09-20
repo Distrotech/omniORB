@@ -28,50 +28,6 @@
 // Description:
 //    POA functions
 
-// $Id$
-// $Log$
-// Revision 1.1.4.6  2008/04/03 09:05:26  dgrisby
-// Leaks of some exception classes. Thanks Luke Deller.
-//
-// Revision 1.1.4.5  2006/01/19 17:28:44  dgrisby
-// Merge from omnipy2_develop.
-//
-// Revision 1.1.4.4  2005/11/09 12:33:32  dgrisby
-// Support POA LocalObjects.
-//
-// Revision 1.1.4.3  2005/06/24 17:36:00  dgrisby
-// Support for receiving valuetypes inside Anys; relax requirement for
-// old style classes in a lot of places.
-//
-// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.7  2001/10/18 16:43:35  dpg1
-// Segfault with invalid policy list in create_POA().
-//
-// Revision 1.1.2.6  2001/09/24 10:48:27  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.5  2001/06/15 10:59:26  dpg1
-// Apply fixes from omnipy1_develop.
-//
-// Revision 1.1.2.4  2001/06/01 11:09:26  dpg1
-// Make use of new omni::ptrStrCmp() and omni::strCmp().
-//
-// Revision 1.1.2.3  2001/03/13 10:38:07  dpg1
-// Fixes from omnipy1_develop
-//
-// Revision 1.1.2.2  2000/12/04 18:57:24  dpg1
-// Fix deadlock when trying to lock omniORB internal lock while holding
-// the Python interpreter lock.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:26  dpg1
-// Initial support for omniORB 4.
-//
-
 #include <omnipy.h>
 
 

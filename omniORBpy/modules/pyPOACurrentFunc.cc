@@ -28,24 +28,6 @@
 // Description:
 //    PortableServer::Current functions
 
-// $Id$
-// $Log$
-// Revision 1.1.4.3  2008/04/03 09:05:26  dgrisby
-// Leaks of some exception classes. Thanks Luke Deller.
-//
-// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.2  2001/09/24 10:48:27  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.1  2001/06/11 13:06:26  dpg1
-// Support for PortableServer::Current.
-//
-
 #include <omnipy.h>
 
 

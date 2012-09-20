@@ -36,7 +36,6 @@
 
 #include "pydistdate.hh"
 #include <omnipy.h>
-#include <pyThreadCache.h>
 #include <initialiser.h>
 
 OMNI_USING_NAMESPACE(omni)
@@ -616,76 +615,17 @@ extern "C" {
     //  exc_desc is a dictionary containing a mapping from repoIds to
     //  exception descriptor tuples.
 
-    PyObject *pyobjref, *in_d, *out_d, *exc_d, *ctxt_d, *op_args;
-    char*  op;
-    size_t op_len;
-
-    PyObject* o;
-    PyObject* desc;
-
-    pyobjref = PyTuple_GET_ITEM(args,0);
-
-    o        = PyTuple_GET_ITEM(args,1);
-    op       = PyString_AS_STRING(o);
-    op_len   = PyString_GET_SIZE(o);
-
-    desc     = PyTuple_GET_ITEM(args,2);
-
-    in_d     = PyTuple_GET_ITEM(desc,0);
-    out_d    = PyTuple_GET_ITEM(desc,1);
-    exc_d    = PyTuple_GET_ITEM(desc,2);
-
-    int desclen = PyTuple_GET_SIZE(desc);
-
-    if (desclen >= 4) {
-      ctxt_d = PyTuple_GET_ITEM(desc,3);
-      if (ctxt_d == Py_None)
-	ctxt_d = 0;
-    }
-    else
-      ctxt_d = 0;
-
-    CORBA::Boolean contains_values = 0;
-
-    if (desclen == 5) {
-      PyObject* v = PyTuple_GET_ITEM(desc,4);
-      if (v != Py_None)
-	contains_values = 1;
-    }
-
-    op_args  = PyTuple_GET_ITEM(args,3);
-
-    int arg_len = PyTuple_GET_SIZE(in_d) + (ctxt_d ? 1:0);
-
-    if (PyTuple_GET_SIZE(op_args) != arg_len) {
-      char* err = new char[80];
-      sprintf(err, "Operation requires %d argument%s; %d given",
-	      arg_len, (arg_len == 1) ? "" : "s",
-	      (int)PyTuple_GET_SIZE(op_args));
-
-      PyErr_SetString(PyExc_TypeError, err);
-      delete [] err;
+    omniPy::Py_omniCallDescriptor::InvokeArgs iargs(args);
+    if (iargs.error())
       return 0;
-    }
 
-    CORBA::Object_ptr cxxobjref =
-      (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
-
-    omniObjRef*    oobjref   = cxxobjref->_PR_getobj();
-    CORBA::Boolean is_oneway = (out_d == Py_None);
-
-    omniPy::Py_omniCallDescriptor call_desc(op, op_len + 1, is_oneway,
-					    in_d, out_d, exc_d, ctxt_d,
-					    op_args, 0);
-
-    if (contains_values)
-      call_desc.containsValues(1);
-
+    omniPy::Py_omniCallDescriptor call_desc(iargs);
     try {
-      call_desc.releaseInterpreterLock();
-      oobjref->_invoke(call_desc);
-      call_desc.reacquireInterpreterLock();
-      if (!is_oneway) {
+      {
+        omniPy::CDInterpreterUnlocker ul(call_desc);
+        iargs.oobjref->_invoke(call_desc);
+      }
+      if (!call_desc.is_oneway()) {
 	return call_desc.result();
       }
       else {
@@ -694,36 +634,69 @@ extern "C" {
       }
     }
     catch (Py_BAD_PARAM& ex) {
-      // systemException() reacquires the interpreter lock if necessary
-      call_desc.systemException(ex, ex.getInfo());
+      omniPy::handleSystemException(ex, ex.getInfo());
     }
 #ifdef HAS_Cplusplus_catch_exception_by_base
     catch (const CORBA::SystemException& ex) {
-      // systemException() reacquires the interpreter lock if necessary
-      call_desc.systemException(ex);
+      omniPy::handleSystemException(ex);
     }
 #else
 #define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
     catch (const CORBA::exc& ex) { \
-      call_desc.systemException(ex); \
+      omniPy::handleSystemException(ex);        \
     }
 OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 #undef DO_CALL_DESC_SYSTEM_EXCEPTON
 #endif
     catch (omniPy::PyUserException& ex) {
-      call_desc.reacquireInterpreterLock();
       ex.setPyExceptionState();
     }
     catch (...) {
-      // This should not happen, but in case it does we reacquire the
-      // interpreter lock to avoid an assertion failure from the call
-      // descriptor's destructor.
       omniORB::logs(1, "Unexpected C++ exception during Python invocation.");
-      call_desc.ensureInterpreterLock();
       throw;
     }
     return 0;
   }
+
+
+  static PyObject*
+  omnipy_invoke_sendp(PyObject* self, PyObject* args)
+  {
+    // Arg format
+    //  (objref, op_name, descriptors, args, excep name)
+
+    omniPy::Py_omniCallDescriptor::InvokeArgs iargs(args);
+    if (iargs.error())
+      return 0;
+
+    omniPy::Py_omniCallDescriptor* call_desc =
+      new omniPy::Py_omniCallDescriptor(iargs, 1);
+
+    iargs.oobjref->_invoke_async(call_desc);
+
+    return call_desc->poller();
+  }
+
+
+  static PyObject*
+  omnipy_invoke_sendc(PyObject* self, PyObject* args)
+  {
+    // Arg format
+    //  (objref, op_name, descriptors, args, excep name, callback)
+
+    omniPy::Py_omniCallDescriptor::InvokeArgs iargs(args);
+    if (iargs.error())
+      return 0;
+
+    omniPy::Py_omniCallDescriptor* call_desc =
+      new omniPy::Py_omniCallDescriptor(iargs, 0);
+
+    iargs.oobjref->_invoke_async(call_desc);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
 
   static PyObject*
   omnipy_releaseObjref(PyObject* self, PyObject* args)
@@ -935,6 +908,8 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     // Functions for CORBA objects:
     {(char*)"invoke",            omnipy_invoke,                  METH_VARARGS},
+    {(char*)"invoke_sendp",      omnipy_invoke_sendp,            METH_VARARGS},
+    {(char*)"invoke_sendc",      omnipy_invoke_sendc,            METH_VARARGS},
     {(char*)"releaseObjref",     omnipy_releaseObjref,           METH_VARARGS},
     {(char*)"isA",               omnipy_isA,                     METH_VARARGS},
     {(char*)"nonExistent",       omnipy_nonExistent,             METH_VARARGS},
@@ -969,6 +944,8 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     omniPy::initPOACurrentFunc(d);
     omniPy::initInterceptorFunc(d);
     omniPy::initomniFunc(d);
+    omniPy::initFixed(d);
+    omniPy::initCallDescriptor(d);
 
     // Set up the C++ API singleton
     PyObject* api = PyCObject_FromVoidPtr((void*)&omniPy::cxxAPI, 0);

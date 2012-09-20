@@ -29,10 +29,14 @@
 //    Cached mapping from threads to PyThreadState and
 //    threading.Thread objects
 
+#ifndef _pyThreadCache_h_
+#define _pyThreadCache_h_
+
+
 #if defined(__VMS)
-#include <pythread.h>
+#  include <pythread.h>
 #else
-#include PYTHON_THREAD_INC
+#  include PYTHON_THREAD_INC
 #endif
 
 // Python 2.3 introduced functions to get and release the Python
@@ -155,3 +159,5 @@ public:
 
   static void threadExit(CacheNode* cn);
 };
+
+#endif // _pyThreadCache_h_

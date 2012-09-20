@@ -485,10 +485,24 @@ PyUserException::_NP_duplicate() const
 }
 
 const char*
+omniPy::PyUserException::
+_PD_typeId = "Exception/UserException/omniPy::PyUserException";
+
+const char*
 omniPy::
 PyUserException::_NP_typeId() const
 {
-  int cannot_downcast = 0;
-  OMNIORB_ASSERT(cannot_downcast);
-  return 0;
+  return _PD_typeId;
+}
+
+omniPy::PyUserException*
+omniPy::PyUserException::_downcast(CORBA::Exception* ex)
+{
+  return (omniPy::PyUserException*)_NP_is_a(ex, _PD_typeId);
+}
+
+const omniPy::PyUserException*
+omniPy::PyUserException::_downcast(const CORBA::Exception* ex)
+{
+  return (const omniPy::PyUserException*)_NP_is_a(ex, _PD_typeId);
 }

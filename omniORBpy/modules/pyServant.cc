@@ -439,14 +439,25 @@ Py_omniServant::_dispatch(omniCallHandle& handle)
   PyObject* exc_d = PyTuple_GET_ITEM(desc,2);
   PyObject* ctxt_d;
 
-  if (PyTuple_GET_SIZE(desc) == 4)
-    ctxt_d = PyTuple_GET_ITEM(desc,3);
+  OMNIORB_ASSERT(PyTuple_Check(in_d));
+  OMNIORB_ASSERT(out_d == Py_None || PyTuple_Check(out_d));
+  OMNIORB_ASSERT(exc_d == Py_None || PyDict_Check(exc_d));
+
+  if (PyTuple_GET_SIZE(desc) >= 4) {
+    ctxt_d = PyTuple_GET_ITEM(desc, 3);
+    if (ctxt_d == Py_None) {
+      ctxt_d = 0;
+    }
+    else {
+      OMNIORB_ASSERT(PyList_Check(ctxt_d));
+    }
+  }
   else
     ctxt_d = 0;
 
   Py_omniCallDescriptor call_desc(op, 0,
 				  (out_d == Py_None),
-				  in_d, out_d, exc_d, ctxt_d, 0, 1);
+				  in_d, out_d, exc_d, ctxt_d);
   try {
     omniPy::InterpreterUnlocker _u;
     handle.upcall(this, call_desc);
@@ -531,7 +542,7 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
   PyObject* result;
 
   if (method) {
-    result = PyEval_CallObject(method, args);
+    result = PyObject_CallObject(method, args);
   }
   else if (propget) {
     if (PyTuple_GET_SIZE(args) != 0)
@@ -591,7 +602,7 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
       OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException, CORBA::COMPLETED_MAYBE);
     }
 
-    PyObject* exc_d = pycd->exc_d_;
+    PyObject* exc_d = pycd->exc_d();
 
     // Is it a user exception?
     if (exc_d != Py_None) {
@@ -674,14 +685,15 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
     }
   }
 
-  PyObject* in_d   = pycd->in_d_;
-  int       in_l   = pycd->in_l_;
-  PyObject* out_d  = pycd->out_d_;
-  int       out_l  = pycd->out_l_;
-  PyObject* exc_d  = pycd->exc_d_;
-  PyObject* ctxt_d = pycd->ctxt_d_;
+  PyObject* in_d;
+  int       in_l;
+  PyObject* out_d;
+  int       out_l;
+  PyObject* exc_d;
+  PyObject* ctxt_d;
+  pycd->setDescriptors(in_d, in_l, out_d, out_l, exc_d, ctxt_d);
 
-  PyObject* args   = pycd->args();
+  PyObject* args = pycd->args();
 
   // Copy args which would otherwise have reference semantics
   PyObject* argtuple = PyTuple_New(in_l + (ctxt_d ? 1 : 0));
@@ -717,7 +729,7 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
   PyObject* result;
 
   if (method) {
-    result = PyEval_CallObject(method, argtuple);
+    result = PyObject_CallObject(method, argtuple);
   }
   else if (propget) {
     if (PyTuple_GET_SIZE(argtuple) != 0)

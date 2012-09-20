@@ -28,57 +28,7 @@
 // Description:
 //    ORB functions
 
-// $Id$
-
-// $Log$
-// Revision 1.1.4.5  2009/03/13 13:57:56  dgrisby
-// Bind orb.register_initial_reference. Thanks Wei Jiang.
-//
-// Revision 1.1.4.4  2008/04/03 09:05:26  dgrisby
-// Leaks of some exception classes. Thanks Luke Deller.
-//
-// Revision 1.1.4.3  2006/07/05 10:46:43  dgrisby
-// list_initial_services did not catch exceptions.
-//
-// Revision 1.1.4.2  2005/06/24 17:36:01  dgrisby
-// Support for receiving valuetypes inside Anys; relax requirement for
-// old style classes in a lot of places.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.9  2001/12/04 12:17:43  dpg1
-// Cope with null ORB.
-//
-// Revision 1.1.2.8  2001/09/24 10:48:27  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.7  2001/09/20 14:51:25  dpg1
-// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
-//
-// Revision 1.1.2.6  2001/08/01 10:12:36  dpg1
-// Main thread policy.
-//
-// Revision 1.1.2.5  2001/05/10 15:16:02  dpg1
-// Big update to support new omniORB 4 internals.
-//
-// Revision 1.1.2.4  2001/03/13 10:38:07  dpg1
-// Fixes from omnipy1_develop
-//
-// Revision 1.1.2.3  2000/12/04 18:57:23  dpg1
-// Fix deadlock when trying to lock omniORB internal lock while holding
-// the Python interpreter lock.
-//
-// Revision 1.1.2.2  2000/11/22 14:42:56  dpg1
-// Fix segfault in string_to_object and resolve_initial_references with
-// nil objref.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:25  dpg1
-// Initial support for omniORB 4.
-//
-
 #include <omnipy.h>
-#include <pyThreadCache.h>
 #include <corbaOrb.h>
 #include <math.h>
 

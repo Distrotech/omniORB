@@ -3,7 +3,7 @@
 // pyThreadCache.cc           Created on: 2000/05/26
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2005 Apasphere Ltd
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -28,41 +28,6 @@
 // Description:
 //    Cached mapping from threads to PyThreadState and
 //    threading.Thread objects
-
-// $Id$
-
-// $Log$
-// Revision 1.1.4.6  2005/07/22 17:41:07  dgrisby
-// Update from omnipy2_develop.
-//
-// Revision 1.1.4.5  2005/04/25 18:28:04  dgrisby
-// Minor log output changes.
-//
-// Revision 1.1.4.4  2005/03/02 13:39:16  dgrisby
-// Another merge from omnipy2_develop.
-//
-// Revision 1.1.4.3  2005/01/25 11:45:48  dgrisby
-// Merge from omnipy2_develop; set RPM version.
-//
-// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.4  2001/09/20 14:51:25  dpg1
-// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
-//
-// Revision 1.1.2.3  2001/09/20 10:13:03  dpg1
-// Avoid deadlock on exit due to new ORB core cleanup.
-//
-// Revision 1.1.2.2  2001/08/01 10:12:36  dpg1
-// Main thread policy.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:27  dpg1
-// Initial support for omniORB 4.
-//
-
 
 #include <omnipy.h>
 #include "pyThreadCache.h"

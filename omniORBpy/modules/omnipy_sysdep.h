@@ -1,6 +1,6 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORBpy
-// omnipy30_sysdep.h          Created on: 2000/03/07
+// omnipy_sysdep.h            Created on: 2000/03/07
 //                            Author    : Duncan Grisby (dpg1)
 //
 //    Copyright (C) 2002-2012 Apasphere Ltd
@@ -31,6 +31,20 @@
 #ifndef _omnipy_sysdep_h_
 #define _omnipy_sysdep_h_
 
+
+//
+// Python version dependencies
+
+// Boolean type support
+#if (PY_VERSION_HEX < 0x02030000)
+#  define PyBool_FromLong(x) PyInt_FromLong(x ? 1 : 0)
+#  define PyBool_Check(x) 0
+#endif
+
+
+//
+// Compiler dependencies
+
 // Defaults for things we'd like to do
 
 #define PY_OMNISERVANT_BASE omniPy::Py_omniServant
@@ -47,8 +61,6 @@
 // Things that are broken
 
 #if defined(_MSC_VER)
-#  undef HAS_Cplusplus_catch_exception_by_base
-
 #  undef  PY_OMNISERVANT_BASE
 #  define PY_OMNISERVANT_BASE Py_omniServant
 

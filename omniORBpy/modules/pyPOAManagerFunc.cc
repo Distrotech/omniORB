@@ -28,26 +28,6 @@
 // Description:
 //    POAManager functions
 
-// $Id$
-
-// $Log$
-// Revision 1.1.4.2  2008/04/03 09:05:25  dgrisby
-// Leaks of some exception classes. Thanks Luke Deller.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.3  2001/06/11 13:07:27  dpg1
-// Unduplicate exception throwing code.
-//
-// Revision 1.1.2.2  2000/12/04 18:57:24  dpg1
-// Fix deadlock when trying to lock omniORB internal lock while holding
-// the Python interpreter lock.
-//
-// Revision 1.1.2.1  2000/10/13 13:55:26  dpg1
-// Initial support for omniORB 4.
-//
-
 #include <omnipy.h>
 
 

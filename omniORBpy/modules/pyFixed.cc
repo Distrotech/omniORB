@@ -3,7 +3,7 @@
 // pyFixed.cc                 Created on: 2001/03/30
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2005 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -24,36 +24,8 @@
 //    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 //    MA 02111-1307, USA
 //
-//
 // Description:
 //    Implementation of Fixed type for Python
-
-// $Id$
-// $Log$
-// Revision 1.1.4.2  2005/01/07 00:22:32  dgrisby
-// Big merge from omnipy2_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
-//
-// Revision 1.1.2.6  2003/03/14 15:29:22  dgrisby
-// Remove const char* -> char* warnings.
-//
-// Revision 1.1.2.5  2003/03/02 19:12:56  dgrisby
-// Remove unnecessary #include.
-//
-// Revision 1.1.2.4  2001/09/24 10:48:26  dpg1
-// Meaningful minor codes.
-//
-// Revision 1.1.2.3  2001/05/14 12:47:21  dpg1
-// Fix memory leaks.
-//
-// Revision 1.1.2.2  2001/04/12 11:11:49  dpg1
-// Can now construct a fixed point object given another one.
-//
-// Revision 1.1.2.1  2001/04/09 15:22:15  dpg1
-// Fixed point support.
-//
 
 #include <omnipy.h>
 #include <pyFixed.h>
@@ -239,19 +211,13 @@ extern "C" {
   }
 
   static PyMethodDef fixed_methods[] = {
-    {(char*)"value",     (PyCFunction)fixed_value},
-    {(char*)"precision", (PyCFunction)fixed_precision},
-    {(char*)"decimals",  (PyCFunction)fixed_decimals},
-    {(char*)"round",     (PyCFunction)fixed_round,    METH_VARARGS},
-    {(char*)"truncate",  (PyCFunction)fixed_truncate, METH_VARARGS},
+    {(char*)"value",     (PyCFunction)fixed_value,     METH_VARARGS},
+    {(char*)"precision", (PyCFunction)fixed_precision, METH_VARARGS},
+    {(char*)"decimals",  (PyCFunction)fixed_decimals,  METH_VARARGS},
+    {(char*)"round",     (PyCFunction)fixed_round,     METH_VARARGS},
+    {(char*)"truncate",  (PyCFunction)fixed_truncate,  METH_VARARGS},
     {0,0}
   };
-
-  static PyObject*
-  fixed_getattr(omnipyFixedObject* f, char* name)
-  {
-    return Py_FindMethod(fixed_methods, (PyObject*) f, name);
-  }
 
   static int
   fixed_compare(omnipyFixedObject* a, omnipyFixedObject* b)
@@ -471,7 +437,7 @@ extern "C" {
     0,
     (destructor) fixed_dealloc,    /*tp_dealloc*/
     (printfunc)  fixed_print,      /*tp_print*/
-    (getattrfunc)fixed_getattr,	   /*tp_getattr*/
+    0,                             /*tp_getattr*/
     0,				   /*tp_setattr*/
     (cmpfunc)    fixed_compare,    /*tp_compare*/
     (reprfunc)   fixed_repr,       /*tp_repr*/
@@ -486,5 +452,19 @@ extern "C" {
     0,                             /*tp_as_buffer*/
     0,				   /*tp_flags*/
     fixed_type_doc,                /*tp_doc*/
+    0,                             /*tp_traverse*/
+    0,                             /*tp_clear*/
+    0,                             /*tp_richcompare*/
+    0,                             /*tp_weaklistoffset*/
+    0,                             /*tp_iter*/
+    0,                             /*tp_iternext*/
+    fixed_methods,                 /*tp_methods*/
   };
+}
+
+void
+omniPy::initFixed(PyObject* mod)
+{
+  int r = PyType_Ready(&omnipyFixed_Type);
+  OMNIORB_ASSERT(r == 0);
 }
