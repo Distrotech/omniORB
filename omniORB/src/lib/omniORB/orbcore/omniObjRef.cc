@@ -861,6 +861,14 @@ AsyncRequest::real_execute()
     }
     pd_callDescriptor->storeException(ex);
   }
+  catch (const CORBA::UserException& ex) {
+    if (omniORB::trace(25)) {
+      omniORB::logger log;
+      log << "Asynchronous invoke '" << pd_callDescriptor->op()
+	  << "' raised " << ex._name() << "\n";
+    }
+    pd_callDescriptor->storeException(ex);
+  }
   catch (...) {
     if (omniORB::trace(1)) {
       omniORB::logger log;

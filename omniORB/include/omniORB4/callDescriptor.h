@@ -316,7 +316,7 @@ private:
 class omniAsyncCallDescriptor : public omniCallDescriptor
 {
 public:
-  // Constructor for normal synchronous calls
+  // Constructor for normal synchronous calls. Created on the stack.
   inline omniAsyncCallDescriptor(LocalCallFn	   lcfn,
 				 const char*	   op_,
 				 size_t		   op_len_,
@@ -332,7 +332,12 @@ public:
       pd_set_cond(0)
   {}
 
-  // Constructor for asynchronous calls
+  // Constructor for asynchronous calls. Created on the heap.
+  // 
+  // In callback AMI, completeCallback() makes the callback to the
+  // ReplyHandler, then deletes this; in polling AMI, the poller
+  // valuetype owns the call descriptor and deletes it when the poller
+  // is deleted.
   inline omniAsyncCallDescriptor(LocalCallFn	   lcfn,
 				 const char*	   op_,
 				 size_t		   op_len_,
@@ -415,6 +420,24 @@ public:
 
     return pd_complete;
   }
+
+  inline _CORBA_Boolean isReady(CORBA::ULong timeout)
+  {
+    if (timeout == 0)
+      return isComplete();
+
+    if (timeout == 0xffffffff) {
+      wait();
+      return 1;
+    }
+
+    omni_time_t timeout_tt(timeout / 1000, (timeout % 1000) * 1000000);
+    omni_time_t deadline;
+    omni_thread::get_time(deadline, timeout_tt);
+
+    return wait(deadline);
+  }
+
     
   inline void storeException(const CORBA::Exception& ex)
   {

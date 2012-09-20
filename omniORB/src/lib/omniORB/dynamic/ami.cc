@@ -63,19 +63,7 @@ CORBA::Boolean
 omniAMI::PollerImpl::
 is_ready(CORBA::ULong timeout)
 {
-  if (timeout == 0)
-    return _pd_cd->isComplete();
-
-  if (timeout == 0xffffffff) {
-    _pd_cd->wait();
-    return 1;
-  }
-
-  omni_time_t timeout_tt(timeout / 1000, (timeout % 1000) * 1000000);
-  omni_time_t deadline;
-  omni_thread::get_time(deadline, timeout_tt);
-
-  return _pd_cd->wait(deadline);
+  return _pd_cd->isReady(timeout);
 }
 
 
@@ -162,18 +150,19 @@ _checkResult(const char* op, CORBA::ULong timeout)
 		  CORBA::COMPLETED_NO);
   }
 
-  if (!is_ready(timeout)) {
+  if (!_pd_cd->isReady(timeout)) {
     _pd_is_from_poller = 1;
 
-    if (timeout == 0)
+    if (timeout == 0) {
       OMNIORB_THROW(NO_RESPONSE,
 		    NO_RESPONSE_ReplyNotAvailableYet,
 		    CORBA::COMPLETED_NO);
-
-    else
+    }
+    else {
       OMNIORB_THROW(TIMEOUT,
 		    TIMEOUT_NoPollerResponseInTime,
 		    CORBA::COMPLETED_NO);
+    }
   }
 
   if (_pd_cd->exceptionOccurred())

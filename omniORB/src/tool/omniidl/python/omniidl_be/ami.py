@@ -222,19 +222,19 @@ class AMIVisitor(idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
             prefix = prefix + "AMI_"
 
 
-    def _prefixName(self, prefix, ident, clashes):
+    def _prefixName(self, prefix, oident, clashes):
         ami = ""
         while 1:
-            ident = "%s%s%s" % (prefix, ami, ident)
+            ident = "%s%s%s" % (prefix, ami, oident)
             if ident not in clashes:
                 return ident
             ami = ami + "ami_"
 
 
-    def _suffixName(self, suffix, ident, clashes):
+    def _suffixName(self, suffix, oident, clashes):
         ami = ""
         while 1:
-            ident = "%s%s%s" % (ident, ami, suffix)
+            ident = "%s%s%s" % (oident, ami, suffix)
             if ident not in clashes:
                 clashes.add(ident)
                 return ident
