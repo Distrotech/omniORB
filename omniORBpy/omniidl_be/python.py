@@ -102,7 +102,7 @@ module_end = """
 __name__ = "@package@@modname@"
 """
 
-import_idl_file = """\
+import_idl_file = """
 # #include "@idlfile@"
 import @ifilename@"""
 
@@ -704,6 +704,7 @@ def run(tree, args):
 
     if generate_ami:
         ami_import = "import omniORB.ami"
+        imported_files["messaging_idl"] = 1
         from omniidl_be import ami
         tree.accept(ami.AMIVisitor())
     else:
