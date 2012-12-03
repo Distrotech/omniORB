@@ -512,7 +512,7 @@ ami_poller_impl = """
 # Implementation of @vname@
 class _impl_@vname@ (@vname@, omniORB.ami.PollerImpl):
     def __init__(self, poller):
-        omniORB.ami.PollerImpl(self, poller)
+        omniORB.ami.PollerImpl.__init__(self, poller)
 """
 
 ami_poller_op = """\
