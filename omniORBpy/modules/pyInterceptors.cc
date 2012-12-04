@@ -367,7 +367,7 @@ assignThreadFn(infoT& info, PyObject* fns)
       // Simple function
       Py_DECREF(result);
     }
-    else if (PyCallable_Check(result)) {
+    else {
       // A generator function. Call next() on it once
       PyList_Append(post_list, result);
 
@@ -376,10 +376,6 @@ assignThreadFn(infoT& info, PyObject* fns)
         omniPy::handlePythonException();
 
       Py_DECREF(result);
-    }
-    else {
-      Py_DECREF(result);
-      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
     }
   }
   {
