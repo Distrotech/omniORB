@@ -1,3 +1,11 @@
+Tue Dec  4 10:29:49 GMT 2012 dgrisby
+====================================
+
+- Release interpreter lock in thread interceptor run.
+
+modules/pyInterceptors.cc
+
+
 Mon Dec  3 14:39:34 GMT 2012 dgrisby
 ====================================
 

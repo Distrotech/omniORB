@@ -382,7 +382,10 @@ assignThreadFn(infoT& info, PyObject* fns)
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
     }
   }
-  info.run();
+  {
+    omniPy::InterpreterUnlocker _u;
+    info.run();
+  }
 
   // Reverse-iterate over functions
   for (i = PyList_GET_SIZE(post_list) - 1; i >= 0; --i) {
@@ -391,7 +394,7 @@ assignThreadFn(infoT& info, PyObject* fns)
     PyObject* result = PyObject_CallMethod(gen, (char*)"next", 0);
 
     if (result) {
-      // Not expecting this -- next() should have raise StopIteration
+      // Not expecting this -- next() should have raised StopIteration
       Py_DECREF(result);
     }
     else {
