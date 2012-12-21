@@ -769,10 +769,15 @@ OMNI_NAMESPACE_BEGIN(omni)
 
 class AsyncRequest : public omniTask {
 public:
-  inline AsyncRequest(omniObjRef* objref, omniAsyncCallDescriptor* call_desc)
+  inline AsyncRequest(omniObjRef*              objref,
+		      omniAsyncCallDescriptor* call_desc,
+		      const omni_time_t&       thread_timeout,
+		      CORBA::Boolean           timeout_absolute)
     : omniTask(omniTask::AnyTime),
       pd_objref(objref),
-      pd_callDescriptor(call_desc)
+      pd_callDescriptor(call_desc),
+      pd_threadTimeout(thread_timeout),
+      pd_timeoutAbsolute(timeout_absolute)
   {
     duplicateObjRef(objref);
   }
@@ -786,6 +791,8 @@ protected:
 private:
   omniObjRef*              pd_objref;
   omniAsyncCallDescriptor* pd_callDescriptor;
+  omni_time_t              pd_threadTimeout;
+  CORBA::Boolean           pd_timeoutAbsolute;
 
   // Not implemented
   AsyncRequest(const AsyncRequest&);
@@ -842,6 +849,13 @@ AsyncRequest::real_execute()
   if (omniORB::trace(25)) {
     omniORB::logger log;
     log << "Asynchronous invoke '" << pd_callDescriptor->op() << "'...\n";
+  }
+
+  if (pd_threadTimeout) {
+    if (pd_timeoutAbsolute)
+      omniCurrent::get()->setDeadline(pd_threadTimeout);
+    else
+      omniCurrent::get()->setTimeout(pd_threadTimeout);
   }
 
   try {
@@ -922,9 +936,18 @@ omniObjRef::_invoke_async(omniAsyncCallDescriptor* call_desc)
   // request it from the AMI poller.
   call_desc->objref(this);
 
-  // *** HERE: do something about per-thread timeouts!
+  omni_time_t    thread_timeout;
+  CORBA::Boolean timeout_absolute = 0;
 
-  AsyncRequest* req = new AsyncRequest(this, call_desc);
+  if (!pd_timeout && orbParameters::supportPerThreadTimeOut) {
+    omniCurrent* current;
+    if ((current = omniCurrent::get())) {
+      thread_timeout   = current->timeout();
+      timeout_absolute = current->timeout_absolute();
+    }
+  }
+  AsyncRequest* req = new AsyncRequest(this, call_desc,
+				       thread_timeout, timeout_absolute);
   orbAsyncInvoker->insert(req);
 }
 

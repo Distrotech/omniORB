@@ -1,3 +1,12 @@
+Fri Dec 21 16:25:41 GMT 2012 dgrisby
+====================================
+
+- Propagate per-thread timeout into AMI calls.
+
+include/omniORB4/internal/omniCurrent.h
+src/lib/omniORB/orbcore/omniObjRef.cc
+
+
 Thu Sep 20 23:11:34 BST 2012 dgrisby
 ====================================
 

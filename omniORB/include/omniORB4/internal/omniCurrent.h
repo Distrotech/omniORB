@@ -96,9 +96,20 @@ public:
     pd_timeout.assign(secs, ns);
     pd_timeout_absolute = 0;
   }
+  inline void setTimeout(const omni_time_t& t)
+  {
+    pd_timeout = t;
+    pd_timeout_absolute = 0;
+  }
+
   inline void setDeadline(unsigned long secs, unsigned long ns)
   {
     pd_timeout.assign(secs, ns);
+    pd_timeout_absolute = 1;
+  }
+  inline void setDeadline(const omni_time_t& t)
+  {
+    pd_timeout = t;
     pd_timeout_absolute = 1;
   }
 
