@@ -526,6 +526,12 @@ OMNIORB_SSL_LIB += $(OPEN_SSL_LIB)
 OMNIORB_SSL_CPPFLAGS += $(OPEN_SSL_CPPFLAGS)
 
 
+# ZIOP
+OMNIORB_ZIOP_LIB = $(patsubst %,$(LibSearchPattern),omniZIOP$(OMNIORB_MAJOR_VERSION))
+lib_depend := $(patsubst %,$(LibPattern),omniZIOP$(OMNIORB_MAJOR_VERSION))
+OMNIORB_ZIOP_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
+
+
 ##########################################################################
 #
 # Shared library support stuff
@@ -727,6 +733,10 @@ ifeq (@ENABLE_LONGDOUBLE@,no)
 DisableLongDouble = 1
 endif
 
+ifeq (@ENABLE_ZIOP@,yes)
+EnableZIOP = 1
+endif
+
 
 ###########################################################################
 #
@@ -787,8 +797,7 @@ endif
 ###################
 ifdef SunOS
 IMPORT_CPPFLAGS += -D__sunos__
-OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10 \
-			    -DPthreadSupportThreadPriority
+OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10
 OMNITHREAD_CPPFLAGS = -DUsePthread -D_REENTRANT $(CXXMTFLAG)
 SOCKET_LIB = -lsocket -lnsl
 THREAD_LIB = -lthread $(CXXMTFLAG)

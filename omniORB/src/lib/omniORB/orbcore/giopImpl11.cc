@@ -151,7 +151,7 @@ giopImpl11::inputMessageBegin(giopStream* g,
       // This is a GIOP 1.0 message, switch to the implementation of giop 1.0
       // and dispatch again.
       GIOP::Version v = { 1, 0 };
-      ((giopStrand &)*g).version = v;
+      g->strand().version = v;
       g->impl(giopStreamImpl::matchVersion(v));
       OMNIORB_ASSERT(g->impl());
       g->impl()->inputMessageBegin(g,g->impl()->unmarshalWildCardRequestHeader);

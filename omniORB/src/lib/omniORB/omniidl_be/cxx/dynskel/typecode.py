@@ -3,7 +3,7 @@
 # typecode.py               Created on: 1999/12/2
 #                           Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2011 Apasphere Ltd
+#    Copyright (C) 2003-2012 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.

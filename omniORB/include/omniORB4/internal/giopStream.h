@@ -55,12 +55,44 @@ struct giopStream_Buffer {
   CORBA::ULong             last;    // offset to the last data byte
   CORBA::ULong             size;    // GIOP message size.
   giopStream_Buffer*       next;    // next Buffer in a chain
-  // buffer data to follow.
+  // buffer data follows.
 
   void alignStart(omni::alignment_t);
   static void deleteBuffer(giopStream_Buffer*);
   static giopStream_Buffer* newBuffer(CORBA::ULong sz=0);
 };
+
+class giopStream;
+
+
+//
+// ZIOP support
+
+class giopCompressor {
+public:
+  virtual ~giopCompressor() = 0;
+
+  virtual giopStream_Buffer* compressBuffer(giopStream*        stream,
+                                            giopStream_Buffer* buf) = 0;
+  // Compress buf, which must contain a complete GIOP message.
+  // Consumes buf, or returns it unchanged if the data was not
+  // compressible.
+
+  virtual giopStream_Buffer* decompressBuffer(giopStream*        stream,
+                                              giopStream_Buffer* buf) = 0;
+  // Decompress buf, reading more data from the stream if need be.
+  // Consumes buf.
+};
+
+class giopCompressorFactory {
+public:
+  virtual ~giopCompressorFactory() = 0;
+  virtual giopCompressor* newCompressor() = 0;
+};
+
+
+//
+// GIOP stream
 
 class giopStream : public cdrStream {
 public:
@@ -82,8 +114,7 @@ public:
   GIOP::Version version();
   // No thread safety precondition
 
-  inline operator giopStrand& () { return *pd_strand; }
-  inline giopStrand& strand()    { return *pd_strand; }
+  inline giopStrand& strand() { return *pd_strand; }
   // No thread safety precondition
 
   inline giopStreamImpl* impl() const { return pd_impl; }
@@ -277,6 +308,9 @@ private:
   giopStream(const giopStream&);
   giopStream& operator=(const giopStream&);
 
+  operator giopStrand&();
+  // Not implemented. Use the strand() member functino instead.
+
 public:
   // These tunable parameters are used to determine at what size an
   // octet array will be sent/received directly to/from the network
@@ -286,6 +320,8 @@ public:
 
   static _core_attr CORBA::ULong bufferSize;
   // Allocate this number of bytes for each giopStream_Buffer.
+
+  static _core_attr giopCompressorFactory* compressorFactory;
 
 public:
   // The following implement the abstract functions defined in cdrStream
@@ -324,7 +360,7 @@ public:
   friend class giopImpl10;
   friend class giopImpl11;
   friend class giopImpl12;
-
+  friend class giopCompressorImpl;
 
   ////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////

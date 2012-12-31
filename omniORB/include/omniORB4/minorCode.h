@@ -166,6 +166,9 @@ OMNI_NAMESPACE_BEGIN(omni)
 #define OMNIORBMinorCode_125 OMNIORBMinorCode(125)
 #define OMNIORBMinorCode_126 OMNIORBMinorCode(126)
 #define OMNIORBMinorCode_127 OMNIORBMinorCode(127)
+#define OMNIORBMinorCode_128 OMNIORBMinorCode(128)
+#define OMNIORBMinorCode_129 OMNIORBMinorCode(129)
+#define OMNIORBMinorCode_130 OMNIORBMinorCode(130)
 
 #define OMNI_COMMA ,
 #define DeclareValue(name,value) name = value
@@ -219,6 +222,7 @@ code( BAD_PARAM_InvalidComponentId           , OMGMinorCode(28) ) sep \
 code( BAD_PARAM_InvalidProfileId             , OMGMinorCode(29) ) sep \
 code( BAD_PARAM_DuplicatePolicyType          , OMGMinorCode(30) ) sep \
 code( BAD_PARAM_PollableAlreadyInPollableSet , OMGMinorCode(43) ) sep \
+code( BAD_PARAM_InvalidCompressionLevel      , OMGMinorCode(44) ) sep \
 code( BAD_PARAM_IndexOutOfRange      	     , OMNIORBMinorCode_21 ) sep \
 code( BAD_PARAM_InvalidUnionDiscValue	     , OMNIORBMinorCode_27 ) sep \
 code( BAD_PARAM_InvalidInitialSize   	     , OMNIORBMinorCode_29 ) sep \
@@ -306,8 +310,10 @@ code( INV_OBJREF_CorruptedObjRef    	  , OMNIORBMinorCode_54 ) sep \
 code( INV_OBJREF_InterfaceMisMatch  	  , OMNIORBMinorCode_55 ) sep \
 code( INV_OBJREF_NoPythonTypeForPseudoObj , OMNIORBMinorCode_104 ) sep \
 code( INV_OBJREF_ShortcutServantDeactivated,OMNIORBMinorCode_117 ) sep \
-code( INV_OBJREF_IncorrectReplyHandler    , OMNIORBMinorCode_125 )
- 
+code( INV_OBJREF_IncorrectReplyHandler    , OMNIORBMinorCode_125 ) sep \
+code( INV_OBJREF_InvalidPseudoObject      , OMNIORBMinorCode_129 ) sep \
+code( INV_OBJREF_UnsuitableGIOPVersion    , OMNIORBMinorCode_130 )
+
 enum INV_OBJREF_minor {
   DECLARE_INV_OBJREF_minors(DeclareValue,OMNI_COMMA)
 };
@@ -345,7 +351,8 @@ code( MARSHAL_CannotReserveOutputSpace        , OMNIORBMinorCode_110 ) sep \
 code( MARSHAL_InvalidChunkedEncoding          , OMNIORBMinorCode_111 ) sep \
 code( MARSHAL_InvalidValueTag                 , OMNIORBMinorCode_112 ) sep \
 code( MARSHAL_NoRepoIdInValueType             , OMNIORBMinorCode_113 ) sep \
-code( MARSHAL_TypeIsNotAValueType             , OMNIORBMinorCode_114 )
+code( MARSHAL_TypeIsNotAValueType             , OMNIORBMinorCode_114 ) sep \
+code( MARSHAL_InvalidCompressedData           , OMNIORBMinorCode_128 )
 
 enum MARSHAL_minor {
   DECLARE_MARSHAL_minors(DeclareValue,OMNI_COMMA)

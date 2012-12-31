@@ -3,7 +3,7 @@
 // stringtypes.h              Created on: 16/4/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2003-2005 Apasphere Ltd
+//    Copyright (C) 2003-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library.
@@ -141,9 +141,14 @@ static inline void free(char* s) {
 // As CORBA::string_free().
 
 static inline char* dup(const char* s) { 
-  char* r = alloc((int)strlen(s));
+  int   l = (int)strlen(s);
+  char* r = alloc(l);
   if (r) {
+#ifdef _MSC_VER
+    strcpy_s(r, l+1, s);
+#else
     strcpy(r, s);
+#endif
     return r;
   }
   return 0;

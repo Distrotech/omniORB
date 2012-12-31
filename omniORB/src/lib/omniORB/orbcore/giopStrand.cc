@@ -138,7 +138,7 @@ giopStrand::giopStrand(const giopAddress* addr) :
   address(addr), connection(0), server(0), flags(0),
   biDir(0), gatekeeper_checked(0), first_use(1), first_call(1),
   orderly_closed(0), biDir_initiated(0), biDir_has_callbacks(0),
-  tcs_selected(0), tcs_c(0), tcs_w(0), giopImpl(0),
+  tcs_selected(0), tcs_c(0), tcs_w(0), giopImpl(0), compressor(0),
   rdcond(omniTransportLock, "giopStrand::rdcond"),
   rd_nwaiting(0), rd_n_justwaiting(0),
   wrcond(omniTransportLock, "giopStrand::wrcond"),
@@ -157,7 +157,7 @@ giopStrand::giopStrand(giopConnection* conn, giopServer* serv) :
   address(0), connection(conn), server(serv), flags(0),
   biDir(0), gatekeeper_checked(0), first_use(0), first_call(0),
   orderly_closed(0), biDir_initiated(0), biDir_has_callbacks(0),
-  tcs_selected(0), tcs_c(0), tcs_w(0), giopImpl(0),
+  tcs_selected(0), tcs_c(0), tcs_w(0), giopImpl(0), compressor(0),
   rdcond(omniTransportLock, "giopStrand::rdcond"),
   rd_nwaiting(0), rd_n_justwaiting(0),
   wrcond(omniTransportLock, "giopStrand::wrcond"),
@@ -215,6 +215,9 @@ giopStrand::~giopStrand()
     p = q;
   }
   spare = 0;
+
+  if (compressor)
+    delete compressor;
 }
 
 ////////////////////////////////////////////////////////////////////////

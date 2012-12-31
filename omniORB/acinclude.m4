@@ -431,6 +431,18 @@ fi
 AC_SUBST(ENABLE_LONGDOUBLE, $omni_cv_enable_longdouble)
 ])
 
+dnl Enable ZIOP
+AC_DEFUN([OMNI_ENABLE_ZIOP],
+[AC_CACHE_CHECK(whether to enable ZIOP,
+omni_cv_enable_ziop,
+[AC_ARG_ENABLE(ziop,
+               AC_HELP_STRING([--enable-ziop],
+                  [enable ZIOP support (default disable-ziop)]),
+               omni_cv_enable_ziop=$enableval,
+               omni_cv_enable_ziop=no)
+])
+AC_SUBST(ENABLE_ZIOP, $omni_cv_enable_ziop)
+])
 
 dnl Atomic operations
 

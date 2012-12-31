@@ -464,7 +464,7 @@ GIOP_S::handleLocateRequest() {
       // too much stuff out of the connection and these data belong to
       // other requests. If that is the case, we notify the giopServer
       // that there are already buffers waiting to be read.
-      giopStrand& s = (giopStrand&) *this;
+      giopStrand& s = strand();
       data_in_buffer = ((s.head) ? 1 : 0);
     }
     pd_worker->server()->notifyWkPreUpCall(pd_worker,data_in_buffer);
@@ -599,7 +599,7 @@ GIOP_S::ReceiveRequest(omniCallDescriptor& desc) {
     // too much stuff out of the connection and these data belong to
     // other requests. If that is the case, we notify the giopServer
     // that there are already buffers waiting to be read.
-    giopStrand& s = (giopStrand&) *this;
+    giopStrand& s = strand();
     data_in_buffer = ((s.head) ? 1 : 0);
   }
   pd_worker->server()->notifyWkPreUpCall(pd_worker,data_in_buffer);
@@ -609,7 +609,7 @@ GIOP_S::ReceiveRequest(omniCallDescriptor& desc) {
 
   // Check if this call comes in from a bidirectional connection.
   // If so check if the servant's POA policy allows this.
-  giopStrand& g = (giopStrand&)((giopStream&)(*this));
+  giopStrand& g = strand();
   if (g.biDir && g.isClient()) {
     if (!(pd_calldescriptor->poa() &&
 	  pd_calldescriptor->poa()->acceptBiDirectional())) {
@@ -629,7 +629,7 @@ GIOP_S::SkipRequestBody() {
 
   CORBA::Boolean data_in_buffer = 0;
   if (pd_rdlocked) {
-    giopStrand& s = (giopStrand&) *this;
+    giopStrand& s  = strand();
     data_in_buffer = ((s.head) ? 1 : 0);
   }
   pd_worker->server()->notifyWkPreUpCall(pd_worker,data_in_buffer);

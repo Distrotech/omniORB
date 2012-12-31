@@ -1040,6 +1040,8 @@ private:
 //
 // Specialisation of memory stream to handle CDR encapsulations
 
+class _CORBA_Unbounded_Sequence_Octet;
+
 class cdrEncapsulationStream : public cdrMemoryStream {
 public:
   cdrEncapsulationStream(_CORBA_ULong initialBufsize = 0,
@@ -1049,12 +1051,21 @@ public:
 			 _CORBA_ULong bufsize,
 			 _CORBA_Boolean allowAlign4 = 0);
 
+  cdrEncapsulationStream(const _CORBA_Unbounded_Sequence_Octet& seq,
+                         _CORBA_Boolean allowAlign4 = 0);
+
   cdrEncapsulationStream(cdrStream& s,_CORBA_ULong fetchsize);
   // copy from <s> <fetchsize> bytes of data.
 
 
-  void getOctetStream(_CORBA_Octet*& databuffer, _CORBA_ULong& max,
-		      _CORBA_ULong& len);
+  void getOctetStream(_CORBA_Octet*& databuffer,
+                      _CORBA_ULong&  max,
+                      _CORBA_ULong&  len);
+  // Return stream's buffer. Takes ownership of the buffer.
+
+  void setOctetSeq(_CORBA_Unbounded_Sequence_Octet& seq);
+  // Set octet sequence from the stream's buffer. Ownership of the
+  // buffer is passed to the sequence.
 
   virtual void* ptrToClass(int* cptr);
   static inline cdrEncapsulationStream* downcast(cdrStream* s) {

@@ -3,7 +3,7 @@
 // giopRope.cc                Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -32,6 +32,7 @@
 #include <giopRope.h>
 #include <giopStream.h>
 #include <giopStrand.h>
+#include <giopStrandFlags.h>
 #include <giopStreamImpl.h>
 #include <giopBiDir.h>
 #include <GIOP_C.h>
@@ -81,6 +82,7 @@ giopRope::giopRope(const giopAddressList& addrlist,
   pd_oneCallPerConnection(orbParameters::oneCallPerConnection),
   pd_nwaiting(0),
   pd_cond(omniTransportLock, "giopRope::pd_cond"),
+  pd_flags(0),
   pd_offerBiDir(orbParameters::offerBiDirectionalGIOP)
 {
   {
@@ -111,7 +113,8 @@ giopRope::giopRope(giopAddress* addr,int initialRefCount) :
   pd_maxStrands(orbParameters::maxGIOPConnectionPerServer),
   pd_oneCallPerConnection(orbParameters::oneCallPerConnection),
   pd_nwaiting(0),
-  pd_cond(omniTransportLock, "giopRope::pd_cond")
+  pd_cond(omniTransportLock, "giopRope::pd_cond"),
+  pd_flags(0)
 {
   pd_addresses.push_back(addr);
   pd_addresses_order.push_back(0);
@@ -237,8 +240,9 @@ giopRope::acquireClient(const omniIOR* ior,
     s->state(giopStrand::ACTIVE);
     s->RopeLink::insert(pd_strands);
     s->StrandList::insert(giopStrand::active);
-    s->version = v;
+    s->version  = v;
     s->giopImpl = impl;
+    s->flags    = pd_flags;
   }
   else if (pd_oneCallPerConnection || ndying >= max) {
     // Wait for a strand to be unused.
@@ -331,7 +335,7 @@ giopRope::releaseClient(IOP_C* iop_c) {
   //    also check to ensure that the GIOP_S list is empty.
   //
 
-  giopStrand* s = &((giopStrand&)(*(giopStream*)giop_c));
+  giopStrand* s = &giop_c->strand();
   giop_c->giopStreamList::remove();
 
   CORBA::Boolean remove = 0;
@@ -546,7 +550,7 @@ giopRope::selectRope(const giopAddressList& addrlist,
     RopeLink* p = giopRope::ropes.next;
     while ( p != &giopRope::ropes ) {
       gr = (giopRope*)p;
-      if (gr->match(addrlist)) {
+      if (gr->match(addrlist, info)) {
 	gr->realIncrRefCount();
 	r = (Rope*)gr; loc = 0;
 	return 1;
@@ -576,7 +580,8 @@ giopRope::selectRope(const giopAddressList& addrlist,
   // consequence of this is that we may race with another thread and
   // create two ropes for the same addresses, but although that is
   // wasteful, it doesn't do any real harm.
-  filterAndSortAddressList(addrlist,prefer_list,use_bidir);
+  CORBA::ULong match_flags;
+  filterAndSortAddressList(addrlist, prefer_list, use_bidir, match_flags);
 
   {
     omni_tracedmutex_lock sync(*omniTransportLock);
@@ -595,6 +600,7 @@ giopRope::selectRope(const giopAddressList& addrlist,
 	gr = new giopRope(addrlist,prefer_list);
       }
     }
+    gr->pd_flags = info->flags() & match_flags;
     gr->RopeLink::insert(giopRope::ropes);
     gr->realIncrRefCount();
     r = (Rope*)gr; loc = 0;
@@ -602,9 +608,10 @@ giopRope::selectRope(const giopAddressList& addrlist,
   }
 }
 
+
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-giopRope::match(const giopAddressList& addrlist) const
+giopRope::match(const giopAddressList& addrlist, omniIOR::IORInfo* info) const
 {
   if (addrlist.size() != pd_addresses.size()) return 0;
   if (orbParameters::offerBiDirectionalGIOP != pd_offerBiDir) return 0;
@@ -616,14 +623,15 @@ giopRope::match(const giopAddressList& addrlist) const
   for (; i != last; i++, j++) {
     if (!omni::ptrStrMatch((*i)->address(),(*j)->address())) return 0;
   }
-  return 1;
+  return pd_flags == info->flags();
 }
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopRope::filterAndSortAddressList(const giopAddressList& addrlist,
+giopRope::filterAndSortAddressList(const giopAddressList&    addrlist,
 				   omnivector<CORBA::ULong>& ordered_list,
-				   CORBA::Boolean& use_bidir)
+				   CORBA::Boolean&           use_bidir,
+                                   CORBA::ULong&             flags)
 {
   // We consult the clientTransportRules to decide which address is more
   // preferable than others. The rules may forbid the use of some of the
@@ -633,6 +641,7 @@ giopRope::filterAndSortAddressList(const giopAddressList& addrlist,
   // attribute, use_bidir will be set to 1, otherwise it is set to 0.
 
   use_bidir = 0;
+  flags     = 0;
 
   // For each address, find the rule that is applicable. Record the
   // rules priority in the priority list.
@@ -667,6 +676,9 @@ giopRope::filterAndSortAddressList(const giopAddressList& addrlist,
 	else if ( strcmp(actions[i],"bidir") == 0 ) {
 	  usebidir = 1;
 	}
+        else if ( strcmp(actions[i],"ziop") == 0 ) {
+          flags |= GIOPSTRAND_COMPRESSION;
+        }
       }
       if (matched) {
 	ordered_list.push_back(index);

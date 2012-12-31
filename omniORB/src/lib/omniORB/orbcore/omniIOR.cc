@@ -3,7 +3,7 @@
 // omniIOR.cc                 Created on: 19/09/2000
 //                            Author    : Sai-Lai Lo
 //
-//    Copyright (C) 2005-2006 Apasphere Ltd
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 1999-2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -397,8 +397,10 @@ omniIOR::getIORInfo() const {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-omniIOR::IORInfo::IORInfo() : pd_tcs_c(0),
-			      pd_tcs_w(0)
+omniIOR::IORInfo::IORInfo()
+  : pd_tcs_c(0),
+    pd_tcs_w(0),
+    pd_flags(0)
 {
   pd_version.major = 0;
   pd_version.minor = 0;

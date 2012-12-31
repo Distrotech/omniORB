@@ -705,7 +705,8 @@ setCodeSetServiceContext(omniInterceptors::clientSendRequest_T::info_T& info)
 {
   omniCodeSet::TCS_C* tcs_c;
   omniCodeSet::TCS_W* tcs_w;
-  giopStrand& d = (giopStrand&)info.giop_c;
+
+  giopStrand&   d   = info.giop_c.strand();
   GIOP::Version ver = info.giop_c.version();
 
   if (d.tcs_selected) {
@@ -795,7 +796,7 @@ static
 CORBA::Boolean
 getCodeSetServiceContext(omniInterceptors::serverReceiveRequest_T::info_T& info)
 {
-  giopStrand& d = (giopStrand&)(info.giop_s);
+  giopStrand&   d   = info.giop_s.strand();
   GIOP::Version ver = info.giop_s.version();
 
   if (ver.minor < 1) {

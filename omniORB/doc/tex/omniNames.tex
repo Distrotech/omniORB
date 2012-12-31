@@ -1,18 +1,30 @@
-\documentclass[a4paper,11pt,twoside]{article}
+\documentclass[draft,a4paper,11pt,twoside]{article}
 \usepackage[T1]{fontenc}
-\usepackage{palatino}
+\usepackage{textcomp}
+\usepackage[scaled=0.9]{DejaVuSansMono}
+\usepackage[scaled=0.9]{DejaVuSans}
+\usepackage[scaled=0.9]{DejaVuSerif}
+\linespread{1.05}
+
 \addtolength{\oddsidemargin}{-0.2in}
 \addtolength{\evensidemargin}{-0.6in}
 \addtolength{\textwidth}{0.5in}
+
 \pagestyle{headings}
 
 \newcommand{\cmdline}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\usepackage[T1]{url}
+\newcommand{\email}{\begingroup \urlstyle{sf}\Url}
+\newcommand{\file}{\begingroup \urlstyle{tt}\Url}
+\newcommand{\envvar}{\begingroup \urlstyle{tt}\Url}
 
 
 
-\title{The OMNI Naming Service}
+\title{The omniNames CORBA Naming Service}
 
-\date{14 February 2008}
+\date{December 2012}
 
 \begin{document}
 
@@ -32,7 +44,7 @@ These bindings can be arranged as an arbitrary directed graph,
 although they are often arranged in a tree hierarchy.  Each node in
 the graph is a \emph{naming context}.  There is a ``root'' context at
 which name lookups usually start.  This is the object returned by the
-call to \verb|CORBA::ORB::resolve_initial_references("NameService").|
+call to \code{CORBA::ORB::resolve\_initial\_references("NameService")}.
 
 
 \section{`Log' file}
@@ -43,7 +55,7 @@ CORBA programs.  For this reason, if an instance of omniNames crashes
 certain aspects of its operation persist upon restarting.  Firstly the
 root context of the Naming Service should always be accessible through
 the same object reference.  This helps the ORB to implement the
-\verb|resolve_initial_references| call by allowing the object
+\code{resolve\_initial\_references} call by allowing the object
 reference to be stored in a configuration file, for example.
 Secondly, the naming graph with all its bindings should persist
 between invocations.
@@ -51,16 +63,16 @@ between invocations.
 To achieve this, omniNames generates a redo log file, to which it
 writes out an entry every time a change is made to the naming graph.
 The directory in which this log file is written can be specified with
-the \verb|OMNINAMES_LOGDIR| environment variable.  When omniNames is
+the \envvar{OMNINAMES_LOGDIR} environment variable.  When omniNames is
 restarted it uses the log file so that it can regenerate the naming
 graph.
 
 Periodically the log file is checkpointed, removing unnecessary
 entries from the log file.  The idle time between checkpoints can be
-set with the \verb|OMNINAMES_ITBC| environment variable.  It defaults
-to 15 minutes.
+set with the \envvar{OMNINAMES_ITBC} environment variable.  It
+defaults to 15 minutes.
 
-\section{Starting omniNames and setting omniORB.cfg}
+\section{Starting omniNames and configuring omniORB}
 
 When starting omniNames for the first time, you can either let it
 start with the default TCP port of 2809, or you can specify the port
@@ -70,13 +82,15 @@ and thus can be accessible through the same object reference.  When
 omniNames starts up successfully it writes the stringified object
 reference for its root context on standard error.
 
-At startup, omniORB tries to read the configuration file
-\verb|omniORB.cfg| to obtain the object reference to the root context
-of the Naming Service.  This object reference is returned by
-\verb|resolve_initial_references("NameService")|. There are a number
-of methods of specifying the root naming context in
-\verb|omniORB.cfg|---see the omniORB manual for details.
+At startup, omniORB reads its configuration from \file{omniORB.cfg} or
+from the Windows registry. Amongst other settings, the configuration
+contains the object reference to the root context of the Naming
+Service.  This object reference is returned by
+\code{resolve\_initial\_references("NameService")}. There are a number
+of methods of specifying the root naming context---see the omniORB
+manual for details.
 
+\clearpage
 
 \section{Command line parameters}
 
@@ -132,6 +146,26 @@ omniNames accepts the following command line parameters.
 \end{tabular}
 
 
+\section{Machines with multiple IP addresses}
+
+The CORBA naming service is a tree (or graph) of \code{NamingContext}
+CORBA objects. For each of those CORBA objects, the object reference
+contains details about the \emph{endpoint}---i.e.\ the host address
+and port---that is used to contact the object.
+
+When the machine running omniNames has multiple IP addresses, omniORB
+arbitrarily picks one of the addresses to publish in object
+references. It might pick the `wrong' one, meaning that clients
+connect to the configured root context successfully, but then fail to
+connect to the sub-contexts. To force omniORB to publish the correct
+IP address, use the \cmdline{-ORBendPointPublish} command line
+parameter:
+
+\begin{quote}
+\cmdline{-ORBendPointPublish giop:tcp:}\textit{address}\cmdline{:}
+\end{quote}
+
+\noindent where \textit{address} can be an IP address or a host name.
 
 \section{Windows service}
 

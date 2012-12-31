@@ -177,8 +177,9 @@ restrictedGiopRope::selectRope(const giopAddressList& addrlist,
 
   omnivector<CORBA::ULong> prefer_list;
   CORBA::Boolean use_bidir;
+  CORBA::ULong   flags;
 
-  filterAndSortAddressList(addrlist,prefer_list,use_bidir);
+  filterAndSortAddressList(addrlist, prefer_list, use_bidir, flags);
 
   if (use_bidir) {
     omniORB::logs(1, "Warning: client transport rules specify a bidirectional "
@@ -222,7 +223,7 @@ restrictedGiopRope::acquireClient(const omniIOR*      ior,
 
   if (pd_data_batch) {
     GIOP_C*     giop_c = (GIOP_C*)iop_c;
-    giopStrand& strand = (giopStrand&)*giop_c;
+    giopStrand& strand = giop_c->strand();
     strand.flags |= GIOPSTRAND_ENABLE_TRANSPORT_BATCHING;
   }
   return iop_c;
@@ -377,8 +378,8 @@ static CORBA::Boolean
 clientSendRequestInterceptor(omniInterceptors::
 			     clientSendRequest_T::info_T& iinfo)
 {
-  GIOP_C& giop_c = iinfo.giop_c;
-  giopStrand& strand = (giopStrand&)giop_c;
+  GIOP_C& giop_c     = iinfo.giop_c;
+  giopStrand& strand = giop_c.strand();
 
   if (!strand.first_call) {
     // Only consider the connection on the first call
@@ -469,7 +470,7 @@ serverReceiveRequestInterceptor(omniInterceptors::
       }
       
       // Handle connection options
-      giopStrand& strand = (giopStrand&)iinfo.giop_s;
+      giopStrand& strand = iinfo.giop_s.strand();
       if (data.flags & omniConnectionData::SVC_HOLD_OPEN)
 	strand.flags |= GIOPSTRAND_HOLD_OPEN;
 

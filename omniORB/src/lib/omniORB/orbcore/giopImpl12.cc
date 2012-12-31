@@ -3,7 +3,7 @@
 // giopImpl12.cc              Created on: 14/02/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -666,7 +666,7 @@ giopImpl12::inputMessageBegin(giopStream* g,
     GIOP::Version v;
     v.major = 1;
     v.minor = hdr[5];
-    ((giopStrand &)*g).version = v;
+    g->strand().version = v;
     g->impl(giopStreamImpl::matchVersion(v));
     OMNIORB_ASSERT(g->impl());
     g->impl()->inputMessageBegin(g,g->impl()->unmarshalWildCardRequestHeader);
@@ -1308,7 +1308,6 @@ giopImpl12::outputMessageEnd(giopStream* g) {
 
       if (!g->outputFragmentSize()) {
 
-
 	CORBA::ULong sz = (omni::ptr_arith_t)g->pd_outb_mkr - outbuf_begin -12;
 
 	if (!g->outputMessageSize()) {
@@ -1326,7 +1325,6 @@ giopImpl12::outputMessageEnd(giopStream* g) {
 	  }
 	}
 	*((CORBA::ULong*)(outbuf_begin + 8)) = sz;
-	// g->outputMessageSize(g->outputMessageSize()+sz);
       }
 
       g->pd_currentOutputBuffer->last = (omni::ptr_arith_t) g->pd_outb_mkr - 
@@ -2029,8 +2027,7 @@ giopImpl12::copyOutputData(giopStream* g,void* b, size_t sz,
 
   g->pd_outb_mkr = (void*)newmkr;
 
-  if (sz >= giopStream::directSendCutOff) {
-
+  if (sz >= giopStream::directSendCutOff && !g->pd_strand->compressor) {
 
     // The fragment including this vector of bytes must end on a 8 byte
     // boundary. Therefore we may have to leave behind 0-7 bytes in the
@@ -2066,12 +2063,15 @@ giopImpl12::copyOutputData(giopStream* g,void* b, size_t sz,
   }
 
   while (sz) {
-    size_t avail = (omni::ptr_arith_t) g->pd_outb_end	- 
-      (omni::ptr_arith_t) g->pd_outb_mkr;
-    if (avail > sz) avail = sz;
+    size_t avail = (omni::ptr_arith_t) g->pd_outb_end -
+                   (omni::ptr_arith_t) g->pd_outb_mkr;
+    if (avail > sz)
+      avail = sz;
+
     memcpy(g->pd_outb_mkr,b,avail);
     sz -= avail;
     g->pd_outb_mkr = (void*)((omni::ptr_arith_t) g->pd_outb_mkr + avail);
+
     b = (void*)((omni::ptr_arith_t) b + avail);
     if (g->pd_outb_mkr == g->pd_outb_end) {
       outputFlush(g);

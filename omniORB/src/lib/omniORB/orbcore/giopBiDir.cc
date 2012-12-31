@@ -515,9 +515,8 @@ getBiDirServiceContext(omniInterceptors::serverReceiveRequest_T::info_T& info)
     return 1;
   }
 
-  GIOP::Version ver = info.giop_s.version();
-
-  giopStrand& strand = (giopStrand&)((giopStream&)info.giop_s);
+  GIOP::Version ver    = info.giop_s.version();
+  giopStrand&   strand = info.giop_s.strand();
 
   if (ver.minor != 2 || strand.isClient()) {
     // Only parse service context if the GIOP version is 1.2, on the
@@ -669,7 +668,7 @@ setBiDirServiceContext(omniInterceptors::clientSendRequest_T::info_T& info) {
     return 1;
   }
 
-  giopStrand& g = (giopStrand&)info.giop_c;
+  giopStrand&   g   = info.giop_c.strand();
   GIOP::Version ver = info.giop_c.version();
 
   if (ver.minor != 2 || !g.biDir || !g.isClient() || g.biDir_initiated) {

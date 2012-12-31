@@ -1,10 +1,11 @@
 // messaging.idl
 //
-// A subset of the standard Messaging module.
+// A subset of the standard Messaging module with AMI definitions.
 
 #ifndef _omniorb_messaging_idl_
 #define _omniorb_messaging_idl_
 
+#include "corbaidl.idl"
 #include "pollable.idl"
 
 #pragma prefix "omg.org"
@@ -51,6 +52,5 @@ module Messaging {
   };
 
 };
-
 
 #endif // _omniorb_messaging_idl_
