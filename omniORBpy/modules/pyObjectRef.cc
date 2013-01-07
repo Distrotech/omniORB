@@ -568,7 +568,7 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
 
     giopStream* gs = giopStream::downcast(&s);
     if (gs) {
-      giopStrand& g = (giopStrand&)*gs;
+      giopStrand& g = gs->strand();
       if (g.biDir && !g.isClient()) {
 	// Check the POA policy to see if the servant's POA is willing
 	// to use bidirectional on its callback objects.

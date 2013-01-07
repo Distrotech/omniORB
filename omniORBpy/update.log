@@ -1,3 +1,12 @@
+Mon Jan  7 13:18:52 GMT 2013 dgrisby
+====================================
+
+- Track ORB core API change.
+
+modules/pyInterceptors.cc
+modules/pyObjectRef.cc
+
+
 Tue Dec  4 14:29:32 GMT 2012 dgrisby
 ====================================
 

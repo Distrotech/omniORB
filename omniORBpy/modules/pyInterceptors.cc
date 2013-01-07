@@ -258,10 +258,10 @@ pyClientReceiveReplyFn(omniInterceptors::clientReceiveReply_T::info_T& info)
 
   if (PyList_Size(clientReceiveReplyCredsFns)) {
 
-    giopStrand& strand = (omni::giopStrand&) info.giop_c;
+    giopStrand&     strand     = info.giop_c.strand();
     giopConnection* connection = strand.connection;
-    const char* address  = connection->peeraddress();
-    const char* identity = connection->peeridentity();
+    const char*     address    = connection->peeraddress();
+    const char*     identity   = connection->peeridentity();
 
     getContextsAndCallInterceptors(clientReceiveReplyCredsFns,
 				   info.giop_c.operation(),
@@ -293,10 +293,10 @@ pyServerReceiveRequestFn(omniInterceptors::
 
   if (PyList_Size(serverReceiveRequestCredsFns)) {
 
-    giopStrand& strand = (omni::giopStrand&) info.giop_s;
+    giopStrand&     strand     = info.giop_s.strand();
     giopConnection* connection = strand.connection;
-    const char* address  = connection->peeraddress();
-    const char* identity = connection->peeridentity();
+    const char*     address    = connection->peeraddress();
+    const char*     identity   = connection->peeridentity();
 
     getContextsAndCallInterceptors(serverReceiveRequestCredsFns,
 				   info.giop_s.operation(),
