@@ -36,8 +36,7 @@ EXPORTHEADERS = omniORB4/distdate.hh \
 		omniORB4/omniTypedefs.hh \
                 omniORB4/bootstrap.hh \
 		omniORB4/omniConnectionData.hh \
-		omniORB4/messaging.hh \
-		omniORB4/messaging_policy.hh
+		omniORB4/messaging.hh
 
 ifdef EnableZIOP
 EXPORTHEADERS += omniORB4/compression.hh \
