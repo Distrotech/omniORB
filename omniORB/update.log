@@ -1,3 +1,41 @@
+Fri Jan 11 17:41:44 GMT 2013 dgrisby
+====================================
+
+- Properly quote M4 macro ugliness.
+
+acinclude.m4
+aclocal.m4
+configure
+include/omniORB4/acconfig.h.in
+
+- More restrictive permissions on init script.
+
+contrib/RPMs/omniORB.spec
+contrib/RPMs/omniORB_new.spec
+
+- Rename string helper free() to dealloc().
+
+include/omniORB4/callDescriptor.h
+include/omniORB4/internal/codeSetUtil.h
+include/omniORB4/internal/objectStub.h
+include/omniORB4/stringtypes.h
+include/omniORB4/wstringtypes.h
+src/lib/omniORB/omniidl_be/cxx/value.py
+src/lib/omniORB/orbcore/corbaString.cc
+src/lib/omniORB/orbcore/corbaWString.cc
+src/lib/omniORB/orbcore/portableserver.cc
+
+- Remove long-obsolete option.
+
+src/lib/omniORB/orbcore/corbaOrb.cc
+
+- Improve stream manipulation code clarity.
+
+include/omniORB4/cdrStream.h
+include/omniORB4/internal/giopStream.h
+src/lib/omniORB/orbcore/giopImpl12.cc
+
+
 Mon Jan  7 13:17:38 GMT 2013 dgrisby
 ====================================
 

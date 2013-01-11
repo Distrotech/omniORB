@@ -60,6 +60,31 @@ struct giopStream_Buffer {
   void alignStart(omni::alignment_t);
   static void deleteBuffer(giopStream_Buffer*);
   static giopStream_Buffer* newBuffer(CORBA::ULong sz=0);
+
+  inline omni::ptr_arith_t bufStart()
+  {
+    return (omni::ptr_arith_t)this + start;
+  }
+
+  inline omni::ptr_arith_t bufLast()
+  {
+    return (omni::ptr_arith_t)this + last;
+  }
+
+  inline omni::ptr_arith_t bufEnd()
+  {
+    return (omni::ptr_arith_t)this + end;
+  }
+
+  inline void setLast(void* mkr)
+  {
+    last = (omni::ptr_arith_t)mkr - (omni::ptr_arith_t)this;
+  }
+
+  inline CORBA::ULong dataSize()
+  {
+    return last - start;
+  }
 };
 
 class giopStream;
@@ -309,7 +334,7 @@ private:
   giopStream& operator=(const giopStream&);
 
   operator giopStrand&();
-  // Not implemented. Use the strand() member functino instead.
+  // Not implemented. Use the strand() member function instead.
 
 public:
   // These tunable parameters are used to determine at what size an
@@ -400,7 +425,7 @@ private:
     return pd_inputExpectAnotherFragment;
   }
 
-  inline void inputExpectAnotherFragment(CORBA::Boolean yes ) {
+  inline void inputExpectAnotherFragment(CORBA::Boolean yes) {
     pd_inputExpectAnotherFragment = yes;
   }
 
@@ -408,7 +433,7 @@ private:
     return pd_inputMatchedId;
   }
 
-  inline void inputMatchedId(CORBA::Boolean yes ) {
+  inline void inputMatchedId(CORBA::Boolean yes) {
     pd_inputMatchedId = yes;
   }
 
@@ -426,6 +451,22 @@ private:
 
   inline void inputFragmentToCome(CORBA::ULong fsz) {
     pd_inputFragmentToCome = fsz;
+  }
+
+  inline omni::ptr_arith_t inputBufferStart() {
+    return pd_currentInputBuffer->bufStart();
+  }
+
+  inline omni::ptr_arith_t inputBufferLast() {
+    return pd_currentInputBuffer->bufLast();
+  }
+
+  inline CORBA::ULong inputBufferMsgSize() {
+    return pd_currentInputBuffer->size;
+  }
+
+  inline CORBA::ULong inputBufferDataSize() {
+    return pd_currentInputBuffer->dataSize();
   }
 
   giopStream_Buffer* inputMessage();
@@ -507,7 +548,24 @@ private:
     pd_outputFragmentSize = fsz;
   }
 
-  // GIOP message are sent via these member functions
+  inline omni::ptr_arith_t outputBufferStart() {
+    return pd_currentOutputBuffer->bufStart();
+  }
+
+  inline omni::ptr_arith_t outputBufferEnd() {
+    return pd_currentOutputBuffer->bufEnd();
+  }
+
+  inline CORBA::ULong bufferedOutputSize() {
+    return (omni::ptr_arith_t)pd_outb_mkr - pd_currentOutputBuffer->bufStart();
+  }
+
+  inline void setOutputLastOffset() {
+    pd_currentOutputBuffer->setLast(pd_outb_mkr);
+  }
+
+
+  // GIOP messages are sent via these member functions
 
   void sendChunk(giopStream_Buffer*);
   // Send the buffer to the strand.
@@ -518,7 +576,7 @@ private:
   // Thread Safety preconditions:
   //   Caller must have acquired the write lock on the strand.
 
-  void sendCopyChunk(void*,CORBA::ULong size);
+  void sendCopyChunk(void*, CORBA::ULong size);
   // Same as sendChunk() except that the data is copied directly from
   // the application buffer.
   //

@@ -3,7 +3,7 @@
 // cdrStream.h                Created on: 11/1/99
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2009 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 1999      AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -54,51 +54,6 @@ public:
   cdrStream();
 
   virtual ~cdrStream();
-
-  //
-  // Marshalling macros
-
-#ifndef CdrMarshal
-#define CdrMarshal(type,align,reserveAndMarshal,arg) do { \
-  omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_outb_mkr,align);\
-  omni::ptr_arith_t p2 = p1 + sizeof(type);\
-  if ((void*)p2 <= pd_outb_end) {\
-    pd_outb_mkr = (void*) p2;\
-    if (!pd_marshal_byte_swap) {\
-      *((type*)p1) = arg;\
-    }\
-    else {\
-      *((type*)p1) = byteSwap(arg);\
-    }\
-  }\
-  else {\
-    reserveAndMarshal(arg);\
-  }\
-} while(0)
-#else
-#error "CdrMarshal has already been defined"
-#endif
-
-#ifndef CdrUnMarshal
-#define CdrUnMarshal(type,align,fetchAndUnmarshal,arg) do { \
-  omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,align);\
-  omni::ptr_arith_t p2 = p1 + sizeof(type);\
-  if ((void*)p2 <= pd_inb_end) {\
-    pd_inb_mkr = (void*) p2;\
-    if (!pd_unmarshal_byte_swap) {\
-      arg = *((type*)p1);\
-    }\
-    else {\
-      arg = byteSwap(*((type*)p1));\
-    }\
-  }\
-  else {\
-    arg = fetchAndUnmarshal();\
-  }\
-} while(0)
-#else
-#error "CdrUnMarshal has already been defined"
-#endif
 
   //
   // Byte swapping functions
@@ -169,7 +124,7 @@ public:
 
   inline void marshalOctet(_CORBA_Octet a) {
     // No need to align here
-    omni::ptr_arith_t p1 = (omni::ptr_arith_t)pd_outb_mkr;
+    omni::ptr_arith_t p1 = outMkr();
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Octet);
     if ((void*)p2 <= pd_outb_end) {
       pd_outb_mkr = (void*)p2;
@@ -182,7 +137,7 @@ public:
 
   inline _CORBA_Octet unmarshalOctet() {
     _CORBA_Octet a;
-    omni::ptr_arith_t p1 = (omni::ptr_arith_t)pd_inb_mkr;
+    omni::ptr_arith_t p1 = inMkr();
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Octet);
     if ((void*)p2 <= pd_inb_end) {
       pd_inb_mkr = (void*)p2;
@@ -213,13 +168,39 @@ public:
   // Marshalling methods : integer types
 
 #define intMarshalFns(type,align) \
-  inline void marshal ## type(_CORBA_ ## type a) { \
-    CdrMarshal(_CORBA_ ## type, omni::align, reserveAndMarshal ## type, a); \
+  inline void marshal ## type(_CORBA_ ## type arg) {\
+    omni::ptr_arith_t p1 = outMkr(omni::align);\
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_ ## type);\
+    if ((void*)p2 <= pd_outb_end) {\
+      pd_outb_mkr = (void*) p2;\
+      if (!pd_marshal_byte_swap) {\
+        *((_CORBA_ ## type*)p1) = arg;\
+      }\
+      else {\
+        *((_CORBA_ ## type*)p1) = byteSwap(arg);\
+      }\
+    }\
+    else {\
+      reserveAndMarshal ## type(arg);\
+    }\
   } \
   inline _CORBA_ ## type unmarshal ## type() { \
-    _CORBA_ ## type a; \
-    CdrUnMarshal(_CORBA_ ## type, omni::align, fetchAndUnmarshal ## type , a); \
-    return a; \
+    _CORBA_ ## type arg;\
+    omni::ptr_arith_t p1 = inMkr(omni::align);\
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_ ## type);\
+    if ((void*)p2 <= pd_inb_end) {\
+      pd_inb_mkr = (void*) p2;\
+      if (!pd_unmarshal_byte_swap) {\
+        arg = *((_CORBA_ ## type*)p1);\
+      }\
+      else {\
+        arg = byteSwap(*((_CORBA_ ## type*)p1));\
+      }\
+    }\
+    else {\
+      arg = fetchAndUnmarshal ## type();\
+    }\
+    return arg; \
   }
 
   intMarshalFns(Short,  ALIGN_2)
@@ -269,8 +250,7 @@ public:
 #    else  // No longlong or mixed endian
 
   inline void marshalDouble(_CORBA_Double a) {
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_outb_mkr,
-					  omni::ALIGN_8);
+    omni::ptr_arith_t p1 = outMkr(omni::ALIGN_8);
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
     if ((void*)p2 <= pd_outb_end) {
       pd_outb_mkr = (void*) p2;
@@ -302,8 +282,7 @@ public:
   }
 
   inline _CORBA_Double unmarshalDouble() {
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,
-					  omni::ALIGN_8);
+    omni::ptr_arith_t p1 = inMkr(omni::ALIGN_8);
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
     if ((void*)p2 <= pd_inb_end) {
       pd_inb_mkr = (void*) p2;
@@ -352,8 +331,7 @@ public:
   }
 
   inline void marshalDouble(_CORBA_Double a) {
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_outb_mkr,
-					  omni::ALIGN_8);
+    omni::ptr_arith_t p1 = outMkr(omni::ALIGN_8);
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
     if ((void*)p2 <= pd_outb_end) {
       pd_outb_mkr = (void*) p2;
@@ -378,8 +356,7 @@ public:
   }
 
   inline _CORBA_Double unmarshalDouble() {
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,
-					  omni::ALIGN_8);
+    omni::ptr_arith_t p1 = inMkr(omni::ALIGN_8);
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
     if ((void*)p2 <= pd_inb_end) {
       pd_inb_mkr = (void*) p2;
@@ -413,8 +390,7 @@ public:
 #    if SIZEOF_LONG_DOUBLE == 16
 
   inline void marshalLongDouble(_CORBA_LongDouble a) {
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_outb_mkr,
-					  omni::ALIGN_8);
+    omni::ptr_arith_t p1 = outMkr(omni::ALIGN_8);
     omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_LongDouble);
     if ((void*)p2 <= pd_outb_end) {
       pd_outb_mkr = (void*) p2;
@@ -439,9 +415,8 @@ public:
   }
 
   inline _CORBA_LongDouble unmarshalLongDouble() {
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,
-					  omni::ALIGN_8);
-    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
+    omni::ptr_arith_t p1 = inMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_LongDouble);
     if ((void*)p2 <= pd_inb_end) {
       pd_inb_mkr = (void*) p2;
 
@@ -569,8 +544,7 @@ public:
   // Align the buffer of the input stream to <align>.
   {
   again:
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,
-					  align);
+    omni::ptr_arith_t p1 = inMkr(align);
     if ((void*)p1 > pd_inb_end) {
       fetchInputData(align,0);
       goto again;
@@ -582,8 +556,7 @@ public:
   // Align the buffer of the output stream to <align>.
   {
   again:
-    omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_outb_mkr,
-					  align);
+    omni::ptr_arith_t p1 = outMkr(align);
     if ((void*)p1 > pd_outb_end) {
       if (reserveOutputSpaceForPrimitiveType(align,0))
 	goto again;
@@ -760,6 +733,14 @@ protected:
   void* pd_inb_end;
   void* pd_inb_mkr;
 
+  inline omni::ptr_arith_t inEnd() { return (omni::ptr_arith_t)pd_inb_end; }
+  inline omni::ptr_arith_t inMkr() { return (omni::ptr_arith_t)pd_inb_mkr; }
+
+  inline omni::ptr_arith_t inMkr(omni::alignment_t align)
+  {
+    return omni::align_to((omni::ptr_arith_t)pd_inb_mkr, align);
+  }
+
   virtual void fetchInputData(omni::alignment_t align, size_t required) = 0;
   // Fetch at least <required> bytes into the input buffer.
   // <required> must be no more than 8 bytes && align == required!!
@@ -774,6 +755,14 @@ protected:
   //  calls to reserveOutputSpace().
   void* pd_outb_end;
   void* pd_outb_mkr;
+
+  inline omni::ptr_arith_t outEnd() { return (omni::ptr_arith_t)pd_outb_end; }
+  inline omni::ptr_arith_t outMkr() { return (omni::ptr_arith_t)pd_outb_mkr; }
+
+  inline omni::ptr_arith_t outMkr(omni::alignment_t align)
+  {
+    return omni::align_to((omni::ptr_arith_t)pd_outb_mkr, align);
+  }
 
   virtual
   _CORBA_Boolean reserveOutputSpaceForPrimitiveType(omni::alignment_t align,
