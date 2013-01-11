@@ -450,11 +450,11 @@ AC_DEFUN([OMNI_SYNC_ADD_SUB_FETCH],
 [AC_CACHE_CHECK(whether __sync_add_and_fetch and __sync_sub_and_fetch are present,
 omni_cv_sync_add_and_fetch,
 [AC_LANG_PUSH(C++)
- AC_LINK_IFELSE(AC_LANG_PROGRAM([], [[
+ AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
 int a = 1;
 int b = __sync_add_and_fetch(&a, 1);
 int c = __sync_sub_and_fetch(&b, 1);
-]]),
+]])],
  [omni_cv_sync_add_and_fetch=yes],
  [omni_cv_sync_add_and_fetch=no])
  AC_LANG_POP(C++)
