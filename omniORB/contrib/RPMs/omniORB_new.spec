@@ -266,7 +266,7 @@ fi
 
 %files bootscripts
 %defattr (-,root,root)
-%config(noreplace) %attr(775,root,root) %{_initrddir}/*
+%config(noreplace) %attr(755,root,root) %{_initrddir}/*
 %if "%{_vendor}" == "suse"
 %{_sbindir}/rcomniNames
 %endif
