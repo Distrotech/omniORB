@@ -306,7 +306,7 @@ PortableServer::ObjectId_to_string(const ObjectId& id)
 
   for( int i = 0; i < len; i++ )
     if( (char) (s[i] = id[i]) == '\0' ) {
-      _CORBA_String_helper::free(s);
+      _CORBA_String_helper::dealloc(s);
       OMNIORB_THROW(BAD_PARAM,BAD_PARAM_InvalidObjectId, CORBA::COMPLETED_NO);
     }
 
@@ -329,7 +329,7 @@ PortableServer::ObjectId_to_wstring(const ObjectId& id)
 
   for( int i = 0; i < len; i++ )
     if( (s[i] = buf[i]) == 0 ) {
-      _CORBA_WString_helper::free(s);
+      _CORBA_WString_helper::dealloc(s);
       OMNIORB_THROW(BAD_PARAM,BAD_PARAM_InvalidObjectId, CORBA::COMPLETED_NO);
     }
 

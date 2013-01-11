@@ -930,30 +930,30 @@ inline @name@(const _CORBA_String_element& _v) {
 }
 
 inline @name@& operator=(char* _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   _pd_boxed = _v;
   return *this;
 }
 inline @name@& operator=(const char* _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if (_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
 }
 inline @name@& operator=(const ::CORBA::String_var& _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if ((const char*)_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
 }
 inline @name@& operator=(const ::CORBA::String_member& _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if ((const char*)_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
 }
 inline @name@& operator=(const _CORBA_String_element& _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if ((const char*)_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
@@ -963,26 +963,26 @@ inline const char* _value() const {
   return _pd_boxed;
 }
 inline void _value(char* _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   _pd_boxed = _v;
 }
 inline void _value(const char* _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if (_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
 }
 inline void _value(const ::CORBA::String_var& _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if ((const char*)_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
 }
 inline void _value(const ::CORBA::String_member& _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if ((const char*)_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
 }
 inline void _value(const _CORBA_String_element& _v) {
-  _CORBA_String_helper::free(_pd_boxed);
+  _CORBA_String_helper::dealloc(_pd_boxed);
   if ((const char*)_v) _pd_boxed = _CORBA_String_helper::dup(_v);
   else _pd_boxed = 0;
 }
@@ -1041,30 +1041,30 @@ inline @name@(const _CORBA_WString_element& _v) {
 }
 
 inline @name@& operator=(::CORBA::WChar* _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   _pd_boxed = _v;
   return *this;
 }
 inline @name@& operator=(const ::CORBA::WChar* _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if (_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
 }
 inline @name@& operator=(const ::CORBA::WString_var& _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if ((const ::CORBA::WChar*)_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
 }
 inline @name@& operator=(const ::CORBA::WString_member& _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if ((const ::CORBA::WChar*)_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
 }
 inline @name@& operator=(const _CORBA_WString_element& _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if ((const ::CORBA::WChar*)_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
   return *this;
@@ -1074,26 +1074,26 @@ inline const ::CORBA::WChar* _value() const {
   return _pd_boxed;
 }
 inline void _value(::CORBA::WChar* _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   _pd_boxed = _v;
 }
 inline void _value(const ::CORBA::WChar* _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if (_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
 }
 inline void _value(const ::CORBA::WString_var& _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if ((const ::CORBA::WChar*)_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
 }
 inline void _value(const ::CORBA::WString_member& _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if ((const ::CORBA::WChar*)_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
 }
 inline void _value(const _CORBA_WString_element& _v) {
-  _CORBA_WString_helper::free(_pd_boxed);
+  _CORBA_WString_helper::dealloc(_pd_boxed);
   if ((const ::CORBA::WChar*)_v) _pd_boxed = _CORBA_WString_helper::dup(_v);
   else _pd_boxed = 0;
 }
@@ -3363,11 +3363,11 @@ class ValueBox (mapping.Decl):
 
         elif d_boxedType.string():
             copy_content = "_pd_boxed = _CORBA_String_helper::dup(_v->_pd_boxed);"
-            destructor = "_CORBA_String_helper::free(_pd_boxed);"
+            destructor = "_CORBA_String_helper::dealloc(_pd_boxed);"
 
         elif d_boxedType.wstring():
             copy_content = "_pd_boxed = _CORBA_WString_helper::dup(_v->_pd_boxed);"
-            destructor = "_CORBA_WString_helper::free(_pd_boxed);"
+            destructor = "_CORBA_WString_helper::dealloc(_pd_boxed);"
 
         stream.out(valuebox_functions,
                    fqname=value_name, name=cxx_name, repoId=repoId,

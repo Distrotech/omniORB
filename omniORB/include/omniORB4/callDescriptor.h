@@ -514,7 +514,7 @@ public:
  
     inline ~_cCORBA_mObject_i_cstring() {
       if (is_upcall()) { 
-	_CORBA_String_helper::free(arg_0);
+	_CORBA_String_helper::dealloc(arg_0);
       }
     }
 

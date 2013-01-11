@@ -173,7 +173,7 @@ CORBA::string_alloc(CORBA::ULong len)
 void
 CORBA::string_free(char* p)
 {
-  _CORBA_String_helper::free(p);
+  _CORBA_String_helper::dealloc(p);
 }
 
 
@@ -286,7 +286,7 @@ void
 _CORBA_String_member::operator <<= (cdrStream& s)
 {
   if( _ptr && _ptr != _CORBA_String_helper::empty_string )
-    _CORBA_String_helper::free(_ptr);
+    _CORBA_String_helper::dealloc(_ptr);
   _ptr = 0;
 
   _ptr = s.unmarshalString();
@@ -338,7 +338,7 @@ _CORBA_Sequence_String::operator <<= (cdrStream& s)
   for( _CORBA_ULong i = 0; i < slen; i++ ) {
     char*& p = (char*&) pd_data[i];
 
-    if( p ) { _CORBA_String_helper::free(p); p = 0; }
+    if( p ) { _CORBA_String_helper::dealloc(p); p = 0; }
 
     p = s.unmarshalString();
   }

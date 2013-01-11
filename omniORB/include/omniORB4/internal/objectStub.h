@@ -50,7 +50,7 @@ public:
     {}
 
   inline ~omni_is_a_CallDesc() {
-    if (is_upcall()) { _CORBA_String_helper::free(a_1); }
+    if (is_upcall()) { _CORBA_String_helper::dealloc(a_1); }
   }
 
   void marshalArguments(cdrStream&);

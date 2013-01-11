@@ -86,7 +86,7 @@ public:
   }
 
   static inline void freeC(char* buf) {
-    _CORBA_String_helper::free(buf);
+    _CORBA_String_helper::dealloc(buf);
   }
 
   static inline char* reallocC(char*        oldbuf,
@@ -111,7 +111,7 @@ public:
 
   static inline void freeU(omniCodeSet::UniChar* buf) {
 #if (SIZEOF_WCHAR == 2)
-    _CORBA_WString_helper::free(buf);
+    _CORBA_WString_helper::dealloc(buf);
 #else
     delete [] buf;
 #endif
@@ -134,7 +134,7 @@ public:
   }
 
   static inline void freeW(_CORBA_WChar* buf) {
-    _CORBA_WString_helper::free(buf);
+    _CORBA_WString_helper::dealloc(buf);
   }
 
   static inline _CORBA_WChar* reallocW(_CORBA_WChar* oldbuf,

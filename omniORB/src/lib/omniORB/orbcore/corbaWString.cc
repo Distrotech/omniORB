@@ -80,7 +80,7 @@ CORBA::wstring_alloc(CORBA::ULong len)
 void
 CORBA::wstring_free(_CORBA_WChar* p)
 {
-  _CORBA_WString_helper::free(p);
+  _CORBA_WString_helper::dealloc(p);
 }
 
 
@@ -99,7 +99,7 @@ void
 _CORBA_WString_member::operator <<= (cdrStream& s)
 {
   if( _ptr && _ptr != _CORBA_WString_helper::empty_wstring )
-    _CORBA_WString_helper::free(_ptr);
+    _CORBA_WString_helper::dealloc(_ptr);
   _ptr = 0;
 
   _ptr = s.unmarshalWString();
@@ -151,7 +151,7 @@ _CORBA_Sequence_WString::operator <<= (cdrStream& s)
   for( _CORBA_ULong i = 0; i < slen; i++ ) {
     _CORBA_WChar*& p = (_CORBA_WChar*&) pd_data[i];
 
-    if( p ) { _CORBA_WString_helper::free(p); p = 0; }
+    if( p ) { _CORBA_WString_helper::dealloc(p); p = 0; }
 
     p = s.unmarshalWString();
   }

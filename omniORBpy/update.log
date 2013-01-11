@@ -1,3 +1,16 @@
+Fri Jan 11 17:41:44 GMT 2013 dgrisby
+====================================
+
+- Properly quote M4 macro ugliness.
+
+aclocal.m4
+configure
+
+- Rename string helper free() to dealloc().
+
+modules/pyMarshal.cc
+
+
 Mon Jan  7 13:18:52 GMT 2013 dgrisby
 ====================================
 

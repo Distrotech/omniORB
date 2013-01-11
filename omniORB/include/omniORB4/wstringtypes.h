@@ -3,6 +3,7 @@
 // wstringtypes.h             Created on: 27/10/2000
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library.
@@ -26,49 +27,6 @@
 // Description:
 //    The CORBA wide string type helpers. Also sequence of wide string.
 //
-
-/*
-  $Log$
-  Revision 1.1.4.3  2005/03/30 23:36:14  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.2  2005/01/06 23:08:22  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:03:58  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.10  2003/01/16 12:47:08  dgrisby
-  Const cast macro. Thanks Matej Kenda.
-
-  Revision 1.1.2.9  2003/01/14 11:48:16  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.1.2.8  2002/03/11 12:23:03  dpg1
-  Tweaks to avoid compiler warnings.
-
-  Revision 1.1.2.7  2001/11/06 15:41:35  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.2.6  2001/09/19 17:26:44  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.2.5  2001/08/17 13:44:08  dpg1
-  Change freeing behaviour of string members and elements.
-
-  Revision 1.1.2.4  2000/11/17 19:11:16  dpg1
-  Rename _CORBA_Sequence__WString to _CORBA_Sequence_WString.
-
-  Revision 1.1.2.3  2000/11/15 17:04:33  sll
-  Removed marshalling functions from WString_helper.
-
-  Revision 1.1.2.2  2000/11/09 12:27:50  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.1.2.1  2000/10/27 15:42:03  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
 
 #ifndef __OMNI_WSTRINGTYPES_H__
 #define __OMNI_WSTRINGTYPES_H__
@@ -94,7 +52,7 @@ static inline _CORBA_WChar* alloc(int len_)
 // don't initialise to empty string.  <len> does not include nul
 // terminator.
 
-static inline void free(_CORBA_WChar* s) { 
+static inline void dealloc(_CORBA_WChar* s) { 
   if (s && s != empty_wstring) delete[] s; 
 }
 // As CORBA::wstring_free().
@@ -153,17 +111,17 @@ public:
   inline _CORBA_WString_var(const _CORBA_WString_element& s);
 
   inline ~_CORBA_WString_var() {
-    _CORBA_WString_helper::free(_data);
+    _CORBA_WString_helper::dealloc(_data);
   }
 
   inline _CORBA_WString_var& operator=(_CORBA_WChar* p) {
-    _CORBA_WString_helper::free(_data);
+    _CORBA_WString_helper::dealloc(_data);
     _data = p;
     return *this;
   }
 
   inline _CORBA_WString_var& operator=(const _CORBA_WChar* p) {
-    _CORBA_WString_helper::free(_data);
+    _CORBA_WString_helper::dealloc(_data);
     _data = 0;
     if (p)  _data = _CORBA_WString_helper::dup(p);
     return *this;
@@ -171,7 +129,7 @@ public:
 
   inline _CORBA_WString_var& operator=(const _CORBA_WString_var& s) {
     if (&s != this) {
-      _CORBA_WString_helper::free(_data);
+      _CORBA_WString_helper::dealloc(_data);
       _data = 0;
       if( (const _CORBA_WChar*)s )  _data = _CORBA_WString_helper::dup(s);
     }
@@ -207,7 +165,7 @@ public:
   inline _CORBA_WChar*& inout()         { return _data; }
   inline _CORBA_WChar*& out() {
     if( _data ){
-      _CORBA_WString_helper::free(_data);
+      _CORBA_WString_helper::dealloc(_data);
       _data = 0;
     }
     return _data;
@@ -247,17 +205,17 @@ public:
   }
 
   inline ~_CORBA_WString_member() {
-    _CORBA_WString_helper::free(_ptr);
+    _CORBA_WString_helper::dealloc(_ptr);
   }
 
   inline _CORBA_WString_member& operator=(_CORBA_WChar* s) {
-    _CORBA_WString_helper::free(_ptr);
+    _CORBA_WString_helper::dealloc(_ptr);
     _ptr = s;
     return *this;
   }
 
   inline _CORBA_WString_member& operator= (const _CORBA_WChar* s) {
-    _CORBA_WString_helper::free(_ptr);
+    _CORBA_WString_helper::dealloc(_ptr);
     if (s)
       _ptr = _CORBA_WString_helper::dup(s);
     else
@@ -267,7 +225,7 @@ public:
 
   inline _CORBA_WString_member& operator=(const _CORBA_WString_member& s) {
     if (&s != this) {
-      _CORBA_WString_helper::free(_ptr);
+      _CORBA_WString_helper::dealloc(_ptr);
       if (s._ptr && s._ptr != _CORBA_WString_helper::empty_wstring)
 	_ptr = _CORBA_WString_helper::dup(s._ptr);
       else
@@ -277,7 +235,7 @@ public:
   }
 
   inline _CORBA_WString_member& operator=(const _CORBA_WString_var& s) {
-    _CORBA_WString_helper::free(_ptr);
+    _CORBA_WString_helper::dealloc(_ptr);
     if( (const _CORBA_WChar*)s ) {
       _ptr = _CORBA_WString_helper::dup((const _CORBA_WChar*)s);
     }
@@ -313,7 +271,7 @@ public:
   inline const _CORBA_WChar* in() const { return _ptr; }
   inline _CORBA_WChar*& inout()         { return _ptr; }
   inline _CORBA_WChar*& out() {
-    _CORBA_WString_helper::free(_ptr);
+    _CORBA_WString_helper::dealloc(_ptr);
     _ptr = 0;
     return _ptr;
   }
@@ -354,14 +312,14 @@ public:
 
   inline _CORBA_WString_element& operator=(_CORBA_WChar* s) {
     if (pd_rel) 
-      _CORBA_WString_helper::free(pd_data);
+      _CORBA_WString_helper::dealloc(pd_data);
     pd_data = s;
     return *this;
   }
 
   inline _CORBA_WString_element& operator= (const _CORBA_WChar* s) {
     if (pd_rel)
-      _CORBA_WString_helper::free(pd_data);
+      _CORBA_WString_helper::dealloc(pd_data);
     if (s)
       pd_data = _CORBA_WString_helper::dup(s);
     else
@@ -372,7 +330,7 @@ public:
   inline _CORBA_WString_element& operator=(const _CORBA_WString_element& s) {
     if (s.pd_data != pd_data) {
       if (pd_rel)
-	_CORBA_WString_helper::free(pd_data);
+	_CORBA_WString_helper::dealloc(pd_data);
       if (s.pd_data && s.pd_data != _CORBA_WString_helper::empty_wstring)
 	pd_data = _CORBA_WString_helper::dup(s.pd_data);
       else
@@ -383,7 +341,7 @@ public:
 
   inline _CORBA_WString_element& operator=(const _CORBA_WString_var& s) {
     if (pd_rel)
-      _CORBA_WString_helper::free(pd_data);
+      _CORBA_WString_helper::dealloc(pd_data);
     if( (const _CORBA_WChar*)s )
       pd_data = _CORBA_WString_helper::dup((const _CORBA_WChar*)s);
     else
@@ -393,7 +351,7 @@ public:
 
   inline _CORBA_WString_element& operator=(const _CORBA_WString_member& s) {
     if (pd_rel)
-      _CORBA_WString_helper::free(pd_data);
+      _CORBA_WString_helper::dealloc(pd_data);
     if( (const _CORBA_WChar*)s &&
 	(const _CORBA_WChar*) s != _CORBA_WString_helper::empty_wstring)
       pd_data = _CORBA_WString_helper::dup((const _CORBA_WChar*)s);
@@ -428,7 +386,7 @@ public:
   inline _CORBA_WChar*& inout()         { return pd_data; }
   inline _CORBA_WChar*& out() {
     if (pd_rel) {
-      _CORBA_WString_helper::free(pd_data);
+      _CORBA_WString_helper::dealloc(pd_data);
       pd_data = 0;
     }
     else {
@@ -485,7 +443,7 @@ inline _CORBA_WString_var::_CORBA_WString_var(const _CORBA_WString_element& s)
 inline _CORBA_WString_var&
 _CORBA_WString_var::operator= (const _CORBA_WString_member& s)
 {
-  _CORBA_WString_helper::free(_data);
+  _CORBA_WString_helper::dealloc(_data);
   if ((const _CORBA_WChar*)s) 
     _data = _CORBA_WString_helper::dup(s);
   else
@@ -496,7 +454,7 @@ _CORBA_WString_var::operator= (const _CORBA_WString_member& s)
 inline _CORBA_WString_var&
 _CORBA_WString_var::operator= (const _CORBA_WString_element& s)
 {
-  _CORBA_WString_helper::free(_data);
+  _CORBA_WString_helper::dealloc(_data);
   if ((const _CORBA_WChar*)s)
     _data = _CORBA_WString_helper::dup(s);
   else
@@ -506,7 +464,7 @@ _CORBA_WString_var::operator= (const _CORBA_WString_element& s)
 
 inline _CORBA_WString_member& 
 _CORBA_WString_member::operator=(const _CORBA_WString_element& s) {
-  _CORBA_WString_helper::free(_ptr);
+  _CORBA_WString_helper::dealloc(_ptr);
   if( (const _CORBA_WChar*)s )
     _ptr = _CORBA_WString_helper::dup((const _CORBA_WChar*)s);
   else
@@ -655,7 +613,7 @@ public:
     }
     ptr_arith_t l = (ptr_arith_t) b[1];
     for (_CORBA_ULong i = 0; i < (_CORBA_ULong) l; i++) {
-      _CORBA_WString_helper::free(buf[i]);
+      _CORBA_WString_helper::dealloc(buf[i]);
     }
     b[0] = (_CORBA_WChar*) 0;
     delete [] b;

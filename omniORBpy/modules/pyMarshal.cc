@@ -3578,7 +3578,7 @@ unmarshalPyObjectString(cdrStream& stream, PyObject* d_o)
 						      max_len, s);
 
   PyObject* r_o = PyString_FromStringAndSize(s, len);
-  _CORBA_String_helper::free(s);
+  _CORBA_String_helper::dealloc(s);
   return r_o;
 }
 
