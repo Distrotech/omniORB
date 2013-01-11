@@ -3,7 +3,7 @@
 // corbaOrb.cc                Created on: 6/2/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -1180,47 +1180,6 @@ public:
 static principalHandler principalHandler_;
 
 /////////////////////////////////////////////////////////////////////////////
-class poa_iiop_portHandler : public orbOptions::Handler {
-public:
-
-#define POA_IIOP_IS_OBSOLETE "is now obsolete, use -ORBendpoint instead"
-
-  poa_iiop_portHandler() :
-    orbOptions::Handler("poa_iiop_port",0,1,0) {}
-
-  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
-
-    throw orbOptions::BadParam(key(),value,
-			       "poa_iiop_port"POA_IIOP_IS_OBSOLETE);
-  }
-
-  void dump(orbOptions::sequenceString& result) {
-    return;
-  }
-};
-
-static poa_iiop_portHandler poa_iiop_portHandler_;
-
-/////////////////////////////////////////////////////////////////////////////
-class poa_iiop_name_portHandler : public orbOptions::Handler {
-public:
-
-  poa_iiop_name_portHandler() :
-    orbOptions::Handler("poa_iiop_name_port",0,1,0) {}
-
-  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
-    throw orbOptions::BadParam(key(),value,
-			       "poa_iiop_name_port"POA_IIOP_IS_OBSOLETE);
-  }
-
-  void dump(orbOptions::sequenceString& result) {
-    return;
-  }
-};
-
-static poa_iiop_name_portHandler poa_iiop_name_portHandler_;
-
-/////////////////////////////////////////////////////////////////////////////
 class configFileHandler : public orbOptions::Handler {
 public:
 
@@ -1257,8 +1216,6 @@ public:
     orbOptions::singleton().registerHandler(dumpConfigurationHandler_);
     orbOptions::singleton().registerHandler(lcdModeHandler_);
     orbOptions::singleton().registerHandler(principalHandler_);
-    orbOptions::singleton().registerHandler(poa_iiop_portHandler_);
-    orbOptions::singleton().registerHandler(poa_iiop_name_portHandler_);
     orbOptions::singleton().registerHandler(configFileHandler_);
   }
 
