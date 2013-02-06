@@ -1,3 +1,12 @@
+Wed Feb  6 17:30:11 GMT 2013 dgrisby
+====================================
+
+- Call completion could race with invocation, prematurely deleting the poller.
+
+src/lib/omniORB/omniidl_be/cxx/call.py
+src/lib/omniORB/omniidl_be/cxx/skel/template.py
+
+
 Fri Jan 11 17:41:44 GMT 2013 dgrisby
 ====================================
 

@@ -3,7 +3,7 @@
 # call.py                   Created on: 2000/08/03
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2002-2011 Apasphere Ltd
+#    Copyright (C) 2002-2013 Apasphere Ltd
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -911,7 +911,7 @@ class CallDescriptor:
 
         stream.out(template.interface_ami_sendc,
                    assign_args = "\n".join(assign_args),
-                   cd_name = cd_names[0],
+                   cd_name     = cd_names[0],
                    ami_handler = ami_method.arg_names()[0])
 
 
@@ -921,9 +921,12 @@ class CallDescriptor:
 
         assign_args = self._ami_send_args(ami_args, environment)
 
+        poller_cls = ami_method.return_type()
+
         stream.out(template.interface_ami_sendp,
-                   assign_args = "\n".join(assign_args),
-                   cd_name = cd_names[1])
+                   assign_args  = "\n".join(assign_args),
+                   cd_name      = cd_names[1],
+                   poller_class = poller_cls.base(gscope=1))
 
 
     def out_ami_poller(self, stream, ami_method, poller_method, cd_names):

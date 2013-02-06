@@ -3,7 +3,7 @@
 # template.py               Created on: 2000/01/19
 #			    Author    : David Scott (djs)
 #
-#    Copyright (C) 2003-2011 Apasphere Ltd
+#    Copyright (C) 2003-2013 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -847,8 +847,9 @@ _invoke_async(_call_desc);"""
 interface_ami_sendp = """\
 @cd_name@* _call_desc = new @cd_name@();
 @assign_args@
+@poller_class@::_var_type _poller = _call_desc->poller();
 _invoke_async(_call_desc);
-return _call_desc->poller();"""
+return _poller._retn();"""
 
 interface_ami_poller_method = """\
 _checkResult(@cd_name_c@::ami_op, @timeout_arg@);
