@@ -1,3 +1,19 @@
+Fri Feb  8 22:26:59 GMT 2013 dgrisby
+====================================
+
+- Special-case LongDouble comparisons in DynAny equal.
+
+src/lib/omniORB/dynamic/dynAny.cc
+
+- Cast to PR_unionDiscriminator in TypeCode table to avoid compiler warning.
+
+src/lib/omniORB/omniidl_be/cxx/dynskel/typecode.py
+
+- Union containing a valuetype could dereference a null value.
+
+src/lib/omniORB/omniidl_be/cxx/header/template.py
+
+
 Wed Feb  6 17:30:11 GMT 2013 dgrisby
 ====================================
 

@@ -1360,7 +1360,8 @@ union_release_helper = """\
 """
 
 union_release_valuetype = """\
-_pd_@name@->_remove_ref();
+if (_pd_@name@)
+  _pd_@name@->_remove_ref();
 """
 
 union_release_case = """\
