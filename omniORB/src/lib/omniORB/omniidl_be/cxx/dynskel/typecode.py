@@ -538,8 +538,8 @@ def visitUnion(node):
             else:
                 label = switchType.literal(l.value())
 
-            array.append("{\"" + case_name + "\", " + typecode +
-                         ", " + label + "}")
+            array.append('{"%s", %s, (CORBA::PR_unionDiscriminator)%s}' %
+                         (case_name, typecode, label))
             numlabels = numlabels + 1
 
 
