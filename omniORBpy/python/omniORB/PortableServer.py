@@ -3,7 +3,7 @@
 # PortableServer.py          Created on: 1999/09/22
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2005-2010 Apasphere Ltd
+#    Copyright (C) 2005-2013 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -30,6 +30,13 @@
 import _omnipy
 import omniORB
 from omniORB import CORBA
+
+try:
+    property
+except NameError:
+    def property(*args):
+        return None
+
 
 # native Servant
 class Servant(object):
@@ -86,8 +93,6 @@ class POAManager (CORBA.Object) :
     def get_state(self):
         return self.State._item(_omnipy.poamanager_func.get_state(self))
 
-    __methods__ = ["activate", "hold_requests", "discard_requests",
-                   "deactivate", "get_state"] + CORBA.Object.__methods__
 
     # Generated declarations
 
@@ -164,11 +169,17 @@ class POA (CORBA.Object) :
     def _get_the_name(self):
         return _omnipy.poa_func._get_the_name(self)
 
+    the_name = property(_get_the_name)
+
     def _get_the_parent(self):
         return _omnipy.poa_func._get_the_parent(self)
 
+    the_parent = property(_get_the_parent)
+
     def _get_the_children(self):
         return _omnipy.poa_func._get_the_children(self)
+
+    the_children = property(_get_the_children)
 
     def _get_the_POAManager(self):
         try:
@@ -177,11 +188,15 @@ class POA (CORBA.Object) :
             self.__manager = _omnipy.poa_func._get_the_POAManager(self)
             return self.__manager
 
+    the_POAManager = property(_get_the_POAManager)
+
     def _get_the_activator(self):
         return _omnipy.poa_func._get_the_activator(self)
 
     def _set_the_activator(self, value):
         return _omnipy.poa_func._set_the_activator(self, value)
+
+    the_activator = property(_get_the_activator, _set_the_activator)
 
     def get_servant_manager(self):
         return _omnipy.poa_func.get_servant_manager(self)
@@ -228,37 +243,6 @@ class POA (CORBA.Object) :
     def id_to_reference(self, oid):
         return _omnipy.poa_func.id_to_reference(self, oid)
 
-    __methods__ = ["create_POA",
-                   "find_POA",
-                   "destroy",
-                   "create_thread_policy",
-                   "create_lifespan_policy",
-                   "create_id_uniqueness_policy",
-                   "create_id_assignment_policy",
-                   "create_implicit_activation_policy",
-                   "create_servant_retention_policy",
-                   "create_request_processing_policy",
-                   "_get_the_name",
-                   "_get_the_parent",
-                   "_get_the_children",
-                   "_get_the_POAManager",
-                   "_get_the_activator",
-                   "_set_the_activator",
-                   "get_servant_manager",
-                   "set_servant_manager",
-                   "get_servant",
-                   "set_servant",
-                   "activate_object",
-                   "activate_object_with_id",
-                   "deactivate_object",
-                   "create_reference",
-                   "create_reference_with_id",
-                   "servant_to_id",
-                   "servant_to_reference",
-                   "reference_to_servant",
-                   "reference_to_id",
-                   "id_to_servant",
-                   "id_to_reference"] + CORBA.Object.__methods__
 
     # Generated exception declarations
     # exception AdapterAlreadyExists
@@ -407,8 +391,6 @@ class Current (CORBA.Object) :
     def get_servant(self):
         return _omnipy.poacurrent_func.get_servant(self)
 
-    __methods__ = ["get_POA", "get_object_id",
-                   "get_reference", "get_servant"] + CORBA.Object.__methods__
 
     # Generated declarations
 
@@ -485,7 +467,8 @@ class ThreadPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
+
 
 class LifespanPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/LifespanPolicy:2.4"
@@ -499,7 +482,8 @@ class LifespanPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
+
 
 class IdUniquenessPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/IdUniquenessPolicy:2.4"
@@ -513,7 +497,8 @@ class IdUniquenessPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
+
 
 class IdAssignmentPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/IdAssignmentPolicy:2.4"
@@ -527,7 +512,8 @@ class IdAssignmentPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
+
 
 class ImplicitActivationPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/ImplicitActivationPolicy:2.4"
@@ -541,7 +527,8 @@ class ImplicitActivationPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
+
 
 class ServantRetentionPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/ServantRetentionPolicy:2.4"
@@ -555,7 +542,8 @@ class ServantRetentionPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
+
 
 class RequestProcessingPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/RequestProcessingPolicy:2.4"
@@ -569,7 +557,7 @@ class RequestProcessingPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
 
 
 # enum ThreadPolicyValue
@@ -705,8 +693,6 @@ class _objref_ServantManager (CORBA.Object):
     def __init__(self):
         CORBA.Object.__init__(self)
 
-    __methods__ = [] + CORBA.Object.__methods__
-
 omniORB.registerObjref(ServantManager._NP_RepositoryId, _objref_ServantManager)
 
 
@@ -761,9 +747,6 @@ class _objref_ServantActivator (_objref_ServantManager):
                                 ServantActivator._d_etherialize,
                                 (oid, adapter, serv, cleanup_in_progress,
                                  remaining_activations))
-
-    __methods__ = ["incarnate", "etherealize"] + \
-                  _objref_ServantManager.__methods__
 
 omniORB.registerObjref(ServantActivator._NP_RepositoryId,
                        _objref_ServantActivator)
@@ -821,9 +804,6 @@ class _objref_ServantLocator (_objref_ServantManager):
                                 (oid, adapter, operation,
                                  the_cookie, the_servant))
 
-    __methods__ = ["preinvoke", "postinvoke"] + \
-                  _objref_ServantManager.__methods__
-
 omniORB.registerObjref(ServantLocator._NP_RepositoryId, _objref_ServantLocator)
 
 
@@ -865,8 +845,6 @@ class _objref_AdapterActivator (CORBA.Object):
         return _omnipy.invokeOp(self, "unknown_adapter",
                                 AdapterActivator._d_unknown_adapter,
                                 (parent, name))
-
-    __methods__ = ["unknown_adapter"] + CORBA.Object.__methods__
 
 omniORB.registerObjref(AdapterActivator._NP_RepositoryId,
                        _objref_AdapterActivator)

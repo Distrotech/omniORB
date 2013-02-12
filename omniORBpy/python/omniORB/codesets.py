@@ -3,7 +3,7 @@
 # codesets.py                Created on: 2002/09/06
 #                            Author    : Duncan Grisby (dgrisby)
 #
-#    Copyright (C) 2002 Apasphere Ltd.
+#    Copyright (C) 2002-2013 Apasphere Ltd
 #
 #    This file is part of the omniORBpy library
 #
@@ -26,12 +26,6 @@
 #
 # Description:
 #    Import this to get extra code sets.
-
-# $Id$
-# $Log$
-# Revision 1.1.2.1  2002/09/06 21:34:26  dgrisby
-# Add codesets and sslTP modules.
-#
 
 """omniORB.codesets
 

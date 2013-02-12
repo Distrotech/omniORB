@@ -3,7 +3,7 @@
 # BiDirPolicy.py             Created on: 2003/04/25
 #                            Author    : Duncan Grisby (dgrisby)
 #
-#    Copyright (C) 2003-2005 Apasphere Ltd.
+#    Copyright (C) 2003-2013 Apasphere Ltd.
 #
 #    This file is part of the omniORBpy library
 #
@@ -27,16 +27,14 @@
 # Description:
 #    Definitions for BiDirPolicy module
 
-# $Log$
-# Revision 1.1.4.1  2005/01/07 00:22:34  dgrisby
-# Big merge from omnipy2_develop.
-#
-# Revision 1.1.2.1  2003/04/25 15:25:39  dgrisby
-# Implement missing bidir policy.
-#
-
 import omniORB
 from omniORB import CORBA
+
+try:
+    property
+except NameError:
+    def property(*args):
+        return None
 
 
 NORMAL = 0
@@ -57,7 +55,7 @@ class BidirectionalPolicy (CORBA.Policy):
     def _get_value(self):
         return self._value
 
-    __methods__ = ["_get_value"] + CORBA.Policy.__methods__
+    value = property(_get_value)
 
 
 def _create_policy(ptype, val):

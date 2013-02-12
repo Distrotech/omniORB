@@ -3,6 +3,7 @@
 # PortableServer__POA.py     Created on: 2000/02/24
 #                            Author    : Duncan Grisby (dpg1)
 #
+#    Copyright (C) 2002-2013 Apasphere Ltd
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -26,18 +27,6 @@
 #
 # Description:
 #    PortableServer skeletons
-
-# $Id$
-# $Log$
-# Revision 1.1.4.1  2002/01/18 15:49:45  dpg1
-# Context support. New system exception construction. Fix None call problem.
-#
-# Revision 1.1  2000/06/27 15:07:10  dpg1
-# Change from POA_M to M__POA mapping
-#
-# Revision 1.1  2000/03/03 17:41:28  dpg1
-# Major reorganisation to support omniORB 3.0 as well as 2.8.
-#
 
 import omniORB
 from omniORB import CORBA, PortableServer

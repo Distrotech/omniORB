@@ -3,6 +3,7 @@
 # URI.py                     Created on: 2000/06/26
 #                            Author    : Duncan Grisby (dpg1)
 #
+#    Copyright (C) 2002-2013 Apasphere Ltd
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -26,16 +27,6 @@
 #
 # Description:
 #    URI handling functions
-
-# $Id$
-
-# $Log$
-# Revision 1.1.4.1  2002/03/11 15:40:05  dpg1
-# _get_interface support, exception minor codes.
-#
-# Revision 1.1  2000/06/27 16:15:46  dpg1
-# New omniORB.URI module
-#
 
 import types, string, re
 import CosNaming

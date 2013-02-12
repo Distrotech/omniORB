@@ -3,7 +3,7 @@
 # CORBA.py                   Created on: 1999/06/08
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2010 Apasphere Ltd
+#    Copyright (C) 2002-2013 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -36,6 +36,12 @@ import _omnipy
 import omniORB
 
 import threading, types, time, exceptions, string
+
+try:
+    property
+except NameError:
+    def property(*args):
+        return None
 
 
 #############################################################################
@@ -258,13 +264,6 @@ class TypeCode(object):
     def type_modifier(self):            return self._t.type_modifier()
     def concrete_base_type(self):       return self._t.concrete_base_type()
 
-    __methods__ = ["equal", "equivalent", "get_compact_typecode",
-                   "kind", "id", "name", "member_count", "member_name",
-                   "member_type", "member_label", "discriminator_type",
-                   "default_index", "length", "content_type",
-                   "fixed_digits", "fixed_scale", "member_visibility",
-                   "type_modifier", "concrete_base_type"]
-
 import tcInternal
 _d_TypeCode = tcInternal.tv_TypeCode
 
@@ -334,8 +333,6 @@ class Any(object):
 
     def __repr__(self):
         return "CORBA.Any(%s, %s)" % (repr(self._t), repr(self._v))
-
-    __methods__ = ["typecode", "value"]
 
 _d_any = tcInternal.tv_any
 
@@ -513,22 +510,6 @@ class ORB(object):
 
         raise PolicyError(BAD_POLICY)
 
-
-    __methods__ = ["string_to_object", "object_to_string",
-                   "register_initial_reference",
-                   "list_initial_services", "resolve_initial_references",
-                   "work_pending", "perform_work", "run",
-                   "shutdown", "destroy",
-                   "create_struct_tc", "create_union_tc",
-                   "create_enum_tc", "create_alias_tc",
-                   "create_exception_tc", "create_interface_tc",
-                   "create_string_tc", "create_sequence_tc",
-                   "create_array_tc", "create_recursive_tc",
-                   "create_value_tc", "create_value_box_tc",
-                   "create_abstract_interface_tc", "create_local_interface_tc",
-                   "get_default_context", "register_value_factory",
-                   "lookup_value_factory"]
-
     class InvalidName (UserException):
         _NP_RepositoryId = "IDL:omg.org/CORBA/ORB/InvalidName:1.0"
 
@@ -683,10 +664,6 @@ class Object(object):
         return omni_dynamic_op
 
 
-    __methods__ = ["_is_a", "_non_existent", "_is_equivalent",
-                   "_get_interface", "_hash", "_narrow", "_unchecked_narrow",
-                   "_dynamic_op"]
-
 _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 TC_Object  = _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 omniORB.registerType(Object._NP_RepositoryId, _d_Object, _tc_Object)
@@ -836,6 +813,8 @@ class Policy (Object):
     def _get_policy_type(self):
         return self._policy_type
 
+    policy_type = property(_get_policy_type)
+
     def copy(self):
         return self
 
@@ -859,9 +838,6 @@ class Policy (Object):
             return self
         else:
             return None
-
-    __methods__ = ["_get_policy_type", "copy", "destroy"] + Object.__methods__
-
 
 
 #############################################################################
@@ -996,11 +972,7 @@ class Context (Object):
             self.__parent._get_values(patterns, values)
 
         return values
-        
-    __methods__ = ["set_one_value", "set_values", "get_values",
-                   "delete_values", "create_child"] + Object.__methods__
-
-
+    
 
 #############################################################################
 #                                                                           #

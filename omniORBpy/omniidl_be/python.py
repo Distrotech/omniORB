@@ -3,7 +3,7 @@
 # python.py                 Created on: 1999/10/29
 #			    Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2012 Apasphere Ltd
+#    Copyright (C) 2002-2013 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -190,9 +190,6 @@ objref_ami_sendc = """
 objref_ami_sendp = """
     def @ami_opname@(self, *args):
         return _0_@modname@._impl_@poller_class@(_omnipy.invoke_sendp(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@"))"""
-
-objref_methods = """
-    __methods__ = @methods@"""
 
 objref_register = """
 omniORB.registerObjref(@ifid@._NP_RepositoryId, _objref_@ifid@)
@@ -1005,8 +1002,6 @@ class PythonVisitor:
             self.st.out(objref_object_init)
 
         # Operations and attributes
-        methodl = []
-
         for c in node.callables():
             if isinstance(c, idlast.Attribute):
 
@@ -1017,15 +1012,11 @@ class PythonVisitor:
                                 ifid    = ifid,
                                 modname = self.modname)
                     
-                    methodl.append('"_get_%s"' % attr)
-                    methodl.append('"%s"' % attr)
-
                     if c.readonly():
                         self.st.out(objref_readonly_attribute_property,
                                     attr = attr)
 
                     else:
-
                         self.st.out(objref_attribute_set,
                                     attr    = attr,
                                     ifid    = ifid,
@@ -1033,8 +1024,6 @@ class PythonVisitor:
                         
                         self.st.out(objref_attribute_property,
                                     attr = attr)
-
-                        methodl.append('"_set_%s"' % attr)
 
             else: # Operation
                 opname = mangle(c.identifier())
@@ -1045,8 +1034,6 @@ class PythonVisitor:
                             ifid     = ifid,
                             modname  = self.modname)
                 
-                methodl.append('"' + opname + '"')
-
         for c in getattr(node, "_ami_ops", []):
             ami_opname = mangle(c.identifier())
 
@@ -1086,25 +1073,6 @@ class PythonVisitor:
                             ifid         = ifid,
                             modname      = self.modname,
                             poller_class = poller_class)
-
-            methodl.append('"' + ami_opname + '"')
-                
-
-        # __methods__ assignment
-        methods = "[" + ", ".join(methodl) + "]"
-
-        if node.inherits():
-            inheritl = []
-            for i in node.inherits():
-                i = i.fullDecl()
-                sn = fixupScopedName(i.scopedName())
-                methods = methods + " + " + \
-                          dotName(sn[:-1] + ["_objref_" + sn[-1]]) + \
-                          ".__methods__"
-        else:
-            methods = methods + " + CORBA.Object.__methods__"
-
-        self.st.out(objref_methods, methods = methods)
 
         # registerObjRef()
         self.st.out(objref_register, ifid = ifid, modname = self.modname)
@@ -1904,23 +1872,17 @@ class PythonVisitor:
         # If value supports some interfaces, output an objref class for it
         if node.supports():
             inheritl = []
-            methodl  = []
             for i in node.supports():
                 i = i.fullDecl()
                 sn = fixupScopedName(i.scopedName())
                 inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
-                methodl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]) +
-                               ".__methods__")
-                
+            
             inherits = ", ".join(inheritl)
 
             self.st.out(objref_class, ifid=vname, inherits=inherits)
 
             for inclass in inheritl:
                 self.st.out(objref_inherit_init, inclass=inclass)
-
-            methods = " + ".join(methodl)
-            self.st.out(objref_methods, methods = methods)
 
             # registerObjRef()
             self.st.out(value_objref_register,

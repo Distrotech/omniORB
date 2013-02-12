@@ -3,7 +3,7 @@
 # interceptors.py            Created on: 2003/05/27
 #                            Author    : Duncan Grisby (dgrisby)
 #
-#    Copyright (C) 2003 Apasphere Ltd.
+#    Copyright (C) 2003-2013 Apasphere Ltd
 #
 #    This file is part of the omniORBpy library
 #
@@ -26,15 +26,6 @@
 #
 # Description:
 #    Python request interceptors
-
-# $Id$
-# $Log$
-# Revision 1.1.4.1  2005/01/07 00:22:35  dgrisby
-# Big merge from omnipy2_develop.
-#
-# Revision 1.1.2.1  2003/05/28 10:13:02  dgrisby
-# Preliminary interceptor support. General clean-up.
-#
 
 """omniORB.interceptors
 
