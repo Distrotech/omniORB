@@ -541,7 +541,7 @@ public:
   }
 
   static void get_time(unsigned long* abs_sec, unsigned long* abs_nsec,
-		       unsigned long rel_sec = 0, unsigned long rel_nsec=0);
+		       unsigned long rel_sec = 0, unsigned long rel_nsec = 0);
   // calculates an absolute time in seconds and nanoseconds, suitable for
   // use in timed_waits on condition variables, which is the current time
   // plus the given relative offset.
@@ -554,6 +554,11 @@ public:
   static inline void get_time(omni_time_t& t, const omni_time_t& r)
   {
     get_time(&t.s, &t.ns, r.s, r.ns);
+  }
+
+  static inline void get_time(omni_time_t& t, unsigned long rel_sec)
+  {
+    get_time(&t.s, &t.ns, rel_sec, 0);
   }
 
   static void stacksize(unsigned long sz);
