@@ -1,3 +1,27 @@
+Tue Feb 12 23:00:15 GMT 2013 dgrisby
+====================================
+
+- Expose setClientThreadCallDeadline.
+
+modules/pyomniFunc.cc
+
+- Use properties for all attributes; remove __methods__.
+
+omniidl_be/python.py
+python/omniORB/BiDirPolicy.py
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/PortableServer__POA.py
+python/omniORB/URI.py
+python/omniORB/codesets.py
+python/omniORB/interceptors.py
+python/omniORB/sslTP.py
+
+- Clean generated code.
+
+python/omniORB/dir.mk
+
+
 Fri Jan 11 17:41:44 GMT 2013 dgrisby
 ====================================
 

@@ -59,6 +59,10 @@ minorCodes.py: $(minorfile)
 all:: corbaidl_idl.py ir_idl.py boxes_idl.py pollable_idl.py messaging_idl.py \
       minorCodes.py
 
+clean::
+	$(RM) corbaidl_idl.py ir_idl.py boxes_idl.py pollable_idl.py
+	$(RM) messaging_idl.py minorCodes.py
+
 
 FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
         tcInternal.py URI.py codesets.py any.py BiDirPolicy.py \
