@@ -36,7 +36,7 @@
 OMNI_NAMESPACE_BEGIN(omni)
 
 DeferredRequest::DeferredRequest(RequestImpl* request)
-  : omniTask(omniTask::AnyTime),
+  : omniTask(omniTask::AnyTime, omniTask::ClientInvocation),
     pd_readyMutex("DeferredRequest::pd_readyMutex"),
     pd_readyCondition(&pd_readyMutex, "DeferredRequest::pd_readyCondition")
 {

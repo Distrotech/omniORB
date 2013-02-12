@@ -3,7 +3,7 @@
 // giopStrand.cc              Created on: 16/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -71,7 +71,7 @@ CORBA::ULong orbParameters::inConScanPeriod = 180;
 ////////////////////////////////////////////////////////////////////////
 class Scavenger : public omniTask {
 public:
-  Scavenger() : omniTask(omniTask::AnyTime) {}
+  Scavenger() : omniTask(omniTask::ImmediateDispatch) {}
   ~Scavenger() {}
 
   void execute();

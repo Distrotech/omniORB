@@ -403,7 +403,13 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong   maxServerThreadPerConnection;
 _CORBA_MODULE_VAR _core_attr CORBA::ULong   maxServerThreadPoolSize;
 //   The max. no. of threads the server will allocate to do various
 //   ORB tasks. This number does not include the dedicated thread
-//   per connection when the threadPerConnectionPolicy is in effect
+//   per connection when the threadPerConnectionPolicy is in effect.
+//
+//   Valid values = (n >= 1) 
+
+_CORBA_MODULE_VAR _core_attr CORBA::ULong   maxClientThreadPoolSize;
+//   The max. no. of threads a client will allocate to do asynchronous
+//   calls.
 //
 //   Valid values = (n >= 1) 
 

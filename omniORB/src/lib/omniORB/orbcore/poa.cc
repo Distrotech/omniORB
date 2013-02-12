@@ -94,7 +94,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 // to incarnate() are made by dispatch_to_sa(), but are synchronised
 // with the queue's activities.
 
-class omniServantActivatorTaskQueue : public omni_thread {
+class omniServantActivatorTaskQueue : public omniTask {
 public:
   class Task;
 
@@ -127,15 +127,7 @@ public:
     Task* pd_next;
   };
 
-  // Since this thread calls into application code, it must run both
-  // the thread interceptors -- to mark thread creation and assignment
-  // of the thread to do upcalls. run_undetached() trggers any
-  // createThread interceptors, and control reaches mid_run();
-  // mid_run() triggers any assignUpcallThread interceptors, and
-  // control reaches real_run(), which does the work.
-  virtual void* run_undetached(void*);
-  void mid_run();
-  void real_run();
+  void execute();
 
 private:
   omni_tracedmutex     pd_queue_lock;
@@ -150,14 +142,15 @@ omniServantActivatorTaskQueue::~omniServantActivatorTaskQueue() {}
 
 
 omniServantActivatorTaskQueue::omniServantActivatorTaskQueue()
-  : pd_queue_lock("omniServantActivatorTaskQueue::pd_queue_lock"),
+  : omniTask(omniTask::ImmediateDispatch, omniTask::ServerUpcall),
+    pd_queue_lock("omniServantActivatorTaskQueue::pd_queue_lock"),
     pd_task_lock("omniServantActivatorTaskQueue::pd_task_lock"),
     pd_cond(&pd_queue_lock, "omniServantActivatorTaskQueue::pd_cond"),
     pd_taskq(0),
     pd_taskqtail(0),
     pd_dying(0)
 {
-  start_undetached();
+  orbAsyncInvoker->insert(this);
 }
 
 
@@ -184,12 +177,25 @@ omniServantActivatorTaskQueue::insert(Task* t)
 void
 omniServantActivatorTaskQueue::die()
 {
-  pd_queue_lock.lock();
-  pd_dying = 1;
-  int signal = !pd_taskq;
-  pd_queue_lock.unlock();
+  {
+    omni_tracedmutex_lock sync(pd_queue_lock);
+    pd_dying = 1;
+    pd_cond.signal();
 
-  if( signal )  pd_cond.signal();
+    omni_time_t deadline;
+    omni_thread::get_time(deadline, 60);
+
+    omniORB::logs(15, "Wait for ServantActivator task queue to finish...");
+    while (pd_dying != 2) {
+      if (pd_cond.timedwait(deadline) == 0) {
+        omniORB::logs(2, "Timed out waiting for ServantActivator task queue "
+                      "to finish.");
+        return;
+      }
+    }
+  }
+  omniORB::logs(15, "ServantActivator task queue finished.");
+  delete this;
 }
 
 OMNI_NAMESPACE_END(omni)
@@ -439,9 +445,8 @@ omniOrbPOA::~omniOrbPOA()
     delete [] pd_oidPrefix;
 
   if (pd_servant_activator_queue) {
-    void* v;
     pd_servant_activator_queue->die();
-    pd_servant_activator_queue->join(&v);
+    pd_servant_activator_queue = 0;
   }
 }
 
@@ -3006,103 +3011,18 @@ omniOrbPOA::etherealise_objects(omniObjTableEntry* entry,
   }
 }
 
-OMNI_NAMESPACE_BEGIN(omni)
-
-class saTaskQueueCreateInfo
-  : public omniInterceptors::createThread_T::info_T {
-public:
-  saTaskQueueCreateInfo(omniServantActivatorTaskQueue* worker) :
-    pd_worker(worker), pd_elmt(omniInterceptorP::createThread) {}
-
-  void run();
-  omni_thread* self();
-  
-private:
-  omniServantActivatorTaskQueue* pd_worker;
-  omniInterceptorP::elmT*        pd_elmt;
-};
-
 void
-saTaskQueueCreateInfo::run()
+omniServantActivatorTaskQueue::execute()
 {
-  if (pd_elmt) {
-    omniInterceptors::createThread_T::interceptFunc f =
-      (omniInterceptors::createThread_T::interceptFunc)pd_elmt->func;
-    pd_elmt = pd_elmt->next;
-    f(*this);
-  }
-  else
-    pd_worker->mid_run();
-}
-
-omni_thread*
-saTaskQueueCreateInfo::self()
-{
-  return pd_worker;
-}
-
-class saTaskQueueAssignInfo
-  : public omniInterceptors::assignUpcallThread_T::info_T {
-public:
-  saTaskQueueAssignInfo(omniServantActivatorTaskQueue* worker) :
-    pd_worker(worker), pd_elmt(omniInterceptorP::assignUpcallThread) {}
-
-  void run();
-  omni_thread* self();
-  
-private:
-  omniServantActivatorTaskQueue* pd_worker;
-  omniInterceptorP::elmT*        pd_elmt;
-};
-
-void
-saTaskQueueAssignInfo::run()
-{
-  if (pd_elmt) {
-    omniInterceptors::assignUpcallThread_T::interceptFunc f =
-      (omniInterceptors::assignUpcallThread_T::interceptFunc)pd_elmt->func;
-    pd_elmt = pd_elmt->next;
-    f(*this);
-  }
-  else
-    pd_worker->real_run();
-}
-
-omni_thread*
-saTaskQueueAssignInfo::self()
-{
-  return pd_worker;
-}
-
-OMNI_NAMESPACE_END(omni)
-
-
-void*
-omniServantActivatorTaskQueue::run_undetached(void*)
-{
-  saTaskQueueCreateInfo info(this);
-  info.run();
-  return 0;
-}
-
-void
-omniServantActivatorTaskQueue::mid_run()
-{
-  saTaskQueueAssignInfo info(this);
-  info.run();
-}
-
-
-void
-omniServantActivatorTaskQueue::real_run()
-{
-  omniORB::logs(25, "Servant Activator task queue start");
+  omniORB::logs(25, "Servant Activator task queue start.");
   while( 1 ) {
     pd_queue_lock.lock();
     while( !pd_taskq ) {
       if( pd_dying ) {
         pd_queue_lock.unlock();
-	omniORB::logs(15, "Servant Activator task queue exit");
+	omniORB::logs(15, "Servant Activator task queue exit.");
+        pd_dying = 2;
+        pd_cond.broadcast();
         return;
       }
       pd_cond.wait();

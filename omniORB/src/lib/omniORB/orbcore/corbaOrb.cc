@@ -74,13 +74,6 @@ static omni_tracedmutex     orb_lock("orb_lock");
 static omni_tracedcondition orb_signal(&orb_lock, "orb_signal");
 static volatile int         orb_n_blocked_in_run      = 0;
 
-// For the main thread AsyncInvoker:
-static volatile int         invoker_threads           = 0;
-static omni_tracedcondition invoker_signal(&orb_lock, "invoker_signal");
-static omniTaskLink         invoker_dedicated_tq;
-static CORBA::Boolean       invoker_shutting_down     = 0;
-
-
 #ifdef __SINIX__
 // Why haven't we got this signature from signal.h? - sll
 //
@@ -101,7 +94,7 @@ static const char* config_fname = CONFIG_DEFAULT_LOCATION;
 //
 OMNI_NAMESPACE_BEGIN(omni)
 
-ORBAsyncInvoker* orbAsyncInvoker = 0;
+omniAsyncInvoker* orbAsyncInvoker = 0;
 
 extern omniInitialiser& omni_omniIOR_initialiser_;
 extern omniInitialiser& omni_corbaOrb_initialiser_;
@@ -130,9 +123,6 @@ extern omniInitialiser& omni_uri_initialiser_;
 extern omniInitialiser& omni_invoker_initialiser_;
 
 OMNI_NAMESPACE_END(omni)
-
-static void
-shutdownAsyncInvoker();
 
 
 //////////////////////////////////////////////////////////////////////
@@ -501,15 +491,17 @@ omniOrbORB::run()
     orbAsyncInvoker->perform();
   }
   else {
-    orb_lock.lock();
+    omni_tracedmutex_lock l(orb_lock);
 
     orb_n_blocked_in_run++;
-    while( !pd_shutdown )  orb_signal.wait();
-    orb_n_blocked_in_run--;
 
-    orb_lock.unlock();
+    while (!pd_shutdown)
+      orb_signal.wait();
+
+    orb_n_blocked_in_run--;
   }
 }
+
 
 CORBA::Boolean
 omniOrbORB::run_timeout(unsigned long secs, unsigned long nanosecs)
@@ -522,13 +514,14 @@ omniOrbORB::run_timeout(unsigned long secs, unsigned long nanosecs)
     orbAsyncInvoker->perform(secs, nanosecs);
   }
   else {
-    orb_lock.lock();
+    omni_tracedmutex_lock l(orb_lock);
 
     orb_n_blocked_in_run++;
-    if( !pd_shutdown )  orb_signal.timedwait(secs, nanosecs);
-    orb_n_blocked_in_run--;
 
-    orb_lock.unlock();
+    if (!pd_shutdown)
+      orb_signal.timedwait(secs, nanosecs);
+
+    orb_n_blocked_in_run--;
   }
   return pd_shutdown;
 }
@@ -750,7 +743,7 @@ omniOrbORB::actual_shutdown()
   orb_signal.broadcast();
 
   // Wake up main thread if there is one running
-  shutdownAsyncInvoker();
+  orbAsyncInvoker->shutdown();
 }
 
 
@@ -817,116 +810,6 @@ omniOrbORB::do_shutdown(CORBA::Boolean wait_for_completion)
     }
   }
 }
-
-//////////////////////////////////////////////////////////////////////
-////////////////////////  ORBAsyncInvoker  ///////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-OMNI_NAMESPACE_BEGIN(omni)
-
-ORBAsyncInvoker::~ORBAsyncInvoker()
-{
-  ASSERT_OMNI_TRACEDMUTEX_HELD(orb_lock, 1);
-  OMNIORB_ASSERT(omniTaskLink::is_empty(invoker_dedicated_tq));
-  OMNIORB_ASSERT(invoker_threads == 0);
-}
-
-int
-ORBAsyncInvoker::work_pending()
-{
-  omni_tracedmutex_lock sync(orb_lock);
-
-  return !omniTaskLink::is_empty(invoker_dedicated_tq);
-}
-
-void
-ORBAsyncInvoker::perform(unsigned long secs, unsigned long nanosecs)
-{
-  orb_lock.lock();
-  invoker_threads++;
-
-  while (!invoker_shutting_down) {
-
-    while (!invoker_shutting_down &&
-	   omniTaskLink::is_empty(invoker_dedicated_tq)) {
-
-      // Wait for a task to arrive
-      if (secs || nanosecs) {
-	if (invoker_signal.timedwait(secs, nanosecs) == 0) {
-	  // timeout
-	  invoker_threads--;
-	  if (invoker_shutting_down) invoker_signal.signal();
-	  orb_lock.unlock();
-	  return;
-	}
-      }
-      else {
-	invoker_signal.wait();
-      }
-    }
-    while (!omniTaskLink::is_empty(invoker_dedicated_tq)) {
-      // Run all queued tasks
-      omniTask* t = (omniTask*)invoker_dedicated_tq.next;
-      t->deq();
-      orb_lock.unlock();
-      try {
-	t->execute();
-      }
-      catch (...) {
-	omniORB::logs(1, "ORBAsyncInvoker: Warning - unexpected "
-		      "exception caught while executing a task.");
-      }
-      orb_lock.lock();
-    }
-  }
-  OMNIORB_ASSERT(omniTaskLink::is_empty(invoker_dedicated_tq));
-
-  invoker_threads--;
-  if (invoker_shutting_down) invoker_signal.signal();
-  orb_lock.unlock();
-}
-
-int
-ORBAsyncInvoker::insert_dedicated(omniTask* t)
-{
-  OMNIORB_ASSERT(t->category() == omniTask::DedicatedThread);
-
-  omni_tracedmutex_lock sync(orb_lock);
-  t->enq(invoker_dedicated_tq);
-  invoker_signal.signal();
-  return 1;
-}
-
-int
-ORBAsyncInvoker::cancel_dedicated(omniTask* t)
-{
-  OMNIORB_ASSERT(t->category() == omniTask::DedicatedThread);
-
-  omni_tracedmutex_lock sync(orb_lock);
-
-  omniTaskLink* l;
-
-  for (l = invoker_dedicated_tq.next; l != &invoker_dedicated_tq; l= l->next) {
-    if ((omniTask*)l == t) {
-      l->deq();
-      return 1;
-    }
-  }
-  return 0;
-}
-
-
-OMNI_NAMESPACE_END(omni)
-
-
-static void
-shutdownAsyncInvoker()
-{
-  ASSERT_OMNI_TRACEDMUTEX_HELD(orb_lock, 1);
-  invoker_shutting_down = 1;
-  invoker_signal.broadcast();
-}
-
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1219,7 +1102,6 @@ public:
     orbOptions::singleton().registerHandler(configFileHandler_);
   }
 
-
   void attach() {
 
 #if !defined(__CIAO__)
@@ -1255,21 +1137,13 @@ public:
 # endif // HAVE_SIGACTION
 #endif // __CIAO__
 
-    orbAsyncInvoker = new ORBAsyncInvoker(orbParameters::maxServerThreadPoolSize);
-    invoker_shutting_down = 0;
+    orbAsyncInvoker = new omniAsyncInvoker();
   }
 
   void detach() {
     if (orbAsyncInvoker) {
-      if (invoker_threads) {
-	omniORB::logs(20, "Wait for ORB invoker threads to finish.");
-	while (invoker_threads)
-	  invoker_signal.wait();
-	omniORB::logs(20, "All ORB invoker threads finished.");
-      }
       delete orbAsyncInvoker;
       orbAsyncInvoker = 0;
-      invoker_shutting_down = 0;
     }
 #ifdef __WIN32__
     (void) WSACleanup();

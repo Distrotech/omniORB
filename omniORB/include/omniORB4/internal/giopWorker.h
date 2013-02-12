@@ -1,8 +1,9 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORB
-// giopWorker.h                 Created on: 20 Dec 2000
+// giopWorker.h               Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -24,24 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.3  2002/09/10 23:17:11  dgrisby
-  Thread interceptors.
-
-  Revision 1.1.4.2  2001/07/13 15:21:22  sll
-  Added access functions.
-
-  Revision 1.1.4.1  2001/04/18 17:18:59  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:03  sll
-  Added new files.
-
-*/
 
 #ifndef __GIOPWORKER_H__
 #define __GIOPWORKER_H__
@@ -54,7 +39,6 @@ public:
 	     CORBA::Boolean singleshot=0);
 
   void execute();
-  void real_execute();
 
   void terminate();
   // finish off this task, call by another thread.

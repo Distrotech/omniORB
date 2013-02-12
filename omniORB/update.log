@@ -1,3 +1,30 @@
+Tue Feb 12 22:51:30 GMT 2013 dgrisby
+====================================
+
+- New get_time overload.
+
+include/omnithread.h
+
+- Set deadline overload.
+
+include/omniORB4/omniORB.h
+
+- New invoker with separate client and server pools.
+
+include/omniORB4/internal/giopWorker.h
+include/omniORB4/internal/invoker.h
+include/omniORB4/internal/orbParameters.h
+include/omniORB4/omniAsyncInvoker.h
+src/lib/omniORB/dynamic/deferredRequest.cc
+src/lib/omniORB/orbcore/corbaOrb.cc
+src/lib/omniORB/orbcore/giopServer.cc
+src/lib/omniORB/orbcore/giopStrand.cc
+src/lib/omniORB/orbcore/giopWorker.cc
+src/lib/omniORB/orbcore/invoker.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/lib/omniORB/orbcore/poa.cc
+
+
 Fri Feb  8 22:26:59 GMT 2013 dgrisby
 ====================================
 

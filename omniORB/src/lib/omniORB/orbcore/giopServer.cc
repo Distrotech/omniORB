@@ -76,13 +76,6 @@ CORBA::ULong   orbParameters::maxServerThreadPerConnection   = 100;
 //
 //   Valid values = (n >= 1) 
 
-CORBA::ULong   orbParameters::maxServerThreadPoolSize        = 100;
-//   The max. no. of threads the server will allocate to do various
-//   ORB tasks. This number does not include the dedicated thread
-//   per connection when the threadPerConnectionPolicy is in effect
-//
-//   Valid values = (n >= 1) 
-
 CORBA::ULong   orbParameters::threadPoolWatchConnection      = 1;
 //   After dispatching an upcall in thread pool mode, the thread that
 //   has just performed the call can watch the connection for a short
@@ -1480,34 +1473,6 @@ static maxServerThreadPerConnectionHandler maxServerThreadPerConnectionHandler_;
 
 
 /////////////////////////////////////////////////////////////////////////////
-class maxServerThreadPoolSizeHandler : public orbOptions::Handler {
-public:
-
-  maxServerThreadPoolSizeHandler() : 
-    orbOptions::Handler("maxServerThreadPoolSize",
-			"maxServerThreadPoolSize = n >= 1",
-			1,
-			"-ORBmaxServerThreadPoolSize < n >= 1 >") {}
-
-  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
-
-    CORBA::ULong v;
-    if (!orbOptions::getULong(value,v) || v < 1) {
-      throw orbOptions::BadParam(key(),value,
-				 orbOptions::expect_greater_than_zero_ulong_msg);
-    }
-    orbParameters::maxServerThreadPoolSize = v;
-  }
-
-  void dump(orbOptions::sequenceString& result) {
-    orbOptions::addKVULong(key(),orbParameters::maxServerThreadPoolSize,
-			   result);
-  }
-};
-
-static maxServerThreadPoolSizeHandler maxServerThreadPoolSizeHandler_;
-
-/////////////////////////////////////////////////////////////////////////////
 class threadPoolWatchConnectionHandler : public orbOptions::Handler {
 public:
 
@@ -1566,8 +1531,6 @@ public:
 static connectionWatchImmediateHandler connectionWatchImmediateHandler_;
 
 
-
-
 /////////////////////////////////////////////////////////////////////////////
 //            Module initialiser                                           //
 /////////////////////////////////////////////////////////////////////////////
@@ -1580,7 +1543,6 @@ public:
     orbOptions::singleton().registerHandler(threadPerConnectionUpperLimitHandler_);
     orbOptions::singleton().registerHandler(threadPerConnectionLowerLimitHandler_);
     orbOptions::singleton().registerHandler(maxServerThreadPerConnectionHandler_);
-    orbOptions::singleton().registerHandler(maxServerThreadPoolSizeHandler_);
     orbOptions::singleton().registerHandler(threadPoolWatchConnectionHandler_);
     orbOptions::singleton().registerHandler(connectionWatchImmediateHandler_);
   }

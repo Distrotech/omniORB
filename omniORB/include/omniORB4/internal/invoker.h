@@ -3,6 +3,7 @@
 // invoker.h                  Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -24,27 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.6.1  2003/03/23 21:03:45  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.3  2002/01/09 11:35:22  dpg1
-  Remove separate omniAsyncInvoker library to save library overhead.
-
-  Revision 1.1.4.2  2001/08/01 10:08:20  dpg1
-  Main thread policy.
-
-  Revision 1.1.4.1  2001/04/18 17:18:59  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:02  sll
-  Added new files.
-
-*/
 
 #ifndef __INVOKER_H__
 #define __INVOKER_H__
@@ -61,22 +43,7 @@
 
 OMNI_NAMESPACE_BEGIN(omni)
 
-  class ORBAsyncInvoker : public omniAsyncInvoker {
-  public:
-    ORBAsyncInvoker(unsigned int max=10000)
-      : omniAsyncInvoker(max) {}
-
-    virtual ~ORBAsyncInvoker();
-
-    int  work_pending();
-    void perform(unsigned long secs = 0, unsigned long nanosecs = 0);
-
-  protected:
-    int insert_dedicated(omniTask*);
-    int cancel_dedicated(omniTask*);
-  };
-
-  extern _core_attr ORBAsyncInvoker* orbAsyncInvoker;
+  extern _core_attr omniAsyncInvoker* orbAsyncInvoker;
 
 OMNI_NAMESPACE_END(omni)
 

@@ -1,9 +1,10 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORB
 // invoker.cc                 Created on: 11 Apr 2001
-//                            Author    : Sai Lai Lo (sll)
+//                            Authors   : Duncan Grisby
+//                                        Sai Lai Lo
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -23,7 +24,6 @@
 //    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //    02111-1307, USA
 //
-//
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //
@@ -41,7 +41,37 @@ OMNI_USING_NAMESPACE(omni)
 
 unsigned int omniAsyncInvoker::idle_timeout = 10;
 
-class omniAsyncWorker;
+
+
+////////////////////////////////////////////////////////////////////////////
+// Configuration
+
+CORBA::ULong   orbParameters::maxServerThreadPoolSize        = 100;
+//   The max. no. of threads the server will allocate to do various
+//   ORB tasks. This number does not include the dedicated thread
+//   per connection when the threadPerConnectionPolicy is in effect
+//
+//   Valid values = (n >= 1) 
+
+CORBA::ULong   orbParameters::maxClientThreadPoolSize        = 100;
+//   The max. no. of threads a client will allocate to do asynchronous
+//   calls.
+//
+//   Valid values = (n >= 1) 
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Helpers
+
+static inline const char* plural(CORBA::ULong val)
+{
+  return val == 1 ? "" : "s";
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// Worker interceptor
 
 class omniAsyncWorkerInfo
   : public omniInterceptors::createThread_T::info_T {
@@ -58,147 +88,568 @@ private:
 };
 
 
+///////////////////////////////////////////////////////////////////////////
+// Worker
+
 class omniAsyncWorker : public omni_thread {
 public:
 
-  omniAsyncWorker(omniAsyncInvoker* pool, omniTask* task) :
-    pd_pool(pool), pd_task(task), pd_next(0), pd_id(id()), pd_in_idle_queue(0)
+  inline omniAsyncWorker(omniAsyncInvoker* invoker)
+    : pd_invoker(invoker),
+      pd_lock(invoker->pd_lock),
+      pd_cond(&invoker->pd_lock, "omniAsyncWorker::pd_cond"),
+      pd_id(id()),
+      pd_pool(0),
+      pd_task(0),
+      pd_next_idle(0), pd_prev_idle(0)
   {
-    pd_cond = new omni_tracedcondition(pool->pd_lock,
-				       "omniAsyncWorker::pd_cond");
     start();
   }
 
-  ~omniAsyncWorker() {
+  ~omniAsyncWorker()
+  {
+    unsigned int total = pd_invoker->workerStop();
 
     if (omniORB::trace(10)) {
-      omniORB::logger l;
-      l << "AsyncInvoker: thread id = " << pd_id
-	<< " has exited. Total threads = " << pd_pool->pd_totalthreads
-	<< "\n";
+      omniORB::logger log;
+      log << "AsyncInvoker: thread id " << pd_id
+          << " has exited. Total threads = " << total << ".\n";
     }
-
-    delete pd_cond;
-    pd_pool->pd_lock->lock();
-
-    if (--pd_pool->pd_totalthreads == 0)
-      pd_pool->pd_cond->signal();
-
-    pd_pool->pd_lock->unlock();
   }
 
   void run(void*) {
+    unsigned int total = pd_invoker->workerStart();
+
+    if (omniORB::trace(10)) {
+      omniORB::logger log;
+      log << "AsyncInvoker: thread id " << pd_id
+          << " has started. Total threads = " << total << ".\n";
+    }
     omniAsyncWorkerInfo info(this);
     info.run();
   }
 
-  void real_run() {
+  void mid_run();
+  void real_run();
 
-    omni_thread* self_thread = omni_thread::self();
+  inline void assign(omniAsyncPool* pool)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+    OMNIORB_ASSERT(!pd_pool);
 
-    if (omniORB::trace(10)) {
-      omni_tracedmutex_lock sync(*pd_pool->pd_lock);
-      omniORB::logger l;
-      l << "AsyncInvoker: thread id = " << pd_id
-	<< " has started. Total threads = " << pd_pool->pd_totalthreads
-	<< "\n";
-    }
-    pd_pool->pd_lock->lock();
-
-    while (pd_task || pd_pool->pd_keep_working) {
-
-      if (!pd_task) {
-	if (!omniTaskLink::is_empty(pd_pool->pd_anytime_tq)) {
-	  pd_task = (omniTask*)pd_pool->pd_anytime_tq.next;
-	  pd_task->deq();
-	}
-	else {
-	  // Add to the idle queue
-	  OMNIORB_ASSERT(!pd_in_idle_queue);
-	  pd_next = pd_pool->pd_idle_threads;
-	  pd_pool->pd_idle_threads = this;
-	  pd_in_idle_queue = 1;
-
-	  unsigned long abs_sec,abs_nanosec;
-	  omni_thread::get_time(&abs_sec,&abs_nanosec,
-				omniAsyncInvoker::idle_timeout);
-
-	  int signalled = pd_cond->timedwait(abs_sec,abs_nanosec);
-
-	  if (pd_in_idle_queue) {
-	    // Remove from the idle queue
-	    omniAsyncWorker** pp = &pd_pool->pd_idle_threads;
-	    while (*pp && *pp != this) {
-	      pp = &((*pp)->pd_next);
-	    }
-	    if (*pp) {
-	      *pp = pd_next;
-	    }
-	    else {
-	      if (omniORB::trace(1)) {
-		omniORB::logger l;
-		l << "AsyncInvoker: Warning: thread " << pd_id
-		  << " thought it was in the idle queue but it was not.\n";
-	      }
-	    }
-	    pd_next = 0;
-	    pd_in_idle_queue = 0;
-	  }
-	  if (!signalled && !pd_task) {
-	    // We have timed out and have not been assigned a task.
-	    // Break out from the while loop and exit.
-	    break;
-	  }
-	  // If signalled, we have been dequeued by the
-	  // omniAsyncInvoker, and will have a task to process next
-	  // time around the while loop.
-	  continue;
-	}
-      }
-
-      unsigned int immediate = (pd_task->category() ==
-				omniTask::ImmediateDispatch);
-
-      pd_pool->pd_lock->unlock();
-      try {
-	pd_task->pd_selfThread = self_thread;
-	pd_task->execute();
-      }
-      catch(...) {
-	omniORB::logs(1, "AsyncInvoker: Warning: unexpected exception "
-		      "caught while executing a task.");
-      }
-      pd_task = 0;
-      pd_pool->pd_lock->lock();
-
-      if (immediate) {
-	pd_pool->pd_nthreads++;
-      }
-
-      if (pd_pool->pd_nthreads > pd_pool->pd_maxthreads) {
-	// No need to keep this thread
-	break;
-      }
-    }
-
-    pd_pool->pd_nthreads--;
-    pd_pool->pd_lock->unlock();
+    pd_pool = pool;
+    pd_cond.signal();
   }
 
-  friend class omniAsyncInvoker;
+  inline void handle(omniTask* task)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+    OMNIORB_ASSERT(pd_pool);
+    OMNIORB_ASSERT(!pd_task);
+
+    pd_task = task;
+    pd_cond.signal();
+  }
+
+  inline void stop()
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+    pd_cond.signal();
+  }
+
+  inline void addIdle();
+  inline void remIdle();
 
 private:
-  omniAsyncInvoker*     pd_pool;
-  omniTask*             pd_task;
-  omni_tracedcondition* pd_cond;
-  omniAsyncWorker*      pd_next;
-  int                   pd_id;
-  CORBA::Boolean        pd_in_idle_queue;
+  omniAsyncInvoker*    pd_invoker;
+  omni_tracedmutex&    pd_lock;
+  omni_tracedcondition pd_cond;
+  int                  pd_id;
 
-  omniAsyncWorker();
+  omniAsyncPool*       pd_pool;
+  omniTask*            pd_task;
+  omniAsyncWorker*     pd_next_idle;
+  omniAsyncWorker**    pd_prev_idle;
+
   omniAsyncWorker(const omniAsyncWorker&);
   omniAsyncWorker& operator=(const omniAsyncWorker&);
+
+  friend class omniAsyncPool;
+  friend class omniAsyncInvoker;
 };
+
+
+///////////////////////////////////////////////////////////////////////////
+// Pool
+
+class omniAsyncPool {
+public:
+  inline omniAsyncPool(omniAsyncInvoker* invoker,
+                       const char*       purpose,
+                       unsigned int      max)
+    : pd_invoker(invoker), pd_lock(invoker->pd_lock), pd_purpose(purpose),
+      pd_total_threads(0), pd_pool_threads(0), pd_max(max),
+      pd_idle_threads(0)
+  {}
+
+  virtual ~omniAsyncPool() {}
+
+  inline const char* purpose() { return pd_purpose; }
+
+  CORBA::Boolean insert(omniTask* task);
+
+  void stop();
+  
+  virtual void workerRun(omniAsyncWorker* worker) = 0;
+
+  inline unsigned int workerStart(omniAsyncWorker* worker)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+    return ++pd_total_threads;
+  }
+
+  inline unsigned int workerStop(omniAsyncWorker* worker)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+    return --pd_total_threads;
+  }
+
+private:
+
+  omniAsyncInvoker* pd_invoker;
+  omni_tracedmutex& pd_lock;
+
+  const char*       pd_purpose;
+  unsigned int      pd_total_threads;
+  unsigned int      pd_pool_threads;
+  unsigned int      pd_max;
+  omniTaskLink      pd_tasks;
+  omniAsyncWorker*  pd_idle_threads;
+
+  friend class omniAsyncWorker;
+};
+
+
+CORBA::Boolean
+omniAsyncPool::insert(omniTask* task)
+{
+  omni_tracedmutex_lock l(pd_lock);
+
+  omniAsyncWorker* worker;
+
+  if (pd_idle_threads) {
+    // Use idle worker
+    worker = pd_idle_threads;
+    worker->remIdle();
+    worker->handle(task);
+  }
+  else if (task->category() == omniTask::ImmediateDispatch ||
+           pd_pool_threads < pd_max) {
+
+    // Get a new worker from the invoker
+    worker = pd_invoker->getWorker(this);
+
+    if (!worker) {
+      if (task->category() == omniTask::ImmediateDispatch) {
+        omniORB::logs(2, "Unable to start new thread. Operation failed.");
+        return 0;
+      }
+      else {
+        omniORB::logs(2, "Unable to start new thread. Task queued.");
+        task->enq(pd_tasks);
+        return 1;
+      }
+    }
+    ++pd_pool_threads;
+    worker->handle(task);
+  }
+  else {
+    // Add to queue
+    task->enq(pd_tasks);
+  }
+
+  return 1;
+}
+
+
+void
+omniAsyncPool::stop()
+{
+  ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+
+  omniAsyncWorker* worker = pd_idle_threads;
+  while (worker) {
+    worker->stop();
+    worker = worker->pd_next_idle;
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// General pool
+
+class omniAsyncPoolGeneral : public omniAsyncPool {
+public:
+  inline omniAsyncPoolGeneral(omniAsyncInvoker* invoker)
+    : omniAsyncPool(invoker, "general", 100000)
+  {}
+
+  void workerRun(omniAsyncWorker* worker)
+  {
+    worker->real_run();
+  }
+};
+
+
+///////////////////////////////////////////////////////////////////////////
+// Server-side pool
+
+class omniServerWorkerInfo
+  : public omniInterceptors::assignUpcallThread_T::info_T {
+public:
+  inline omniServerWorkerInfo(omniAsyncWorker* worker) :
+    pd_worker(worker), pd_elmt(omniInterceptorP::assignUpcallThread) {}
+
+  void run();
+  omni_thread* self();
+  
+private:
+  omniAsyncWorker*        pd_worker;
+  omniInterceptorP::elmT* pd_elmt;
+};
+
+class omniAsyncPoolServer : public omniAsyncPool {
+public:
+  inline omniAsyncPoolServer(omniAsyncInvoker* invoker)
+    : omniAsyncPool(invoker, "server", orbParameters::maxServerThreadPoolSize)
+  {}
+
+  void workerRun(omniAsyncWorker* worker)
+  {
+    omniServerWorkerInfo info(worker);
+    info.run();
+  }
+};
+
+
+///////////////////////////////////////////////////////////////////////////
+// Client-side pool
+
+class omniClientWorkerInfo
+  : public omniInterceptors::assignAMIThread_T::info_T {
+public:
+  inline omniClientWorkerInfo(omniAsyncWorker* worker) :
+    pd_worker(worker), pd_elmt(omniInterceptorP::assignAMIThread) {}
+
+  void run();
+  omni_thread* self();
+  
+private:
+  omniAsyncWorker*        pd_worker;
+  omniInterceptorP::elmT* pd_elmt;
+};
+
+class omniAsyncPoolClient : public omniAsyncPool {
+public:
+  inline omniAsyncPoolClient(omniAsyncInvoker* invoker)
+    : omniAsyncPool(invoker, "client", orbParameters::maxClientThreadPoolSize)
+  {}
+
+  void workerRun(omniAsyncWorker* worker)
+  {
+    omniClientWorkerInfo info(worker);
+    info.run();
+  }
+};
+
+
+///////////////////////////////////////////////////////////////////////////
+// Dedicated thread queue
+
+class omniAsyncDedicated {
+public:
+  inline omniAsyncDedicated(omniAsyncInvoker* invoker)
+    : pd_invoker(invoker),
+      pd_lock(invoker->pd_lock),
+      pd_cond(&pd_lock, "omniAsyncDedicated::pd_cond")
+  {}
+
+  inline ~omniAsyncDedicated() {}
+
+  CORBA::Boolean insert(omniTask* task);
+  CORBA::Boolean work_pending();
+  void perform(unsigned long secs = 0, unsigned long nanosecs = 0);
+  void shutdown();
+
+private:
+  omniAsyncInvoker*    pd_invoker;
+  omni_tracedmutex&    pd_lock;
+  omni_tracedcondition pd_cond;
+
+  omniTaskLink         pd_tasks;
+};
+
+
+CORBA::Boolean
+omniAsyncDedicated::insert(omniTask* task)
+{
+  omni_tracedmutex_lock l(pd_lock);
+  task->enq(pd_tasks);
+  pd_cond.signal();
+  return 1;
+}
+
+CORBA::Boolean
+omniAsyncDedicated::work_pending()
+{
+  omni_tracedmutex_lock l(pd_lock);
+  return !omniTaskLink::is_empty(pd_tasks);
+}
+
+void
+omniAsyncDedicated::perform(unsigned long secs, unsigned long nanosecs)
+{
+  pd_invoker->workerStart();
+
+  omniTask*      task = 0;
+  CORBA::Boolean go   = 1;
+
+  while (go) {
+    {
+      omni_tracedmutex_lock l(pd_lock);
+
+      while (omniTaskLink::is_empty(pd_tasks) &&
+             pd_invoker->pd_keep_working) {
+        
+        // Wait for a task
+        if (secs || nanosecs) {
+          if (pd_cond.timedwait(secs, nanosecs) == 0) {
+            // Timed out
+            go = 0;
+            break;
+          }
+        }
+        else {
+          pd_cond.wait();
+        }
+      }
+    
+      if (!omniTaskLink::is_empty(pd_tasks)) {
+        // Queued task available
+        task = (omniTask*)pd_tasks.next;
+        task->deq();
+      }
+      else if (!pd_invoker->pd_keep_working) {
+        go = 0;
+      }
+    }
+    if (task) {
+      try {
+        task->execute();
+      }
+      catch (...) {
+        omniORB::logs(1, "AsyncInvoker: Warning: unexpected exception "
+                      "caught while executing a task on the main thread.");
+      }
+      task = 0;
+    }
+  }
+  pd_invoker->workerStop();
+}
+
+
+void
+omniAsyncDedicated::shutdown()
+{
+  omniORB::logs(25, "Shut down dedicated thread queue.");
+  omni_tracedmutex_lock l(pd_lock);
+  pd_cond.broadcast();
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////
+// Worker
+
+void
+omniAsyncWorker::mid_run()
+{
+  unsigned int total;
+
+  while (1) {
+    {
+      omni_tracedmutex_lock l(pd_lock);
+
+      if (!pd_pool) {
+        addIdle();
+
+        omni_time_t deadline;
+        omni_thread::get_time(deadline, omniAsyncInvoker::idle_timeout);
+        
+        while (pd_invoker->pd_keep_working && !pd_pool) {
+
+          int signalled = pd_cond.timedwait(deadline);
+          if (!signalled) // timed out
+            break;
+        }
+
+        if (!pd_pool) {
+          remIdle();
+          return;
+        }
+      }
+      total = pd_pool->workerStart(this);
+    }
+
+    const char* purpose = pd_pool->purpose();
+
+    if (omniORB::trace(10)) {
+      omniORB::logger log;
+      log << "AsyncInvoker: thread id " << pd_id << " assigned to "
+          << purpose << " tasks. Total " << purpose << " threads = "
+          << total << ".\n";
+    }
+
+    pd_pool->workerRun(this);
+
+    {
+      omni_tracedmutex_lock l(pd_lock);
+      total   = pd_pool->workerStop(this);
+      pd_pool = 0;
+    }
+
+    if (omniORB::trace(10)) {
+      omniORB::logger log;
+      log << "AsyncInvoker: thread id " << pd_id << " released from "
+          << purpose << " tasks. Total " << purpose << " threads = "
+          << total << ".\n";
+    }
+  }
+}
+
+
+void omniAsyncWorker::real_run()
+{
+  OMNIORB_ASSERT(pd_pool);
+
+  omni_thread*   self_thread = omni_thread::self();
+  CORBA::Boolean immediate   = 0;
+
+  while (1) {
+    {
+      omni_tracedmutex_lock l(pd_lock);
+
+      if (!pd_task) {
+        if (!omniTaskLink::is_empty(pd_pool->pd_tasks)) {
+          // Queued task available
+          pd_task = (omniTask*)pd_pool->pd_tasks.next;
+          pd_task->deq();
+        }
+        else {
+          addIdle();
+
+          omni_time_t deadline;
+          omni_thread::get_time(deadline, omniAsyncInvoker::idle_timeout);
+        
+          while (pd_invoker->pd_keep_working && !pd_task) {
+            int signalled = pd_cond.timedwait(deadline);
+            if (!signalled) // timed out
+              break;
+          }
+
+          if (!pd_task) {
+            remIdle();
+            break;
+          }
+        }
+      }
+      if ((immediate = pd_task->category() == omniTask::ImmediateDispatch)) {
+        // This thread is no longer counted towards the pool total
+        --pd_pool->pd_pool_threads;
+        
+        if (omniORB::trace(25)) {
+          omniORB::logger log;
+          log << "AsyncInvoker: thread id " << pd_id
+              << " performing immediate " << pd_pool->purpose() << " task.\n";
+        }
+      }
+    }
+
+    try {
+      pd_task->pd_self = self_thread;
+      pd_task->execute();
+    }
+    catch(...) {
+      omniORB::logs(1, "AsyncInvoker: Warning: unexpected exception "
+                    "caught while executing a task.");
+    }
+
+    {
+      omni_tracedmutex_lock l(pd_lock);
+      pd_task = 0;
+
+      if (immediate) {
+        // Thread is back in the pool
+        ++pd_pool->pd_pool_threads;
+
+        if (omniORB::trace(25)) {
+          omniORB::logger log;
+          log << "AsyncInvoker: thread id " << pd_id
+              << " finished immediate " << pd_pool->purpose() << " task.\n";
+        }
+      }
+
+      if (pd_pool->pd_pool_threads > pd_pool->pd_max)
+        break;
+    }
+  }
+  
+  {
+    omni_tracedmutex_lock l(pd_lock);
+    --pd_pool->pd_pool_threads;
+  }
+}
+
+
+void
+omniAsyncWorker::addIdle()
+{
+  ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+  OMNIORB_ASSERT(!pd_prev_idle);
+
+  if (pd_pool) {
+    pd_next_idle = pd_pool->pd_idle_threads;
+    pd_prev_idle = &pd_pool->pd_idle_threads;
+    pd_pool->pd_idle_threads = this;
+  }
+  else {
+    pd_next_idle = pd_invoker->pd_idle_threads;
+    pd_prev_idle = &pd_invoker->pd_idle_threads;
+    pd_invoker->pd_idle_threads = this;      
+  }
+  if (pd_next_idle)
+    pd_next_idle->pd_prev_idle = &pd_next_idle;
+}
+
+
+void
+omniAsyncWorker::remIdle()
+{
+  ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+  OMNIORB_ASSERT(pd_prev_idle);
+
+  if (pd_next_idle)
+    pd_next_idle->pd_prev_idle = pd_prev_idle;
+    
+  *pd_prev_idle = pd_next_idle;
+
+  pd_next_idle = 0;
+  pd_prev_idle = 0;
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+// Worker interceptors
 
 void
 omniAsyncWorkerInfo::run()
@@ -210,7 +661,7 @@ omniAsyncWorkerInfo::run()
     f(*this);
   }
   else
-    pd_worker->real_run();
+    pd_worker->mid_run();
 }
 
 omni_thread*
@@ -220,243 +671,188 @@ omniAsyncWorkerInfo::self()
 }
 
 
-///////////////////////////////////////////////////////////////////////////
-omniAsyncInvoker::omniAsyncInvoker(unsigned int max) {
-  pd_keep_working = 1;
-  pd_lock  = new omni_tracedmutex("omniAsyncInvoker::pd_lock");
-  pd_cond  = new omni_tracedcondition(pd_lock, "omniAsyncInvoker::pd_cond");
-  pd_idle_threads = 0;
-  pd_nthreads = 0;
-  pd_maxthreads = max;
-  pd_totalthreads = 0;
-}
-
-////////////////////////////////////////////////////////////////////////////
-static const char* plural(CORBA::ULong val)
+void
+omniServerWorkerInfo::run()
 {
-  return val == 1 ? "" : "s";
+  if (pd_elmt) {
+    omniInterceptors::assignUpcallThread_T::interceptFunc f =
+      (omniInterceptors::assignUpcallThread_T::interceptFunc)pd_elmt->func;
+    pd_elmt = pd_elmt->next;
+    f(*this);
+  }
+  else
+    pd_worker->real_run();
 }
 
+omni_thread*
+omniServerWorkerInfo::self()
+{
+  return pd_worker;
+}
+
+
+void
+omniClientWorkerInfo::run()
+{
+  if (pd_elmt) {
+    omniInterceptors::assignAMIThread_T::interceptFunc f =
+      (omniInterceptors::assignAMIThread_T::interceptFunc)pd_elmt->func;
+    pd_elmt = pd_elmt->next;
+    f(*this);
+  }
+  else
+    pd_worker->real_run();
+}
+
+omni_thread*
+omniClientWorkerInfo::self()
+{
+  return pd_worker;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////
-omniAsyncInvoker::~omniAsyncInvoker() {
+// Invoker
 
-  pd_lock->lock();
-  pd_keep_working = 0;
-  while (pd_idle_threads) {
-    omniAsyncWorker* t = pd_idle_threads;
-    pd_idle_threads = t->pd_next;
-    t->pd_next = 0;
-    t->pd_in_idle_queue = 0;
-    t->pd_cond->signal();
-  }
+omniAsyncInvoker::omniAsyncInvoker()
+  : pd_lock("omniAsyncInvoker::pd_lock"),
+    pd_idle_cond(&pd_lock, "omniAsyncInvoker::pd_idle_cond"),
+    pd_total_threads(0),
+    pd_idle_threads(0),
+    pd_general  (new omniAsyncPoolGeneral(this)),
+    pd_server   (new omniAsyncPoolServer(this)),
+    pd_client   (new omniAsyncPoolClient(this)),
+    pd_dedicated(new omniAsyncDedicated(this)),
+    pd_keep_working(1)
+{
+}
 
-  // Wait for threads to exit
-  if (pd_totalthreads) {
-    unsigned long timeout, s, ns;
-    if (orbParameters::scanGranularity)
-      timeout = orbParameters::scanGranularity;
-    else
-      timeout = 5;
-    
-    omni_thread::get_time(&s, &ns, timeout);
 
-    if (omniORB::trace(25)) {
-      omniORB::logger l;
-      l << "Wait for " << pd_totalthreads << " invoker thread"
-	<< plural(pd_totalthreads) << " to finish.\n";
+omniAsyncInvoker::~omniAsyncInvoker()
+{
+  CORBA::Boolean ok = 1;
+  {
+    omni_tracedmutex_lock l(pd_lock);
+
+    pd_keep_working = 0;
+
+    pd_client->stop();
+    pd_server->stop();
+    pd_general->stop();
+
+    omniAsyncWorker* worker = pd_idle_threads;
+    while (worker) {
+      worker->stop();
+      worker = worker->pd_next_idle;
     }
-    int go = 1;
-    while (go && pd_totalthreads) {
-      go = pd_cond->timedwait(s, ns);
-    }
-    if (omniORB::trace(25)) {
-      omniORB::logger l;
-      if (go)
-	l << "Invoker threads finished.\n";
+
+    // Wait for threads to exit
+    if (pd_total_threads) {
+
+      omni_time_t  deadline;
+      unsigned int timeout;
+
+      if (orbParameters::scanGranularity)
+        timeout = orbParameters::scanGranularity;
       else
-	l << "Timed out. " << pd_totalthreads
-	  << " invoker threads remaining.\n";
+        timeout = 5;
+    
+      omni_thread::get_time(deadline, timeout);
+
+      if (omniORB::trace(25)) {
+        omniORB::logger l;
+        l << "Wait for " << pd_total_threads << " invoker thread"
+          << plural(pd_total_threads) << " to finish.\n";
+      }
+
+      int go = 1;
+      while (go && pd_total_threads) {
+        go = pd_idle_cond.timedwait(deadline);
+      }
+
+      if (go) {
+        omniORB::logs(25, "Invoker threads finished.");
+      }
+      else {
+        ok = 0;
+        if (omniORB::trace(25)) {
+          omniORB::logger log;
+          log << "Timed out. " << pd_total_threads
+              << " invoker threads remaining.\n";
+        }
+      }
     }
   }
-  pd_lock->unlock();
-
-  delete pd_cond;
-  delete pd_lock;
+  if (ok) {
+    delete pd_dedicated;
+    delete pd_client;
+    delete pd_server;
+    delete pd_general;
+  }
   omniORB::logs(10, "AsyncInvoker: deleted.");
 }
 
-///////////////////////////////////////////////////////////////////////////
-int
-omniAsyncInvoker::insert(omniTask* t) {
 
-  switch (t->category()) {
-  case omniTask::AnyTime:
-    {
-      omni_tracedmutex_lock sync(*pd_lock);
-
-      if (pd_idle_threads) {
-	omniAsyncWorker* w = pd_idle_threads;
-	pd_idle_threads = w->pd_next;
-	w->pd_next = 0;
-	OMNIORB_ASSERT(w->pd_task == 0);
-	w->pd_task = t;
-	w->pd_in_idle_queue = 0;
-	w->pd_cond->signal();
-      }
-      else {
-	if (pd_nthreads < pd_maxthreads) {
-	  try {
-	    pd_nthreads++;
-	    pd_totalthreads++;
-	    omniAsyncWorker* w = new omniAsyncWorker(this,t);
-	    OMNIORB_ASSERT(w);
-	  }
-	  catch (const omni_thread_fatal &ex) {
-	    // Cannot start a new thread.
-	    pd_nthreads--;
-	    pd_totalthreads--;
-	    if (omniORB::trace(2)) {
-	      omniORB::logger log;
-	      log << "Exception trying to start new thread ("
-		  << ex.error << "). Task queued.\n";
-	    }
-	    t->enq(pd_anytime_tq);
-	  }
-	  catch (...) {
-	    // Cannot start a new thread.
-	    pd_nthreads--;
-	    pd_totalthreads--;
-	    omniORB::logs(2, "Exception trying to start new thread. "
-			  "Task queued.");
-	    t->enq(pd_anytime_tq);
-	  }
-	}
-	else {
-	  t->enq(pd_anytime_tq);
-	}
-      }
-      break;
-    }
-  case omniTask::ImmediateDispatch:
-    {
-      omni_tracedmutex_lock sync(*pd_lock);
-
-      if (pd_idle_threads) {
-	omniAsyncWorker* w = pd_idle_threads;
-	pd_idle_threads = w->pd_next;
-	w->pd_next = 0;
-	OMNIORB_ASSERT(w->pd_task == 0);
-	w->pd_task = t;
-	w->pd_in_idle_queue = 0;
-	w->pd_cond->signal();
-	pd_nthreads--;
-      }
-      else {
-	try {
-	  pd_totalthreads++;
-	  omniAsyncWorker* w = new omniAsyncWorker(this,t);
-	}
-	catch (const omni_thread_fatal &ex) {
-	  // Cannot start a new thread.
-	  pd_totalthreads--;
-	  if (omniORB::trace(1)) {
-	    omniORB::logger log;
-	    log << "Exception trying to start new thread ("
-		<< ex.error << ").\n";
-	  }
-	  return 0;
-	}
-	catch(...) {
-	  // Cannot start a new thread.
-	  pd_totalthreads--;
-	  omniORB::logs(1, "Exception trying to start new thread.");
-	  return 0;
-	}
-      }
-      break;
-    }
-  case omniTask::DedicatedThread:
-    {
-      return insert_dedicated(t);
-    }
+CORBA::Boolean
+omniAsyncInvoker::insert(omniTask* t)
+{
+  if (t->category() == omniTask::DedicatedThread) {
+    return pd_dedicated->insert(t);
   }
-  return 1;
-}
+  else {
+    switch (t->purpose()) {
 
-///////////////////////////////////////////////////////////////////////////
-int
-omniAsyncInvoker::cancel(omniTask* t) {
-
-  if (t->category() == omniTask::AnyTime) {
-    omni_tracedmutex_lock sync(*pd_lock);
-    omniTaskLink* l;
-
-    for (l = pd_anytime_tq.next; l != &pd_anytime_tq; l =l->next) {
-      if ((omniTask*)l == t) {
-	l->deq();
-	return 1;
-      }
+    case omniTask::General:          return pd_general->insert(t);
+    case omniTask::ServerUpcall:     return pd_server->insert(t);
+    case omniTask::ClientInvocation: return pd_client->insert(t);
     }
-  }
-  else if (t->category() == omniTask::DedicatedThread) {
-    return cancel_dedicated(t);
   }
   return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// Default do-nothing implementations of dedicated thread functions
-
-int
+CORBA::Boolean
 omniAsyncInvoker::work_pending()
 {
-  return 0;
+  return pd_dedicated->work_pending();
 }
 
 void
 omniAsyncInvoker::perform(unsigned long secs, unsigned long nanosecs)
 {
-  omniORB::logs(1, "omniAsyncInvoker::perform() not implemented. aborting...\n");
-  abort();
+  return pd_dedicated->perform(secs, nanosecs);
 }
 
-int
-omniAsyncInvoker::insert_dedicated(omniTask*)
-{
-  return 0;
-}
-
-int
-omniAsyncInvoker::cancel_dedicated(omniTask*)
-{
-  return 0;
-}
-
-
-///////////////////////////////////////////////////////////////////////////
 void
-omniTaskLink::enq(omniTaskLink& head) {
-
-  next = head.prev->next;
-  head.prev->next = this;
-  prev = head.prev;
-  head.prev = this;
+omniAsyncInvoker::shutdown()
+{
+  omniORB::logs(15, "Shut down AsyncInvoker...");
+  {
+    omni_tracedmutex_lock l(pd_lock);
+    pd_keep_working = 0;
+  }
+  pd_dedicated->shutdown();
+  omniORB::logs(15, "AsyncInvoker shut down.");
 }
 
+omniAsyncWorker*
+omniAsyncInvoker::getWorker(omniAsyncPool* pool)
+{ 
+  ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
 
-///////////////////////////////////////////////////////////////////////////
-void
-omniTaskLink::deq() {
-  prev->next = next;
-  next->prev = prev;
+  omniAsyncWorker* worker;
+
+  if (pd_idle_threads) {
+    worker = pd_idle_threads;
+    worker->remIdle();
+  }
+  else {
+    worker = new omniAsyncWorker(this);
+  }
+
+  worker->assign(pool);
+  return worker;
 }
 
-///////////////////////////////////////////////////////////////////////////
-unsigned int
-omniTaskLink::is_empty(omniTaskLink& head) {
-  return (head.next == &head);
-}
 
 
 OMNI_NAMESPACE_BEGIN(omni)
@@ -494,6 +890,64 @@ public:
 static idleThreadTimeoutHandler idleThreadTimeoutHandler_;
 
 
+/////////////////////////////////////////////////////////////////////////////
+class maxServerThreadPoolSizeHandler : public orbOptions::Handler {
+public:
+
+  maxServerThreadPoolSizeHandler() : 
+    orbOptions::Handler("maxServerThreadPoolSize",
+			"maxServerThreadPoolSize = n >= 1",
+			1,
+			"-ORBmaxServerThreadPoolSize < n >= 1 >") {}
+
+  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
+
+    CORBA::ULong v;
+    if (!orbOptions::getULong(value,v) || v < 1) {
+      throw orbOptions::BadParam(key(),value,
+				 orbOptions::expect_greater_than_zero_ulong_msg);
+    }
+    orbParameters::maxServerThreadPoolSize = v;
+  }
+
+  void dump(orbOptions::sequenceString& result) {
+    orbOptions::addKVULong(key(),orbParameters::maxServerThreadPoolSize,
+			   result);
+  }
+};
+
+static maxServerThreadPoolSizeHandler maxServerThreadPoolSizeHandler_;
+
+
+/////////////////////////////////////////////////////////////////////////////
+class maxClientThreadPoolSizeHandler : public orbOptions::Handler {
+public:
+
+  maxClientThreadPoolSizeHandler() : 
+    orbOptions::Handler("maxClientThreadPoolSize",
+			"maxClientThreadPoolSize = n >= 1",
+			1,
+			"-ORBmaxClientThreadPoolSize < n >= 1 >") {}
+
+  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
+
+    CORBA::ULong v;
+    if (!orbOptions::getULong(value,v) || v < 1) {
+      throw orbOptions::BadParam(key(),value,
+				 orbOptions::expect_greater_than_zero_ulong_msg);
+    }
+    orbParameters::maxClientThreadPoolSize = v;
+  }
+
+  void dump(orbOptions::sequenceString& result) {
+    orbOptions::addKVULong(key(),orbParameters::maxClientThreadPoolSize,
+			   result);
+  }
+};
+
+static maxClientThreadPoolSizeHandler maxClientThreadPoolSizeHandler_;
+
+
 ////////////////////////////////////////////////////////////////////////
 // Module initialiser
 ////////////////////////////////////////////////////////////////////////
@@ -502,6 +956,8 @@ class omni_invoker_initialiser : public omniInitialiser {
 public:
   omni_invoker_initialiser() {
     orbOptions::singleton().registerHandler(idleThreadTimeoutHandler_);
+    orbOptions::singleton().registerHandler(maxServerThreadPoolSizeHandler_);
+    orbOptions::singleton().registerHandler(maxClientThreadPoolSizeHandler_);
   }
 
   void attach() { }

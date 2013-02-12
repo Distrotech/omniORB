@@ -773,7 +773,7 @@ public:
 		      omniAsyncCallDescriptor* call_desc,
 		      const omni_time_t&       thread_timeout,
 		      CORBA::Boolean           timeout_absolute)
-    : omniTask(omniTask::AnyTime),
+    : omniTask(omniTask::AnyTime, omniTask::ClientInvocation),
       pd_objref(objref),
       pd_callDescriptor(call_desc),
       pd_threadTimeout(thread_timeout),
@@ -783,7 +783,6 @@ public:
   }
 
   void execute();
-  void real_execute();
 
 protected:
   virtual ~AsyncRequest();
@@ -800,51 +799,8 @@ private:
 };
 
 
-class AsyncRequestInfo
-  : public omniInterceptors::assignAMIThread_T::info_T {
-public:
-  inline AsyncRequestInfo(AsyncRequest* worker)
-    : pd_worker(worker), pd_elmt(omniInterceptorP::assignAMIThread) {}
-
-  void run();
-  omni_thread* self();
-
-private:
-  AsyncRequest*           pd_worker;
-  omniInterceptorP::elmT* pd_elmt;
-};
-
-
-void
-AsyncRequestInfo::run()
-{
-  if (pd_elmt) {
-    omniInterceptors::assignAMIThread_T::interceptFunc f =
-      (omniInterceptors::assignAMIThread_T::interceptFunc)pd_elmt->func;
-    pd_elmt = pd_elmt->next;
-    f(*this);
-  }
-  else
-    pd_worker->real_execute();
-}
-
-omni_thread*
-AsyncRequestInfo::self()
-{
-  return pd_worker->selfThread();
-}
-
-
 void
 AsyncRequest::execute()
-{
-  AsyncRequestInfo info(this);
-  info.run();
-}
-
-
-void
-AsyncRequest::real_execute()
 {
   if (omniORB::trace(25)) {
     omniORB::logger log;

@@ -3,7 +3,7 @@
 // giopWorker.cc              Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -42,55 +42,15 @@
 OMNI_NAMESPACE_BEGIN(omni)
 
 
-class giopWorkerInfo
-  : public omniInterceptors::assignUpcallThread_T::info_T {
-public:
-  inline giopWorkerInfo(giopWorker* worker) :
-    pd_worker(worker), pd_elmt(omniInterceptorP::assignUpcallThread) {}
-
-  void run();
-  omni_thread* self();
-  
-private:
-  giopWorker*             pd_worker;
-  omniInterceptorP::elmT* pd_elmt;
-};
-
-void
-giopWorkerInfo::run()
-{
-  if (pd_elmt) {
-    omniInterceptors::assignUpcallThread_T::interceptFunc f =
-      (omniInterceptors::assignUpcallThread_T::interceptFunc)pd_elmt->func;
-    pd_elmt = pd_elmt->next;
-    f(*this);
-  }
-  else
-    pd_worker->real_execute();
-}
-
-omni_thread*
-giopWorkerInfo::self()
-{
-  return pd_worker->selfThread();
-}
-
-
-giopWorker::giopWorker(giopStrand* r, giopServer* s, CORBA::Boolean h) :
-    omniTask(((h)?omniTask::AnyTime:omniTask::ImmediateDispatch)),
+giopWorker::giopWorker(giopStrand* r, giopServer* s, CORBA::Boolean h)
+  : omniTask(((h) ? omniTask::AnyTime : omniTask::ImmediateDispatch),
+             omniTask::ServerUpcall),
     pd_strand(r),
     pd_server(s),
     pd_singleshot(h) {}
 
 void
 giopWorker::execute()
-{
-  giopWorkerInfo info(this);
-  info.run();
-}
-
-void
-giopWorker::real_execute()
 {
   omniORB::logs(25, "giopWorker task execute.");
 
