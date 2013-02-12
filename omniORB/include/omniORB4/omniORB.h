@@ -179,6 +179,12 @@ _CORBA_MODULE_BEG
                                                                         //
   _CORBA_MODULE_FN void setClientThreadCallDeadline(unsigned long secs, //
                                                     unsigned long ns);  //
+                                                                        //
+  _CORBA_MODULE_FN inline void                                          //
+  setClientThreadCallDeadline(const omni_time_t& tt)                    //
+  {                                                                     //
+    setClientThreadCallDeadline(tt.s, tt.ns);                           //
+  }                                                                     //
   _CORBA_MODULE_FN void setClientConnectTimeout(CORBA::ULong millisecs);//
                                                                         //
   ////////////////////////////////////////////////////////////////////////
