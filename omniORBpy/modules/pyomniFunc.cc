@@ -3,7 +3,7 @@
 // pyomniFunc.cc              Created on: 2000/06/07
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -829,6 +829,32 @@ extern "C" {
     return Py_None;
   }
 
+  static char setClientThreadCallDeadline_doc [] =
+  "setClientThreadCallDeadline(secs)\n"
+  "\n"
+  "Set the client call deadline for the calling thread.\n";
+
+  static PyObject* pyomni_setClientThreadCallDeadline(PyObject* self,
+                                                      PyObject* args)
+  {
+    double deadline;
+    if (!PyArg_ParseTuple(args, (char*)"d", &deadline))
+      return 0;
+
+    unsigned long s, ns;
+    s  = (unsigned long)deadline;
+    ns = (deadline - s) * 1000000000.0;
+
+    try {
+      omniPy::ensureOmniThread();
+      omniORB::setClientThreadCallDeadline(s, ns);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
   static char setClientConnectTimeout_doc [] =
   "setClientConnectTimeout(millisecs)\n"
   "\n"
@@ -993,6 +1019,10 @@ extern "C" {
     {(char*)"setClientThreadCallTimeout",
      pyomni_setClientThreadCallTimeout,
      METH_VARARGS, setClientThreadCallTimeout_doc},
+
+    {(char*)"setClientThreadCallDeadline",
+     pyomni_setClientThreadCallDeadline,
+     METH_VARARGS, setClientThreadCallDeadline_doc},
 
     {(char*)"setClientConnectTimeout",
      pyomni_setClientConnectTimeout,
