@@ -3,7 +3,7 @@
 // codeSets.cc                Created on: 18/10/2000
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -27,68 +27,6 @@
 // Description:
 //    Base implementation of code set conversion functions
 //
-
-/*
-  $Log$
-  Revision 1.1.4.6  2008/08/08 18:45:48  dgrisby
-  Add missing ISO-8859 and Windows code sets.
-
-  Revision 1.1.4.5  2006/08/17 16:21:21  dgrisby
-  Second call to server with no codeset information would fail.
-
-  Revision 1.1.4.4  2006/07/18 16:21:22  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.4.3  2006/07/02 22:52:05  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.4.2  2006/06/05 11:25:30  dgrisby
-  Move codeset initialisation code to a more logical source file.
-
-  Revision 1.1.4.1  2003/03/23 21:02:24  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.12  2003/03/03 12:32:33  dgrisby
-  EBCDIC code sets. Thanks Coleman Corrigan.
-
-  Revision 1.1.2.11  2002/12/19 13:56:58  dgrisby
-  New Windows 1251 code set. (Thanks Vasily Tchekalkin).
-
-  Revision 1.1.2.10  2001/07/26 16:37:20  dpg1
-  Make sure static initialisers always run.
-
-  Revision 1.1.2.9  2001/07/26 11:28:58  dpg1
-  Print GIOP version information when listing code sets.
-
-  Revision 1.1.2.8  2001/07/25 10:56:28  dpg1
-  Fix static initialiser problem with codesets.
-
-  Revision 1.1.2.7  2001/06/13 20:12:32  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.1.2.6  2001/05/31 16:18:12  dpg1
-  inline string matching functions, re-ordered string matching in
-  _ptrToInterface/_ptrToObjRef
-
-  Revision 1.1.2.5  2001/04/18 18:18:11  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.4  2000/11/22 14:37:59  dpg1
-  Code set marshalling functions now take a string length argument.
-
-  Revision 1.1.2.3  2000/11/15 17:18:47  sll
-  Added marshalling operators for the TAG_CODE_SETS component.
-
-  Revision 1.1.2.2  2000/11/02 10:16:27  dpg1
-  Correct some minor errors in code set implementation. Remove Big5
-  converter since it's wrong.
-
-  Revision 1.1.2.1  2000/10/27 15:42:07  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/omniInterceptors.h>
@@ -583,117 +521,6 @@ static void write_codeset_name(char* buf, const char* cname,
   }
 }
 
-char*
-omniIOR::dump_TAG_CODE_SETS(const IOP::TaggedComponent& c)
-{
-
-  OMNIORB_ASSERT(c.tag == IOP::TAG_CODE_SETS);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-
-  CONV_FRAME::CodeSetComponentInfo info;
-  info <<= e;
-
-  CORBA::ULong bufsize = 0;
-  const char* ncs_c;
-  const char* ncs_w;
-
-  {
-    omniCodeSet::NCS_C* n;
-    n = omniCodeSet::getNCS_C(info.ForCharData.native_code_set);
-    if (n)
-      ncs_c = n->name();
-    else if (info.ForCharData.native_code_set == 0)
-      ncs_c = not_specified;
-    else
-      ncs_c = not_supported;
-    bufsize += strlen(ncs_c) + 1;
-  }
-
-  {
-    omniCodeSet::NCS_W* n;
-    n = omniCodeSet::getNCS_W(info.ForWcharData.native_code_set);
-    if (n)
-      ncs_w = n->name();
-    else if (info.ForWcharData.native_code_set == 0)
-      ncs_w = not_specified;
-    else
-      ncs_w = not_supported;
-    bufsize += strlen(ncs_w) + 1;
-  }
-
-  CORBA::ULong total,index;
-  const char** tcs_c;
-  const char** tcs_w;
-
-  total = info.ForCharData.conversion_code_sets.length();
-  tcs_c = new const char*[total+1];
-  for (index = 0; index < total; index++) {
-    omniCodeSet::TCS_C* t;
-    t = omniCodeSet::getTCS_C(info.ForCharData.conversion_code_sets[index],
-			      giopStreamImpl::maxVersion()->version());
-    if (t)
-      tcs_c[index] = t->name();
-    else if (info.ForCharData.conversion_code_sets[index] == 0)
-      tcs_c[index] = not_specified;
-    else
-      tcs_c[index] = not_supported;
-    bufsize += strlen(tcs_c[index]) + 3;
-  }
-  tcs_c[index] = 0;
-
-  total = info.ForWcharData.conversion_code_sets.length();
-  tcs_w = new const char*[total+1];
-  for (index = 0; index < total; index++) {
-    omniCodeSet::TCS_W* t;
-    t = omniCodeSet::getTCS_W(info.ForWcharData.conversion_code_sets[index],
-			      giopStreamImpl::maxVersion()->version());
-    if (t)
-      tcs_w[index] = t->name();
-    else if (info.ForWcharData.conversion_code_sets[index] == 0)
-      tcs_w[index] = not_specified;
-    else
-      tcs_w[index] = not_supported;
-    bufsize += strlen(tcs_w[index]) + 3;
-  }
-  tcs_w[index] = 0;
-
-  CORBA::String_var strbuf(CORBA::string_alloc(bufsize+256));
-  const char** p;
-  strcpy(strbuf,"TAG_CODE_SETS char native code set: ");
-  write_codeset_name(strbuf,ncs_c,info.ForCharData.native_code_set);
-  strcat(strbuf,"\n");
-  strcat(strbuf,"              char conversion code set: ");
-  p = tcs_c;
-  index = 0;
-  while (*p) {
-    if (index) 
-      strcat(strbuf,", ");
-    write_codeset_name(strbuf,*p,info.ForCharData.conversion_code_sets[index]);
-    p++; index++;
-  }
-  strcat(strbuf,"\n");
-
-  strcat(strbuf,"              wchar native code set: ");
-  write_codeset_name(strbuf,ncs_w,info.ForWcharData.native_code_set);
-  strcat(strbuf,"\n");
-  strcat(strbuf,"              wchar conversion code set: ");
-  p = tcs_w;
-  index = 0;
-  while (*p) {
-    if (index) 
-      strcat(strbuf,", ");
-    write_codeset_name(strbuf,*p,
-		       info.ForWcharData.conversion_code_sets[index]);
-    p++; index++;
-  }
-  strcat(strbuf,"\n");
-
-  delete [] tcs_c;
-  delete [] tcs_w;
-
-  return strbuf._retn();
-}
 
 //
 // Client side interceptor for code set service context
@@ -706,8 +533,7 @@ setCodeSetServiceContext(omniInterceptors::clientSendRequest_T::info_T& info)
   omniCodeSet::TCS_C* tcs_c;
   omniCodeSet::TCS_W* tcs_w;
 
-  giopStrand&   d   = info.giop_c.strand();
-  GIOP::Version ver = info.giop_c.version();
+  giopStrand& d = info.giop_c.strand();
 
   if (d.tcs_selected) {
     // giopStream::acquireClient never gives out the same strand
@@ -726,6 +552,7 @@ setCodeSetServiceContext(omniInterceptors::clientSendRequest_T::info_T& info)
     // into the 2 IORs a different set of codesets.
   }
 
+  GIOP::Version ver = info.giop_c.version();
   if (ver.minor < 1) {
     // Code set service context is only defined from GIOP 1.1 onwards,
     // so here we do not attempt to set a codeset service context.
