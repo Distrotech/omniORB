@@ -35,10 +35,8 @@ extern PortableServer::POA_var names_poa;
 
 class ObjectBinding;
 
-class NamingContext_i : public POA_CosNaming::NamingContextExt,
-			public PortableServer::RefCountServantBase
+class NamingContext_i : public POA_CosNaming::NamingContextExt
 {
-
   friend class ObjectBinding;
   friend class omniNameslog;
 

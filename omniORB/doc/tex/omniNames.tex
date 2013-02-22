@@ -24,7 +24,7 @@
 
 \title{The omniNames CORBA Naming Service}
 
-\date{December 2012}
+\date{omniORB 4.2}
 
 \begin{document}
 
@@ -32,51 +32,51 @@
 
 \section{Introduction}
 
-The OMNI Naming Service (\emph{omniNames}) is an omniORB
-implementation of the OMG's COS Naming Service Specification.  It
-offers a way for a client to turn a human-readable name into an object
-reference, on which the client can subsequently invoke operations in
-the normal way.  See the OMG specification for full details of the
-functionality provided by the Naming Service.
+omniNames is omniORB's implementation of the OMG's COS Naming Service
+Specification.  It offers a way for a client to turn a human-readable
+name into an object reference, on which the client can subsequently
+invoke operations in the normal way.  See the OMG specification for
+full details of the functionality provided by the Naming Service.
 
 The Naming Service stores a set of bindings of names to objects.
 These bindings can be arranged as an arbitrary directed graph,
 although they are often arranged in a tree hierarchy.  Each node in
-the graph is a \emph{naming context}.  There is a ``root'' context at
+the graph is a \emph{naming context}.  There is a `root' context at
 which name lookups usually start.  This is the object returned by the
 call to \code{CORBA::ORB::resolve\_initial\_references("NameService")}.
 
 
-\section{`Log' file}
+\section{Data file}
 
-The Naming Service is often part of the bootstrapping process of other
-CORBA programs.  For this reason, if an instance of omniNames crashes
-(or the machine on which it runs is rebooted), it is important that
-certain aspects of its operation persist upon restarting.  Firstly the
-root context of the Naming Service should always be accessible through
-the same object reference.  This helps the ORB to implement the
-\code{resolve\_initial\_references} call by allowing the object
-reference to be stored in a configuration file, for example.
-Secondly, the naming graph with all its bindings should persist
-between invocations.
+omniNames persists its contents in a data file. The data file takes
+the form of a `redo log', to which it writes out an entry every time a
+change is made to the naming graph.  The directory in which this log
+file is written can be specified with the \cmdline{-datadir} command
+line option or the \envvar{OMNINAMES_DATADIR} environment variable.
+When omniNames is restarted it uses the data file so that it can
+regenerate the naming graph.
 
-To achieve this, omniNames generates a redo log file, to which it
-writes out an entry every time a change is made to the naming graph.
-The directory in which this log file is written can be specified with
-the \envvar{OMNINAMES_LOGDIR} environment variable.  When omniNames is
-restarted it uses the log file so that it can regenerate the naming
-graph.
+Periodically the data file is checkpointed, removing unnecessary
+entries from the file.  The idle time between checkpoints defaults to
+15 minutes. That can be overridden by specifying a period in seconds
+in the \envvar{OMNINAMES_ITBC} environment variable.
 
-Periodically the log file is checkpointed, removing unnecessary
-entries from the log file.  The idle time between checkpoints can be
-set with the \envvar{OMNINAMES_ITBC} environment variable.  It
-defaults to 15 minutes.
+The name of the data file name normally includes the hostname, in the
+form \file{omninames-}\textit{hostname}\file{.dat}. To suppress
+inclusion of the hostname, start omniNames with the
+\cmdline{-nohostname} option.
+
+Previous versions of omniNames referred to the data file as a `log
+file', and the file had the extension `\file{.log}'. When omniNames
+starts up, it will accept a data file with the extension `\file{.log}'
+and replace it with one with the extension `\file{.dat}'.
+
 
 \section{Starting omniNames and configuring omniORB}
 
 When starting omniNames for the first time, you can either let it
 start with the default TCP port of 2809, or you can specify the port
-number on which it should listen.  This is written to the log file so
+number on which it should listen.  This is written to the data file so
 that on subsequent invocations it will listen on the same port number
 and thus can be accessible through the same object reference.  When
 omniNames starts up successfully it writes the stringified object
@@ -90,15 +90,13 @@ Service.  This object reference is returned by
 of methods of specifying the root naming context---see the omniORB
 manual for details.
 
-\clearpage
-
 \section{Command line parameters}
 
 omniNames accepts the following command line parameters.
 
 \vspace{\baselineskip}
 
-\begin{tabular}{lp{.8\textwidth}}
+\noindent\begin{tabular}{lp{.8\textwidth}}
 %HEVEA\\
 
 \cmdline{-help} &
@@ -110,35 +108,31 @@ omniNames accepts the following command line parameters.
 
 \cmdline{-always} &
     In conjunction with \cmdline{-start}, always start up
-    omniNames, even if its log file already exists.\\[.5\baselineskip]
+    omniNames, even if its data file already exists.\\[.5\baselineskip]
 
-\cmdline{-logdir }\textit{directory} &
-    Specifies the directory for the redo log file, overriding the
+\cmdline{-datadir }\textit{directory} &
+    Specifies the directory for the data file, overriding the
     default.\\[.5\baselineskip]
 
+\cmdline{-logdir }\textit{directory} &
+    Equivalent to \cmdline{-datadir}, for compatibility with previous
+    omniNames versions.\\[.5\baselineskip]
+
 \cmdline{-errlog }\textit{filename} &
-    Causes output that would normally be sent to stderr to go to the
+    Causes trace output that would normally be sent to stderr to go to the
     specified file instead.\\[.5\baselineskip]
 
 \cmdline{-nohostname} &
-    Normally, omniNames includes the host name in the name of the redo
-    log file. This option disables that, meaning the log file can be
-    used on a different host, or if the host name
-    changes.\\[.5\baselineskip]
-
-\cmdline{-ignoreport} &
-    omniNames normally adds its own endpoint, based on the port
-    specification (given with \cmdline{-start} or stored in the log
-    file). This option causes it to ignore the port. It should be used
-    in conjunction with specific \cmdline{-ORBendPoint} options to
-    ensure object references are stable.\\[.5\baselineskip]
+    Normally, omniNames includes the host name in the name of the data
+    file. This option disables that, meaning the data file can be used
+    on a different host, or if the host name changes.\\[.5\baselineskip]
 
 \cmdline{-install }\textit{[port]} &
     On Windows, install omniNames service. See below.\\[.5\baselineskip]
 
 \cmdline{-manual} &
-    On Windows, specify that the service should be started
-    manually. See below.\\[.5\baselineskip]
+    On Windows, specify that the service should be configured to
+    require manual start. See below.\\[.5\baselineskip]
 
 \cmdline{-remove} &
     On Windows, uninstall omniNames service. See below.\\[.5\baselineskip]
@@ -154,12 +148,12 @@ contains details about the \emph{endpoint}---i.e.\ the host address
 and port---that is used to contact the object.
 
 When the machine running omniNames has multiple IP addresses, omniORB
-arbitrarily picks one of the addresses to publish in object
-references. It might pick the `wrong' one, meaning that clients
-connect to the configured root context successfully, but then fail to
-connect to the sub-contexts. To force omniORB to publish the correct
-IP address, use the \cmdline{-ORBendPointPublish} command line
-parameter:
+listens for incoming connections on all addresses, but it arbitrarily
+picks one of the addresses to publish in object references. It might
+pick the `wrong' one, meaning that clients connect to the configured
+root context successfully, but then fail to connect to the
+sub-contexts. To force omniORB to publish the correct IP address, use
+the \cmdline{-ORBendPointPublish} command line parameter:
 
 \begin{quote}
 \cmdline{-ORBendPointPublish giop:tcp:}\textit{address}\cmdline{:}
@@ -167,18 +161,26 @@ parameter:
 
 \noindent where \textit{address} can be an IP address or a host name.
 
+Occasionally, it is necessary to limit omniNames to listen on just one
+of a machine's IP addresses. To do that, use \cmdline{-ORBendPoint} to
+specify the address to listen on. In this case, you should also
+specify a port (e.g.\ the standard 2809), otherwise an arbitrary
+ephemeral port will be used for the endpoint:
+
+\begin{quote}
+\cmdline{-ORBendPoint giop:tcp:}\textit{address}\cmdline{:2809}
+\end{quote}
+
+
 \section{Windows service}
 
-omniNames can be run as a Windows service.
-
-To install the service, run with the \cmdline{-install} command line
-option, with a port to override the default 2809 if necessary. The
-command line should include any other parameters of relevance, such as
-the log directory and error log file. It is particularly important to
-specify an error log file, since the service runs in an environment
-where stderr goes nowhere. Similarly, if omniORB tracing is requested
-with the various \cmdline{-ORBtrace} options, \cmdline{-ORBtraceFile}
-should be specified, otherwise the trace messages vanish.
+omniNames can be run as a Windows service. To install the service, run
+with the \cmdline{-install} command line option, with a port to
+override the default 2809 if necessary. The command line should
+include any other parameters of relevance, such as the data directory
+and error log file. It is particularly important to specify an error
+log file, since the service runs in an environment where stderr goes
+nowhere.
 
 The service is normally configured to start at system startup time.
 Specifying \cmdline{-manual} configures it for manual startup.
@@ -189,7 +191,6 @@ restart.
 
 Once installed, the service can be uninstalled by running omniNames
 with the \cmdline{-remove} option.
-
 
 
 \end{document}

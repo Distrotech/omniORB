@@ -2,7 +2,7 @@
 //                          Package   : omniNames
 // log.h                    Author    : Tristan Richardson (tjr)
 //
-//    Copyright (C) 2003-2008 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 1997-1999 AT&T Laboratories Cambridge
 //
 //  This file is part of omniNames.
@@ -35,18 +35,37 @@
 #  include <fstream.h>
 #endif
 
+#ifndef DATADIR_ENV_VAR
+#  define DATADIR_ENV_VAR "OMNINAMES_DATADIR"
+#endif
+
 #ifndef LOGDIR_ENV_VAR
 #  define LOGDIR_ENV_VAR "OMNINAMES_LOGDIR"
 #endif
+
+// Tracing/logging
+
+#define LOG(level, msg) \
+  do { \
+    if (omniORB::trace(level)) { \
+      omniORB::logger _log("omniNames: "); \
+      _log << msg << '\n'; \
+    } \
+  } while(0)
+
 
 class omniNameslog {
 
   CORBA::ORB_ptr orb;
   PortableServer::POA_ptr poa;
   PortableServer::POA_ptr ins_poa;
+
   CORBA::String_var active;
   CORBA::String_var backup;
   CORBA::String_var checkpt;
+  CORBA::String_var active_new;
+  CORBA::String_var active_old;
+
   ofstream logf;
 
   int port;
@@ -123,7 +142,7 @@ public:
 	    CosNaming::BindingType t);
   void unbind(CosNaming::NamingContext_ptr nc, const CosNaming::Name& n);
 
-  void checkpoint(void);
+  void checkpoint();
 
 };
 

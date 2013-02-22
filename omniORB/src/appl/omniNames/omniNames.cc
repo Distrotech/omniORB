@@ -2,7 +2,7 @@
 //                          Package   : omniNames
 // omniNames.cc             Author    : Tristan Richardson (tjr)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1997-1999 AT&T Laboratories Cambridge
 //
 //  This file is part of omniNames.
@@ -71,10 +71,9 @@ usage()
        <<   "                 [-remove]\n"
 #endif
        <<   "                 [-always]\n"
-       <<   "                 [-logdir <directory name>]\n"
+       <<   "                 [-datadir <directory name>]\n"
        <<   "                 [-nohostname]\n"
        <<   "                 [-errlog <file name>]\n"
-       <<   "                 [-ignoreport]\n"
        <<   "                 [-help]\n"
        <<   "                 [<omniORB-options>...]" << endl
        << "\nUse -start option to start omniNames for the first time.\n"
@@ -86,16 +85,15 @@ usage()
        << "Use -manual to request manual service start/stop rather than automatic.\n"
 #endif
        << "\nUse -always in conjunction with -start to always start omniNames, regardless\n"
-       << "of whether the log/data files already exist.\n"
-       << "\nUse -logdir option to specify the directory where the log/data files are kept.\n"
-       << "\nYou can also set the environment variable " << LOGDIR_ENV_VAR
-       << " to specify the\ndirectory where the log/data files are kept.\n"
+       << "of whether the data files already exist.\n"
+       << "\nUse -datadir option to specify the directory where the data files are kept.\n"
+       << "You can also set the environment variable " << DATADIR_ENV_VAR
+       << " to specify the\ndirectory where the data files are kept.\n"
        << "\nUse -nohostname to suppress the inclusion of the hostname in the log files.\n"
-       << "\nUse -errlog option to specify where standard error output is redirected.\n"
-       << "\nUse -ignoreport option to ignore the port specification when determining\n"
-       << "the end points to listen on, using -ORBendPoint arguments instead.\n"
+       << "\nUse -errlog option to specify where error/debug output is redirected.\n"
        << "\nTo publish a specific IP address to clients, use\n"
-       << " -ORBendPointPublish giop:tcp:<address>:\n";
+       << " -ORBendPointPublish giop:tcp:<address>:\n"
+       << "\nFor a list of omniORB options run with -ORBhelp\n";
 }
 
 
@@ -165,7 +163,8 @@ main(int argc, char **argv)
     else if (strcmp(argv[arg], "-nohostname") == 0) {
       nohostname = 1;
     }
-    else if (strcmp(argv[arg], "-logdir") == 0) {
+    else if (strcmp(argv[arg], "-datadir") == 0 ||
+             strcmp(argv[arg], "-logdir") == 0) {
       if (arg + 1 == argc) {
 	usage();
 	exit(1);
@@ -180,7 +179,12 @@ main(int argc, char **argv)
       errlog = argv[++arg];
     }
     else if (strcmp(argv[arg], "-help") == 0 ||
-	     strcmp(argv[arg], "-ORBhelp") == 0) {
+             strcmp(argv[arg], "--help") == 0) {
+      usage();
+      cerr << endl << endl;
+      exit(0);
+    }
+    else if (strcmp(argv[arg], "-ORBhelp") == 0) {
       usage();
       cerr << endl << endl;
       new_argv[new_argc++] = (char*)"-ORBhelp";
@@ -193,10 +197,11 @@ main(int argc, char **argv)
       exit(1);
     }
     else {
-      if (strcmp(argv[arg], "-ORBendPoint") == 0 && !ignoreport) {
-	cerr << "Warning: -ORBendPoint specified without -ignoreport\n"
-	     << "  omniNames will add its own -ORBendPoint argument before yours.\n"
-	     << "  To publish a specific address use -ORBendPointPublish giop:tcp:<address>:\n";
+      if (strcmp(argv[arg], "-ORBendPoint") == 0) {
+        if (!ignoreport) {
+          ignoreport = 1;
+          LOG(1, "-ORBendPoint option overriding default endpoint.");
+        }
       }
       new_argv[new_argc++] = argv[arg];
       if (arg+1 < argc)
@@ -245,30 +250,16 @@ omniNames(int            port,
 	  int argc, char** argv)
 
   : cond_(&mu_), stop_(0), running_(0)
-#ifdef __WIN32__
-    , cerrbuf_(0)
-#endif
 {
-  // Redirect stderr
+  // Redirect log
   if (errlog) {
-#ifdef __WIN32__
-    errstream_.open(errlog, ios_base::out | ios_base::trunc);
-
-    if (errstream_.good()) {
-      cerrbuf_ = cerr.ios::rdbuf(errstream_.rdbuf());
+    try {
+      omniORB::setLogFilename(errlog);
     }
-    else {
-#else
-    int fd = open(errlog, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    if (fd < 0 || dup2(fd,2) < 0) {
-#endif
+    catch (CORBA::INITIALIZE&) {
       cerr << "Cannot open error log file: " << errlog << endl;
-      usage();
       exit(1);
     }
-#ifndef __WIN32__
-    setvbuf(stderr, 0, _IOLBF, 0);
-#endif
   }
 
   // Set up an instance of omniNameslog.  This also gives us back the
@@ -350,11 +341,7 @@ run()
       cond_.timedwait(s,n);
     } while (!stop_);
   }
-  {
-    time_t t = time(NULL);
-    char *p = ctime(&t);
-    cerr << endl << p << endl << "omniNames shutting down." << endl;
-  }
+  omniORB::logs(1, "omniNames shutting down.");
 }
 
 omniNames::
@@ -362,14 +349,6 @@ omniNames::
 {
   delete log_;
   orb_->destroy();
-
-#ifdef __WIN32__
-  if (cerrbuf_) {
-    // Restore original cerr buffer
-    cerr.ios::rdbuf(cerrbuf_);
-    errstream_.close();
-  }
-#endif
 }
 
 void

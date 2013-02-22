@@ -2,7 +2,7 @@
 //                          Package   : omniNames
 // NamingContext_i.cc       Author    : Tristan Richardson (tjr)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1997-1999 AT&T Laboratories Cambridge
 //
 //  This file is part of omniNames.
@@ -38,12 +38,6 @@
 #  include <iostream.h>
 #endif
 
-#ifdef DEBUG_NC
-#define DB(x) x
-#else
-#define DB(x)
-#endif
-
 ReadersWritersLock NamingContext_i::lock;
 NamingContext_i* NamingContext_i::headContext = (NamingContext_i*)0;
 NamingContext_i* NamingContext_i::tailContext = (NamingContext_i*)0;
@@ -70,7 +64,8 @@ NamingContext_i::NamingContext_i(PortableServer::POA_ptr poa,
   tailContext = this;
   if (prev) {
     prev->next = this;
-  } else {
+  }
+  else {
     headContext = this;
   }
 
@@ -85,6 +80,8 @@ NamingContext_i::NamingContext_i(PortableServer::POA_ptr poa,
 CosNaming::NamingContext_ptr
 NamingContext_i::new_context()
 {
+  LOG(4, "new_context");
+
   CORBA::Object_var ref = names_poa->create_reference(
 				    CosNaming::NamingContext::_PD_repoId);
   PortableServer::ObjectId_var id = names_poa->reference_to_id(ref);
@@ -109,8 +106,7 @@ NamingContext_i::resolve_simple(const CosNaming::Name& n)
 {
   assert(n.length() == 1);
 
-  DB(cerr << "  resolve_simple name (" << n[0].id << "," << n[0].kind << ")"
-     << " in context " << this << endl);
+  LOG(4, "resolve_simple (" << n[0].id << '.' << n[0].kind << ")");
 
   for (ObjectBinding* ob = headBinding; ob; ob = ob->next) {
 
@@ -119,17 +115,13 @@ NamingContext_i::resolve_simple(const CosNaming::Name& n)
     if ((strcmp(n[0].id,ob->binding.binding_name[0].id) == 0) &&
 	(strcmp(n[0].kind,ob->binding.binding_name[0].kind) == 0))
       {
-	DB(cerr << "  resolve_simple: found (" << n[0].id << "," << n[0].kind
-	   << ")" << " in context " << this << ", bound to "
-	   << (void*)((CORBA::Object_ptr)ob->object) << endl);
+	LOG(4, "resolve_simple: found (" << n[0].id << '.' << n[0].kind << ")");
 
 	return ob;
       }
   }
 
-  DB(cerr << "  resolve_simple: didn't find (" << n[0].id << "," << n[0].kind
-     << ")" << " in context " << this << "; raising exception"
-     << endl);
+  LOG(4, "resolve_simple: didn't find (" << n[0].id << '.' << n[0].kind << ")");
 
   throw CosNaming::NamingContext::NotFound(CosNaming::NamingContext::
 					   missing_node, n);
@@ -148,11 +140,16 @@ CosNaming::NamingContext_ptr
 NamingContext_i::resolve_compound(const CosNaming::Name& n,
 				  CosNaming::Name& restOfName)
 {
-  DB(cerr << "  resolve_compound name ");
-  for (unsigned int j = 0; j < n.length(); j++) {
-    DB(cerr << "(" << n[j].id << "," << n[j].kind << ")");
+  if (omniORB::trace(4)) {
+    omniORB::logger log("omniNames: ");
+    log << "resolve_compound name (";
+
+    for (unsigned int j = 0; j < n.length(); j++) {
+      if (j != 0) log << '/';
+      log << n[j].id << '.' << n[j].kind;
+    }
+    log << ")\n";
   }
-  DB(cerr << " in context " << this << endl);
 
   if (n.length() == 0) {
     throw CosNaming::NamingContext::InvalidName();
@@ -183,13 +180,11 @@ NamingContext_i::resolve_compound(const CosNaming::Name& n,
   if (CORBA::is_nil((CosNaming::NamingContext_ptr)context) ||
       (ob->binding.binding_type != CosNaming::ncontext))
   {
-    DB(cerr << "  resolve_compound: object "
-       << (void*)((CORBA::Object_ptr)ob->object)
-       << " not (bound as) a context; raising exception" << endl);
+    LOG(4, "resolve_compound: object (" << n[0].id << '.' << n[0].kind <<
+        ") not bound as a context; raising exception");
     throw CosNaming::NamingContext::NotFound(CosNaming::NamingContext::
 					     not_context, n);
   }
-
   return CosNaming::NamingContext::_duplicate(context);
 }
 
@@ -201,29 +196,25 @@ NamingContext_i::resolve_compound(const CosNaming::Name& n,
 CORBA::Object_ptr
 NamingContext_i::resolve(const CosNaming::Name& n)
 {
-  if (n.length() == 1) {
-    DB(cerr << "resolve simple name (" << n[0].id << "," << n[0].kind
-       << ") in context " << this << endl);
+  if (omniORB::trace(3)) {
+    omniORB::logger log("omniNames: ");
+    log << "resolve (";
 
-    ReaderLock r(lock);
-
-    ObjectBinding* ob = resolve_simple(n);
-
-    DB(cerr << "returning " << (void*)((CORBA::Object_ptr)ob->object) << endl);
-
-    return CORBA::Object::_duplicate(ob->object);
-
-  } else {
-
-    DB(cerr << "resolve compound name ");
-    for (unsigned int i = 0; i < n.length(); i++) {
-      DB(cerr << "(" << n[i].id << "," << n[i].kind << ")");
+    for (unsigned int j = 0; j < n.length(); j++) {
+      if (j != 0) log << '/';
+      log << n[j].id << '.' << n[j].kind;
     }
-    DB(cerr << " in context " << this << endl);
+    log << ")\n";
+  }
 
+  if (n.length() == 1) {
+    ReaderLock r(lock);
+    ObjectBinding* ob = resolve_simple(n);
+    return CORBA::Object::_duplicate(ob->object);
+  }
+  else {
     CosNaming::Name restOfName;
     CosNaming::NamingContext_var context = resolve_compound(n, restOfName);
-
     return context->resolve(restOfName);
   }
 }
@@ -237,17 +228,12 @@ void
 NamingContext_i::bind_helper(const CosNaming::Name& n, CORBA::Object_ptr obj,
 			     CosNaming::BindingType t, CORBA::Boolean rebind)
 {
-  DB(cerr << "bind in context " << this << " (type " << t << " rebind "
-     << (int)rebind << ")" << endl);
-
   if (n.length() == 1) {
-
     //
     // Bind a simple name - i.e. bind object in this context.
     //
 
-    DB(cerr << "  bind simple name (" << n[0].id << "," << n[0].kind << ") to "
-       << obj << " in context " << this << endl);
+    LOG(2, "bind simple name (" << n[0].id << '.' << n[0].kind << ')');
 
     WriterLock w(lock);
 
@@ -260,44 +246,37 @@ NamingContext_i::bind_helper(const CosNaming::Name& n, CORBA::Object_ptr obj,
     }
     catch (CosNaming::NamingContext::NotFound& ex) {
       ob = 0;
-      DB(cerr << "  bind in context " << this
-	 << ": caught not found exception from resolving simple name\n"
-	 << "    reason " << ex.why << " rest of name ");
-
-      for (unsigned int i = 0; i < ex.rest_of_name.length(); i++) {
-	DB(cerr << "(" << ex.rest_of_name[i].id << ","
-	   << ex.rest_of_name[i].kind << ")");
-      }
-      DB(cerr << endl);
     }
 
     CosNaming::NamingContext_var nc = _this();
     redolog->bind(nc, n, obj, t);
 
     if (ob) {
-      DB(cerr << "  rebind in context " << this
-	 << ": unbinding simple name (" << n[0].id << "," << n[0].kind
-	 << ") from " << (void*)((CORBA::Object_ptr)ob->object) << endl);
+      LOG(4, "rebind: unbinding simple name (" << n[0].id << '.' << n[0].kind
+          << ')');
       delete ob;
     }
 
     new ObjectBinding(n, t, obj, this);
 
-    DB(cerr << "  bind in context " << this << ": bound simple name ("
-       << n[0].id << "," << n[0].kind << ") to " << obj << endl);
-
-  } else {
-
+    LOG(4, "bound simple name (" << n[0].id << '.' << n[0].kind << ')');
+  }
+  else {
     //
     // Bind a compound name <c1;c2;...;cn> - i.e. bind object to name
     // <c2;...;cn> in the context <c1>.
     //
 
-    DB(cerr << "  bind compound name ");
-    for (unsigned int i = 0; i < n.length(); i++) {
-      DB(cerr << "(" << n[i].id << "," << n[i].kind << ")");
+    if (omniORB::trace(2)) {
+      omniORB::logger log("omniNames: ");
+      log << "bind compound name (";
+    
+      for (unsigned int j = 0; j < n.length(); j++) {
+        if (j != 0) log << '/';
+        log << n[j].id << '.' << n[j].kind;
+      }
+      log << ")\n";
     }
-    DB(cerr << " to " << obj << " in context " << this << endl);
 
     CosNaming::Name restOfName;
     CosNaming::NamingContext_var context = resolve_compound(n, restOfName);
@@ -307,7 +286,8 @@ NamingContext_i::bind_helper(const CosNaming::Name& n, CORBA::Object_ptr obj,
 	context->rebind(restOfName, obj);
       else
 	context->bind(restOfName, obj);
-    } else {
+    }
+    else {
       if (rebind)
 	context->rebind_context(restOfName,
 				CosNaming::NamingContext::_narrow(obj));
@@ -326,16 +306,12 @@ NamingContext_i::bind_helper(const CosNaming::Name& n, CORBA::Object_ptr obj,
 void
 NamingContext_i::unbind(const CosNaming::Name& n)
 {
-  DB(cerr << "unbind in context " << this << endl);
-
   if (n.length() == 1) {
-
     //
     // Unbind a simple name - i.e. remove it from this context.
     //
 
-    DB(cerr << "  unbind simple name (" << n[0].id << "," << n[0].kind << ")"
-       << " in context " << this << endl);
+    LOG(2, "unbind simple name (" << n[0].id << '.' << n[0].kind << ')');
 
     WriterLock w(lock);
 
@@ -344,25 +320,24 @@ NamingContext_i::unbind(const CosNaming::Name& n)
     CosNaming::NamingContext_var nc = _this();
     redolog->unbind(nc, n);
 
-    DB(cerr << "  unbind: removing (" << n[0].id << "," << n[0].kind << ")"
-       << " from context " << this << " (was bound to "
-       << (void*)((CORBA::Object_ptr)ob->object) << ")" << endl);
-
     delete ob;
-
-  } else {
-
+  }
+  else {
     //
     // Unbind a compound name <c1;c2;...;cn> - i.e. unbind the name
     // <c2;...;cn> from the context <c1>.
     //
 
-    DB(cerr << "  unbind compound name ");
-    for (unsigned int i = 0; i < n.length(); i++) {
-      DB(cerr << "(" << n[i].id << "," << n[i].kind << ")");
+    if (omniORB::trace(2)) {
+      omniORB::logger log("omniNames: ");
+      log << "unbind compound name (";
+    
+      for (unsigned int j = 0; j < n.length(); j++) {
+        if (j != 0) log << '/';
+        log << n[j].id << '.' << n[j].kind;
+      }
+      log << ")\n";
     }
-    DB(cerr << " in context " << this << endl);
-
     CosNaming::Name restOfName;
     CosNaming::NamingContext_var context = resolve_compound(n, restOfName);
 
@@ -379,38 +354,41 @@ CosNaming::NamingContext_ptr
 NamingContext_i::bind_new_context(const CosNaming::Name& n)
 {
   if (n.length() == 1) {
-
     //
     // Bind a new context with a simple name - i.e. create a new context and
     // bind it in this context.
     //
 
-    DB(cerr << "bind_new_context simple (" << n[0].id << "," << n[0].kind
-       << ") in context " << this << endl);
+    LOG(2, "bind_new_context simple name (" <<
+        n[0].id << '.' << n[0].kind << ')');
+
     CosNaming::NamingContext_ptr nc = new_context();
     try {
       bind_context(n, nc);
-    } catch (...) {
+    }
+    catch (...) {
       nc->destroy();
       CORBA::release(nc);
       throw;
     }
-      
     return nc;
-
-  } else {
-
+  }
+  else {
     //
     // Bind a new context with a compound name <c1;c2;...;cn> - i.e.
     // bind_new_context <c2;...;cn> in the context <c1>.
     //
 
-    DB(cerr << "bind_new_context compound name ");
-    for (unsigned int i = 0; i < n.length(); i++) {
-      DB(cerr << "(" << n[i].id << "," << n[i].kind << ")");
+    if (omniORB::trace(2)) {
+      omniORB::logger log("omniNames: ");
+      log << "bind_new_context compound name (";
+    
+      for (unsigned int j = 0; j < n.length(); j++) {
+        if (j != 0) log << '/';
+        log << n[j].id << '.' << n[j].kind;
+      }
+      log << ")\n";
     }
-    DB(cerr << " in context " << this << endl);
-
     CosNaming::Name restOfName;
     CosNaming::NamingContext_var context = resolve_compound(n, restOfName);
 
@@ -426,7 +404,7 @@ NamingContext_i::bind_new_context(const CosNaming::Name& n)
 void
 NamingContext_i::destroy()
 {
-  DB(cerr << "destroy" << endl);
+  LOG(4, "destroy");
 
   WriterLock w(lock);
 
@@ -451,10 +429,9 @@ NamingContext_i::list(CORBA::ULong how_many, CosNaming::BindingList_out bl,
 {
   lock.readerIn();
 
-  DB(cerr << "list context " << this << ", how_many " << how_many
-     << ", size " << size << endl);
+  LOG(3, "list context: how_many = " << how_many << ", size = " << size);
 
-  CosNaming::BindingList* all = new CosNaming::BindingList(size);
+  CosNaming::BindingList_var all = new CosNaming::BindingList(size);
   all->length(size);
 
   unsigned int i;
@@ -462,35 +439,24 @@ NamingContext_i::list(CORBA::ULong how_many, CosNaming::BindingList_out bl,
 
   for (ob = headBinding, i = 0; ob; ob = ob->next, i++) {
     assert(i < size);
-    (*all)[i] = ob->binding;
-    DB(cerr << "  (" << (*all)[i].binding_name[0].id << ","
-       << (*all)[i].binding_name[0].kind << ") binding type "
-       << (((*all)[i].binding_type == CosNaming::nobject) ?
-	   "nobject" : "ncontext")
-       << endl);
+    all[i] = ob->binding;
   }
 
   lock.readerOut();
 
-  if( all->length() <= how_many ) {
+  if (all->length() <= how_many) {
     // don't need an iterator.  All results can go back as a
     // result of this call
     bi = CosNaming::BindingIterator::_nil();
-    bl = all;
+    bl = all._retn();
     return;
   }
 
-  BindingIterator_i* bii = new BindingIterator_i(names_poa, all);
+  BindingIterator_i* bii = new BindingIterator_i(names_poa, all._retn());
 
   bi = bii->_this();
   bii->_remove_ref();
 
-  if (CORBA::is_nil(bi.ptr())) {
-    cerr << "couldn't narrow binding iterator" << endl;
-    return;
-  }
-
-  DB(cerr << "  calling next_n()" << endl);
   bi->next_n(how_many, bl);
 }
 
@@ -501,18 +467,18 @@ NamingContext_i::list(CORBA::ULong how_many, CosNaming::BindingList_out bl,
 
 NamingContext_i::~NamingContext_i()
 {
-  DB(cerr << "~NamingContext_i" << endl);
-
   WriterLock w(lock);
 
   if (prev) {
     prev->next = next;
-  } else {
+  }
+  else {
     headContext = next;
   }
   if (next) {
     next->prev = prev;
-  } else {
+  }
+  else {
     tailContext = prev;
   }
 
