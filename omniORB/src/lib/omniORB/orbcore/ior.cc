@@ -3,7 +3,7 @@
 // ior.cc                     Created on: 5/7/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,150 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.12.2.6  2007/11/28 12:24:26  dgrisby
-  Implement a tiny subset of CSIv2 to permit multiple SSL endpoints in IORs.
-
-  Revision 1.12.2.5  2006/09/17 23:24:18  dgrisby
-  Remove hard-coded hostname length.
-
-  Revision 1.12.2.4  2006/05/21 17:44:04  dgrisby
-  Remove unnecessary uses of cdrCountingStream.
-
-  Revision 1.12.2.3  2006/04/09 19:52:31  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.12.2.2  2005/01/06 23:10:30  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.12.2.1  2003/03/23 21:02:13  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.10.2.23  2003/02/03 16:53:14  dgrisby
-  Force type in constructor argument to help confused compilers.
-
-  Revision 1.10.2.22  2003/01/14 14:18:12  dgrisby
-  Don't overwrite component data when decoding multi component profile.
-
-  Revision 1.10.2.21  2002/08/16 16:00:50  dgrisby
-  Bugs accessing uninitialised String_vars with [].
-
-  Revision 1.10.2.20  2002/03/18 12:38:26  dpg1
-  Lower trace(0) to trace(1), propagate fatalException.
-
-  Revision 1.10.2.19  2002/03/14 14:39:44  dpg1
-  Obscure bug in objref creation with unaligned buffers.
-
-  Revision 1.10.2.18  2002/01/02 18:17:00  dpg1
-  Relax IOR strictness when strictIIOP not set.
-
-  Revision 1.10.2.17  2001/08/21 10:50:46  dpg1
-  Incorrect length calculation if no components.
-
-  Revision 1.10.2.16  2001/08/17 17:12:39  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.10.2.15  2001/08/06 15:49:17  sll
-  Added IOP component TAG_OMNIORB_UNIX_TRANS for omniORB specific local
-  transport using the unix domain socket.
-
-  Revision 1.10.2.14  2001/08/03 17:41:22  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.10.2.13  2001/07/31 16:27:59  sll
-  Added GIOP BiDir support.
-
-  Revision 1.10.2.12  2001/06/13 20:13:15  sll
-  Minor updates to make the ORB compiles with MSVC++.
-
-  Revision 1.10.2.11  2001/06/11 17:53:22  sll
-   The omniIOR ctor used by genior and corbaloc now has the option to
-   select whether to call interceptors and what set of interceptors to call.
-
-  Revision 1.10.2.10  2001/05/31 16:18:13  dpg1
-  inline string matching functions, re-ordered string matching in
-  _ptrToInterface/_ptrToObjRef
-
-  Revision 1.10.2.9  2001/05/09 16:59:08  sll
-  Added unmarshalObjectKey() to allow quick extraction of the object key.
-
-  Revision 1.10.2.8  2001/04/18 18:18:07  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.10.2.7  2000/12/05 17:39:31  dpg1
-  New cdrStream functions to marshal and unmarshal raw strings.
-
-  Revision 1.10.2.6  2000/11/20 14:42:23  sll
-  Do not insert codeset component if the IOR is GIOP 1.0.
-
-  Revision 1.10.2.5  2000/11/15 17:24:45  sll
-  Added service context marshalling operators.
-  Added hooks to add TAG_CODE_SETS componment to an IOR.
-
-  Revision 1.10.2.4  2000/11/03 19:12:07  sll
-  Use new marshalling functions for byte, octet and char. Use get_octet_array
-  instead of get_char_array and put_octet_array instead of put_char_array.
-
-  Revision 1.10.2.3  2000/10/04 16:53:16  sll
-  Added default interceptor to encode and decode supported tag components.
-
-  Revision 1.10.2.2  2000/09/27 18:20:32  sll
-  Removed obsoluted IOP::iorToEncapStr and IOP::EncapStrToIor.
-  Added new function IOP::IOR::unmarshaltype_id(), IIOP::encodeProfile(),
-  IIOP::decodeProfile(), IIOP::addAlternativeIIOPAddress().
-  Use the new cdrStream abstraction.
-
-  Revision 1.10.2.1  2000/07/17 10:35:54  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.11  2000/07/13 15:25:57  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.9.6.5  2000/06/22 10:40:15  dpg1
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.9.6.4  2000/04/27 10:50:30  dpg1
-  Interoperable Naming Service
-
-  IOR: prefix is not case sensitive.
-
-  Revision 1.9.6.3  1999/10/14 16:22:11  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.9.6.2  1999/09/27 08:48:32  djr
-  Minor corrections to get rid of warnings.
-
-  Revision 1.9.6.1  1999/09/22 14:26:51  djr
-  Major rewrite of orbcore to support POA.
-
-  Revision 1.9  1999/05/25 17:06:14  sll
-  Make sure all padding bytes are converted to 0s in the stringified IOR.
-
-  Revision 1.8  1999/03/11 16:25:53  djr
-  Updated copyright notice
-
-  Revision 1.7  1998/08/14 13:48:04  sll
-  Added pragma hdrstop to control pre-compile header if the compiler feature
-  is available.
-
-  Revision 1.6  1997/12/09 17:32:39  sll
-  Removed obsoluted functions IIOP::profileToEncapStream and
-  IIOP::EncapStreamToProfile.
-  IOP::EncapStrToIor now accepts dodgy nil object reference.
-
-  Revision 1.5  1997/08/21 22:04:23  sll
-  minor cleanup to get rid of purify's warnings.
-
-// Revision 1.4  1997/05/06  15:21:58  sll
-// Public release.
-//
-  */
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/omniInterceptors.h>
@@ -483,31 +341,6 @@ omniIOR::unmarshal_TAG_ORB_TYPE(const IOP::TaggedComponent& c, omniIOR& ior)
 }
 
 
-char*
-omniIOR::dump_TAG_ORB_TYPE(const IOP::TaggedComponent& c)
-{
-  OMNIORB_ASSERT(c.tag == IOP::TAG_ORB_TYPE);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-  CORBA::ULong orb_type;
-  orb_type <<= e;
-
-  CORBA::String_var outstr;
-  CORBA::ULong len = sizeof("TAG_ORB_TYPE") + 1;
-  if (orb_type == omniORB_TAG_ORB_TYPE) {
-    len += sizeof("omniORB");
-    outstr = CORBA::string_alloc(len);
-    strcpy(outstr,"TAG_ORB_TYPE omniORB");
-  }
-  else {
-    len += 16;
-    outstr = CORBA::string_alloc(len);
-    sprintf(outstr,"%s 0x%08lx","TAG_ORB_TYPE",(unsigned long)orb_type);
-  }
-  return outstr._retn();
-}
-
-
 void
 omniIOR::unmarshal_TAG_ALTERNATE_IIOP_ADDRESS(const IOP::TaggedComponent& c, omniIOR& ior)
 {
@@ -523,74 +356,6 @@ omniIOR::unmarshal_TAG_ALTERNATE_IIOP_ADDRESS(const IOP::TaggedComponent& c, omn
   ior.getIORInfo()->addresses().push_back(address);
 }
 
-
-char*
-omniIOR::dump_TAG_ALTERNATE_IIOP_ADDRESS(const IOP::TaggedComponent& c)
-{
-  OMNIORB_ASSERT(c.tag == IOP::TAG_ALTERNATE_IIOP_ADDRESS);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-
-  IIOP::Address v;
-  v.host = e.unmarshalRawString();
-  v.port <<= e;
-  CORBA::String_var outstr;
-  CORBA::ULong len = sizeof("TAG_ALTERNATE_IIOP_ADDRESS ")+strlen(v.host)+8;
-  outstr = CORBA::string_alloc(len);
-  sprintf(outstr,"%s %s %d","TAG_ALTERNATE_IIOP_ADDRESS",(const char*)v.host,
-	  v.port);
-  return outstr._retn();
-}
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-void
-omniIOR::unmarshal_TAG_GROUP(const IOP::TaggedComponent& c, omniIOR& ior)
-{
-  OMNIORB_ASSERT(c.tag == IOP::TAG_GROUP);
-
-#if 0
-  // XXX Temporarily disabled.
-  ior.pd_is_IOGR = 1;
-#endif
-
-#if 0
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-  GIOP::Version ftsvc_ver;
-  CORBA::FT::FTDomainId ftdom_id;
-  CORBA::FT::ObjectGroupId objgrp_id;
-  CORBA::FT::ObjectGroupRefVersion objgrp_ver;
-  ftsvc_ver <<= e;
-  ftdom_id <<= e;
-  objgrp_id <<= e;
-  objgrp_ver <<= e;
-  // XXX STORE IN EXTRA INFO PART OF IOR
-#endif
-}
-
-
-char*
-omniIOR::dump_TAG_GROUP(const IOP::TaggedComponent& c)
-{
-  OMNIORB_ASSERT(c.tag == IOP::TAG_GROUP);
-
-#if 0
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-  GIOP::Version ftsvc_ver;
-  CORBA::FT::FTDomainId ftdom_id;
-  CORBA::FT::ObjectGroupId objgrp_id;
-  CORBA::FT::ObjectGroupRefVersion objgrp_ver;
-  ftsvc_ver <<= e;
-  ftdom_id <<= e;
-  objgrp_id <<= e;
-  objgrp_ver <<= e;
-  // XXX Format everything into a string
-#endif
-  CORBA::String_var outstr((const char*)"TAG_GROUP");
-  return outstr._retn();
-}
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -661,53 +426,6 @@ omniIOR::unmarshal_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent& c,
   // If we do not have ssl transport linked the return value will be 0
   if (address == 0) return;
   ior.getIORInfo()->addresses().push_back(address);
-}
-
-char*
-omniIOR::dump_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent& c) {
-
-  OMNIORB_ASSERT(c.tag == IOP::TAG_SSL_SEC_TRANS);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-
-  CORBA::UShort target_supports,target_requires, port;
-  CORBA::Boolean is_visi = 0;
-
-  CORBA::String_var outstr;
-
-  try {
-    switch (c.component_data.length()) {
-      // Remember this is an encapsulation, so the length includes the
-      // first endian octet plus the necessary paddings after it
-    case 8:
-      {
-	// This is the standard format
-	target_supports <<= e;
-	target_requires <<= e;
-	port <<= e;
-	break;
-      }
-    default:
-      {
-	// Try visibroker propriety format
-	CORBA::ULong v;
-	v <<= e; target_supports = v;
-	v <<= e; target_requires = v;
-	port <<= e;
-	is_visi = 1;
-	break;
-      }
-    }
-    const char* format = "TAG_SSL_SEC_TRANS port = %d supports = %d requires = %d";
-    const char* visiformat = " (visibroker format)";
-    outstr = CORBA::string_alloc(strlen(format)+strlen(visiformat)+36);
-    sprintf(outstr,format,port,target_supports,target_requires);
-    if (is_visi) strcat(outstr,visiformat);
-  }
-  catch (...) {
-    outstr = (const char*)"TAG_SSL_SEC_TRANS (non-standard and unknown format)";
-  }
-  return outstr._retn();
 }
 
 
@@ -797,111 +515,6 @@ omniIOR::unmarshal_TAG_CSI_SEC_MECH_LIST(const IOP::TaggedComponent& c,
   }
 }
 
-char*
-omniIOR::dump_TAG_CSI_SEC_MECH_LIST(const IOP::TaggedComponent& c) {
-
-  OMNIORB_ASSERT(c.tag == IOP::TAG_CSI_SEC_MECH_LIST);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-
-  _CORBA_Unbounded_Sequence_String addrs;
-  CORBA::ULong addrs_size = 0;
-
-  CORBA::Boolean stateful = e.unmarshalBoolean();
-
-  CORBA::ULong mech_count;
-  mech_count <<= e;
-
-  for (CORBA::ULong mech_idx = 0; mech_idx != mech_count; ++mech_idx) {
-    CORBA::UShort target_requires;
-
-    CORBA::UShort as_target_supports, as_target_requires;
-    _CORBA_Unbounded_Sequence_Octet as_client_authentication_mech;
-    _CORBA_Unbounded_Sequence_Octet as_target_name;
-
-    CORBA::UShort sas_target_supports, sas_target_requires;
-    CORBA::ULong sas_privilege_authorities_len;
-    _CORBA_Unbounded_Sequence<_CORBA_Unbounded_Sequence_Octet> sas_supported_naming_mechanisms;
-    CORBA::ULong sas_supported_identity_types;
-
-    // CompoundSecMech structure
-    target_requires <<= e;
-
-    IOP::TaggedComponent transport_mech;
-    transport_mech <<= e;
-
-    // as_context_mech member
-    as_target_supports <<= e;
-    as_target_requires <<= e;
-    as_client_authentication_mech <<= e;
-    as_target_name <<= e;
-
-    // sas_context_mech member
-    sas_target_supports <<= e;
-    sas_target_requires <<= e;
-    sas_privilege_authorities_len <<= e;
-    for (CORBA::ULong pi = 0; pi != sas_privilege_authorities_len; ++pi) {
-      CORBA::ULong syntax;
-      _CORBA_Unbounded_Sequence_Octet name;
-      
-      syntax <<= e;
-      name   <<= e;
-    }
-    sas_supported_naming_mechanisms <<= e;
-    sas_supported_identity_types <<= e;
-
-    if (as_target_requires  == 0 &&
-	sas_target_requires == 0 &&
-	transport_mech.tag  == IOP::TAG_TLS_SEC_TRANS) {
-
-      // No higher-level requirements and a TLS transport tag -- we
-      // can support this component.
-      CORBA::UShort tls_target_supports, tls_target_requires;
-      CORBA::ULong addresses_len;
-
-      cdrEncapsulationStream tls_e(transport_mech.component_data.get_buffer(),
-				   transport_mech.component_data.length(),1);
-      
-      tls_target_supports <<= tls_e;
-      tls_target_requires <<= tls_e;
-      addresses_len <<= tls_e;
-
-      for (CORBA::ULong ai = 0; ai != addresses_len; ++ai) {
-	IIOP::Address ssladdr;
-
-	ssladdr.host = tls_e.unmarshalRawString();
-	ssladdr.port <<= tls_e;
-
-	char* addr = omniURI::buildURI("", ssladdr.host, ssladdr.port);
-
-	addrs_size += strlen(addr);
-
-	CORBA::ULong addrslen = addrs.length();
-	addrs.length(addrslen+1);
-	addrs[addrslen] = addr;
-      }
-    }
-  }
-
-  if (addrs.length()) {
-    const char* prefix = "TAG_CSI_SEC_MECH_LIST endpoints ";
-
-    CORBA::String_var outstr = CORBA::string_alloc(strlen(prefix) +
-						   addrs_size +
-						   addrs.length() * 2);
-    strcpy(outstr, prefix);
-    for (CORBA::ULong i=0; i != addrs.length(); ++i) {
-      strcat(outstr, addrs[i]);
-      if (i + 1 != addrs.length())
-	strcat(outstr, ", ");
-    }
-    return outstr._retn();
-  }
-  else {
-    return CORBA::string_dup("TAG_CSI_SEC_MECH_LIST (no usable endpoints)");
-  }
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -923,22 +536,6 @@ omniIOR::unmarshal_TAG_OMNIORB_BIDIR(const IOP::TaggedComponent& c,
   CORBA::ULong index = infolist.length();
   infolist.length(index+1);
   infolist[index] = (omniIOR::IORExtraInfo*)info;
-}
-
-char*
-omniIOR::dump_TAG_OMNIORB_BIDIR(const IOP::TaggedComponent& c) {
-
-  OMNIORB_ASSERT(c.tag == IOP::TAG_OMNIORB_BIDIR);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-
-  CORBA::String_var sendfrom;
-  sendfrom = e.unmarshalRawString();
-  CORBA::String_var outstr;
-  CORBA::ULong len = sizeof("TAG_OMNIORB_BIDIR ")+strlen(sendfrom);
-  outstr = CORBA::string_alloc(len);
-  sprintf(outstr,"%s %s","TAG_OMNIORB_BIDIR",(const char*)sendfrom);
-  return outstr._retn();
 }
 
 void
@@ -997,27 +594,6 @@ omniIOR::unmarshal_TAG_OMNIORB_UNIX_TRANS(const IOP::TaggedComponent& c,
   ior.getIORInfo()->addresses().push_back(address);
 }
 
-char*
-omniIOR::dump_TAG_OMNIORB_UNIX_TRANS(const IOP::TaggedComponent& c) {
-
-  OMNIORB_ASSERT(c.tag == IOP::TAG_OMNIORB_UNIX_TRANS);
-  cdrEncapsulationStream e(c.component_data.get_buffer(),
-			   c.component_data.length(),1);
-
-  CORBA::String_var host;
-  host = e.unmarshalRawString();
-  CORBA::String_var filename;
-  filename = e.unmarshalRawString();
-
-  const char* format = "TAG_OMNIORB_UNIX_TRANS %s %s";
-  CORBA::String_var outstr;
-  CORBA::ULong len = strlen(format) + strlen(host) + strlen(filename);
-  outstr = CORBA::string_alloc(len);
-  sprintf(outstr,format,(const char*)host,(const char*)filename);
-  return outstr._retn();
-
-}
-
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 void
@@ -1044,42 +620,6 @@ omniIOR::unmarshal_TAG_OMNIORB_PERSISTENT_ID(const IOP::TaggedComponent& c,
   }
 }
 
-
-char*
-omniIOR::dump_TAG_OMNIORB_PERSISTENT_ID(const IOP::TaggedComponent& c)
-{
-  OMNIORB_ASSERT(c.tag == IOP::TAG_OMNIORB_PERSISTENT_ID);
-
-  const char* prefix = "TAG_OMNIORB_PERSISTENT_ID ";
-
-  CORBA::String_var outstr;
-
-  CORBA::ULong prefix_len = strlen(prefix);
-  outstr = CORBA::string_alloc(prefix_len + c.component_data.length() * 2);
-
-  strcpy((char*)outstr, prefix);
-
-  char* o = (char*)outstr + prefix_len;
-
-  int d, n;
-  for (CORBA::ULong i=0; i < c.component_data.length(); i++) {
-    d = c.component_data[i];
-    n = (d & 0xf0) >> 4;
-    if (n >= 10)
-      *o++ = 'a' + n - 10;
-    else
-      *o++ = '0' + n;
-
-    n = d & 0xf;
-    if (n >= 10)
-      *o++ = 'a' + n - 10;
-    else
-      *o++ = '0' + n;
-  }
-  *o = '\0';
-
-  return outstr._retn();
-}
 
 static void
 logPersistentIdentifier()
@@ -1136,153 +676,67 @@ OMNI_NAMESPACE_BEGIN(omni)
 static struct {
   IOP::ComponentId id;
   void (*fn)(const IOP::TaggedComponent&,omniIOR&);
-  char* (*dump)(const IOP::TaggedComponent&);
 } componentUnmarshalHandlers[] = {
   // This table must be arranged in ascending order of IOP::ComponentId
 
   { IOP::TAG_ORB_TYPE,
-    omniIOR::unmarshal_TAG_ORB_TYPE,
-    omniIOR::dump_TAG_ORB_TYPE },
+    omniIOR::unmarshal_TAG_ORB_TYPE },
 
   { IOP::TAG_CODE_SETS,
-    omniIOR::unmarshal_TAG_CODE_SETS,
-    omniIOR::dump_TAG_CODE_SETS },
+    omniIOR::unmarshal_TAG_CODE_SETS },
 
-  { IOP::TAG_POLICIES, 0, 0 },
+  { IOP::TAG_POLICIES, 0 },
 
   { IOP::TAG_ALTERNATE_IIOP_ADDRESS,
-    omniIOR::unmarshal_TAG_ALTERNATE_IIOP_ADDRESS,
-    omniIOR::dump_TAG_ALTERNATE_IIOP_ADDRESS },
+    omniIOR::unmarshal_TAG_ALTERNATE_IIOP_ADDRESS },
 
-  { IOP::TAG_COMPLETE_OBJECT_KEY, 0, 0 },
-  { IOP::TAG_ENDPOINT_ID_POSITION, 0, 0 },
-  { IOP::TAG_LOCATION_POLICY, 0, 0 },
-  { IOP::TAG_ASSOCIATION_OPTIONS, 0, 0 },
-  { IOP::TAG_SEC_NAME, 0, 0 },
-  { IOP::TAG_SPKM_1_SEC_MECH, 0, 0 },
-  { IOP::TAG_SPKM_2_SEC_MECH, 0, 0 },
-  { IOP::TAG_KERBEROSV5_SEC_MECH, 0, 0 },
-  { IOP::TAG_CSI_ECMA_SECRET_SEC_MECH, 0, 0 },
-  { IOP::TAG_CSI_ECMA_HYBRID_SEC_MECH, 0, 0 },
+  { IOP::TAG_COMPLETE_OBJECT_KEY, 0 },
+  { IOP::TAG_ENDPOINT_ID_POSITION, 0 },
+  { IOP::TAG_LOCATION_POLICY, 0 },
+  { IOP::TAG_ASSOCIATION_OPTIONS, 0 },
+  { IOP::TAG_SEC_NAME, 0 },
+  { IOP::TAG_SPKM_1_SEC_MECH, 0 },
+  { IOP::TAG_SPKM_2_SEC_MECH, 0 },
+  { IOP::TAG_KERBEROSV5_SEC_MECH, 0 },
+  { IOP::TAG_CSI_ECMA_SECRET_SEC_MECH, 0 },
+  { IOP::TAG_CSI_ECMA_HYBRID_SEC_MECH, 0 },
 
   { IOP::TAG_SSL_SEC_TRANS,
-    omniIOR::unmarshal_TAG_SSL_SEC_TRANS,
-    omniIOR::dump_TAG_SSL_SEC_TRANS },
+    omniIOR::unmarshal_TAG_SSL_SEC_TRANS },
 
-  { IOP::TAG_CSI_ECMA_PUBLIC_SEC_MECH, 0, 0 },
-  { IOP::TAG_GENERIC_SEC_MECH, 0, 0 },
-  { IOP::TAG_FIREWALL_TRANS, 0, 0 },
-  { IOP::TAG_SCCP_CONTACT_INFO, 0, 0 },
-  { IOP::TAG_JAVA_CODEBASE, 0, 0 },
+  { IOP::TAG_CSI_ECMA_PUBLIC_SEC_MECH, 0 },
+  { IOP::TAG_GENERIC_SEC_MECH, 0 },
+  { IOP::TAG_FIREWALL_TRANS, 0 },
+  { IOP::TAG_SCCP_CONTACT_INFO, 0 },
+  { IOP::TAG_JAVA_CODEBASE, 0 },
 
   { IOP::TAG_CSI_SEC_MECH_LIST,
-    omniIOR::unmarshal_TAG_CSI_SEC_MECH_LIST,
-    omniIOR::dump_TAG_CSI_SEC_MECH_LIST },
+    omniIOR::unmarshal_TAG_CSI_SEC_MECH_LIST },
 
-  { IOP::TAG_DCE_STRING_BINDING, 0, 0 },
-  { IOP::TAG_DCE_BINDING_NAME, 0, 0 },
-  { IOP::TAG_DCE_NO_PIPES, 0, 0 },
-  { IOP::TAG_DCE_SEC_MECH, 0, 0 },
-  { IOP::TAG_INET_SEC_TRANS, 0, 0 },
+  { IOP::TAG_DCE_STRING_BINDING, 0 },
+  { IOP::TAG_DCE_BINDING_NAME, 0 },
+  { IOP::TAG_DCE_NO_PIPES, 0 },
+  { IOP::TAG_DCE_SEC_MECH, 0 },
+  { IOP::TAG_INET_SEC_TRANS, 0 },
 
-  { IOP::TAG_GROUP,
-    omniIOR::unmarshal_TAG_GROUP,
-    omniIOR::dump_TAG_GROUP  },
-
-  { IOP::TAG_PRIMARY, 0, 0 },
-  { IOP::TAG_HEARTBEAT_ENABLED, 0, 0 },
+  { IOP::TAG_PRIMARY, 0 },
+  { IOP::TAG_HEARTBEAT_ENABLED, 0 },
 
   { IOP::TAG_OMNIORB_BIDIR,
-    omniIOR::unmarshal_TAG_OMNIORB_BIDIR,
-    omniIOR::dump_TAG_OMNIORB_BIDIR },
+    omniIOR::unmarshal_TAG_OMNIORB_BIDIR },
 
   { IOP::TAG_OMNIORB_UNIX_TRANS,
-    omniIOR::unmarshal_TAG_OMNIORB_UNIX_TRANS,
-    omniIOR::dump_TAG_OMNIORB_UNIX_TRANS },
+    omniIOR::unmarshal_TAG_OMNIORB_UNIX_TRANS },
 
   { IOP::TAG_OMNIORB_PERSISTENT_ID,
-    omniIOR::unmarshal_TAG_OMNIORB_PERSISTENT_ID,
-    omniIOR::dump_TAG_OMNIORB_PERSISTENT_ID },
+    omniIOR::unmarshal_TAG_OMNIORB_PERSISTENT_ID },
 
-  { 0xffffffff, 0, 0 }
+  { 0xffffffff, 0 }
 };
 
 static int tablesize = 0;
 
 OMNI_NAMESPACE_END(omni)
-
-/////////////////////////////////////////////////////////////////////////////
-char*
-IOP::dumpComponent(const IOP::TaggedComponent& c) {
-
-  if (!tablesize) {
-    while (componentUnmarshalHandlers[tablesize].id != 0xffffffff) tablesize++;
-  }
-
-  int top = tablesize;
-  int bottom = 0;
-
-  do {
-    int i = (top + bottom) >> 1;
-    IOP::ComponentId id = componentUnmarshalHandlers[i].id;
-    if (id == c.tag) {
-      if (componentUnmarshalHandlers[i].dump) {
-	return componentUnmarshalHandlers[i].dump(c);
-      }
-      break;
-    }
-    else if (id > c.tag) {
-      top = i;
-    }
-    else {
-      bottom = i + 1;
-    }
-  } while (top != bottom);
-
-  // Reach here if we don't know how to dump the content.
-  CORBA::ULong len = c.component_data.length() * 2 + 4;
-  const char* tagname = IOP::ComponentIDtoName(c.tag);
-  if (!tagname) {
-    len += sizeof("unknown tag()") + 10;
-  }
-  else {
-    len += strlen(tagname);
-  }
-  CORBA::String_var outstr;
-  char* p;
-  outstr = p = CORBA::string_alloc(len);
-  memset(p,0,len+1);
-
-  if (tagname) {
-    strcpy(p,tagname);
-  }
-  else {
-    sprintf(p,"unknown tag(0x%08lx)",(unsigned long)c.tag);
-  }
-  p += strlen(p);
-  *p++ = ' ';
-  *p++ = '0';
-  *p++ = 'x';
-
-  CORBA::Char* data = (CORBA::Char *) c.component_data.get_buffer();
-
-  for (CORBA::ULong i=0; i < c.component_data.length(); i++) {
-    int v = (data[i] & 0xf0);
-    v = v >> 4;
-    if (v < 10)
-      *p++ = '0' + v;
-    else
-      *p++ = 'a' + (v - 10);
-    v = ((data[i] & 0xf));
-    if (v < 10)
-      *p++ = '0' + v;
-    else
-      *p++ = 'a' + (v - 10);
-  }
-
-  return outstr._retn();
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 //            Default interceptors                                         //
