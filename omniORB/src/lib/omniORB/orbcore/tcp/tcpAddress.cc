@@ -3,7 +3,7 @@
 // tcpAddress.cc              Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2010 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -107,7 +107,7 @@ tcpAddress::Poke() const {
 
 #if defined(USE_NONBLOCKING_CONNECT)
 
-  if (SocketSetnonblocking(sock) == RC_INVALID_SOCKET) {
+  if (tcpSocket::setNonBlocking(sock) == RC_INVALID_SOCKET) {
     CLOSESOCKET(sock);
     return 0;
   }

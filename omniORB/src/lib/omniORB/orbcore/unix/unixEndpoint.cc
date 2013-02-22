@@ -3,7 +3,7 @@
 // unixEndpoint.cc            Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005-2006 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,67 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.7  2006/07/03 11:18:56  dgrisby
-  If Poke() fails to connect to itself, wake up the SocketCollection in
-  case it is idle.
-
-  Revision 1.1.4.6  2006/04/28 18:40:46  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.5  2006/04/09 19:52:29  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.1.4.4  2005/08/03 09:43:51  dgrisby
-  Make sure accept() never blocks.
-
-  Revision 1.1.4.3  2005/01/13 21:10:16  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.2  2005/01/06 23:10:59  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:57  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.9  2002/04/16 12:44:27  dpg1
-  Fix SSL accept bug, clean up logging.
-
-  Revision 1.1.2.8  2002/03/13 16:05:40  dpg1
-  Transport shutdown fixes. Reference count SocketCollections to avoid
-  connections using them after they are deleted. Properly close
-  connections when in thread pool mode.
-
-  Revision 1.1.2.7  2002/01/15 16:38:14  dpg1
-  On the road to autoconf. Dependencies refactored, configure.ac
-  written. No makefiles yet.
-
-  Revision 1.1.2.6  2001/11/28 20:33:43  dpg1
-  Minor Unix transport bugs.
-
-  Revision 1.1.2.5  2001/08/23 10:11:16  sll
-  Use AF_UNIX if AF_LOCAL is not defined.
-
-  Revision 1.1.2.4  2001/08/17 17:12:42  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.2.3  2001/08/08 15:58:17  sll
-  Set up the socket with the permission mode set in
-  omniORB::unixTransportPermission.
-
-  Revision 1.1.2.2  2001/08/07 15:42:17  sll
-  Make unix domain connections distinguishable on both the server and client
-  side.
-
-  Revision 1.1.2.1  2001/08/06 15:47:44  sll
-  Added support to use the unix domain socket as the local transport.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/giopEndpoint.h>
@@ -193,7 +134,6 @@ publish_one(const char*    	     publish_spec,
   return 1;
 }
 
-
 CORBA::Boolean
 unixEndpoint::publish(const orbServer::PublishSpecs& publish_specs,
 		      CORBA::Boolean 	      	     all_specs,
@@ -239,7 +179,7 @@ unixEndpoint::Bind() {
 
   unlink(pd_filename);
 
-  SocketSetCloseOnExec(pd_socket);
+  tcpSocket::setCloseOnExec(pd_socket);
 
   struct sockaddr_un addr;
 
@@ -248,7 +188,7 @@ unixEndpoint::Bind() {
   strncpy(addr.sun_path, pd_filename, sizeof(addr.sun_path) - 1);
 
   if (::bind(pd_socket,(struct sockaddr *)&addr,
-	               sizeof(addr)) == RC_SOCKET_ERROR) {
+             sizeof(addr)) == RC_SOCKET_ERROR) {
     CLOSESOCKET(pd_socket);
     return 0;
   }
@@ -272,7 +212,7 @@ unixEndpoint::Bind() {
   pd_addresses[0] = unixConnection::unToString(pd_filename);
 
   // Never block in accept
-  SocketSetnonblocking(pd_socket);
+  tcpSocket::setNonBlocking(pd_socket);
 
   // Add the socket to our SocketCollection.
   addSocket(this);
@@ -292,10 +232,11 @@ unixEndpoint::Poke() {
       log << "Warning: fail to connect to myself ("
 	  << (const char*) pd_addresses[0] << ") via unix socket.\n";
     }
-    // Wake up the SocketCollection in case it is idle and blocked
-    // with no timeout.
-    wakeUp();
   }
+  // Wake up the SocketCollection in case the connect did not work and
+  // it is idle and blocked with no timeout.
+  wakeUp();
+
   delete target;
 }
 
@@ -361,7 +302,7 @@ again:
       // On some platforms, the new socket inherits the non-blocking
       // setting from the listening socket, so we set it blocking here
       // just to be sure.
-      SocketSetblocking(sock);
+      tcpSocket::setBlocking(sock);
 
       pd_new_conn_socket = sock;
     }

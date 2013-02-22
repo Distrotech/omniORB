@@ -30,12 +30,19 @@
 #ifndef __TCPSOCKET_h__
 #define __TCPSOCKET_h__
 
-#include <SocketCollection.h>
 #include <orbParameters.h>
+#include <libcWrapper.h>
 #include <omniORB4/omniServer.h>
 
-
 OMNI_NAMESPACE_BEGIN(omni)
+
+
+#if defined(__WIN32__)
+typedef SOCKET SocketHandle_t;
+#else
+typedef int SocketHandle_t;
+#endif
+
 
 class tcpSocket {
 public:
@@ -122,9 +129,8 @@ public:
 				       struct timeval&    t)
   {
     if (deadline) {
-      SocketSetTimeOut(deadline, t);
-      if (t.tv_sec == 0 && t.tv_usec == 0) {
-	// Already timed out.
+      if (setTimeout(deadline, t)) {
+        // Already timed out.
 	return 1;
       }
 #if defined(USE_FAKE_INTERRUPTABLE_RECV)
@@ -198,6 +204,36 @@ public:
 #endif
     return rc;
   }
+
+  static inline CORBA::Boolean
+  setTimeout(const omni_time_t& deadline, struct timeval& t)
+  {
+    if (!deadline) {
+      // Avoid get_time call which is expensive on some platforms.
+      t.tv_sec = t.tv_usec = 0;
+      return 0;
+    }
+
+    omni_time_t now;
+    omni_thread::get_time(now);
+
+    if (deadline < now) {
+      t.tv_sec = t.tv_usec = 0;
+      return 1;
+    }
+    else {
+      omni_time_t diff(deadline);
+      diff -= now;
+      t.tv_sec  = diff.s;
+      t.tv_usec = diff.ns / 1000;
+      return 0;
+    }
+  }
+  
+  static int setBlocking(SocketHandle_t sock);
+  static int setNonBlocking(SocketHandle_t sock);
+  static int setCloseOnExec(SocketHandle_t sock);
+
 
   static char* addrToString(sockaddr* addr);
   // Return string form of an IP address in dotted decimal or

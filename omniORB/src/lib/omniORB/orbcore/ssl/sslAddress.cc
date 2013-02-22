@@ -3,7 +3,7 @@
 // sslAddress.cc              Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2010 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -86,7 +86,7 @@ sslAddress::Connect(const omni_time_t& deadline,
   if (sock == RC_SOCKET_ERROR)
     return 0;
 
-  if (SocketSetnonblocking(sock) == RC_INVALID_SOCKET) {
+  if (tcpSocket::setNonBlocking(sock) == RC_INVALID_SOCKET) {
     tcpSocket::logConnectFailure("Failed to set socket to non-blocking mode",
 				 pd_address.host, pd_address.port);
     CLOSESOCKET(sock);
@@ -119,7 +119,7 @@ sslAddress::Connect(const omni_time_t& deadline,
     switch(code) {
     case SSL_ERROR_NONE:
       {
-	if (SocketSetblocking(sock) == RC_INVALID_SOCKET) {
+	if (tcpSocket::setBlocking(sock) == RC_INVALID_SOCKET) {
 	  tcpSocket::logConnectFailure("Failed to set socket to blocking mode",
 				       pd_address.host, pd_address.port);
 	  SSL_free(ssl);
@@ -205,10 +205,14 @@ sslAddress::Poke() const {
   if ((sock = socket(ai->addrFamily(), SOCK_STREAM,0)) == RC_INVALID_SOCKET)
     return 0;
 
-  if (SocketSetnonblocking(sock) == RC_INVALID_SOCKET) {
+#if defined(USE_NONBLOCKING_CONNECT)
+
+  if (tcpSocket::setNonBlocking(sock) == RC_INVALID_SOCKET) {
     CLOSESOCKET(sock);
     return 0;
   }
+
+#endif
 
   if (::connect(sock,ai->addr(),ai->addrSize()) == RC_SOCKET_ERROR) {
 

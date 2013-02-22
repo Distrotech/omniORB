@@ -3,7 +3,7 @@
 // tcpEndpoint.cc             Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -51,8 +51,8 @@ OMNI_NAMESPACE_BEGIN(omni)
 tcpEndpoint::tcpEndpoint(const char* param) :
   SocketHolder(RC_INVALID_SOCKET), pd_address_param(param),
   pd_new_conn_socket(RC_INVALID_SOCKET), pd_callback_func(0),
-  pd_callback_cookie(0), pd_poked(0) {
-
+  pd_callback_cookie(0), pd_poked(0)
+{
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -262,7 +262,7 @@ tcpEndpoint::Bind() {
   pd_address.port = bound_port;
   
   // Never block in accept
-  SocketSetnonblocking(pd_socket);
+  tcpSocket::setNonBlocking(pd_socket);
 
   // Add the socket to our SocketCollection.
   addSocket(this);
@@ -355,15 +355,15 @@ again:
 #if defined(__vxWorks__)
       // vxWorks "forgets" socket options
       static const int valtrue = 1;
-      if(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		    (char*)&valtrue, sizeof(valtrue)) == ERROR) {
+      if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
+                     (char*)&valtrue, sizeof(valtrue)) == ERROR) {
 	return 0;
       }
 #endif
       // On some platforms, the new socket inherits the non-blocking
       // setting from the listening socket, so we set it blocking here
       // just to be sure.
-      SocketSetblocking(sock);
+      tcpSocket::setBlocking(sock);
 
       pd_new_conn_socket = sock;
     }

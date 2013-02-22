@@ -156,7 +156,7 @@ setSocketOptions(SocketHandle_t sock, CORBA::Boolean fixed_port)
     }
   }
 
-  SocketSetCloseOnExec(sock);
+  tcpSocket::setCloseOnExec(sock);
 
   if (fixed_port) {
     int valtrue = 1;
@@ -526,7 +526,7 @@ doConnect(const char*   	 host,
   return sock;
 
 #else
-  if (SocketSetnonblocking(sock) == RC_INVALID_SOCKET) {
+  if (tcpSocket::setNonBlocking(sock) == RC_INVALID_SOCKET) {
     tcpSocket::logConnectFailure("Failed to set socket to non-blocking mode",
 				 ai);
     CLOSESOCKET(sock);
@@ -587,7 +587,7 @@ doConnect(const char*   	 host,
 
   } while (1);
 
-  if (SocketSetblocking(sock) == RC_INVALID_SOCKET) {
+  if (tcpSocket::setBlocking(sock) == RC_INVALID_SOCKET) {
     tcpSocket::logConnectFailure("Failed to set socket to blocking mode", ai);
     CLOSESOCKET(sock);
     return RC_INVALID_SOCKET;
@@ -637,6 +637,98 @@ tcpSocket::Connect(const char*        host,
     ai = ai->next();
   }
   return RC_INVALID_SOCKET;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+int
+tcpSocket::setBlocking(SocketHandle_t sock)
+{
+  {
+    omniORB::logger log;
+    log << "*** setBlocking: " << sock << "\n";
+  }
+# if defined(__vxWorks__)
+  int fl = FALSE;
+  if (ioctl(sock, FIONBIO, (int)&fl) == ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# elif defined(__VMS)
+  int fl = 0;
+  if (ioctl(sock, FIONBIO, &fl) == RC_INVALID_SOCKET) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# elif defined(__WIN32__)
+  u_long v = 0;
+  if (ioctlsocket(sock,FIONBIO,&v) == RC_SOCKET_ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# else
+  int fl = 0;
+  if (fcntl(sock,F_SETFL,fl) == RC_SOCKET_ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# endif
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+int
+tcpSocket::setNonBlocking(SocketHandle_t sock)
+{
+  {
+    omniORB::logger log;
+    log << "*** setNonBlocking: " << sock << "\n";
+  }
+# if defined(__vxWorks__)
+  int fl = TRUE;
+  if (ioctl(sock, FIONBIO, (int)&fl) == ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# elif defined(__VMS)
+  int fl = 1;
+  if (ioctl(sock, FIONBIO, &fl) == RC_INVALID_SOCKET) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# elif defined(__WIN32__)
+  u_long v = 1;
+  if (ioctlsocket(sock,FIONBIO,&v) == RC_SOCKET_ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# else
+  int fl = O_NONBLOCK;
+  if (fcntl(sock,F_SETFL,fl) == RC_SOCKET_ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# endif
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+int
+tcpSocket::setCloseOnExec(SocketHandle_t sock)
+{
+# if defined(__vxWorks__) || defined(__ETS_KERNEL__)
+  // Not supported on vxWorks or ETS
+  return 0;
+# elif defined(__WIN32__)
+  SetHandleInformation((HANDLE)sock, HANDLE_FLAG_INHERIT, 0);
+  return 0;
+# else
+  int fl = FD_CLOEXEC;
+  if (fcntl(sock,F_SETFD,fl) == RC_SOCKET_ERROR) {
+    return RC_INVALID_SOCKET;
+  }
+  return 0;
+# endif
 }
 
 

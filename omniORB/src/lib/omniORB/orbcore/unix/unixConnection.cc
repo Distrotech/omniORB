@@ -3,7 +3,7 @@
 // unixConnection.cc          Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2011 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -41,6 +41,7 @@ OMNI_EXPORT_LINK_FORCE_SYMBOL(unixConnection);
 
 OMNI_NAMESPACE_BEGIN(omni)
 
+
 /////////////////////////////////////////////////////////////////////////
 int
 unixConnection::Send(void* buf, size_t sz,
@@ -52,47 +53,41 @@ unixConnection::Send(void* buf, size_t sz,
   int tx;
 
   do {
-
     struct timeval t;
 
     if (deadline) {
-      SocketSetTimeOut(deadline, t);
-      if (t.tv_sec == 0 && t.tv_usec == 0) {
-	// Already timeout.
+      if (tcpSocket::setTimeout(deadline, t)) {
+	// Already timed out.
 	return 0;
       }
       else {
-#if defined(USE_POLL)
-	struct pollfd fds;
-	fds.fd = pd_socket;
-	fds.events = POLLOUT;
-	tx = poll(&fds,1,t.tv_sec*1000+(t.tv_usec/1000));
-#else
-	fd_set fds, efds;
-	FD_ZERO(&fds);
-	FD_ZERO(&efds);
-	FD_SET(pd_socket,&fds);
-	FD_SET(pd_socket,&efds);
-	tx = select(pd_socket+1,0,&fds,&efds,&t);
-#endif
+        setNonBlocking();
+
+        tx = tcpSocket::waitWrite(pd_socket, t);
+
 	if (tx == 0) {
-	  // Time out!
+	  // Timed out
 	  return 0;
 	}
 	else if (tx == RC_SOCKET_ERROR) {
-	  if (ERRNO == RC_EINTR)
+	  if (ERRNO == RC_EINTR) {
 	    continue;
+          }
 	  else {
 	    return -1;
 	  }
 	}
       }
     }
+    else {
+      setBlocking();
+    }
 
-    // Reach here if we can write without blocking or we don't
-    // care if we block here.
+    // Reach here if we can write without blocking or we don't care if
+    // we block here.
     if ((tx = ::send(pd_socket,(char*)buf,sz,0)) == RC_SOCKET_ERROR) {
-      if (ERRNO == RC_EINTR)
+      int err = ERRNO;
+      if (RC_TRY_AGAIN(err))
 	continue;
       else
 	return -1;
@@ -105,13 +100,12 @@ unixConnection::Send(void* buf, size_t sz,
   } while(1);
 
   return tx;
-
 }
 
 /////////////////////////////////////////////////////////////////////////
 int
 unixConnection::Recv(void* buf, size_t sz,
-		     const omni_time_t& deadline) {
+                     const omni_time_t& deadline) {
 
   if (sz > orbParameters::maxSocketRecv)
     sz = orbParameters::maxSocketRecv;
@@ -119,50 +113,22 @@ unixConnection::Recv(void* buf, size_t sz,
   int rx;
 
   do {
-
     if (pd_shutdown)
       return -1;
 
     struct timeval t;
 
-    if (deadline) {
-      SocketSetTimeOut(deadline, t);
-      if (t.tv_sec == 0 && t.tv_usec == 0) {
-	// Already timeout.
-	return 0;
-      }
-#if defined(USE_FAKE_INTERRUPTABLE_RECV)
-      if (orbParameters::scanGranularity > 0 && 
-	  t.tv_sec > orbParameters::scanGranularity) {
-	t.tv_sec = orbParameters::scanGranularity;
-      }
-#endif
-    }
-    else {
-#if defined(USE_FAKE_INTERRUPTABLE_RECV)
-      t.tv_sec = orbParameters::scanGranularity;
-      t.tv_usec = 0;
-#else
-      t.tv_sec = t.tv_usec = 0;
-#endif
+    if (tcpSocket::setAndCheckTimeout(deadline, t)) {
+      // Already timed out
+      return 0;
     }
 
     if (t.tv_sec || t.tv_usec) {
-#if defined(USE_POLL)
-      struct pollfd fds;
-      fds.fd = pd_socket;
-      fds.events = POLLIN;
-      rx = poll(&fds,1,t.tv_sec*1000+(t.tv_usec/1000));
-#else
-      fd_set fds, efds;
-      FD_ZERO(&fds);
-      FD_ZERO(&efds);
-      FD_SET(pd_socket,&fds);
-      FD_SET(pd_socket,&efds);
-      rx = select(pd_socket+1,&fds,0,&efds,&t);
-#endif
+      setNonBlocking();
+      rx = tcpSocket::waitRead(pd_socket, t);
+
       if (rx == 0) {
-	// Time out!
+	// Timed out
 #if defined(USE_FAKE_INTERRUPTABLE_RECV)
 	continue;
 #else
@@ -170,18 +136,23 @@ unixConnection::Recv(void* buf, size_t sz,
 #endif
       }
       else if (rx == RC_SOCKET_ERROR) {
-	if (ERRNO == RC_EINTR)
+	if (ERRNO == RC_EINTR) {
 	  continue;
+        }
 	else {
 	  return -1;
 	}
       }
     }
+    else {
+      setBlocking();
+    }
 
-    // Reach here if we can read without blocking or we don't
-    // care if we block here.
+    // Reach here if we can read without blocking or we don't care if
+    // we block here.
     if ((rx = ::recv(pd_socket,(char*)buf,sz,0)) == RC_SOCKET_ERROR) {
-      if (ERRNO == RC_EINTR)
+      int err = ERRNO;
+      if (RC_TRY_AGAIN(err))
 	continue;
       else
 	return -1;
@@ -237,7 +208,7 @@ unixConnection::unixConnection(SocketHandle_t sock,
     pd_peeraddress = unToString(filename_1);
   }
 
-  SocketSetCloseOnExec(sock);
+  tcpSocket::setCloseOnExec(sock);
 
   belong_to->addSocket(this);
 }
@@ -254,9 +225,8 @@ void
 unixConnection::setSelectable(int now,
 			      CORBA::Boolean data_in_buffer) {
 
-  SocketHolder::setSelectable(now,data_in_buffer);
+  SocketHolder::setSelectable(now, data_in_buffer);
 }
-
 
 /////////////////////////////////////////////////////////////////////////
 void

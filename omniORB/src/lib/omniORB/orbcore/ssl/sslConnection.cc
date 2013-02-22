@@ -3,7 +3,7 @@
 // sslConnection.cc           Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005-2012 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -20,13 +20,13 @@
 //
 //    You should have received a copy of the GNU Library General Public
 //    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
+//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //    02111-1307, USA
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
-// 
+//
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/giopEndpoint.h>
@@ -46,6 +46,7 @@ OMNI_EXPORT_LINK_FORCE_SYMBOL(sslConnection);
 
 OMNI_NAMESPACE_BEGIN(omni)
 
+
 /////////////////////////////////////////////////////////////////////////
 int
 sslConnection::Send(void* buf, size_t sz,
@@ -63,41 +64,34 @@ sslConnection::Send(void* buf, size_t sz,
   int rc;
 
   do {
-
     struct timeval t;
 
     if (deadline) {
-      SocketSetTimeOut(deadline, t);
-      if (t.tv_sec == 0 && t.tv_usec == 0) {
-	// Already timeout.
+      if (tcpSocket::setTimeout(deadline, t)) {
+	// Already timed out.
 	return 0;
       }
       else {
-#if defined(USE_POLL)
-	struct pollfd fds;
-	fds.fd = pd_socket;
-	fds.events = POLLOUT;
-	tx = poll(&fds,1,t.tv_sec*1000+(t.tv_usec/1000));
-#else
-	fd_set fds, efds;
-	FD_ZERO(&fds);
-	FD_ZERO(&efds);
-	FD_SET(pd_socket,&fds);
-	FD_SET(pd_socket,&efds);
-	tx = select(pd_socket+1,0,&fds,&efds,&t);
-#endif
+        setNonBlocking();
+
+        tx = tcpSocket::waitWrite(pd_socket, t);
+
 	if (tx == 0) {
-	  // Time out!
+	  // Timed out
 	  return 0;
 	}
 	else if (tx == RC_SOCKET_ERROR) {
-	  if (ERRNO == RC_EINTR)
+	  if (ERRNO == RC_EINTR) {
 	    continue;
+          }
 	  else {
 	    return -1;
 	  }
 	}
       }
+    }
+    else {
+      setBlocking();
     }
 
     // Reach here if we can write without blocking or we don't
@@ -123,10 +117,13 @@ sslConnection::Send(void* buf, size_t sz,
       continue;
 
     case SSL_ERROR_SYSCALL:
-      if (ERRNO == RC_EINTR)
-	continue;
-      else
-	return -1;
+      {
+        int err = ERRNO;
+        if (RC_TRY_AGAIN(err))
+          continue;
+        else
+          return -1;
+      }
     default:
       OMNIORB_ASSERT(0);
     }
@@ -157,50 +154,22 @@ sslConnection::Recv(void* buf, size_t sz,
   int rc;
 
   do {
-
     if (pd_shutdown)
       return -1;
 
     struct timeval t;
 
-    if (deadline) {
-      SocketSetTimeOut(deadline, t);
-      if (t.tv_sec == 0 && t.tv_usec == 0) {
-	// Already timeout.
-	return 0;
-      }
-#if defined(USE_FAKE_INTERRUPTABLE_RECV)
-      if (orbParameters::scanGranularity > 0 && 
-	  t.tv_sec > orbParameters::scanGranularity) {
-	t.tv_sec = orbParameters::scanGranularity;
-      }
-#endif
-    }
-    else {
-#if defined(USE_FAKE_INTERRUPTABLE_RECV)
-      t.tv_sec = orbParameters::scanGranularity;
-      t.tv_usec = 0;
-#else
-      t.tv_sec = t.tv_usec = 0;
-#endif
+    if (tcpSocket::setAndCheckTimeout(deadline, t)) {
+      // Already timed out
+      return 0;
     }
 
-    if ( (t.tv_sec || t.tv_usec) && SSL_pending(pd_ssl) <=0 ) {
-#if defined(USE_POLL)
-      struct pollfd fds;
-      fds.fd = pd_socket;
-      fds.events = POLLIN;
-      rx = poll(&fds,1,t.tv_sec*1000+(t.tv_usec/1000));
-#else
-      fd_set fds, efds;
-      FD_ZERO(&fds);
-      FD_ZERO(&efds);
-      FD_SET(pd_socket,&fds);
-      FD_SET(pd_socket,&efds);
-      rx = select(pd_socket+1,&fds,0,&efds,&t);
-#endif
+    if (t.tv_sec || t.tv_usec) {
+      setNonBlocking();
+      rx = tcpSocket::waitRead(pd_socket, t);
+
       if (rx == 0) {
-	// Time out!
+	// Timed out
 #if defined(USE_FAKE_INTERRUPTABLE_RECV)
 	continue;
 #else
@@ -208,12 +177,16 @@ sslConnection::Recv(void* buf, size_t sz,
 #endif
       }
       else if (rx == RC_SOCKET_ERROR) {
-	if (ERRNO == RC_EINTR)
+	if (ERRNO == RC_EINTR) {
 	  continue;
+        }
 	else {
 	  return -1;
 	}
       }
+    }
+    else {
+      setBlocking();
     }
 
     // Reach here if we can read without blocking or we don't
@@ -239,10 +212,13 @@ sslConnection::Recv(void* buf, size_t sz,
       continue;
 
     case SSL_ERROR_SYSCALL:
-      if (ERRNO == RC_EINTR)
-	continue;
-      else
-	return -1;
+      {
+        int err = ERRNO;
+        if (RC_TRY_AGAIN(err))
+          continue;
+        else
+          return -1;
+      }
     default:
       OMNIORB_ASSERT(0);
     }
@@ -300,7 +276,7 @@ sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
 
   if (sslTransportImpl::sslAcceptTimeOut) {
 
-    SocketSetnonblocking(pd_socket);
+    tcpSocket::setNonBlocking(pd_socket);
     omni_thread::get_time(deadline, sslTransportImpl::sslAcceptTimeOut);
   }
 
@@ -319,7 +295,7 @@ sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
 
     switch(code) {
     case SSL_ERROR_NONE:
-      SocketSetblocking(pd_socket);
+      tcpSocket::setBlocking(pd_socket);
       pd_handshake_ok = 1;
       return 1;
 
@@ -391,7 +367,7 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
   else {
     pd_peeraddress = tcpSocket::addrToURI((sockaddr*)&addr, "giop:ssl");
   }
-  SocketSetCloseOnExec(sock);
+  tcpSocket::setCloseOnExec(sock);
 
   belong_to->addSocket(this);
 
@@ -462,7 +438,7 @@ sslConnection::~sslConnection() {
   clearSelectable();
   pd_belong_to->removeSocket(this);
 
-  if(pd_ssl != 0) {
+  if (pd_ssl != 0) {
     if (SSL_get_shutdown(pd_ssl) == 0) {
       SSL_set_shutdown(pd_ssl, SSL_SENT_SHUTDOWN | SSL_RECEIVED_SHUTDOWN);
       SSL_shutdown(pd_ssl);

@@ -3,7 +3,7 @@
 // sslEndpoint.cc             Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -20,13 +20,13 @@
 //
 //    You should have received a copy of the GNU Library General Public
 //    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
+//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //    02111-1307, USA
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
-// 
+//
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -260,19 +260,18 @@ sslEndpoint::Bind() {
 
   if (pd_socket == RC_INVALID_SOCKET)
     return 0;
-  
+
   pd_address.host = bound_host;
   pd_address.port = bound_port;
-
+  
   // Never block in accept
-  SocketSetnonblocking(pd_socket);
+  tcpSocket::setNonBlocking(pd_socket);
 
   // Add the socket to our SocketCollection.
   addSocket(this);
 
   return 1;
 }
-
 
 /////////////////////////////////////////////////////////////////////////
 void
@@ -295,7 +294,6 @@ sslEndpoint::Poke() {
   delete target;
 }
 
-
 /////////////////////////////////////////////////////////////////////////
 void
 sslEndpoint::Shutdown() {
@@ -304,7 +302,6 @@ sslEndpoint::Shutdown() {
   decrRefCount();
   omniORB::logs(20, "SSL endpoint shut down.");
 }
-
 
 /////////////////////////////////////////////////////////////////////////
 giopConnection*
@@ -364,15 +361,15 @@ again:
 #if defined(__vxWorks__)
       // vxWorks "forgets" socket options
       static const int valtrue = 1;
-      if(setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		    (char*)&valtrue, sizeof(valtrue)) == ERROR) {
+      if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
+                     (char*)&valtrue, sizeof(valtrue)) == ERROR) {
 	return 0;
       }
 #endif
       // On some platforms, the new socket inherits the non-blocking
       // setting from the listening socket, so we set it blocking here
       // just to be sure.
-      SocketSetblocking(sock);
+      tcpSocket::setBlocking(sock);
 
       pd_new_conn_socket = sock;
     }

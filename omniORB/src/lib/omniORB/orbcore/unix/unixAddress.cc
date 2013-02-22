@@ -3,7 +3,7 @@
 // unixAddress.cc             Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2006-2012 Apasphere Ltd
+//    Copyright (C) 2006-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -82,21 +82,22 @@ unixAddress::Connect(const omni_time_t& deadline,
 		     CORBA::Boolean& 	timed_out) const {
 
   struct sockaddr_un raddr;
-  int  rc;
-  SocketHandle_t sock;
+  int                rc;
+  SocketHandle_t     sock;
 
   if ((sock = socket(AF_LOCAL,SOCK_STREAM,0)) == RC_INVALID_SOCKET) {
     return 0;
   }
 
-  memset((void*)&raddr,0,sizeof(raddr));
+  memset((void*)&raddr, 0, sizeof(raddr));
   raddr.sun_family = AF_LOCAL;
   strncpy(raddr.sun_path, pd_filename, sizeof(raddr.sun_path) - 1);
 
 #if !defined(USE_NONBLOCKING_CONNECT)
 
-  if (::connect(sock,(struct sockaddr *)&raddr,
-                     sizeof(raddr)) == RC_SOCKET_ERROR) {
+  if (::connect(sock, (struct sockaddr *)&raddr,
+                sizeof(raddr)) == RC_SOCKET_ERROR) {
+
     omniORB::logs(25, "Failed to connect to Unix socket.");
     CLOSESOCKET(sock);
     return 0;
@@ -104,14 +105,14 @@ unixAddress::Connect(const omni_time_t& deadline,
 
 #else
 
-  if (SocketSetnonblocking(sock) == RC_INVALID_SOCKET) {
+  if (tcpSocket::setNonBlocking(sock) == RC_INVALID_SOCKET) {
     omniORB::logs(25, "Failed to set Unix socket to non-blocking mode.");
     CLOSESOCKET(sock);
     return 0;
   }
 
   if (::connect(sock,(struct sockaddr *)&raddr,
-                     sizeof(raddr)) == RC_SOCKET_ERROR) {
+                sizeof(raddr)) == RC_SOCKET_ERROR) {
 
     int err = ERRNO;
     if (err && err != RC_EINPROGRESS) {
@@ -121,56 +122,21 @@ unixAddress::Connect(const omni_time_t& deadline,
     }
   }
 
+  struct timeval t;
+
   do {
-
-    struct timeval t;
-
-    if (deadline) {
-      SocketSetTimeOut(deadline, t);
-      if (t.tv_sec == 0 && t.tv_usec == 0) {
-	// Already timed out.
-	omniORB::logs(25, "Timed out connecting to Unix socket.");
-	CLOSESOCKET(sock);
-	timed_out = 1;
-	return 0;
-      }
-#if defined(USE_FAKE_INTERRUPTABLE_RECV)
-      if (t.tv_sec > orbParameters::scanGranularity) {
-	t.tv_sec = orbParameters::scanGranularity;
-      }
-#endif
-    }
-    else {
-#if defined(USE_FAKE_INTERRUPTABLE_RECV)
-      t.tv_sec = orbParameters::scanGranularity;
-      t.tv_usec = 0;
-#else
-      t.tv_sec = t.tv_usec = 0;
-#endif
+    if (tcpSocket::setAndCheckTimeout(deadline, t)) {
+      // Already timed out
+      omniORB::logs(25, "Timed out connecting to Unix socket.");
+      CLOSESOCKET(sock);
+      timed_out = 1;
+      return 0;
     }
 
-#if defined(USE_POLL)
-    struct pollfd fds;
-    fds.fd = sock;
-    fds.events = POLLOUT;
-    int timeout = t.tv_sec*1000+((t.tv_usec+999)/1000);
-    if (timeout == 0) timeout = -1;
-    int rc = poll(&fds,1,timeout);
-    if (rc > 0 && fds.revents & POLLERR) {
-      rc = RC_SOCKET_ERROR;
-    }
-#else
-    fd_set fds, efds;
-    FD_ZERO(&fds);
-    FD_ZERO(&efds);
-    FD_SET(sock,&fds);
-    FD_SET(sock,&efds);
-    struct timeval* tp = &t;
-    if (t.tv_sec == 0 && t.tv_usec == 0) tp = 0;
-    int rc = select(sock+1,0,&fds,&efds,tp);
-#endif
+    rc = tcpSocket::waitWrite(sock, t);
+
     if (rc == 0) {
-      // Time out!
+      // Timed out
 #if defined(USE_FAKE_INTERRUPTABLE_RECV)
       continue;
 #else
@@ -182,7 +148,6 @@ unixAddress::Connect(const omni_time_t& deadline,
     }
     if (rc != RC_SOCKET_ERROR) {
       // Check to make sure that the socket is connected.
-
       OMNI_SOCKADDR_STORAGE peer;
       SOCKNAME_SIZE_T len = sizeof(peer);
       rc = getpeername(sock, (struct sockaddr*)&peer, &len);
@@ -200,15 +165,9 @@ unixAddress::Connect(const omni_time_t& deadline,
     break;
 
   } while (1);
-
-  if (SocketSetblocking(sock) == RC_INVALID_SOCKET) {
-    omniORB::logs(25, "Failed to set Unix socket to blocking mode.");
-    CLOSESOCKET(sock);
-    return 0;
-  }
 #endif
 
-  return new unixActiveConnection(sock,pd_filename);
+  return new unixActiveConnection(sock, pd_filename);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -227,11 +186,27 @@ unixAddress::Poke() const {
   raddr.sun_family = AF_LOCAL;
   strncpy(raddr.sun_path, pd_filename, sizeof(raddr.sun_path) - 1);
 
-  if (::connect(sock,(struct sockaddr *)&raddr,
-                     sizeof(raddr)) == RC_SOCKET_ERROR) {
+
+#if defined(USE_NONBLOCKING_CONNECT)
+
+  if (tcpSocket::setNonBlocking(sock) == RC_INVALID_SOCKET) {
     CLOSESOCKET(sock);
     return 0;
   }
+
+#endif
+
+  if (::connect(sock,(struct sockaddr *)&raddr,
+                sizeof(raddr)) == RC_SOCKET_ERROR) {
+
+    if (ERRNO != RC_EINPROGRESS) {
+      CLOSESOCKET(sock);
+      return 0;
+    }
+  }
+
+  // The connect has not necessarily completed by this stage, but
+  // we've done enough to poke the endpoint.
   CLOSESOCKET(sock);
   return 1;
 }

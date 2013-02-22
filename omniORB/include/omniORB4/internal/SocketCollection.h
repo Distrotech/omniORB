@@ -4,7 +4,7 @@
 //                            Author    : Sai Lai Lo (sll)
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2005-2012 Apasphere Ltd.
+//    Copyright (C) 2005-2013 Apasphere Ltd.
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -89,7 +89,6 @@
 #if defined(__WIN32__)
 
 #  include <sys/types.h>
-#  include <libcWrapper.h>
 
 #  if defined(OMNI_SUPPORT_IPV6)
 #    include <ws2tcpip.h>
@@ -99,22 +98,18 @@
 #    endif
 #  endif
 
-#  define RC_INADDR_NONE     INADDR_NONE
-#  define RC_INVALID_SOCKET  INVALID_SOCKET
-#  define RC_SOCKET_ERROR    SOCKET_ERROR
-#  define INETSOCKET         PF_INET
-#  define CLOSESOCKET(sock)  closesocket(sock)
+#  define RC_INADDR_NONE       INADDR_NONE
+#  define RC_INVALID_SOCKET    INVALID_SOCKET
+#  define RC_SOCKET_ERROR      SOCKET_ERROR
+#  define INETSOCKET           PF_INET
+#  define CLOSESOCKET(sock)    closesocket(sock)
 #  define SHUTDOWNSOCKET(sock) ::shutdown(sock,2)
-#  define ERRNO              ::WSAGetLastError()
-#  define RC_EINPROGRESS     WSAEWOULDBLOCK
-#  define RC_EINTR           WSAEINTR
-#  define RC_EBADF           WSAENOTSOCK
+#  define ERRNO                ::WSAGetLastError()
+#  define RC_EINPROGRESS       WSAEWOULDBLOCK
+#  define RC_EINTR             WSAEINTR
+#  define RC_EBADF             WSAENOTSOCK
 
-OMNI_NAMESPACE_BEGIN(omni)
-
-typedef SOCKET SocketHandle_t;
-
-OMNI_NAMESPACE_END(omni)
+#  define RC_TRY_AGAIN(err)       ((err == WSAEINTR) || (err == WSAEWOULDBLOCK))
 
 #else
 
@@ -192,12 +187,9 @@ extern "C" int select (int,fd_set*,fd_set*,fd_set*,struct timeval *);
 #  endif
 #  define RC_EAGAIN          EAGAIN
 
-
-OMNI_NAMESPACE_BEGIN(omni)
-
-typedef int SocketHandle_t;
-
-OMNI_NAMESPACE_END(omni)
+#  define RC_TRY_AGAIN(err) ((err == EINTR) ||\
+                             (err == EWOULDBLOCK) ||\
+                             (err == EAGAIN))
 
 #endif
 
@@ -205,17 +197,12 @@ OMNI_NAMESPACE_END(omni)
 extern "C" int gethostname(char *name, int namelen);
 #endif
 
+#include <tcpSocket.h>
+
+
 OMNI_NAMESPACE_BEGIN(omni)
 
 class SocketCollection;
-
-extern void SocketSetTimeOut(const omni_time_t& deadline, struct timeval& t);
-
-extern int SocketSetnonblocking(SocketHandle_t sock);
-
-extern int SocketSetblocking(SocketHandle_t sock);
-
-extern int SocketSetCloseOnExec(SocketHandle_t sock);
 
 
 //
@@ -234,6 +221,7 @@ public:
       pd_data_in_buffer(0),
       pd_peeking(0),
       pd_peek_go(0),
+      pd_nonblocking(0),
       pd_peek_cond(0),
       pd_fd_index(-1),
       pd_next(0),
@@ -270,6 +258,25 @@ public:
   // return true if the socket becomes readable, otherwise return
   // false.
 
+  inline void
+  setBlocking()
+  {
+    if (pd_nonblocking) {
+      tcpSocket::setBlocking(pd_socket);
+      pd_nonblocking = 0;
+    }
+  }
+
+  inline void
+  setNonBlocking()
+  {
+    if (!pd_nonblocking) {
+      tcpSocket::setNonBlocking(pd_socket);
+      pd_nonblocking = 1;
+    }
+  }
+
+
   friend class SocketCollection;
 
 protected:
@@ -285,6 +292,7 @@ private:
   CORBA::Boolean        pd_peek_go;        // True if the peeking thread
 					   // should return true, even if it
 					   // did not see data to read
+  CORBA::Boolean        pd_nonblocking;    // True if the socket is nonblocking
   omni_tracedcondition* pd_peek_cond;      // Condition to signal a waiting
 					   // peeker
   int                  	pd_fd_index;       // -1 if select thread is not

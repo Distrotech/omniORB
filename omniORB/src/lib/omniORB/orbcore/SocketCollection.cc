@@ -60,109 +60,6 @@ OMNI_NAMESPACE_BEGIN(omni)
 
 #define GDB_DEBUG
 
-/////////////////////////////////////////////////////////////////////////
-void
-SocketSetTimeOut(const omni_time_t& deadline, struct timeval& t)
-{
-  if (!deadline) {
-    // Avoid get_time call which is expensive on some platforms.
-    t.tv_sec = t.tv_usec = 0;
-    return;
-  }
-
-  omni_time_t now;
-  omni_thread::get_time(now);
-
-  if (deadline < now) {
-    t.tv_sec = t.tv_usec = 0;
-  }
-  else {
-    omni_time_t diff(deadline);
-    diff -= now;
-    t.tv_sec  = diff.s;
-    t.tv_usec = diff.ns / 1000;
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////
-int
-SocketSetnonblocking(SocketHandle_t sock) {
-# if defined(__vxWorks__)
-  int fl = TRUE;
-  if (ioctl(sock, FIONBIO, (int)&fl) == ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# elif defined(__VMS)
-  int fl = 1;
-  if (ioctl(sock, FIONBIO, &fl) == RC_INVALID_SOCKET) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# elif defined(__WIN32__)
-  u_long v = 1;
-  if (ioctlsocket(sock,FIONBIO,&v) == RC_SOCKET_ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# else
-  int fl = O_NONBLOCK;
-  if (fcntl(sock,F_SETFL,fl) == RC_SOCKET_ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# endif
-}
-
-/////////////////////////////////////////////////////////////////////////
-int
-SocketSetblocking(SocketHandle_t sock) {
-# if defined(__vxWorks__)
-  int fl = FALSE;
-  if (ioctl(sock, FIONBIO, (int)&fl) == ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# elif defined(__VMS)
-  int fl = 0;
-  if (ioctl(sock, FIONBIO, &fl) == RC_INVALID_SOCKET) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# elif defined(__WIN32__)
-  u_long v = 0;
-  if (ioctlsocket(sock,FIONBIO,&v) == RC_SOCKET_ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# else
-  int fl = 0;
-  if (fcntl(sock,F_SETFL,fl) == RC_SOCKET_ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# endif
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-int
-SocketSetCloseOnExec(SocketHandle_t sock) {
-# if defined(__vxWorks__) || defined(__ETS_KERNEL__)
-  // Not supported on vxWorks or ETS
-  return 0;
-# elif defined(__WIN32__)
-  SetHandleInformation((HANDLE)sock, HANDLE_FLAG_INHERIT, 0);
-  return 0;
-# else
-  int fl = FD_CLOEXEC;
-  if (fcntl(sock,F_SETFD,fl) == RC_SOCKET_ERROR) {
-    return RC_INVALID_SOCKET;
-  }
-  return 0;
-# endif
-}
-
 
 /////////////////////////////////////////////////////////////////////////
 omni_time_t  SocketCollection::scan_interval(0, 50*1000*1000);
@@ -200,8 +97,8 @@ static void initPipe(int& pipe_read, int& pipe_write)
     pipe_read  = filedes[0];
     pipe_write = filedes[1];
 
-    SocketSetCloseOnExec(pipe_read);
-    SocketSetCloseOnExec(pipe_write);
+    tcpSocket::setCloseOnExec(pipe_read);
+    tcpSocket::setCloseOnExec(pipe_write);
   }
   else {
     omniORB::logs(5, "Unable to create pipe for SocketCollection.");
@@ -293,7 +190,7 @@ SocketCollection::Select() {
 
   // pd_abs_time defines the absolute time at which we process the
   // socket list.
-  SocketSetTimeOut(pd_abs_time, timeout);
+  tcpSocket::setTimeout(pd_abs_time, timeout);
 
   if ((timeout.tv_sec == 0 && timeout.tv_usec == 0) ||
       timeout.tv_sec > scan_interval.s) {
@@ -740,7 +637,7 @@ SocketCollection::Select() {
 
   // pd_abs_time defines the absolute time at which we process the
   // socket list.
-  SocketSetTimeOut(pd_abs_time, timeout);
+  tcpSocket::setTimeout(pd_abs_time, timeout);
 
   fd_set rfds;
   
@@ -1098,7 +995,7 @@ SocketCollection::Select() {
 
   // pd_abs_time defines the absolute time at which we process the
   // socket list.
-  SocketSetTimeOut(pd_abs_time, timeout);
+  tcpSocket::setTimeout(pd_abs_time, timeout);
 
   fd_set rfds;
 
