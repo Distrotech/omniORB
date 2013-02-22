@@ -3,7 +3,7 @@
 // omniIOR.h                  Created on: 11/8/99
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1999-2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -25,70 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.4  2007/11/28 12:24:26  dgrisby
-  Implement a tiny subset of CSIv2 to permit multiple SSL endpoints in IORs.
-
-  Revision 1.1.4.3  2006/07/18 16:21:24  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.4.2  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:04:14  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.13  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.1.2.12  2002/09/08 21:12:38  dgrisby
-  Properly handle IORs with no usable profiles.
-
-  Revision 1.1.2.11  2002/01/02 18:13:43  dpg1
-  Platform fixes/additions.
-
-  Revision 1.1.2.10  2001/08/15 10:26:08  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.2.9  2001/08/06 15:49:17  sll
-  Added IOP component TAG_OMNIORB_UNIX_TRANS for omniORB specific local
-  transport using the unix domain socket.
-
-  Revision 1.1.2.8  2001/07/31 16:10:38  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.2.7  2001/06/13 20:07:25  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.2.6  2001/06/11 17:53:23  sll
-   The omniIOR ctor used by genior and corbaloc now has the option to
-   select whether to call interceptors and what set of interceptors to call.
-
-  Revision 1.1.2.5  2001/05/09 17:00:27  sll
-  addr_selected_profile_index() now returns signed long.
-
-  Revision 1.1.2.4  2001/04/18 17:50:44  sll
-  Big checkin with the brand new internal APIs.
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.1.2.3  2000/11/15 17:06:49  sll
-  Added tcs_c and tcs_w in omniIOR to record what code set convertor to use
-  for this IOR.
-  Added declarations for handlers of the tagged components used by the ORB.
-
-  Revision 1.1.2.2  2000/10/03 17:37:07  sll
-  Changed omniIOR synchronisation mutex from omni::internalLock to its own
-  mutex.
-
-  Revision 1.1.2.1  2000/09/27 16:54:08  sll
-  *** empty log message ***
-
-*/
 
 #ifndef __OMNIIOR_H__
 #define __OMNIIOR_H__
@@ -290,27 +228,19 @@ public:
 
   // Handlers for each of the tagged component used by the ORB
   static void  unmarshal_TAG_ORB_TYPE(const IOP::TaggedComponent&, omniIOR&);
-  static char* dump_TAG_ORB_TYPE(const IOP::TaggedComponent&);
 
   ////
   static void  unmarshal_TAG_CODE_SETS(const IOP::TaggedComponent&, omniIOR&);
-  static char* dump_TAG_CODE_SETS(const IOP::TaggedComponent&);
   static void  add_TAG_CODE_SETS(const _OMNI_NS(CONV_FRAME::CodeSetComponentInfo)&);
 
   ////
   static void  unmarshal_TAG_ALTERNATE_IIOP_ADDRESS(const IOP::TaggedComponent&,
                                                    omniIOR&);
-  static char* dump_TAG_ALTERNATE_IIOP_ADDRESS(const IOP::TaggedComponent&);
   static void  add_TAG_ALTERNATE_IIOP_ADDRESS(const IIOP::Address&);
-
-  ////
-  static void  unmarshal_TAG_GROUP(const IOP::TaggedComponent&, omniIOR&);
-  static char* dump_TAG_GROUP(const IOP::TaggedComponent&);
 
   ////
   static void  unmarshal_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent&,
 					   omniIOR&);
-  static char* dump_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent&);
   static void  add_TAG_SSL_SEC_TRANS(const IIOP::Address&,
 				     _CORBA_UShort supports,
 				     _CORBA_UShort requires);
@@ -318,26 +248,21 @@ public:
   ////
   static void unmarshal_TAG_CSI_SEC_MECH_LIST(const IOP::TaggedComponent&,
 					      omniIOR&);
-  static char* dump_TAG_CSI_SEC_MECH_LIST(const IOP::TaggedComponent&);
-
 
   ////
   static void  unmarshal_TAG_OMNIORB_BIDIR(const IOP::TaggedComponent&,
 					   omniIOR&);
-  static char* dump_TAG_OMNIORB_BIDIR(const IOP::TaggedComponent&);
   static void  add_TAG_OMNIORB_BIDIR(const char* sendfrom,
 				     omniIOR&);
 
   ////
   static void  unmarshal_TAG_OMNIORB_UNIX_TRANS(const IOP::TaggedComponent&,
 						omniIOR&);
-  static char* dump_TAG_OMNIORB_UNIX_TRANS(const IOP::TaggedComponent&);
   static void  add_TAG_OMNIORB_UNIX_TRANS(const char* filename);
 
   ////
   static void  unmarshal_TAG_OMNIORB_PERSISTENT_ID(const IOP::TaggedComponent&,
 						   omniIOR&);
-  static char* dump_TAG_OMNIORB_PERSISTENT_ID(const IOP::TaggedComponent&);
 
   ////
   static void  add_IIOP_ADDRESS(const IIOP::Address&);
