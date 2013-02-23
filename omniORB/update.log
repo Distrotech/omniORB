@@ -1,3 +1,50 @@
+Fri Feb 22 16:39:38 GMT 2013 dgrisby
+====================================
+
+- omniNames uses omniORB logger; more sensible startup; rename .log to .dat.
+
+doc/omniNames.html
+doc/omniNames.pdf
+doc/tex/omniNames.tex
+etc/init.d/omniNames.in
+src/appl/omniNames/BindingIterator_i.h
+src/appl/omniNames/NamingContext_i.cc
+src/appl/omniNames/NamingContext_i.h
+src/appl/omniNames/log.cc
+src/appl/omniNames/log.h
+src/appl/omniNames/omniNames.cc
+src/appl/omniNames/omniNames.h
+src/appl/omniNames/omniNamesWin.cc
+
+- Move IOR dumping out of core into catior.
+
+include/omniORB4/IOP.h
+include/omniORB4/omniIOR.h
+src/appl/utils/catior/catior.cc
+src/lib/omniORB/orbcore/codeSets.cc
+src/lib/omniORB/orbcore/ior.cc
+
+- Implement put_small_octet_array with memcpy instead of a loop.
+
+src/lib/omniORB/orbcore/cdrStream.cc
+
+- Use common socket functions; properly time out reads/writes.
+
+include/omniORB4/internal/SocketCollection.h
+include/omniORB4/internal/tcpSocket.h
+src/lib/omniORB/orbcore/SocketCollection.cc
+src/lib/omniORB/orbcore/ssl/sslAddress.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+src/lib/omniORB/orbcore/ssl/sslEndpoint.cc
+src/lib/omniORB/orbcore/tcp/tcpAddress.cc
+src/lib/omniORB/orbcore/tcp/tcpConnection.cc
+src/lib/omniORB/orbcore/tcp/tcpEndpoint.cc
+src/lib/omniORB/orbcore/tcpSocket.cc
+src/lib/omniORB/orbcore/unix/unixAddress.cc
+src/lib/omniORB/orbcore/unix/unixConnection.cc
+src/lib/omniORB/orbcore/unix/unixEndpoint.cc
+
+
 Tue Feb 12 22:51:30 GMT 2013 dgrisby
 ====================================
 
