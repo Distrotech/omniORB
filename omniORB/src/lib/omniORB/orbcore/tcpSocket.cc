@@ -644,10 +644,6 @@ tcpSocket::Connect(const char*        host,
 int
 tcpSocket::setBlocking(SocketHandle_t sock)
 {
-  {
-    omniORB::logger log;
-    log << "*** setBlocking: " << sock << "\n";
-  }
 # if defined(__vxWorks__)
   int fl = FALSE;
   if (ioctl(sock, FIONBIO, (int)&fl) == ERROR) {
@@ -680,10 +676,6 @@ tcpSocket::setBlocking(SocketHandle_t sock)
 int
 tcpSocket::setNonBlocking(SocketHandle_t sock)
 {
-  {
-    omniORB::logger log;
-    log << "*** setNonBlocking: " << sock << "\n";
-  }
 # if defined(__vxWorks__)
   int fl = TRUE;
   if (ioctl(sock, FIONBIO, (int)&fl) == ERROR) {

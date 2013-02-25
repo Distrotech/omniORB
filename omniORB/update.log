@@ -1,3 +1,11 @@
+Mon Feb 25 09:54:51 GMT 2013 dgrisby
+====================================
+
+- Remove accidental logging.
+
+src/lib/omniORB/orbcore/tcpSocket.cc
+
+
 Fri Feb 22 16:39:38 GMT 2013 dgrisby
 ====================================
 
