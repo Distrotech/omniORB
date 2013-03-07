@@ -43,7 +43,7 @@ validateTypeAbstractInterface(PyObject* d_o, PyObject* a_o,
     return;
 
   // Object reference?
-  if (omniPy::getTwin(a_o, OBJREF_TWIN))
+  if (omniPy::getObjRef(a_o))
     return;
 
   // Value?
@@ -120,8 +120,7 @@ marshalPyObjectAbstractInterface(cdrStream& stream,
   }
 
   // Object reference?
-  CORBA::Object_ptr obj;
-  obj = (CORBA::Object_ptr)omniPy::getTwin(a_o, OBJREF_TWIN);
+  CORBA::Object_ptr obj = omniPy::getObjRef(a_o);
   if (obj) {
     stream.marshalBoolean(1);
     CORBA::Object::_marshalObjRef(obj, stream);
@@ -162,7 +161,7 @@ copyArgumentAbstractInterface(PyObject* d_o, PyObject* a_o,
     return Py_None;
   }
 
-  if (omniPy::getTwin(a_o, OBJREF_TWIN)) {
+  if (omniPy::getObjRef(a_o)) {
     return omniPy::copyObjRefArgument(PyTuple_GET_ITEM(d_o, 1),
 				      a_o, compstatus);
   }

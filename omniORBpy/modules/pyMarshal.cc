@@ -435,8 +435,7 @@ validateTypeObjref(PyObject* d_o, PyObject* a_o,
 		   PyObject* track)
 { // repoId, name
   if (a_o != Py_None) {
-    CORBA::Object_ptr obj =
-      (CORBA::Object_ptr)omniPy::getTwin(a_o, OBJREF_TWIN);
+    CORBA::Object_ptr obj = omniPy::getObjRef(a_o);
     if (!obj) {
       THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, compstatus,
 			 omniPy::formatString("Expecting object reference, "
@@ -2417,7 +2416,7 @@ marshalPyObjectObjref(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   if (a_o == Py_None)
     obj = CORBA::Object::_nil();
   else
-    obj = (CORBA::Object_ptr)omniPy::getTwin(a_o, OBJREF_TWIN);
+    obj = omniPy::getObjRef(a_o);
 
   CORBA::Object::_marshalObjRef(obj, stream);
 }

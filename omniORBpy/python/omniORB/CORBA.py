@@ -343,19 +343,11 @@ _d_any = tcInternal.tv_any
 #                                                                           #
 #############################################################################
 
-if _omnipy.coreVersion() == "2.8.0":
-    ORB_ID = "omniORB2"
-elif _omnipy.coreVersion()[0] == "3":
-    ORB_ID = "omniORB3"
-elif _omnipy.coreVersion()[0] == "4":
-    ORB_ID = "omniORB4"
-else:
-    ORB_ID = "UnknownORB"
+ORB_ID = "omniORB4"
 
 def ORB_init(argv=[], orb_identifier = ORB_ID):
     if _omnipy.need_ORB_init():
-        omniORB.poaCache.clear()
-        omniORB.orb = ORB(argv, orb_identifier)
+        omniORB.orb = _omnipy.ORB_init(argv, orb_identifier)
         omniORB.rootPOA = None
 
     return omniORB.orb
@@ -364,39 +356,33 @@ def ORB_init(argv=[], orb_identifier = ORB_ID):
 class ORB(object):
     """omnipy ORB object"""
 
-    def __init__(self, argv, orb_identifier):
-        self.__release = None
-        _omnipy.ORB_init(self, argv, orb_identifier)
-        self.__release = _omnipy.orb_func.releaseRef
-        self.__context = None
-
-    def __del__(self):
-        if self.__release:
-            self.__release(self)
+    def __init__(self, orb):
+        self._obj     = orb
+        self._context = None
 
     def id(self):
         return ORB_ID
 
     def string_to_object(self, ior):
-        return _omnipy.orb_func.string_to_object(self, ior)
+        return self._obj.string_to_object(ior)
 
     def object_to_string(self, obj):
-        return _omnipy.orb_func.object_to_string(self, obj)
+        return self._obj.object_to_string(obj)
 
     def register_initial_reference(self, identifier, obj):
-        return _omnipy.orb_func.register_initial_reference(self, identifier, obj)
+        return self._obj.register_initial_reference(identifier, obj)
 
     def list_initial_services(self):
-        return _omnipy.orb_func.list_initial_services(self)
+        return self._obj.list_initial_services(self)
 
     def resolve_initial_references(self, identifier):
-        return _omnipy.orb_func.resolve_initial_references(self, identifier)
+        return self._obj.resolve_initial_references(identifier)
 
     def work_pending(self):
-        return _omnipy.orb_func.work_pending(self)
+        return self._obj.work_pending(self)
 
     def perform_work(self):
-        _omnipy.orb_func.perform_work(self)
+        self._obj.perform_work(self)
 
     def run(self):
         # We have to use a timeout rather than just blocking in run(),
@@ -404,14 +390,14 @@ class ORB(object):
 
         timeout = 0.000001 # 1 usec
 
-        shutdown = _omnipy.orb_func.run_timeout(self, timeout)
+        shutdown = self._obj.run_timeout(timeout)
 
         try:
             while not shutdown:
                 if timeout < 1.0:
                     timeout = timeout * 1.1
 
-                shutdown = _omnipy.orb_func.run_timeout(self, timeout)
+                shutdown = self._obj.run_timeout(timeout)
 
         except BAD_INV_ORDER:
             # If a shutdown races with the timeout occurring, we will
@@ -420,12 +406,10 @@ class ORB(object):
             pass
 
     def shutdown(self, wait_for_completion):
-        omniORB.poaCache.clear()
-        _omnipy.orb_func.shutdown(self, wait_for_completion)
+        self._obj.shutdown(wait_for_completion)
 
     def destroy(self):
-        omniORB.poaCache.clear()
-        _omnipy.orb_func.destroy(self)
+        self._obj.destroy()
 
 
     # TypeCode operations
@@ -480,10 +464,10 @@ class ORB(object):
     # Context operation
     def get_default_context(self):
         omniORB.lock.acquire()
-        if self.__context is None:
-            self.__context = Context("", None)
+        if self._context is None:
+            self._context = Context("", None)
         omniORB.lock.release()
-        return self.__context
+        return self._context
 
     # ValueFactory operations
     def register_value_factory(self, repoId, factory):
@@ -534,11 +518,8 @@ class Object(object):
 
     _nil = None
 
-    def __init__(self):
-        self.__release = _omnipy.releaseObjref
-
-    def __del__(self):
-        self.__release(self)
+    def __init__(self, obj):
+        self._obj = obj
 
     def __getstate__(self):
         return ORB_init().object_to_string(self)
@@ -546,11 +527,8 @@ class Object(object):
     def __setstate__(self, state):
         o = ORB_init().string_to_object(state)
         self.__dict__.update(o.__dict__)
-        def dummy(*_): pass
-        o.__release = dummy
 
     def _get_interface(self):
-        import omniORB
         if omniORB.orb is None:
             raise BAD_INV_ORDER(omniORB.BAD_INV_ORDER_ORBHasShutdown,
                                 COMPLETED_NO)
@@ -558,7 +536,7 @@ class Object(object):
         omniORB.importIRStubs()
 
         try:
-            return _omnipy.invoke(self, "_interface", _d_Object_interface, ())
+            return self._obj.invoke("_interface", _d_Object_interface, ())
         except Exception:
             pass
 
@@ -570,17 +548,17 @@ class Object(object):
         return interf._narrow(InterfaceDef)
     
     def _is_a(self, repoId):
-        return _omnipy.isA(self, repoId)
+        return self._obj.isA(repoId)
     
     def _non_existent(self):
-        return _omnipy.nonExistent(self)
+        return self._obj.nonExistent()
     
     def _is_equivalent(self, other_object):
         if self == other_object: return TRUE
-        return _omnipy.isEquivalent(self, other_object)
+        return self._obj.isEquivalent(other_object)
     
     def _hash(self, maximum):
-        return _omnipy.hash(self, maximum)
+        return self._obj.hash(maximum)
     
     def _duplicate(self, obj):
         return self
@@ -596,7 +574,8 @@ class Object(object):
                 return self
         except KeyError:
             pass
-        return _omnipy.narrow(self, repoId, 1)
+
+        return self._obj.narrow(repoId, 1)
 
     def _unchecked_narrow(self, dest):
         repoId = dest._NP_RepositoryId
@@ -606,7 +585,8 @@ class Object(object):
                 return self
         except KeyError:
             pass
-        return _omnipy.narrow(self, repoId, 0)
+
+        return self._obj.narrow(repoId, 0)
 
     def _dynamic_op(self, name, in_args=[], out_args=[], excs=[]):
         """_dynamic_op(name, in_args=[], out_args=[], excs=[])
@@ -654,7 +634,7 @@ class Object(object):
         op_desc = (in_d, out_d, exc_d)
 
         def omni_dynamic_op(*args):
-            return _omnipy.invoke(self, name, op_desc, args)
+            return self._obj.invoke(name, op_desc, args)
 
         try:
             omni_dynamic_op.__name__ = "dynamic<%s>" % name
@@ -684,9 +664,8 @@ class LocalObject (Object):
     _NP_RepositoryId = "IDL:omg.org/CORBA/LocalObject:1.0"
 
     def __init__(self):
-        # Override base Object __init__
-        def no_release(obj): pass
-        self._Object__release = no_release
+        pass
+
 
 _d_LocalObject  = (omniORB.tcInternal.tv_local_interface, LocalObject._NP_RepositoryId, "LocalObject")
 TC_LocalObject  = _tc_LocalObject = omniORB.tcInternal.createTypeCode(_d_LocalObject)

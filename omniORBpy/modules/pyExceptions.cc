@@ -247,8 +247,7 @@ omniPy::handleLocationForward(PyObject* evalue)
 		  "Using FALSE.");
     perm = 0;
   }
-  CORBA::Object_ptr fwd =
-    (CORBA::Object_ptr)omniPy::getTwin(pyfwd, OBJREF_TWIN);
+  CORBA::Object_ptr fwd = omniPy::getObjRef(pyfwd);
 
   if (fwd)
     CORBA::Object::_duplicate(fwd);

@@ -311,10 +311,9 @@ from _omnipy.omni_func import *
 # Private things
 
 # ORB:
-orb      = None
-rootPOA  = None
-poaCache = {}
-lock     = threading.Lock()
+orb     = None
+rootPOA = None
+lock    = threading.Lock()
 
 # Maps for object reference classes and IDL-defined types:
 objrefMapping       = {}
@@ -940,12 +939,8 @@ is set to 1, a permanent location forward is requested."""
 # unloaded.
 
 _emptyTuple      = ()
-_ORB_TWIN        = "__omni_orb"
-_OBJREF_TWIN     = "__omni_obj"
-_SERVANT_TWIN    = "__omni_svt"
-_POA_TWIN        = "__omni_poa"
-_POAMANAGER_TWIN = "__omni_mgr"
-_POACURRENT_TWIN = "__omni_pct"
+_servantAttr     = "__omni_svt"
+_objAttr         = "_obj"
 _NP_RepositoryId = "_NP_RepositoryId"
 
 

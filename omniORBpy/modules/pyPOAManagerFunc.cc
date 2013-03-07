@@ -3,7 +3,7 @@
 // pyPOAManagerFunc.cc        Created on: 2000/02/04
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2008 Apasphere Ltd
+//    Copyright (C) 2008-2013 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -31,180 +31,188 @@
 #include <omnipy.h>
 
 
-PyObject*
-omniPy::createPyPOAManagerObject(const PortableServer::POAManager_ptr pm)
-{
-  if (CORBA::is_nil(pm)) {
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  PyObject* pypm_class =
-    PyObject_GetAttrString(omniPy::pyPortableServerModule,
-			   (char*)"POAManager");
-  OMNIORB_ASSERT(pypm_class);
-
-  PyObject* pypm = PyEval_CallObject(pypm_class, omniPy::pyEmptyTuple);
-  OMNIORB_ASSERT(pypm);
-
-  omniPy::setTwin(pypm, (PortableServer::POAManager_ptr)pm, POAMANAGER_TWIN);
-  omniPy::setTwin(pypm, (CORBA::Object_ptr)             pm, OBJREF_TWIN);
-  return pypm;
-}
-
-
 static PyObject*
-raiseAdapterInactive(PyObject* pyPM)
+raiseAdapterInactive()
 {
-  PyObject* excc = PyObject_GetAttrString(pyPM, (char*)"AdapterInactive");
-  OMNIORB_ASSERT(excc);
-  PyObject* exci = PyEval_CallObject(excc, omniPy::pyEmptyTuple);
+  omniPy::PyRefHolder
+    pypm(PyObject_GetAttrString(omniPy::pyPortableServerModule,
+                                (char*)"POAManager"));
+  omniPy::PyRefHolder
+    excc(PyObject_GetAttrString(pypm, (char*)"AdapterInactive"));
+  
+  omniPy::PyRefHolder
+    exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
+
   PyErr_SetObject(excc, exci);
-  Py_DECREF(exci);
   return 0;
 }
 
 
 extern "C" {
 
-  static PyObject* pyPM_activate(PyObject* self, PyObject* args)
+  static void
+  pyPM_dealloc(PyPOAManagerObject* self)
   {
-    PyObject* pyPM;
-    if (!PyArg_ParseTuple(args, (char*)"O", &pyPM)) return NULL;
+    {
+      omniPy::InterpreterUnlocker _u;
+      CORBA::release(self->pm);
+      CORBA::release(self->base.obj);
+    }
+    self->base.ob_type->tp_free((PyObject*)self);
+  }
 
-    PortableServer::POAManager_ptr pm =
-      (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
-
-    OMNIORB_ASSERT(pm);
-
+  static PyObject*
+  pyPM_activate(PyPOAManagerObject* self, PyObject* args)
+  {
     try {
       omniPy::InterpreterUnlocker _u;
-      pm->activate();
+      self->pm->activate();
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive(pyPM);
+      return raiseAdapterInactive();
     }
     Py_INCREF(Py_None); return Py_None;
   }
 
-  static PyObject* pyPM_hold_requests(PyObject* self, PyObject* args)
+  static PyObject*
+  pyPM_hold_requests(PyPOAManagerObject* self, PyObject* args)
   {
-    PyObject* pyPM;
-    int       wfc;
-    if (!PyArg_ParseTuple(args, (char*)"Oi", &pyPM, &wfc)) return NULL;
-
-    PortableServer::POAManager_ptr pm =
-      (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
-
-    OMNIORB_ASSERT(pm);
+    int wfc;
+    if (!PyArg_ParseTuple(args, (char*)"i", &wfc)) return NULL;
 
     try {
       omniPy::InterpreterUnlocker _u;
-      pm->hold_requests(wfc);
+      self->pm->hold_requests(wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive(pyPM);
+      return raiseAdapterInactive();
     }
     Py_INCREF(Py_None); return Py_None;
   }
 
-  static PyObject* pyPM_discard_requests(PyObject* self, PyObject* args)
+  static PyObject*
+  pyPM_discard_requests(PyPOAManagerObject* self, PyObject* args)
   {
-    PyObject* pyPM;
-    int       wfc;
-    if (!PyArg_ParseTuple(args, (char*)"Oi", &pyPM, &wfc)) return NULL;
-
-    PortableServer::POAManager_ptr pm =
-      (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
-
-    OMNIORB_ASSERT(pm);
+    int wfc;
+    if (!PyArg_ParseTuple(args, (char*)"i", &wfc)) return NULL;
 
     try {
       omniPy::InterpreterUnlocker _u;
-      pm->discard_requests(wfc);
+      self->pm->discard_requests(wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive(pyPM);
+      return raiseAdapterInactive();
     }
     Py_INCREF(Py_None); return Py_None;
   }
 
-  static PyObject* pyPM_deactivate(PyObject* self, PyObject* args)
+  static PyObject*
+  pyPM_deactivate(PyPOAManagerObject* self, PyObject* args)
   {
-    PyObject* pyPM;
-    int       eo, wfc;
-    if (!PyArg_ParseTuple(args, (char*)"Oii", &pyPM, &eo, &wfc)) return NULL;
-
-    PortableServer::POAManager_ptr pm =
-      (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
-
-    OMNIORB_ASSERT(pm);
+    int eo, wfc;
+    if (!PyArg_ParseTuple(args, (char*)"ii", &eo, &wfc)) return NULL;
 
     try {
       omniPy::InterpreterUnlocker _u;
-      pm->deactivate(eo, wfc);
+      self->pm->deactivate(eo, wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive(pyPM);
+      return raiseAdapterInactive();
     }
     Py_INCREF(Py_None); return Py_None;
   }
 
-  static PyObject* pyPM_get_state(PyObject* self, PyObject* args)
+  static PyObject* pyPM_get_state(PyPOAManagerObject* self, PyObject* args)
   {
-    PyObject* pyPM;
-    if (!PyArg_ParseTuple(args, (char*)"O", &pyPM)) return NULL;
-
-    PortableServer::POAManager_ptr pm =
-      (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
-
-    OMNIORB_ASSERT(pm);
-
     PortableServer::POAManager::State s;
     {
       omniPy::InterpreterUnlocker _u;
-      s = pm->get_state();
+      s = self->pm->get_state();
     }
     return PyInt_FromLong((int)s);
   }
 
-
-  static PyObject* pyPM_releaseRef(PyObject* self, PyObject* args)
-  {
-    PyObject* pyPM;
-    if (!PyArg_ParseTuple(args, (char*)"O", &pyPM)) return NULL;
-
-    PortableServer::POAManager_ptr pm =
-      (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
-
-    OMNIORB_ASSERT(pm);
-    {
-      omniPy::InterpreterUnlocker _u;
-      CORBA::release(pm);
-    }
-    omniPy::remTwin(pyPM, POAMANAGER_TWIN);
-    omniPy::remTwin(pyPM, OBJREF_TWIN);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-
   static PyMethodDef pyPM_methods[] = {
-    {(char*)"activate",         pyPM_activate,         METH_VARARGS},
-    {(char*)"hold_requests",    pyPM_hold_requests,    METH_VARARGS},
-    {(char*)"discard_requests", pyPM_discard_requests, METH_VARARGS},
-    {(char*)"deactivate",       pyPM_deactivate,       METH_VARARGS},
-    {(char*)"get_state",        pyPM_get_state,        METH_VARARGS},
+    {(char*)"activate",
+     (PyCFunction)pyPM_activate,
+     METH_NOARGS},
 
-    {(char*)"releaseRef",       pyPM_releaseRef,       METH_VARARGS},
+    {(char*)"hold_requests",
+     (PyCFunction)pyPM_hold_requests,
+     METH_VARARGS},
+
+    {(char*)"discard_requests",
+     (PyCFunction)pyPM_discard_requests,
+     METH_VARARGS},
+
+    {(char*)"deactivate",
+     (PyCFunction)pyPM_deactivate,
+     METH_VARARGS},
+
+    {(char*)"get_state",
+     (PyCFunction)pyPM_get_state,
+     METH_NOARGS},
+
     {NULL,NULL}
   };
+
+  static PyTypeObject PyPOAManagerType = {
+    PyObject_HEAD_INIT(0)
+    0,                                 /* ob_size */
+    (char*)"_omnipy.PyPOAManagerObject",  /* tp_name */
+    sizeof(PyPOAManagerObject),           /* tp_basicsize */
+    0,                                 /* tp_itemsize */
+    (destructor)pyPM_dealloc,          /* tp_dealloc */
+    0,                                 /* tp_print */
+    0,                                 /* tp_getattr */
+    0,                                 /* tp_setattr */
+    0,                                 /* tp_compare */
+    0,                                 /* tp_repr */
+    0,                                 /* tp_as_number */
+    0,                                 /* tp_as_sequence */
+    0,                                 /* tp_as_mapping */
+    0,                                 /* tp_hash  */
+    0,                                 /* tp_call */
+    0,                                 /* tp_str */
+    0,                                 /* tp_getattro */
+    0,                                 /* tp_setattro */
+    0,                                 /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
+    (char*)"Internal POAManager object", /* tp_doc */
+    0,                                 /* tp_traverse */
+    0,                                 /* tp_clear */
+    0,                                 /* tp_richcompare */
+    0,                                 /* tp_weaklistoffset */
+    0,                                 /* tp_iter */
+    0,                                 /* tp_iternext */
+    pyPM_methods,                      /* tp_methods */
+  };
+}
+
+PyObject*
+omniPy::createPyPOAManagerObject(PortableServer::POAManager_ptr pm)
+{
+  PyPOAManagerObject* self = PyObject_New(PyPOAManagerObject,
+                                          &PyPOAManagerType);
+  self->pm = pm;
+  self->base.obj = CORBA::Object::_duplicate(pm);
+
+  omniPy::PyRefHolder args(PyTuple_New(1));
+  PyTuple_SET_ITEM(args, 0, (PyObject*)self);
+
+  return PyObject_CallObject(omniPy::pyPOAManagerClass, args);
+}
+
+CORBA::Boolean
+omniPy::pyPOAManagerCheck(PyObject* pyobj)
+{
+  return pyobj->ob_type == &PyPOAManagerType;
 }
 
 void
 omniPy::initPOAManagerFunc(PyObject* d)
 {
-  PyObject* m = Py_InitModule((char*)"_omnipy.poamanager_func", pyPM_methods);
-  PyDict_SetItemString(d, (char*)"poamanager_func", m);
+  PyPOAManagerType.tp_base = omniPy::PyObjRefType;
+  int r = PyType_Ready(&PyPOAManagerType);
+  OMNIORB_ASSERT(r == 0);
 }

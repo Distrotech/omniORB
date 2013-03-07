@@ -3,7 +3,7 @@
 // cxxAPI.cc                  Created on: 2002/05/25
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //
 //    This file is part of the omniORBpy library
 //
@@ -91,17 +91,9 @@ lockedPyObjRefToCxxObjRef(PyObject* py_obj)
   if (py_obj == Py_None) {
     return CORBA::Object::_nil();
   }
-  CORBA::Object_ptr obj = (CORBA::Object_ptr)omniPy::getTwin(py_obj,
-							     OBJREF_TWIN);
-  if (!obj) {
-    // The ORB doesn't have an OBJREF_TWIN. Perhaps that's what we're
-    // dealing with...
-    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(py_obj, ORB_TWIN);
-    obj = orb;
-  }
-  if (!obj) {
+  CORBA::Object_ptr obj = omniPy::getObjRef(py_obj);
+  if (!obj)
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
-  }
 
   if (obj->_NP_is_pseudo()) {
     return CORBA::Object::_duplicate(obj);

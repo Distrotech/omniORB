@@ -3,7 +3,7 @@
 // pyCallDescriptor.cc        Created on: 2000/02/02
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2012 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -68,7 +68,7 @@ OMNI_USING_NAMESPACE(omni)
 
 extern "C" {
 
-  struct pyCDObj {
+  struct PyCDObj {
     PyObject_HEAD
     omniPy::Py_omniCallDescriptor* cd;
     CORBA::Boolean                 from_poller;
@@ -76,14 +76,14 @@ extern "C" {
   };
 
   static void
-  pyCDObj_dealloc(pyCDObj* self)
+  PyCDObj_dealloc(PyCDObj* self)
   {
     delete self->cd;
     PyObject_Del((PyObject*)self);
   }
 
   static PyObject*
-  pyCDObj_poll(pyCDObj* self, PyObject* args)
+  PyCDObj_poll(PyCDObj* self, PyObject* args)
   {
     omniPy::Py_omniCallDescriptor* cd = self->cd;
 
@@ -146,7 +146,7 @@ extern "C" {
   }
 
   static PyObject*
-  pyCDObj_is_ready(pyCDObj* self, PyObject* args)
+  PyCDObj_is_ready(PyCDObj* self, PyObject* args)
   {
     PyObject*    pytimeout;
     CORBA::ULong timeout;
@@ -167,7 +167,7 @@ extern "C" {
   }
 
   static PyObject*
-  pyCDObj_operation_target(pyCDObj* self, PyObject* args)
+  PyCDObj_operation_target(PyCDObj* self, PyObject* args)
   {
     omniObjRef* objref = self->cd->objref();
     omni::duplicateObjRef(objref);
@@ -179,19 +179,19 @@ extern "C" {
   }
 
   static PyObject*
-  pyCDObj_operation_name(pyCDObj* self, PyObject* args)
+  PyCDObj_operation_name(PyCDObj* self, PyObject* args)
   {
     return PyString_FromString(self->cd->op());
   }
 
   static PyObject*
-  pyCDObj_get_handler(pyCDObj* self, PyObject* args)
+  PyCDObj_get_handler(PyCDObj* self, PyObject* args)
   {
     return self->cd->callback();
   }
 
   static PyObject*
-  pyCDObj_set_handler(pyCDObj* self, PyObject* args)
+  PyCDObj_set_handler(PyCDObj* self, PyObject* args)
   {
     PyObject* pyhandler;
 
@@ -204,40 +204,40 @@ extern "C" {
   }
 
   static PyObject*
-  pyCDObj_is_from_poller(pyCDObj* self, PyObject* args)
+  PyCDObj_is_from_poller(PyCDObj* self, PyObject* args)
   {
     return PyBool_FromLong(self->from_poller);
   }
 
   static PyObject*
-  pyCDObj_raise_exception(pyCDObj* self, PyObject* args)
+  PyCDObj_raise_exception(PyCDObj* self, PyObject* args)
   {
     return self->cd->raisePyException();
   }
 
-  static PyMethodDef pyCDObj_methods[] = {
-    {(char*)"poll",             (PyCFunction)pyCDObj_poll,        METH_VARARGS},
-    {(char*)"is_ready",         (PyCFunction)pyCDObj_is_ready,    METH_VARARGS},
-    {(char*)"operation_target", (PyCFunction)pyCDObj_operation_target,
+  static PyMethodDef PyCDObj_methods[] = {
+    {(char*)"poll",             (PyCFunction)PyCDObj_poll,        METH_VARARGS},
+    {(char*)"is_ready",         (PyCFunction)PyCDObj_is_ready,    METH_VARARGS},
+    {(char*)"operation_target", (PyCFunction)PyCDObj_operation_target,
                                                                   METH_NOARGS},
-    {(char*)"operation_name",   (PyCFunction)pyCDObj_operation_name,
+    {(char*)"operation_name",   (PyCFunction)PyCDObj_operation_name,
                                                                   METH_NOARGS},
-    {(char*)"get_handler",      (PyCFunction)pyCDObj_get_handler, METH_VARARGS},
-    {(char*)"set_handler",      (PyCFunction)pyCDObj_set_handler, METH_VARARGS},
-    {(char*)"is_from_poller",   (PyCFunction)pyCDObj_is_from_poller,
+    {(char*)"get_handler",      (PyCFunction)PyCDObj_get_handler, METH_VARARGS},
+    {(char*)"set_handler",      (PyCFunction)PyCDObj_set_handler, METH_VARARGS},
+    {(char*)"is_from_poller",   (PyCFunction)PyCDObj_is_from_poller,
                                                                   METH_NOARGS},
-    {(char*)"raise_exception",  (PyCFunction)pyCDObj_raise_exception,
+    {(char*)"raise_exception",  (PyCFunction)PyCDObj_raise_exception,
                                                                   METH_NOARGS},
     {0,0}
   };
 
-  static PyTypeObject pyCDType = {
+  static PyTypeObject PyCDType = {
     PyObject_HEAD_INIT(0)
     0,                                 /* ob_size */
-    (char*)"_omnipy.pyCDObj",          /* tp_name */
-    sizeof(pyCDObj),                   /* tp_basicsize */
+    (char*)"_omnipy.PyCDObj",          /* tp_name */
+    sizeof(PyCDObj),                   /* tp_basicsize */
     0,                                 /* tp_itemsize */
-    (destructor)pyCDObj_dealloc,       /* tp_dealloc */
+    (destructor)PyCDObj_dealloc,       /* tp_dealloc */
     0,                                 /* tp_print */
     0,                                 /* tp_getattr */
     0,                                 /* tp_setattr */
@@ -252,7 +252,7 @@ extern "C" {
     0,                                 /* tp_getattro */
     0,                                 /* tp_setattro */
     0,                                 /* tp_as_buffer */
-    0,                                 /* tp_flags */
+    Py_TPFLAGS_DEFAULT,                /* tp_flags */
     (char*)"Call descriptor",          /* tp_doc */
     0,                                 /* tp_traverse */
     0,                                 /* tp_clear */
@@ -260,29 +260,27 @@ extern "C" {
     0,                                 /* tp_weaklistoffset */
     0,                                 /* tp_iter */
     0,                                 /* tp_iternext */
-    pyCDObj_methods,                   /* tp_methods */
+    PyCDObj_methods,                   /* tp_methods */
   };
-
-
-  static pyCDObj*
-  pyCDObj_alloc(omniPy::Py_omniCallDescriptor* cd)
-  {
-    pyCDObj* self = PyObject_New(pyCDObj, &pyCDType);
-
-    self->cd          = cd;
-    self->from_poller = 0;
-    self->retrieved   = 0;
-
-    return self;
-  }
-
 }
 
+
+static inline PyCDObj*
+PyCDObj_alloc(omniPy::Py_omniCallDescriptor* cd)
+{
+  PyCDObj* self = PyObject_New(PyCDObj, &PyCDType);
+
+  self->cd          = cd;
+  self->from_poller = 0;
+  self->retrieved   = 0;
+
+  return self;
+}
 
 void
 omniPy::initCallDescriptor(PyObject* mod)
 {
-  int r = PyType_Ready(&pyCDType);
+  int r = PyType_Ready(&PyCDType);
   OMNIORB_ASSERT(r == 0);
 }
 
@@ -488,7 +486,7 @@ omniPy::Py_omniCallDescriptor::completeCallback()
     else {
       // Exception. We need a poller.
       if (!poller.valid())
-        poller = (PyObject*)pyCDObj_alloc(this);
+        poller = (PyObject*)PyCDObj_alloc(this);
 
       method = PyObject_GetAttr(callback_, excep_name_);
 
@@ -548,7 +546,7 @@ omniPy::Py_omniCallDescriptor::raisePyException()
 PyObject*
 omniPy::Py_omniCallDescriptor::makePoller()
 {
-  return (PyObject*)pyCDObj_alloc(this);
+  return (PyObject*)PyCDObj_alloc(this);
 }
 
 

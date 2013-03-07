@@ -3,7 +3,7 @@
 // pyObjectRef.cc             Created on: 1999/07/29
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2010 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -155,7 +155,10 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
 
   OMNIORB_ASSERT(objrefClass); // Couldn't even find CORBA.Object!
 
-  PyObject* pyobjref = PyEval_CallObject(objrefClass, omniPy::pyEmptyTuple);
+  omniPy::PyRefHolder args(PyTuple_New(1));
+  PyTuple_SET_ITEM(args, 0, createPyObjRefObject(objref));
+
+  PyObject* pyobjref = PyObject_CallObject(objrefClass, args);
 
   if (!pyobjref) {
     // Oh dear -- return the error to the program
@@ -167,7 +170,6 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
     PyObject_SetAttrString(pyobjref, (char*)"_NP_RepositoryId", idstr);
     Py_DECREF(idstr);
   }
-  omniPy::setTwin(pyobjref, (CORBA::Object_ptr)objref, OBJREF_TWIN);
 
   return pyobjref;
 }
@@ -441,7 +443,7 @@ omniPy::copyObjRefArgument(PyObject* pytargetRepoId, PyObject* pyobjref,
     Py_INCREF(Py_None);
     return Py_None;
   }
-  CORBA::Object_ptr objref = (CORBA::Object_ptr)getTwin(pyobjref, OBJREF_TWIN);
+  CORBA::Object_ptr objref = getObjRef(pyobjref);
   if (!objref) {
     // Not an objref
     THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, compstatus,
@@ -589,4 +591,314 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
       (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
   }
   return 0; // To shut GCC up
+}
+
+
+//
+// Python objref type
+
+extern "C" {
+
+  static void
+  pyObjRef_dealloc(PyObjRefObject* self)
+  {
+    {
+      omniPy::InterpreterUnlocker _u;
+      CORBA::release(self->obj);
+    }
+    self->ob_type->tp_free((PyObject*)self);
+  }
+
+  static PyObject*
+  pyObjRef_invoke(PyObjRefObject* self, PyObject* args)
+  {
+    // Arg format
+    //  (op_name, (in_desc,out_desc,exc_desc [, ctxt [,values]]), args)
+    //
+    //  exc_desc is a dictionary containing a mapping from repoIds to
+    //  exception descriptor tuples.
+
+    omniPy::Py_omniCallDescriptor::InvokeArgs iargs(self->obj, args);
+    if (iargs.error())
+      return 0;
+
+    omniPy::Py_omniCallDescriptor call_desc(iargs);
+    try {
+      {
+        omniPy::CDInterpreterUnlocker ul(call_desc);
+        iargs.oobjref->_invoke(call_desc);
+      }
+      if (!call_desc.is_oneway()) {
+	return call_desc.result();
+      }
+      else {
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    catch (Py_BAD_PARAM& ex) {
+      omniPy::handleSystemException(ex, ex.getInfo());
+    }
+#ifdef HAS_Cplusplus_catch_exception_by_base
+    catch (const CORBA::SystemException& ex) {
+      omniPy::handleSystemException(ex);
+    }
+#else
+#define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
+    catch (const CORBA::exc& ex) { \
+      omniPy::handleSystemException(ex);        \
+    }
+OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
+#undef DO_CALL_DESC_SYSTEM_EXCEPTON
+#endif
+    catch (omniPy::PyUserException& ex) {
+      ex.setPyExceptionState();
+    }
+    catch (...) {
+      omniORB::logs(1, "Unexpected C++ exception during Python invocation.");
+      throw;
+    }
+    return 0;
+  }
+
+  static PyObject*
+  pyObjRef_invoke_sendp(PyObjRefObject* self, PyObject* args)
+  {
+    // Arg format
+    //  (op_name, descriptors, args, excep name)
+
+    omniPy::Py_omniCallDescriptor::InvokeArgs iargs(self->obj, args);
+    if (iargs.error())
+      return 0;
+
+    omniPy::Py_omniCallDescriptor* call_desc =
+      new omniPy::Py_omniCallDescriptor(iargs, 1);
+
+    iargs.oobjref->_invoke_async(call_desc);
+
+    return call_desc->poller();
+  }
+
+
+  static PyObject*
+  pyObjRef_invoke_sendc(PyObjRefObject* self, PyObject* args)
+  {
+    // Arg format
+    //  (op_name, descriptors, args, excep name, callback)
+
+    omniPy::Py_omniCallDescriptor::InvokeArgs iargs(self->obj, args);
+    if (iargs.error())
+      return 0;
+
+    omniPy::Py_omniCallDescriptor* call_desc =
+      new omniPy::Py_omniCallDescriptor(iargs, 0);
+
+    iargs.oobjref->_invoke_async(call_desc);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+
+  static PyObject*
+  pyObjRef_isA(PyObjRefObject* self, PyObject* args)
+  {
+    char* repoId;
+
+    if (!PyArg_ParseTuple(args, (char*)"s", &repoId))
+      return 0;
+
+    try {
+      omniPy::InterpreterUnlocker ul;
+      CORBA::Boolean isa = self->obj->_is_a(repoId);
+      return PyInt_FromLong(isa);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+  }
+
+  static PyObject*
+  pyObjRef_nonExistent(PyObjRefObject* self, PyObject* args)
+  {
+    try {
+      omniPy::InterpreterUnlocker ul;
+      CORBA::Boolean nex = self->obj->_non_existent();
+      return PyInt_FromLong(nex);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+  }
+
+  static PyObject*
+  pyObjRef_isEquivalent(PyObjRefObject* self, PyObject* args)
+  {
+    PyObject* pyobjref2;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyobjref2))
+      return 0;
+
+    CORBA::Object_ptr cxxobjref = omniPy::getObjRef(pyobjref2);
+    RAISE_PY_BAD_PARAM_IF(!cxxobjref, BAD_PARAM_WrongPythonType);
+
+    try {
+      omniPy::InterpreterUnlocker ul;
+      CORBA::Boolean ise = self->obj->_is_equivalent(cxxobjref);
+      return PyInt_FromLong(ise);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+  }
+
+  static PyObject*
+  pyObjRef_hash(PyObjRefObject* self, PyObject* args)
+  {
+    CORBA::ULong max;
+
+    if (!PyArg_ParseTuple(args, (char*)"i", &max))
+      return 0;
+
+    CORBA::ULong h = self->obj->_hash(max);
+    return PyInt_FromLong(h);
+  }
+
+
+  static PyObject*
+  pyObjRef_narrow(PyObjRefObject* self, PyObject* args)
+  {
+    char* repoId;
+    int   checked;
+
+    if (!PyArg_ParseTuple(args, (char*)"si", &repoId, &checked))
+      return 0;
+
+    CORBA::Boolean    isa;
+    CORBA::Object_ptr cxxdest = 0;
+
+    try {
+      omniPy::InterpreterUnlocker ul;
+
+      if (checked || self->obj->_NP_is_pseudo())
+	isa = self->obj->_is_a(repoId);
+      else
+	isa = 1;
+
+      if (isa) {
+	if (!self->obj->_NP_is_pseudo()) {
+	  omniObjRef* oosource = self->obj->_PR_getobj();
+	  omniObjRef* oodest;
+	  {
+	    omni_tracedmutex_lock sync(*omni::internalLock);
+	    oodest = omniPy::createObjRef(repoId, oosource->_getIOR(), 1,
+					  oosource->_identity(), 1,
+					  oosource->_isForwardLocation());
+	  }
+	  cxxdest = (CORBA::Object_ptr)
+	                   (oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+	}
+	else
+	  cxxdest = CORBA::Object::_duplicate(self->obj);
+      }
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    if (isa) {
+      return omniPy::createPyCorbaObjRef(repoId, cxxdest);
+    }
+    else {
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+  }
+
+
+  static PyMethodDef pyObjRef_methods[] = {
+    {(char*)"invoke",
+     (PyCFunction)pyObjRef_invoke,
+     METH_VARARGS},
+
+    {(char*)"invoke_sendp",
+     (PyCFunction)pyObjRef_invoke_sendp,
+     METH_VARARGS},
+
+    {(char*)"invoke_sendc",
+     (PyCFunction)pyObjRef_invoke_sendc,
+     METH_VARARGS},
+
+    {(char*)"isA",
+     (PyCFunction)pyObjRef_isA,
+     METH_VARARGS},
+
+    {(char*)"nonExistent",
+     (PyCFunction)pyObjRef_nonExistent,
+     METH_VARARGS},
+
+    {(char*)"isEquivalent",
+     (PyCFunction)pyObjRef_isEquivalent,
+     METH_VARARGS},
+
+    {(char*)"hash",
+     (PyCFunction)pyObjRef_hash,
+     METH_VARARGS},
+
+    {(char*)"narrow",
+     (PyCFunction)pyObjRef_narrow,
+     METH_VARARGS},
+
+    {NULL,NULL}
+  };
+
+  static PyTypeObject pyObjRefType = {
+    PyObject_HEAD_INIT(0)
+    0,                                 /* ob_size */
+    (char*)"_omnipy.PyObjRefObject",   /* tp_name */
+    sizeof(PyObjRefObject),            /* tp_basicsize */
+    0,                                 /* tp_itemsize */
+    (destructor)pyObjRef_dealloc,      /* tp_dealloc */
+    0,                                 /* tp_print */
+    0,                                 /* tp_getattr */
+    0,                                 /* tp_setattr */
+    0,                                 /* tp_compare */
+    0,                                 /* tp_repr */
+    0,                                 /* tp_as_number */
+    0,                                 /* tp_as_sequence */
+    0,                                 /* tp_as_mapping */
+    0,                                 /* tp_hash  */
+    0,                                 /* tp_call */
+    0,                                 /* tp_str */
+    0,                                 /* tp_getattro */
+    0,                                 /* tp_setattro */
+    0,                                 /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
+    (char*)"Internal ObjRef object",   /* tp_doc */
+    0,                                 /* tp_traverse */
+    0,                                 /* tp_clear */
+    0,                                 /* tp_richcompare */
+    0,                                 /* tp_weaklistoffset */
+    0,                                 /* tp_iter */
+    0,                                 /* tp_iternext */
+    pyObjRef_methods,                  /* tp_methods */
+  };
+};
+
+
+PyObject*
+omniPy::createPyObjRefObject(CORBA::Object_ptr obj)
+{
+  PyObjRefObject* self = PyObject_New(PyObjRefObject, &pyObjRefType);
+  self->obj = obj;
+  return (PyObject*)self;
+}
+
+CORBA::Boolean
+omniPy::pyObjRefCheck(PyObject* pyobj)
+{
+  return PyObject_TypeCheck(pyobj, &pyObjRefType);
+}
+
+PyTypeObject* omniPy::PyObjRefType;
+
+void
+omniPy::initObjRefFunc(PyObject* d)
+{
+  int r = PyType_Ready(&pyObjRefType);
+  OMNIORB_ASSERT(r == 0);
+
+  omniPy::PyObjRefType = &pyObjRefType;
 }

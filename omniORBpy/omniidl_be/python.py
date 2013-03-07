@@ -72,7 +72,7 @@ from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 @ami_import@
 
-_omnipy.checkVersion(4,2, __file__)
+_omnipy.checkVersion(4,2, __file__, 1)
 
 try:
     property
@@ -155,21 +155,21 @@ objref_class = """\
 class _objref_@ifid@ (@inherits@):
     _NP_RepositoryId = @ifid@._NP_RepositoryId
 
-    def __init__(self):"""
+    def __init__(self, obj):"""
 
 objref_inherit_init = """\
-        @inclass@.__init__(self)"""
+        @inclass@.__init__(self, obj)"""
 
 objref_object_init = """\
-        CORBA.Object.__init__(self)"""
+        CORBA.Object.__init__(self, obj)"""
 
 objref_attribute_get = """
     def _get_@attr@(self, *args):
-        return _omnipy.invoke(self, "_get_@attr@", _0_@modname@.@ifid@._d__get_@attr@, args)"""
+        return self._obj.invoke("_get_@attr@", _0_@modname@.@ifid@._d__get_@attr@, args)"""
 
 objref_attribute_set = """
     def _set_@attr@(self, *args):
-        return _omnipy.invoke(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
+        return self._obj.invoke("_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
 
 objref_attribute_property = """
     @attr@ = property(_get_@attr@, _set_@attr@)
@@ -181,15 +181,15 @@ objref_readonly_attribute_property = """
 
 objref_operation = """
     def @opname@(self, *args):
-        return _omnipy.invoke(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
+        return self._obj.invoke("@r_opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
 
 objref_ami_sendc = """
     def @ami_opname@(self, ami_handler, *args):
-        return _omnipy.invoke_sendc(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@", ami_handler)"""
+        return self._obj.invoke_sendc("@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@", ami_handler)"""
 
 objref_ami_sendp = """
     def @ami_opname@(self, *args):
-        return _0_@modname@._impl_@poller_class@(_omnipy.invoke_sendp(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@"))"""
+        return _0_@modname@._impl_@poller_class@(self._obj.invoke_sendp("@r_opname@", _0_@modname@.@ifid@._d_@opname@, args, "@excep_name@"))"""
 
 objref_register = """
 omniORB.registerObjref(@ifid@._NP_RepositoryId, _objref_@ifid@)

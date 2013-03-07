@@ -3,7 +3,7 @@
 // pyServant.cc               Created on: 1999/07/29
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2012 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -34,6 +34,108 @@
 #include <omniORB4/IOP_S.h>
 
 
+//
+// Python type used to hold a pointer to a Py_omniServant
+
+extern "C" {
+
+  struct pyServantObj {
+    PyObject_HEAD
+    omniPy::Py_omniServant* svt;
+  };
+
+  static void
+  pyServantObj_dealloc(pyServantObj* self)
+  {
+    PyObject_Del((PyObject*)self);
+  }
+
+  static PyMethodDef pyServantObj_methods[] = {
+    {0,0}
+  };
+
+  static PyTypeObject pyServantType = {
+    PyObject_HEAD_INIT(0)
+    0,                                 /* ob_size */
+    (char*)"_omnipy.pyServantObj",     /* tp_name */
+    sizeof(pyServantObj),              /* tp_basicsize */
+    0,                                 /* tp_itemsize */
+    (destructor)pyServantObj_dealloc,  /* tp_dealloc */
+    0,                                 /* tp_print */
+    0,                                 /* tp_getattr */
+    0,                                 /* tp_setattr */
+    0,                                 /* tp_compare */
+    0,                                 /* tp_repr */
+    0,                                 /* tp_as_number */
+    0,                                 /* tp_as_sequence */
+    0,                                 /* tp_as_mapping */
+    0,                                 /* tp_hash  */
+    0,                                 /* tp_call */
+    0,                                 /* tp_str */
+    0,                                 /* tp_getattro */
+    0,                                 /* tp_setattro */
+    0,                                 /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,                /* tp_flags */
+    (char*)"omni Servant",             /* tp_doc */
+    0,                                 /* tp_traverse */
+    0,                                 /* tp_clear */
+    0,                                 /* tp_richcompare */
+    0,                                 /* tp_weaklistoffset */
+    0,                                 /* tp_iter */
+    0,                                 /* tp_iternext */
+    pyServantObj_methods,              /* tp_methods */
+  };
+}
+
+static inline PyObject*
+pyServantObj_alloc(omniPy::Py_omniServant* svt)
+{
+  pyServantObj* self = PyObject_New(pyServantObj, &pyServantType);
+  self->svt = svt;
+  return (PyObject*)self;
+}
+
+static inline void
+setSvt(PyObject* obj, omniPy::Py_omniServant* svt)
+{
+  PyObject* pysvt = pyServantObj_alloc(svt);
+  PyObject_SetAttr(obj, omniPy::pyservantAttr, pysvt);
+  Py_DECREF(pysvt);
+}
+
+static inline omniPy::Py_omniServant*
+getSvt(PyObject* obj)
+{
+  omniPy::Py_omniServant* svt;
+  PyObject* pysvt = PyObject_GetAttr(obj, omniPy::pyservantAttr);
+  if (pysvt) {
+    svt = ((pyServantObj*)pysvt)->svt;
+    Py_DECREF(pysvt);
+  }
+  else {
+    PyErr_Clear();
+    svt = 0;
+  }
+  return svt;
+}
+
+static inline void
+remSvt(PyObject* obj)
+{
+  PyObject_DelAttr(obj, omniPy::pyservantAttr);
+}
+
+
+void
+omniPy::initServant(PyObject* mod)
+{
+  int r = PyType_Ready(&pyServantType);
+  OMNIORB_ASSERT(r == 0);
+}
+
+
+
+//
 // Implementation classes for ServantManagers and AdapterActivator
 
 class Py_ServantActivatorSvt :
@@ -193,13 +295,13 @@ Py_omniServant::Py_omniServant(PyObject* pyservant, PyObject* opdict,
   pyskeleton_ = PyObject_GetAttrString(pyservant_, (char*)"_omni_skeleton");
   OMNIORB_ASSERT(pyskeleton_);
 
-  omniPy::setTwin(pyservant, (omniPy::Py_omniServant*)this, SERVANT_TWIN);
+  setSvt(pyservant, this);
 }
 
 omniPy::
 Py_omniServant::~Py_omniServant()
 {
-  omniPy::remTwin(pyservant_, SERVANT_TWIN);
+  remSvt(pyservant_);
   Py_DECREF(pyservant_);
   Py_DECREF(opdict_);
   Py_DECREF(pyskeleton_);
@@ -276,17 +378,19 @@ Py_omniServant::_default_POA()
 {
   {
     omnipyThreadCache::lock _t;
-    PyObject* pyPOA = PyObject_CallMethod(pyservant_,
-					  (char*)"_default_POA", 0);
-    if (pyPOA) {
-      PortableServer::POA_ptr poa =
-	(PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
 
-      Py_DECREF(pyPOA);
-      if (poa) {
-	return PortableServer::POA::_duplicate(poa);
+    omniPy::PyRefHolder
+      pyPOA(PyObject_CallMethod(pyservant_, (char*)"_default_POA", 0));
+
+    if (pyPOA.valid()) {
+      omniPy::PyRefHolder
+        pyobj(PyObject_GetAttrString(pyPOA, (char*)"_obj"));
+
+      if (pyobj.valid() && omniPy::pyPOACheck(pyobj)) {
+        return PortableServer::POA::_duplicate(((PyPOAObject*)pyobj)->poa);
       }
       else {
+        PyErr_Clear();
         omniORB::logs(1, "Python servant returned an invalid object from "
                       "_default_POA.");
         OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType,
@@ -945,7 +1049,7 @@ omniPy::getServantForPyObject(PyObject* pyservant)
   Py_omniServant* pyos;
 
   // Is there a Py_omniServant already?
-  pyos = (omniPy::Py_omniServant*)omniPy::getTwin(pyservant, SERVANT_TWIN);
+  pyos = getSvt(pyservant);
   if (pyos) {
     pyos->_locked_add_ref();
     return pyos;
@@ -959,8 +1063,8 @@ omniPy::getServantForPyObject(PyObject* pyservant)
   if (!(opdict && PyDict_Check(opdict)))
     return 0;
 
-  PyObject* pyrepoId = PyObject_GetAttrString(pyservant,
-					      (char*)"_NP_RepositoryId");
+  PyObject* pyrepoId = PyObject_GetAttr(pyservant, pyNP_RepositoryId);
+
   if (!(pyrepoId && PyString_Check(pyrepoId))) {
     Py_DECREF(opdict);
     return 0;

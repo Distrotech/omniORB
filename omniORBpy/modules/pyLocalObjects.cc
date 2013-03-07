@@ -433,8 +433,7 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
 					      (char*)"forward_reference");
       Py_DECREF(evalue);
       if (pyfr) {
-	CORBA::Object_ptr fr = (CORBA::Object_ptr)omniPy::getTwin(pyfr,
-								  OBJREF_TWIN);
+	CORBA::Object_ptr fr = omniPy::getObjRef(pyfr);
 	if (fr) {
 	  PortableServer::ForwardRequest ex(fr);
 	  Py_DECREF(pyfr);
@@ -606,8 +605,7 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
 					      (char*)"forward_reference");
       Py_DECREF(evalue);
       if (pyfr) {
-	CORBA::Object_ptr fr = (CORBA::Object_ptr)omniPy::getTwin(pyfr,
-								  OBJREF_TWIN);
+	CORBA::Object_ptr fr = omniPy::getObjRef(pyfr);
 	if (fr) {
 	  PortableServer::ForwardRequest ex(fr);
 	  Py_DECREF(pyfr);

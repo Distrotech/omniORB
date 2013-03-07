@@ -1,3 +1,44 @@
+Thu Mar  7 11:09:28 GMT 2013 dgrisby
+====================================
+
+- Update examples.
+
+examples/fortune/fortune_server.py
+examples/random
+examples/random/README
+examples/random/random.idl
+examples/random/random_clt.py
+examples/weather
+examples/weather/README
+examples/weather/gauge.py
+examples/weather/weather.py
+examples/weather/weatherInfo.idl
+examples/weather/wserver.py
+
+- Replace generic twin type with specific Python types.
+
+modules/cxxAPI.cc
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyAbstractIntf.cc
+modules/pyCallDescriptor.cc
+modules/pyExceptions.cc
+modules/pyLocalObjects.cc
+modules/pyMarshal.cc
+modules/pyORBFunc.cc
+modules/pyObjectRef.cc
+modules/pyPOACurrentFunc.cc
+modules/pyPOAFunc.cc
+modules/pyPOAManagerFunc.cc
+modules/pyServant.cc
+modules/pyTypeCode.cc
+modules/pyomniFunc.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
+
+
 Tue Feb 12 23:00:15 GMT 2013 dgrisby
 ====================================
 

@@ -315,8 +315,7 @@ extern "C" {
     RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
-      CORBA::Object_ptr objref =
-	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+      CORBA::Object_ptr objref = omniPy::getObjRef(pyobjref);
 
       RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
@@ -362,8 +361,7 @@ extern "C" {
     RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
-      CORBA::Object_ptr objref =
-	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+      CORBA::Object_ptr objref = omniPy::getObjRef(pyobjref);
 
       RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
@@ -408,8 +406,7 @@ extern "C" {
     RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
-      CORBA::Object_ptr objref =
-	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+      CORBA::Object_ptr objref = omniPy::getObjRef(pyobjref);
 
       RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
@@ -455,8 +452,7 @@ extern "C" {
     RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
-      CORBA::Object_ptr objref =
-	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+      CORBA::Object_ptr objref = omniPy::getObjRef(pyobjref);
 
       RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
@@ -796,8 +792,7 @@ extern "C" {
       if (!PyArg_ParseTuple(args, (char*)"Oi", &pyobjref, &timeout))
 	return 0;
 
-      CORBA::Object_ptr objref =
-	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+      CORBA::Object_ptr objref = omniPy::getObjRef(pyobjref);
 
       RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
@@ -939,14 +934,10 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"OO", &pyold, &pynew))
       return 0;
 
-    CORBA::Object_ptr oldobj =
-      (CORBA::Object_ptr)omniPy::getTwin(pyold, OBJREF_TWIN);
+    CORBA::Object_ptr oldobj = omniPy::getObjRef(pyold);
+    CORBA::Object_ptr newobj = omniPy::getObjRef(pynew);
 
     RAISE_PY_BAD_PARAM_IF(!oldobj, BAD_PARAM_WrongPythonType);
-
-    CORBA::Object_ptr newobj =
-      (CORBA::Object_ptr)omniPy::getTwin(pynew, OBJREF_TWIN);
-
     RAISE_PY_BAD_PARAM_IF(!newobj, BAD_PARAM_WrongPythonType);
 
     omni::locationForward(oldobj->_PR_getobj(), newobj->_PR_getobj(), 0);

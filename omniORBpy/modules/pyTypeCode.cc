@@ -3,7 +3,7 @@
 // pyTypeCode.cc              Created on: 1999/07/19
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2010 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -30,6 +30,73 @@
 
 #include <omnipy.h>
 
+
+extern "C" {
+  
+  // Simple Python type to hold a PyObject pointer and compare by pointer.
+
+  struct PyPointerObj {
+    PyObject_HEAD
+    PyObject* ptr;
+  };
+
+  static void
+  PyPointerObj_dealloc(PyPointerObj* self)
+  {
+    PyObject_Del((PyObject*)self);
+  }
+
+  static int
+  PyPointerObj_cmp(PyPointerObj* t1, PyPointerObj* t2)
+  {
+    // Can't use simple t1->ptr - t2->ptr in case int is
+    // smaller than a pointer
+    if      (t1->ptr == t2->ptr) return 0;
+    else if (t1->ptr >  t2->ptr) return 1;
+    else                         return -1;
+  }
+
+  static long
+  PyPointerObj_hash(PyPointerObj* self)
+  {
+    return (long)self->ptr;
+  }
+
+  static PyTypeObject PyPointerType = {
+    PyObject_HEAD_INIT(0)
+    0,                                 /* ob_size */
+    (char*)"_omnipy.PyPointerObj",     /* tp_name */
+    sizeof(PyPointerObj),              /* tp_basicsize */
+    0,                                 /* tp_itemsize */
+    (destructor)PyPointerObj_dealloc,  /* tp_dealloc */
+    0,                                 /* tp_print */
+    0,                                 /* tp_getattr */
+    0,                                 /* tp_setattr */
+    (cmpfunc)PyPointerObj_cmp,         /* tp_compare */
+    0,                                 /* tp_repr */
+    0,                                 /* tp_as_number */
+    0,                                 /* tp_as_sequence */
+    0,                                 /* tp_as_mapping */
+    (hashfunc)PyPointerObj_hash,       /* tp_hash  */
+    0,                                 /* tp_call */
+    0,                                 /* tp_str */
+    0,                                 /* tp_getattro */
+    0,                                 /* tp_setattro */
+    0,                                 /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,                /* tp_flags */
+    (char*)"PyPointerObj",             /* tp_doc */
+  };
+}
+
+static inline PyPointerObj*
+PyPointerObj_alloc(PyObject* ptr)
+{
+  PyPointerObj* self = PyObject_New(PyPointerObj, &PyPointerType);
+  self->ptr = ptr;
+  return self;
+}
+
+
 OMNI_USING_NAMESPACE(omni)
 
 // Objects to map descriptors to typecode offsets and vice-versa:
@@ -51,7 +118,7 @@ public:
   }
 
   inline void add(PyObject* desc, CORBA::Long offset) {
-    PyObject* desc_o = omniPy::newTwin(desc);
+    PyObject* desc_o = (PyObject*)PyPointerObj_alloc(desc);
     PyObject* oo     = PyInt_FromLong(offset + base_);
     PyDict_SetItem(dict_, desc_o, oo);
     Py_DECREF(desc_o);
@@ -59,7 +126,7 @@ public:
   }
 
   inline CORBA::Boolean lookup(PyObject* desc, CORBA::Long& offset) {
-    PyObject* desc_o = omniPy::newTwin(desc);
+    PyObject* desc_o = (PyObject*)PyPointerObj_alloc(desc);
     PyObject* oo     = PyDict_GetItem(dict_, desc_o);
     Py_DECREF(desc_o);
     if (oo) {
@@ -1349,4 +1416,12 @@ omniPy::unmarshalTypeCode(cdrStream& stream)
 {
   OffsetDescriptorMap odm;
   return r_unmarshalTypeCode(stream, odm);
+}
+
+
+void
+omniPy::initTypeCode(PyObject* d)
+{
+  int r = PyType_Ready(&PyPointerType);
+  OMNIORB_ASSERT(r == 0);
 }

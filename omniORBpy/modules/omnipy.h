@@ -3,7 +3,7 @@
 // omnipy.h                   Created on: 2000/02/24
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -53,23 +53,41 @@
 OMNI_USING_NAMESPACE(omni)
 
 ////////////////////////////////////////////////////////////////////////////
-// Data structure to manage C++ twins of Python objects                   //
+// Python types                                                           //
 ////////////////////////////////////////////////////////////////////////////
 
 extern "C" {
-  struct omnipyTwin {
+
+  // Object reference
+  struct PyObjRefObject {
     PyObject_HEAD
-    void* ob_twin;
+    CORBA::Object_ptr obj;
+  };
+
+  // ORB
+  struct PyORBObject {
+    PyObjRefObject base;
+    CORBA::ORB_ptr orb;
+  };
+
+  // POA
+  struct PyPOAObject {
+    PyObjRefObject base;
+    PortableServer::POA_ptr poa;
+  };
+
+  // POAManager
+  struct PyPOAManagerObject {
+    PyObjRefObject base;
+    PortableServer::POAManager_ptr pm;
+  };
+
+  // POACurrent
+  struct PyPOACurrentObject {
+    PyObjRefObject base;
+    PortableServer::Current_ptr pc;
   };
 }
-
-// Twin attribute names
-#define ORB_TWIN        omniPy::pyORB_TWIN
-#define OBJREF_TWIN     omniPy::pyOBJREF_TWIN
-#define SERVANT_TWIN    omniPy::pySERVANT_TWIN
-#define POA_TWIN        omniPy::pyPOA_TWIN
-#define POAMANAGER_TWIN omniPy::pyPOAMANAGER_TWIN
-#define POACURRENT_TWIN omniPy::pyPOACURRENT_TWIN
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -163,6 +181,7 @@ public:
   static PyObject* py_omnipymodule;    	// _omnipy module
   static PyObject* pyCORBAmodule;      	// CORBA module
   static PyObject* pyCORBAsysExcMap;   	//  The system exception map
+  static PyObject* pyCORBAORBClass;    	//  ORB class
   static PyObject* pyCORBAAnyClass;    	//  Any class
   static PyObject* pyCORBATypeCodeClass;//  TypeCode class
   static PyObject* pyCORBAContextClass;	//  Context class
@@ -174,27 +193,25 @@ public:
   static PyObject* pyomniORBtypeMap;   	//  Type map
   static PyObject* pyomniORBvalueMap;  	//  Value factory map
   static PyObject* pyomniORBwordMap;   	//  Reserved word map
-  static PyObject* pyomniORBpoaCache;   //  POA cache
   static PyObject* pyomniORBUnknownValueBase;
                                         //  Base class for unknown valuetypes
   static PyObject* pyPortableServerModule;
                                         // Portable server module
-  static PyObject* pyServantClass;     	// Servant class
+  static PyObject* pyPOAClass;          //  POA class
+  static PyObject* pyPOAManagerClass;   //  POAManager class
+  static PyObject* pyPOACurrentClass;   //  Current class
+  static PyObject* pyServantClass;     	//  Servant class
   static PyObject* pyCreateTypeCode;   	// Function to create a TypeCode object
   static PyObject* pyWorkerThreadClass;	// Worker thread class
   static PyObject* pyWorkerThreadDel;  	// Method to delete worker thread
   static PyObject* pyEmptyTuple;       	// Zero element tuple
 
   ////////////////////////////////////////////////////////////////////////////
-  // Twin names and other 'static' strings                                  //
+  // 'Static' strings                                                       //
   ////////////////////////////////////////////////////////////////////////////
 
-  static PyObject* pyORB_TWIN;
-  static PyObject* pyOBJREF_TWIN;
-  static PyObject* pySERVANT_TWIN;
-  static PyObject* pyPOA_TWIN;
-  static PyObject* pyPOAMANAGER_TWIN;
-  static PyObject* pyPOACURRENT_TWIN;
+  static PyObject* pyservantAttr;
+  static PyObject* pyobjAttr;
   static PyObject* pyNP_RepositoryId;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -223,57 +240,10 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
-  // Twin object handling                                                   //
-  ////////////////////////////////////////////////////////////////////////////
-
-  static PyObject* newTwin(void* twin);
-
-  static
-  inline void
-  setTwin(PyObject* obj, void* twin, PyObject* name)
-  {
-    PyObject* ot = newTwin(twin);
-    PyObject_SetAttr(obj, name, ot);
-    Py_DECREF(ot);
-  }
-
-  static
-  inline void
-  setExistingTwin(PyObject* obj, PyObject* ot, PyObject* name)
-  {
-    PyObject_SetAttr(obj, name, ot);
-    Py_DECREF(ot);
-  }
-
-  static
-  inline void*
-  getTwin(PyObject* obj, PyObject* name)
-  {
-    void* twin;
-    PyObject* ot = PyObject_GetAttr(obj, name);
-    if (ot) {
-      twin = ((omnipyTwin*)ot)->ob_twin;
-      Py_DECREF(ot);
-    }
-    else {
-      PyErr_Clear();
-      twin = 0;
-    }
-    return twin;
-  }
-
-  static
-  inline void
-  remTwin(PyObject* obj, PyObject* name)
-  {
-    PyObject_DelAttr(obj, name);
-  }
-
-
-  ////////////////////////////////////////////////////////////////////////////
   // Module initialisation functions                                        //
   ////////////////////////////////////////////////////////////////////////////
 
+  static void initObjRefFunc     (PyObject* d);
   static void initORBFunc        (PyObject* d);
   static void initPOAFunc        (PyObject* d);
   static void initPOAManagerFunc (PyObject* d);
@@ -282,7 +252,8 @@ public:
   static void initomniFunc       (PyObject* d);
   static void initFixed          (PyObject* d);
   static void initCallDescriptor (PyObject* d);
-
+  static void initServant        (PyObject* d);
+  static void initTypeCode       (PyObject* d);
 
   ////////////////////////////////////////////////////////////////////////////
   // PyRefHolder holds a references to a Python object                      //
@@ -339,6 +310,10 @@ public:
     inline operator PyListObject*()   { return (PyListObject*)obj_; }
     inline operator PyTupleObject*()  { return (PyTupleObject*)obj_; }
     inline operator PyStringObject*() { return (PyStringObject*)obj_; }
+
+    // Operators for our own types
+    inline operator PyObjRefObject*() { return (PyObjRefObject*)obj_; }
+    inline operator PyPOAObject*()    { return (PyPOAObject*)obj_; }
 
     // Pointer operator used in some Python macros like PyInt_Check.
     inline PyObject* operator->()     { return obj_; }
@@ -429,24 +404,59 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
-  // Python object creation functions                                       //
+  // Python object creation functions. Take ownership of passed in objects. //
   ////////////////////////////////////////////////////////////////////////////
 
   static
-  PyObject* createPyPOAObject(const PortableServer::POA_ptr poa);
+  PyObject* createPyObjRefObject(CORBA::Object_ptr obj);
 
   static
-  PyObject* createPyPOAManagerObject(const PortableServer::POAManager_ptr pm);
+  PyObject* createPyORBObject(CORBA::ORB_ptr orb);
 
   static
-  PyObject* createPyPOACurrentObject(const PortableServer::Current_ptr pc);
+  PyObject* createPyPOAObject(PortableServer::POA_ptr poa);
+
+  static
+  PyObject* createPyPOAManagerObject(PortableServer::POAManager_ptr pm);
+
+  static
+  PyObject* createPyPOACurrentObject(PortableServer::Current_ptr pc);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Python type checking                                                   //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyTypeObject*  PyObjRefType;
+
+  static CORBA::Boolean pyObjRefCheck(PyObject* pyobj);
+  static CORBA::Boolean pyORBCheck(PyObject* pyobj);
+  static CORBA::Boolean pyPOACheck(PyObject* pyobj);
+  static CORBA::Boolean pyPOAManagerCheck(PyObject* pyobj);
+  static CORBA::Boolean pyPOACurrentCheck(PyObject* pyobj);
 
 
   ////////////////////////////////////////////////////////////////////////////
   // Object reference functions                                             //
   ////////////////////////////////////////////////////////////////////////////
 
-  // Create the Python object relating to a CORBA object reference
+  // Get CORBA::Object_ptr from a Python object reference. Returns
+  // null if not a valid reference.
+  static inline CORBA::Object_ptr
+  getObjRef(PyObject* pyobj)
+  {
+    PyRefHolder pyobjref(PyObject_GetAttr(pyobj, pyobjAttr));
+
+    if (pyobjref.valid() && pyObjRefCheck(pyobjref)) {
+      return ((PyObjRefObject*)pyobjref)->obj;
+    }
+    else {
+      PyErr_Clear();
+      return 0;
+    }
+  }
+
+
   //
   // Caller must hold the Python interpreter lock.
   static
@@ -788,17 +798,16 @@ public:
 
       inline CORBA::Boolean error() { return args == 0; }
 
-      inline InvokeArgs(PyObject* pyargs)
+      inline InvokeArgs(CORBA::Object_ptr cxxobjref, PyObject* pyargs)
       {
-        PyObject* pyobjref;
         PyObject* op_str;
         PyObject* desc;
 
-        op_str = PyTuple_GET_ITEM(pyargs, 1);
+        op_str = PyTuple_GET_ITEM(pyargs, 0);
         op     = PyString_AS_STRING(op_str);
         op_len = PyString_GET_SIZE(op_str) + 1;
 
-        desc   = PyTuple_GET_ITEM(pyargs, 2);
+        desc   = PyTuple_GET_ITEM(pyargs, 1);
         in_d   = PyTuple_GET_ITEM(desc, 0);
         out_d  = PyTuple_GET_ITEM(desc, 1);
         exc_d  = PyTuple_GET_ITEM(desc, 2);
@@ -830,7 +839,7 @@ public:
             contains_values = 1;
         }
 
-        args = PyTuple_GET_ITEM(pyargs, 3);
+        args = PyTuple_GET_ITEM(pyargs, 2);
 
         OMNIORB_ASSERT(PyTuple_Check(args));
 
@@ -849,23 +858,17 @@ public:
         }
 
         // AMI callback excep method name
-        if (PyTuple_GET_SIZE(pyargs) > 4)
-          excep_name = PyTuple_GET_ITEM(pyargs, 4);
+        if (PyTuple_GET_SIZE(pyargs) > 3)
+          excep_name = PyTuple_GET_ITEM(pyargs, 3);
         else
           excep_name = 0;
 
         // AMI callback object
-        if (PyTuple_GET_SIZE(pyargs) > 5)
-          callback = PyTuple_GET_ITEM(pyargs, 5);
+        if (PyTuple_GET_SIZE(pyargs) > 4)
+          callback = PyTuple_GET_ITEM(pyargs, 4);
         else
           callback = 0;
 
-        // Object reference to invoke upon
-        pyobjref = PyTuple_GET_ITEM(pyargs, 0);
-
-        CORBA::Object_ptr cxxobjref =
-          (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
-        
         oobjref = cxxobjref->_PR_getobj();
       }
     };
@@ -1121,6 +1124,16 @@ public:
     // Not implemented:
     Py_omniServant(const Py_omniServant&);
     Py_omniServant& operator=(const Py_omniServant&);
+  };
+
+  class PYOSReleaseHelper {
+  public:
+    PYOSReleaseHelper(Py_omniServant* pyos) : pyos_(pyos) {}
+    ~PYOSReleaseHelper() {
+      pyos_->_locked_remove_ref();
+    }
+  private:
+    Py_omniServant* pyos_;
   };
 
   // Function to find or create a Py_omniServant object for a Python
