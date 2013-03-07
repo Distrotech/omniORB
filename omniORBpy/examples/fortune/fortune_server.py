@@ -4,7 +4,7 @@ import sys, os
 import CORBA, PortableServer
 import Fortune, Fortune__POA
 
-FORTUNE_PATH = "/usr/games/fortune"
+FORTUNE_PATH = "/usr/bin/fortune"
 
 class CookieServer_i (Fortune__POA.CookieServer):
     def get_cookie(self):
