@@ -167,6 +167,11 @@ unixAddress::Connect(const omni_time_t& deadline,
   } while (1);
 #endif
 
+  if (tcpSocket::setBlocking(sock) == RC_INVALID_SOCKET) {
+    omniORB::logs(25, "Failed to set Unix socket to blocking mode");
+    CLOSESOCKET(sock);
+    return 0;
+  }
   return new unixActiveConnection(sock, pd_filename);
 }
 

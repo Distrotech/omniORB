@@ -1,3 +1,17 @@
+Thu Mar  7 11:07:33 GMT 2013 dgrisby
+====================================
+
+- Consistent repository id version.
+
+src/lib/omniORB/orbcore/poastubs.cc
+
+
+- Make sure Unix socket is in blocking mode when opened.
+
+src/lib/omniORB/orbcore/unix/unixAddress.cc
+
+
+
 Mon Feb 25 09:54:51 GMT 2013 dgrisby
 ====================================
 
