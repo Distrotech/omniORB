@@ -84,7 +84,7 @@ const char* PortableServer::ForwardRequest::_NP_typeId() const {
 }
 
 const char* PortableServer::ForwardRequest::_NP_repoId(int* _size) const {
-  *_size = sizeof("IDL:omg.org/PortableServer/ForwardRequest:2.3");
+  *_size = sizeof("IDL:omg.org/PortableServer/ForwardRequest:2.4");
   return _PD_repoId;
 }
 
@@ -197,7 +197,7 @@ PortableServer::AdapterActivator::_nil()
   return _the_nil_ptr;
 }
 
-const char* PortableServer::AdapterActivator::_PD_repoId = "IDL:omg.org/PortableServer/AdapterActivator:2.3";
+const char* PortableServer::AdapterActivator::_PD_repoId = "IDL:omg.org/PortableServer/AdapterActivator:2.4";
 
 
 PortableServer::AdapterActivator::AdapterActivator()
@@ -457,7 +457,7 @@ PortableServer::ServantManager::_nil()
   return _the_nil_ptr;
 }
 
-const char* PortableServer::ServantManager::_PD_repoId = "IDL:omg.org/PortableServer/ServantManager:2.3";
+const char* PortableServer::ServantManager::_PD_repoId = "IDL:omg.org/PortableServer/ServantManager:2.4";
 
 
 PortableServer::ServantManager::ServantManager()
@@ -660,7 +660,7 @@ PortableServer::ServantActivator::_nil()
   return _the_nil_ptr;
 }
 
-const char* PortableServer::ServantActivator::_PD_repoId = "IDL:omg.org/PortableServer/ServantActivator:2.3";
+const char* PortableServer::ServantActivator::_PD_repoId = "IDL:omg.org/PortableServer/ServantActivator:2.4";
 
 
 PortableServer::ServantActivator::ServantActivator()
@@ -996,7 +996,7 @@ PortableServer::ServantLocator::_nil()
   return _the_nil_ptr;
 }
 
-const char* PortableServer::ServantLocator::_PD_repoId = "IDL:omg.org/PortableServer/ServantLocator:2.3";
+const char* PortableServer::ServantLocator::_PD_repoId = "IDL:omg.org/PortableServer/ServantLocator:2.4";
 
 
 PortableServer::ServantLocator::ServantLocator()
