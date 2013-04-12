@@ -260,6 +260,12 @@ sslConnection::peeridentity() {
 }
 
 /////////////////////////////////////////////////////////////////////////
+void*
+sslConnection::peerdetails() {
+  return (void*)pd_peercert;
+}
+
+/////////////////////////////////////////////////////////////////////////
 _CORBA_Boolean
 sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
 {
@@ -345,8 +351,8 @@ sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
 /////////////////////////////////////////////////////////////////////////
 sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl, 
 			     SocketCollection* belong_to) : 
-  SocketHolder(sock), pd_ssl(ssl), pd_handshake_ok(0) {
-
+  SocketHolder(sock), pd_ssl(ssl), pd_handshake_ok(0), pd_peercert(0)
+{
   OMNI_SOCKADDR_STORAGE addr;
   SOCKNAME_SIZE_T l;
 
@@ -417,7 +423,7 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
       stream.marshalOctet(0);
     }
 
-    X509_free(peer_cert);
+    pd_peercert = peer_cert;
 
     try {
       pd_peeridentity = stream.unmarshalString();
@@ -437,6 +443,11 @@ sslConnection::~sslConnection() {
 
   clearSelectable();
   pd_belong_to->removeSocket(this);
+
+  if (pd_peercert) {
+    X509_free(pd_peercert);
+    pd_peercert = 0;
+  }
 
   if (pd_ssl != 0) {
     if (SSL_get_shutdown(pd_ssl) == 0) {

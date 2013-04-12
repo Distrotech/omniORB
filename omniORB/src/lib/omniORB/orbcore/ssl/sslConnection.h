@@ -58,6 +58,8 @@ public:
 
   _CORBA_Boolean gatekeeperCheckSpecific(giopStrand* strand);
 
+  void* peerdetails();
+
   void setSelectable(int now = 0,CORBA::Boolean data_in_buffer = 0);
 
   void clearSelectable();
@@ -82,6 +84,7 @@ private:
 
 protected:
   _CORBA_Boolean    pd_handshake_ok;
+  X509*             pd_peercert;
 };
 
 

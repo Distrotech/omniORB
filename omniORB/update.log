@@ -1,3 +1,18 @@
+Fri Apr 12 16:30:44 BST 2013 dgrisby
+====================================
+
+- Merge from 4_1 branch, up to revision 6172.
+
+include/omniORB4/sslContext.h
+src/appl/omniNames/omniNames.cc
+src/appl/omniNames/omniNamesWin.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.h
+src/lib/omniORB/orbcore/ssl/sslContext.cc
+src/lib/omniORB/orbcore/ssl/sslEndpoint.cc
+src/lib/omniORB/orbcore/tcp/tcpEndpoint.cc
+
+
 Fri Apr 12 14:34:39 BST 2013 dgrisby
 ====================================
 
