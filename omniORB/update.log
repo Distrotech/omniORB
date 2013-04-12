@@ -1,3 +1,18 @@
+Fri Apr 12 14:34:39 BST 2013 dgrisby
+====================================
+
+- Convenience accessors for connection details in interceptors and callHandle.
+
+include/omniORB4/callHandle.h
+include/omniORB4/giopEndpoint.h
+include/omniORB4/internal/GIOP_C.h
+include/omniORB4/internal/GIOP_S.h
+include/omniORB4/omniInterceptors.h
+src/lib/omniORB/orbcore/callHandle.cc
+src/lib/omniORB/orbcore/giopEndpoint.cc
+src/lib/omniORB/orbcore/interceptors.cc
+
+
 Fri Apr 12 13:56:06 BST 2013 dgrisby
 ====================================
 

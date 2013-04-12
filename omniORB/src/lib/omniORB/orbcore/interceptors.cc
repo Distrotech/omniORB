@@ -37,6 +37,12 @@
 #include <interceptors.h>
 #include <exceptiondefs.h>
 #include <initialiser.h>
+#include <giopStrand.h>
+#include <giopRope.h>
+#include <giopStream.h>
+#include <GIOP_C.h>
+#include <GIOP_S.h>
+
 
 OMNI_NAMESPACE_BEGIN(omni)
 
@@ -143,6 +149,50 @@ void omniInterceptors::invokeLocalCall_T::remove(
 {
   omniCallDescriptor::removeInterceptor(f);
 }
+
+
+//
+// Convenience methods to access connection details
+
+#define CONNECTION_ACCESSORS(interceptor,strand) \
+\
+const char* \
+omniInterceptors::interceptor##_T::info_T::myaddress() \
+{ \
+  giopConnection* connection = strand.connection; \
+  return connection ? connection->myaddress() : 0; \
+}\
+\
+const char* \
+omniInterceptors::interceptor##_T::info_T::peeraddress() \
+{ \
+  giopConnection* connection = strand.connection; \
+  return connection ? connection->peeraddress() : 0; \
+}\
+\
+const char* \
+omniInterceptors::interceptor##_T::info_T::peeridentity() \
+{ \
+  giopConnection* connection = strand.connection; \
+  return connection ? connection->peeridentity() : 0; \
+}\
+\
+void* \
+omniInterceptors::interceptor##_T::info_T::peerdetails() \
+{ \
+  giopConnection* connection = strand.connection; \
+  return connection ? connection->peerdetails() : 0; \
+}
+
+CONNECTION_ACCESSORS(clientOpenConnection,   giop_c.strand())
+CONNECTION_ACCESSORS(clientSendRequest,      giop_c.strand())
+CONNECTION_ACCESSORS(clientReceiveReply,     giop_c.strand())
+CONNECTION_ACCESSORS(serverAcceptConnection, strand)
+CONNECTION_ACCESSORS(serverReceiveRequest,   giop_s.strand())
+CONNECTION_ACCESSORS(serverSendReply,        giop_s.strand())
+CONNECTION_ACCESSORS(serverSendException,    giop_s.strand())
+
+#undef CONNECTION_ACCESSORS
 
 
 /////////////////////////////////////////////////////////////////////////////

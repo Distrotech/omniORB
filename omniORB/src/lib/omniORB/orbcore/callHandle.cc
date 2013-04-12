@@ -37,6 +37,11 @@
 #include <poacurrentimpl.h>
 #include <invoker.h>
 #include <giopStream.h>
+#include <giopStrand.h>
+#include <giopRope.h>
+#include <omniORB4/giopEndpoint.h>
+
+OMNI_USING_NAMESPACE(omni)
 
 
 static void
@@ -240,6 +245,49 @@ omniCallHandle::SkipRequestBody()
   if (pd_iop_s)
     pd_iop_s->SkipRequestBody();
 }
+
+
+giopConnection*
+omniCallHandle::connection()
+{
+  if (pd_iop_s) {
+    cdrStream&  stream  = pd_iop_s->getStream();
+    giopStream* gstream = giopStream::downcast(&stream);
+    if (gstream)
+      return gstream->strand().connection;
+  }
+  return 0;
+}
+
+
+const char*
+omniCallHandle::myaddress()
+{
+  giopConnection* conn = connection();
+  return conn ? conn->myaddress() : 0;
+}
+
+const char*
+omniCallHandle::peeraddress()
+{
+  giopConnection* conn = connection();
+  return conn ? conn->peeraddress() : 0;
+}
+
+const char*
+omniCallHandle::peeridentity()
+{
+  giopConnection* conn = connection();
+  return conn ? conn->peeridentity() : 0;
+}
+
+void*
+omniCallHandle::peerdetails()
+{
+  giopConnection* conn = connection();
+  return conn ? conn->peerdetails() : 0;
+}
+
 
 omniCallHandle::PostInvokeHook::~PostInvokeHook() {}
 

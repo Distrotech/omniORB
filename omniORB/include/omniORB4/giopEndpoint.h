@@ -3,7 +3,7 @@
 // giopEndpoint.h             Created on: 20 Dec 2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -65,6 +65,13 @@ public:
   // Return a string identifying the peer, if appropriate for the
   // connection type. By default returns zero to indicate no peer
   // identification is possible.
+
+  virtual void* peerdetails();
+  // Return connection-specific details about the peer. For SSL
+  // connections, the void* may be cast to an X509*. Returns zero to
+  // indicate no peer details are available. The connection retains
+  // ownership of the returned data.
+
 
   _CORBA_Boolean gatekeeperCheck(giopStrand* strand);
   // For a passive connection, check if the peer is permitted to

@@ -3,7 +3,7 @@
 // callHandle.h               Created on: 16/05/2001
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2006 Apasphere Ltd
+//    Copyright (C) 2006-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -28,35 +28,6 @@
 //
 //   Call handle used during remote or in-process operation dispatch.
 
-/*
- $Log$
- Revision 1.1.4.3  2006/07/02 22:52:05  dgrisby
- Store self thread in task objects to avoid calls to self(), speeding
- up Current. Other minor performance tweaks.
-
- Revision 1.1.4.2  2005/07/22 17:18:40  dgrisby
- Another merge from omni4_0_develop.
-
- Revision 1.1.4.1  2003/03/23 21:04:17  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.2.5  2003/01/14 11:48:15  dgrisby
- Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
- Revision 1.1.2.4  2001/08/15 10:26:07  dpg1
- New object table behaviour, correct POA semantics.
-
- Revision 1.1.2.3  2001/08/01 10:08:19  dpg1
- Main thread policy.
-
- Revision 1.1.2.2  2001/06/07 16:24:08  dpg1
- PortableServer::Current support.
-
- Revision 1.1.2.1  2001/05/29 17:03:48  dpg1
- In process identity.
-
-*/
-
 #ifndef __OMNIORB_CALLHANDLE_H__
 #define __OMNIORB_CALLHANDLE_H__
 
@@ -65,6 +36,7 @@
 
 OMNI_NAMESPACE_BEGIN(omni)
 class omniOrbPOA;
+class giopConnection;
 OMNI_NAMESPACE_END(omni)
 
 class omniLocalIdentity;
@@ -102,6 +74,15 @@ public:
   inline omniCallDescriptor* call_desc()      const { return pd_call_desc; }
   inline _CORBA_Boolean      try_direct()     const { return pd_try_direct; }
 
+  // Accessors for connection details. Return zero in the case of an
+  // in-process call.
+  _OMNI_NS(giopConnection)* connection();
+  const char*               myaddress();
+  const char*               peeraddress();
+  const char*               peeridentity();
+  void*                     peerdetails();
+
+  // Call entry-point
   void upcall(omniServant* servant, omniCallDescriptor& desc);
 
   // Class PostInvokeHook is used to insert extra processing after the

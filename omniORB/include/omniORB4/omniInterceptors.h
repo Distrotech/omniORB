@@ -3,7 +3,7 @@
 // omniInterceptors.h         Created on: 22/09/2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2006-2012 Apasphere Ltd
+//    Copyright (C) 2006-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -116,6 +116,12 @@ public:
       info_T(GIOP_C& c) :
         giop_c(c), reject(0), why(0) {}
 
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
+
     private:
       info_T();
       info_T(const info_T&);
@@ -141,6 +147,12 @@ public:
       info_T(GIOP_C& c) :
         giop_c(c), service_contexts(5) {}
 
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
+
     private:
       info_T();
       info_T(const info_T&);
@@ -165,6 +177,12 @@ public:
       
       info_T(GIOP_C& c, IOP::ServiceContextList& sc) :
 	giop_c(c), service_contexts(sc) {}
+
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
 
     private:
       info_T();
@@ -192,6 +210,12 @@ public:
       info_T(giopStrand& s) : 
 	strand(s), reject(0), why(0) {}
 
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
+
     private:
       info_T();
       info_T(const info_T&);
@@ -215,6 +239,12 @@ public:
 
       info_T(GIOP_S& s) : 
 	giop_s(s) {}
+
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
 
     private:
       info_T();
@@ -240,6 +270,12 @@ public:
       info_T(GIOP_S& s) :
 	giop_s(s) {}
 
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
+
     private:
       info_T();
       info_T(const info_T&);
@@ -264,6 +300,13 @@ public:
 
       info_T(GIOP_S& s, const CORBA::Exception* e) :
 	giop_s(s), exception(e) {}
+
+      // Accessors for connection details
+      const char* myaddress();
+      const char* peeraddress();
+      const char* peeridentity();
+      void*       peerdetails();
+
     private:
       info_T();
       info_T(const info_T&);
