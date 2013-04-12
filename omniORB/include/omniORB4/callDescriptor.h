@@ -372,7 +372,7 @@ public:
 	pd_cond->broadcast();
 
       if (pd_set_cond)
-        pd_set_cond->broadcast();
+        pd_set_cond->signal();
     }
     completeCallback();
   }
@@ -466,15 +466,12 @@ public:
     return 1;
   }
 
-  inline _CORBA_Boolean remFromSet(omni_tracedcondition* set_cond)
+  inline void remFromSet(omni_tracedcondition* set_cond)
   {
     ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);
-
-    if (pd_set_cond != set_cond)
-      return 0;
+    OMNIORB_ASSERT(pd_set_cond == set_cond);
 
     pd_set_cond = 0;
-    return 1;
   }
 
   static _core_attr omni_tracedmutex sd_lock;

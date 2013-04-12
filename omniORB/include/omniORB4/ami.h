@@ -96,8 +96,9 @@ public:
   ::CORBA::Boolean         is_from_poller();
 
   // omniORB internal
+  inline omniAsyncCallDescriptor* _PR_cd()        { return _pd_cd; }
+  inline ::CORBA::Boolean         _PR_retrieved() { return _pd_retrieved; }
 
-  inline omniAsyncCallDescriptor* _PR_cd() { return _pd_cd; }
   static _dyn_attr const char* _PD_repoId;
 
 protected:

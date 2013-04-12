@@ -181,7 +181,12 @@ PollableSetImpl(PollerImpl* poller)
 {
   omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
 
-  if (poller->_PR_cd()->addToSet(&pd_cond)) {
+  if (poller->_PR_retrieved()) {
+    OMNIORB_THROW(OBJECT_NOT_EXIST,
+                  OBJECT_NOT_EXIST_PollerAlreadyDeliveredReply,
+                  CORBA::COMPLETED_NO);
+  }
+  else if (poller->_PR_cd()->addToSet(&pd_cond)) {
     poller->_add_ref();
     pd_ami_pollers.length(1);
     pd_ami_pollers[0] = poller;
@@ -206,7 +211,7 @@ CORBA::DIIPollable*
 omniAMI::PollableSetImpl::
 create_dii_pollable()
 {
-  OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
+  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, CORBA::COMPLETED_NO);
 }
 
 
@@ -220,20 +225,33 @@ add_pollable(CORBA::Pollable* potential)
   if (impl) {
     omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
 
-    if (impl->_PR_cd()->addToSet(&pd_cond)) {
+    if (impl->_PR_retrieved()) {
+      OMNIORB_THROW(OBJECT_NOT_EXIST,
+                    OBJECT_NOT_EXIST_PollerAlreadyDeliveredReply,
+                    CORBA::COMPLETED_NO);
+    }
+    else if (impl->_PR_cd()->addToSet(&pd_cond)) {
       impl->_add_ref();
 
       CORBA::ULong len = pd_ami_pollers.length();
       pd_ami_pollers.length(len+1);
       pd_ami_pollers[len] = impl;
+
+      if (impl->_PR_cd()->lockedIsComplete()) {
+        // Poller is already complete, so signal in case a thread is
+        // blocked in get_ready_pollable.
+        pd_cond.signal();
+      }
     }
     else {
-      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PollableAlreadyInPollableSet,
+      OMNIORB_THROW(BAD_PARAM,
+                    BAD_PARAM_PollableAlreadyInPollableSet,
                     CORBA::COMPLETED_NO);
     }
   }
   else {
-    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidPollerType,
+    OMNIORB_THROW(BAD_PARAM,
+                  BAD_PARAM_InvalidPollerType,
                   CORBA::COMPLETED_NO);
   }
 }
@@ -268,12 +286,19 @@ get_ready_pollable(CORBA::ULong timeout)
   omni_time_t deadline;
   omni_thread::get_time(deadline, timeout_tt);
 
-  pd_cond.timedwait(deadline);
+  while (1) {
+    pd_cond.timedwait(deadline);
 
-  pollable = getAndRemoveReadyPollable();
-  if (!pollable)
-    OMNIORB_THROW(TIMEOUT, TIMEOUT_NoPollerResponseInTime, CORBA::COMPLETED_NO);
+    pollable = getAndRemoveReadyPollable();
+    if (pollable)
+      break;
 
+    omni_time_t now;
+    omni_thread::get_time(now);
+    if (deadline < now)
+      OMNIORB_THROW(TIMEOUT, TIMEOUT_NoPollerResponseInTime,
+                    CORBA::COMPLETED_NO);
+  }
   return pollable;
 }
 
@@ -303,6 +328,7 @@ remove(CORBA::Pollable* potential)
         pd_ami_pollers[i] = pd_ami_pollers[len-1];
       }
       pd_ami_pollers.length(len-1);
+      impl->_PR_cd()->remFromSet(&pd_cond);
       return;
     }
   }
@@ -335,7 +361,7 @@ getAndRemoveReadyPollable()
 
   for (CORBA::ULong i=0; i != len; ++i) {
     PollerImpl* poller = pd_ami_pollers[i];
-      
+    
     if (poller->_PR_cd()->lockedIsComplete()) {
       poller->_add_ref();
 
@@ -344,6 +370,7 @@ getAndRemoveReadyPollable()
         pd_ami_pollers[i] = pd_ami_pollers[len-1];
       }
       pd_ami_pollers.length(len-1);
+      poller->_PR_cd()->remFromSet(&pd_cond);
       return poller;
     }
   }
