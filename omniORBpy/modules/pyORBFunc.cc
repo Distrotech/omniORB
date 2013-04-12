@@ -116,17 +116,8 @@ extern "C" {
       self->orb->register_initial_reference(identifier, objref);
     }
     catch (CORBA::ORB::InvalidName& ex) {
-      omniPy::PyRefHolder pyorb(PyObject_GetAttrString(omniPy::pyCORBAmodule,
-                                                       (char*)"ORB"));
-
-      omniPy::PyRefHolder excc(PyObject_GetAttrString(pyorb,
-                                                      (char*)"InvalidName"));
-      OMNIORB_ASSERT(excc.obj());
-
-      omniPy::PyRefHolder exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
-
-      PyErr_SetObject(excc, exci);
-      return 0;
+      return omniPy::raiseScopedException(omniPy::pyCORBAmodule,
+                                          "ORB", "InvalidName");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
@@ -176,17 +167,8 @@ extern "C" {
       }
     }
     catch (CORBA::ORB::InvalidName& ex) {
-      omniPy::PyRefHolder pyorb(PyObject_GetAttrString(omniPy::pyCORBAmodule,
-                                                       (char*)"ORB"));
-
-      omniPy::PyRefHolder excc(PyObject_GetAttrString(pyorb,
-                                                      (char*)"InvalidName"));
-      OMNIORB_ASSERT(excc.obj());
-
-      omniPy::PyRefHolder exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
-
-      PyErr_SetObject(excc, exci);
-      return 0;
+      return omniPy::raiseScopedException(omniPy::pyCORBAmodule,
+                                          "ORB", "InvalidName");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 

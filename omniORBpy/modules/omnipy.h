@@ -377,6 +377,12 @@ public:
   static
   void handlePythonException();
 
+  // Raise an exception with no arguments
+  static
+  PyObject* raiseScopedException(PyObject* module, const char* scope,
+                                 const char* exc_class);
+
+
   // Handle the omniORB.LocationForward exception in the argument.
   static
   void handleLocationForward(PyObject* evalue);

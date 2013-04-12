@@ -45,7 +45,7 @@ class PollerImpl (Messaging.Poller):
         return self._poller.is_ready(timeout)
 
     def create_pollable_set(self):
-        raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
+        return PollableSetImpl(self._poller.create_pollable_set(self))
 
     def _get_operation_target(self):
         return self._poller.operation_target()
@@ -78,3 +78,32 @@ class ExceptionHolderImpl (Messaging.ExceptionHolder):
 
     def raise_exception(self):
         self._poller.raise_exception()
+
+
+class PollableSetImpl (CORBA.PollableSet):
+    def __init__(self, pset):
+        self._pset = pset
+
+    def create_dii_pollable(self):
+        raise CORBA.NO_IMPLEMENT(omniORB.NO_IMPLEMENT_Unsupported,
+                                 CORBA.COMPLETED_NO)
+    
+    def add_pollable(self, potential):
+        if potential is not None:
+            self._pset.add_pollable(potential)
+        else:
+            raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_InvalidPollerType,
+                                  CORBA.COMPLETED_NO)
+
+    def get_ready_pollable(self, timeout):
+        return self._pset.get_ready_pollable(timeout)
+
+    def remove(self, potential):
+        if potential is not None:
+            self._pset.remove(potential)
+        else:
+            raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_InvalidPollerType,
+                                  CORBA.COMPLETED_NO)
+
+    def number_left(self):
+        return self._pset.number_left()

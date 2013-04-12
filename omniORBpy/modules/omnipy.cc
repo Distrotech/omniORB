@@ -579,17 +579,8 @@ extern "C" {
       return pyos->py_this();
     }
     catch (PortableServer::POA::WrongPolicy& ex) {
-      omniPy::PyRefHolder
-        pypoa(PyObject_GetAttrString(omniPy::pyPortableServerModule,
-                                     (char*)"POA"));
-      omniPy::PyRefHolder
-        excc(PyObject_GetAttrString(pypoa, (char*)"WrongPolicy"));
-  
-      omniPy::PyRefHolder
-        exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
-
-      PyErr_SetObject(excc, exci);
-      return 0;
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "POA", "WrongPolicy");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }

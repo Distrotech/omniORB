@@ -31,23 +31,6 @@
 #include <omnipy.h>
 
 
-static PyObject*
-raiseAdapterInactive()
-{
-  omniPy::PyRefHolder
-    pypm(PyObject_GetAttrString(omniPy::pyPortableServerModule,
-                                (char*)"POAManager"));
-  omniPy::PyRefHolder
-    excc(PyObject_GetAttrString(pypm, (char*)"AdapterInactive"));
-  
-  omniPy::PyRefHolder
-    exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
-
-  PyErr_SetObject(excc, exci);
-  return 0;
-}
-
-
 extern "C" {
 
   static void
@@ -69,7 +52,8 @@ extern "C" {
       self->pm->activate();
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "POAManager", "AdapterInactive");
     }
     Py_INCREF(Py_None); return Py_None;
   }
@@ -85,7 +69,8 @@ extern "C" {
       self->pm->hold_requests(wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "POAManager", "AdapterInactive");
     }
     Py_INCREF(Py_None); return Py_None;
   }
@@ -101,7 +86,8 @@ extern "C" {
       self->pm->discard_requests(wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "POAManager", "AdapterInactive");
     }
     Py_INCREF(Py_None); return Py_None;
   }
@@ -117,7 +103,8 @@ extern "C" {
       self->pm->deactivate(eo, wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
-      return raiseAdapterInactive();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "POAManager", "AdapterInactive");
     }
     Py_INCREF(Py_None); return Py_None;
   }

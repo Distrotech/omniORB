@@ -229,6 +229,19 @@ omniPy::handlePythonException()
 }
 
 
+PyObject*
+omniPy::raiseScopedException(PyObject* module, const char* scope,
+                             const char* cls)
+{
+  omniPy::PyRefHolder excs(PyObject_GetAttrString(module, (char*)scope));
+  omniPy::PyRefHolder excc(PyObject_GetAttrString(excs,   (char*)cls));
+  omniPy::PyRefHolder exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
+
+  PyErr_SetObject(excc, exci);
+  return 0;
+}
+
+
 void
 omniPy::handleLocationForward(PyObject* evalue)
 {

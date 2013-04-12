@@ -63,10 +63,17 @@ namespace {
 OMNI_USING_NAMESPACE(omni)
 
 
-//
-// Python type used to hold call descriptor and implement AMI Poller.
-
 extern "C" {
+
+  //
+  // Forward declarations
+  
+  struct PyCDObj;
+  static PyObject* PyPSetObj_alloc(PyObject* poller);
+
+
+  //
+  // Python type used to hold call descriptor and implement AMI Poller.
 
   struct PyCDObj {
     PyObject_HEAD
@@ -167,6 +174,16 @@ extern "C" {
   }
 
   static PyObject*
+  PyCDObj_create_pollable_set(PyCDObj* self, PyObject* args)
+  {
+    PyObject* poller;
+    if (!PyArg_ParseTuple(args, (char*)"O", &poller))
+      return 0;
+
+    return PyPSetObj_alloc(poller);
+  }
+
+  static PyObject*
   PyCDObj_operation_target(PyCDObj* self, PyObject* args)
   {
     omniObjRef* objref = self->cd->objref();
@@ -218,6 +235,9 @@ extern "C" {
   static PyMethodDef PyCDObj_methods[] = {
     {(char*)"poll",             (PyCFunction)PyCDObj_poll,        METH_VARARGS},
     {(char*)"is_ready",         (PyCFunction)PyCDObj_is_ready,    METH_VARARGS},
+    {(char*)"create_pollable_set",
+                                (PyCFunction)PyCDObj_create_pollable_set,
+                                                                  METH_VARARGS},
     {(char*)"operation_target", (PyCFunction)PyCDObj_operation_target,
                                                                   METH_NOARGS},
     {(char*)"operation_name",   (PyCFunction)PyCDObj_operation_name,
@@ -262,6 +282,340 @@ extern "C" {
     0,                                 /* tp_iternext */
     PyCDObj_methods,                   /* tp_methods */
   };
+
+  // Return borrowed reference to PyCDObj inside a Python poller. Sets
+  // exception state and returns 0 if invalid.
+  static inline
+  PyCDObj* getPyCDObj(PyObject* poller)
+  {
+    omniPy::PyRefHolder pycd(PyObject_GetAttrString(poller, (char*)"_poller"));
+    if (!pycd.valid())
+      return 0;
+
+    if (pycd.obj()->ob_type != &PyCDType) {
+      CORBA::BAD_PARAM ex(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
+      omniPy::handleSystemException(ex);
+      return 0;
+    }
+    return (PyCDObj*)pycd.obj();
+  }
+
+
+  //
+  // Python type implementing AMI PollableSet
+
+  struct PyPSetObj {
+    PyObject_HEAD
+    omni_tracedcondition* cond;
+    PyObject*             pollers;
+  };
+
+  static void
+  PyPSetObj_dealloc(PyPSetObj* self)
+  {
+    {
+      omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+      CORBA::ULong len = PyList_GET_SIZE(self->pollers);
+      for (CORBA::ULong idx=0; idx != len; ++idx) {
+        PyCDObj* pycd = getPyCDObj(PyList_GET_ITEM(self->pollers, idx));
+        OMNIORB_ASSERT(pycd);
+
+        pycd->cd->remFromSet(self->cond);
+      }
+    }
+    delete self->cond;
+    Py_DECREF(self->pollers);
+
+    PyObject_Del((PyObject*)self);
+  }
+
+  static PyObject*
+  PyPSetObj_add_pollable(PyPSetObj* self, PyObject* args)
+  {
+    PyObject* poller;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &poller))
+      return 0;
+
+    PyCDObj* pycd = getPyCDObj(poller);
+    if (!pycd)
+      return 0;
+
+    if (pycd->retrieved) {
+      CORBA::OBJECT_NOT_EXIST ex(OBJECT_NOT_EXIST_PollerAlreadyDeliveredReply,
+                                 CORBA::COMPLETED_NO);
+      return omniPy::handleSystemException(ex);
+    }
+
+    CORBA::Boolean ok;
+    {
+      omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+      ok = pycd->cd->addToSet(self->cond);
+    }
+    if (ok) {
+      Py_INCREF(poller);
+      PyList_Append(self->pollers, (PyObject*)poller);
+    }
+    else {
+      CORBA::BAD_PARAM ex(BAD_PARAM_PollableAlreadyInPollableSet,
+                          CORBA::COMPLETED_NO);
+      return omniPy::handleSystemException(ex);
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  static PyObject*
+  PyPSetObj_getAndRemoveReadyPollable(PyPSetObj* self)
+  {
+    CORBA::ULong len = PyList_GET_SIZE(self->pollers);
+
+    if (len == 0) {
+      // No possible pollable
+      return omniPy::raiseScopedException(omniPy::pyCORBAmodule,
+                                          "PollableSet", "NoPossiblePollable");
+    }
+
+    CORBA::ULong idx;
+    PyObject*    poller;
+    PyCDObj*     pycd;
+
+    {
+      omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+
+      for (idx=0; idx != len; ++idx) {
+        poller = PyList_GET_ITEM(self->pollers, idx);
+        pycd   = getPyCDObj(poller);
+
+        if (pycd->cd->lockedIsComplete()) {
+          pycd->cd->remFromSet(self->cond);
+          break;
+        }
+      }
+    }
+    
+    if (idx != len) {
+      // Poller was complete.
+      Py_INCREF(poller);
+
+      if (--len > idx) {
+        // Copy last item from the list.
+        PyObject* last = PyList_GET_ITEM(self->pollers, len);
+        Py_INCREF(last);
+
+        // Overwrite the completed poller.
+        PyList_SetItem(self->pollers, idx, last);
+      }
+
+      // Shrink the list. Releases one reference to last.
+      PyList_SetSlice(self->pollers, len, len+1, 0);
+
+      return poller;
+    }
+    return 0;
+  }
+
+  static PyObject*
+  PyPSetObj_get_ready_pollable(PyPSetObj* self, PyObject* args)
+  {
+    PyObject*    pytimeout;
+    CORBA::ULong timeout;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &pytimeout))
+      return 0;
+
+    if (PyLong_Check(pytimeout))
+      timeout = PyLong_AsUnsignedLong(pytimeout);
+    else
+      timeout = PyInt_AsLong(pytimeout);
+    
+    if (PyErr_Occurred())
+      return 0;
+
+    PyObject* pollable;
+    
+    pollable = PyPSetObj_getAndRemoveReadyPollable(self);
+    if (pollable || PyErr_Occurred())
+      return pollable;
+
+    if (timeout == 0) {
+      CORBA::NO_RESPONSE ex(NO_RESPONSE_ReplyNotAvailableYet,
+                            CORBA::COMPLETED_NO);
+      return omniPy::handleSystemException(ex);
+    }
+
+    if (timeout == 0xffffffff) {
+      do {
+        {
+          omniPy::InterpreterUnlocker ul;
+          omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+          self->cond->wait();
+        }
+        pollable = PyPSetObj_getAndRemoveReadyPollable(self);
+        if (pollable || PyErr_Occurred())
+          return pollable;
+
+      } while(1);      
+    }
+
+    {
+      omniPy::InterpreterUnlocker ul;
+
+      omni_time_t timeout_tt(timeout / 1000, (timeout % 1000) * 1000000);
+      omni_time_t deadline;
+      omni_thread::get_time(deadline, timeout_tt);
+
+      omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+      self->cond->timedwait(deadline);
+    }
+
+    pollable = PyPSetObj_getAndRemoveReadyPollable(self);
+    if (pollable || PyErr_Occurred())
+      return pollable;
+
+    CORBA::TIMEOUT ex(TIMEOUT_NoPollerResponseInTime, CORBA::COMPLETED_NO);
+    return omniPy::handleSystemException(ex);
+  }
+
+
+  static PyObject*
+  PyPSetObj_remove(PyPSetObj* self, PyObject* args)
+  {
+    PyObject* poller;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &poller))
+      return 0;
+
+    CORBA::ULong len = PyList_GET_SIZE(self->pollers);
+    CORBA::ULong idx;
+
+    for (idx=0; idx != len; ++idx) {
+      if (PyList_GET_ITEM(self->pollers, idx) == poller) {
+        // Found it
+
+        if (--len > idx) {
+          // Copy last item from the list.
+          PyObject* last = PyList_GET_ITEM(self->pollers, len);
+          Py_INCREF(last);
+
+          // Overwrite the removed poller, releasing the list's reference to it.
+          PyList_SetItem(self->pollers, idx, last);
+        }
+
+        // Shrink the list. Releases one reference to last.
+        PyList_SetSlice(self->pollers, len, len+1, 0);
+
+        // Tell the call descriptor it has been removed from the set
+        PyCDObj* pycd = getPyCDObj(poller);
+        {
+          omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+          pycd->cd->remFromSet(self->cond);
+        }
+
+        Py_INCREF(Py_None);
+        return Py_None;
+      }
+    }
+    return omniPy::raiseScopedException(omniPy::pyCORBAmodule,
+                                        "PollableSet", "UnknownPollable");
+  }
+
+  static PyObject*
+  PyPSetObj_number_left(PyPSetObj* self, PyObject* args)
+  {
+    // Return is CORBA::UShort, so we clip to 0xffff.
+    int len = PyList_GET_SIZE(self->pollers);
+    if (len > 0xffff)
+      len = 0xffff;
+
+    return PyInt_FromLong(len);
+  }
+
+  static PyMethodDef PyPSetObj_methods[] = {
+    {(char*)"add_pollable",  (PyCFunction)PyPSetObj_add_pollable, METH_VARARGS},
+
+    {(char*)"get_ready_pollable",
+                             (PyCFunction)PyPSetObj_get_ready_pollable,
+                                                                  METH_VARARGS},
+
+    {(char*)"remove",        (PyCFunction)PyPSetObj_remove,       METH_VARARGS},
+    {(char*)"number_left",   (PyCFunction)PyPSetObj_number_left,  METH_NOARGS},
+    {0,0}
+  };
+
+  static PyTypeObject PyPSetType = {
+    PyObject_HEAD_INIT(0)
+    0,                                 /* ob_size */
+    (char*)"_omnipy.PyPSetObj",        /* tp_name */
+    sizeof(PyPSetObj),                 /* tp_basicsize */
+    0,                                 /* tp_itemsize */
+    (destructor)PyPSetObj_dealloc,     /* tp_dealloc */
+    0,                                 /* tp_print */
+    0,                                 /* tp_getattr */
+    0,                                 /* tp_setattr */
+    0,                                 /* tp_compare */
+    0,                                 /* tp_repr */
+    0,                                 /* tp_as_number */
+    0,                                 /* tp_as_sequence */
+    0,                                 /* tp_as_mapping */
+    0,                                 /* tp_hash  */
+    0,                                 /* tp_call */
+    0,                                 /* tp_str */
+    0,                                 /* tp_getattro */
+    0,                                 /* tp_setattro */
+    0,                                 /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,                /* tp_flags */
+    (char*)"Pollable set",             /* tp_doc */
+    0,                                 /* tp_traverse */
+    0,                                 /* tp_clear */
+    0,                                 /* tp_richcompare */
+    0,                                 /* tp_weaklistoffset */
+    0,                                 /* tp_iter */
+    0,                                 /* tp_iternext */
+    PyPSetObj_methods,                 /* tp_methods */
+  };
+
+  static PyObject*
+  PyPSetObj_alloc(PyObject* poller)
+  {
+    PyCDObj* pycd = getPyCDObj(poller);
+    if (!pycd)
+      return 0;
+
+    if (pycd->retrieved) {
+      CORBA::OBJECT_NOT_EXIST ex(OBJECT_NOT_EXIST_PollerAlreadyDeliveredReply,
+                                 CORBA::COMPLETED_NO);
+      return omniPy::handleSystemException(ex);
+    }
+
+    omni_tracedcondition* cond =
+      new omni_tracedcondition(&omniAsyncCallDescriptor::sd_lock);
+
+    CORBA::Boolean ok;
+    {
+      omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+      ok = pycd->cd->addToSet(cond);
+    }
+
+    if (ok) {
+      PyPSetObj* self = PyObject_New(PyPSetObj, &PyPSetType);
+      self->cond      = cond;
+      self->pollers   = PyList_New(1);
+
+      Py_INCREF(poller);
+      PyList_SetItem(self->pollers, 0, (PyObject*)poller);
+      
+      return (PyObject*)self;
+    }
+    else {
+      // Pollable was already in a set.
+      delete cond;
+      CORBA::BAD_PARAM ex(BAD_PARAM_PollableAlreadyInPollableSet,
+                          CORBA::COMPLETED_NO);
+      return omniPy::handleSystemException(ex);
+    }
+  }
 }
 
 
@@ -280,7 +634,12 @@ PyCDObj_alloc(omniPy::Py_omniCallDescriptor* cd)
 void
 omniPy::initCallDescriptor(PyObject* mod)
 {
-  int r = PyType_Ready(&PyCDType);
+  int r;
+
+  r = PyType_Ready(&PyCDType);
+  OMNIORB_ASSERT(r == 0);
+
+  r = PyType_Ready(&PyPSetType);
   OMNIORB_ASSERT(r == 0);
 }
 

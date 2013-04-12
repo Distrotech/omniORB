@@ -1,3 +1,20 @@
+Fri Apr 12 13:57:21 BST 2013 dgrisby
+====================================
+
+- AMI PollableSet implementation; generic exception throwing code.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyCallDescriptor.cc
+modules/pyExceptions.cc
+modules/pyORBFunc.cc
+modules/pyObjectRef.cc
+modules/pyPOACurrentFunc.cc
+modules/pyPOAManagerFunc.cc
+python/omniORB/CORBA.py
+python/omniORB/ami.py
+
+
 Thu Mar  7 11:09:28 GMT 2013 dgrisby
 ====================================
 

@@ -708,23 +708,29 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     if (!PyArg_ParseTuple(args, (char*)"s", &repoId))
       return 0;
 
+    CORBA::Boolean isa;
+
     try {
       omniPy::InterpreterUnlocker ul;
-      CORBA::Boolean isa = self->obj->_is_a(repoId);
-      return PyInt_FromLong(isa);
+      isa = self->obj->_is_a(repoId);
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    return PyBool_FromLong(isa);
   }
 
   static PyObject*
   pyObjRef_nonExistent(PyObjRefObject* self, PyObject* args)
   {
+    CORBA::Boolean nex;
+
     try {
       omniPy::InterpreterUnlocker ul;
-      CORBA::Boolean nex = self->obj->_non_existent();
-      return PyInt_FromLong(nex);
+      nex = self->obj->_non_existent();
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    return PyBool_FromLong(nex);
   }
 
   static PyObject*
@@ -738,12 +744,15 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     CORBA::Object_ptr cxxobjref = omniPy::getObjRef(pyobjref2);
     RAISE_PY_BAD_PARAM_IF(!cxxobjref, BAD_PARAM_WrongPythonType);
 
+    CORBA::Boolean ise;
+
     try {
       omniPy::InterpreterUnlocker ul;
-      CORBA::Boolean ise = self->obj->_is_equivalent(cxxobjref);
-      return PyInt_FromLong(ise);
+      ise = self->obj->_is_equivalent(cxxobjref);
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    return PyBool_FromLong(ise);
   }
 
   static PyObject*

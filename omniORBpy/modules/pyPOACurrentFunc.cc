@@ -31,23 +31,6 @@
 #include <omnipy.h>
 
 
-static PyObject*
-raiseNoContext()
-{
-  omniPy::PyRefHolder
-    pypc(PyObject_GetAttrString(omniPy::pyPortableServerModule,
-                                (char*)"Current"));
-  omniPy::PyRefHolder
-    excc(PyObject_GetAttrString(pypc, (char*)"NoContext"));
-  
-  omniPy::PyRefHolder
-    exci(PyObject_CallObject(excc, omniPy::pyEmptyTuple));
-
-  PyErr_SetObject(excc, exci);
-  return 0;
-}
-
-
 extern "C" {
 
   static void
@@ -70,7 +53,8 @@ extern "C" {
       poa = self->pc->get_POA();
     }
     catch (PortableServer::Current::NoContext& ex) {
-      return raiseNoContext();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "Current", "NoContext");
     }
     return omniPy::createPyPOAObject(poa);
   }
@@ -84,7 +68,8 @@ extern "C" {
       oid = self->pc->get_object_id();
     }
     catch (PortableServer::Current::NoContext& ex) {
-      return raiseNoContext();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "Current", "NoContext");
     }
     return PyString_FromStringAndSize((const char*)oid->NP_data(),
                                       oid->length());
@@ -104,7 +89,8 @@ extern "C" {
       lobjref = omniPy::makeLocalObjRef(mdri, objref);
     }
     catch (PortableServer::Current::NoContext& ex) {
-      return raiseNoContext();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "Current", "NoContext");
     }
     return omniPy::createPyCorbaObjRef(0, lobjref);
   }
@@ -112,8 +98,8 @@ extern "C" {
   static PyObject*
   pyPC_get_servant(PyPOACurrentObject* self, PyObject* args)
   {
-    PortableServer::Servant  servant;
-    omniPy::Py_omniServant*  pyos;
+    PortableServer::Servant servant;
+    omniPy::Py_omniServant* pyos;
     try {
       omniPy::InterpreterUnlocker _u;
       servant = self->pc->get_servant();
@@ -121,7 +107,8 @@ extern "C" {
                                _ptrToInterface(omniPy::string_Py_omniServant);
     }
     catch (PortableServer::Current::NoContext& ex) {
-      return raiseNoContext();
+      return omniPy::raiseScopedException(omniPy::pyPortableServerModule,
+                                          "Current", "NoContext");
     }
     if (pyos) {
       PyObject* pyservant = pyos->pyServant();

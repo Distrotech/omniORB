@@ -50,8 +50,13 @@ except NameError:
 #                                                                           #
 #############################################################################
 
-TRUE  = 1
-FALSE = 0
+try:
+    TRUE  = True
+    FALSE = False
+
+except NameError:
+    TRUE  = 1
+    FALSE = 0
 
 
 
