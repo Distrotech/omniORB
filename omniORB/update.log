@@ -1,3 +1,13 @@
+Fri Apr 12 13:56:06 BST 2013 dgrisby
+====================================
+
+- AMI PollableSet updates.
+
+include/omniORB4/ami.h
+include/omniORB4/callDescriptor.h
+src/lib/omniORB/dynamic/ami.cc
+
+
 Thu Mar  7 11:07:33 GMT 2013 dgrisby
 ====================================
 
