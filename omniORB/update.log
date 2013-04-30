@@ -1,3 +1,15 @@
+Tue Apr 30 18:21:01 BST 2013 dgrisby
+====================================
+
+- Small Any stream optimisation.
+
+include/omniORB4/anyStream.h
+include/omniORB4/cdrStream.h
+src/lib/omniORB/dynamic/any.cc
+src/lib/omniORB/dynamic/anyStream.cc
+src/lib/omniORB/orbcore/cdrMemoryStream.cc
+
+
 Fri Apr 12 16:30:44 BST 2013 dgrisby
 ====================================
 
