@@ -716,6 +716,9 @@ public:
   }
 #endif
 
+  inline void* inPtr()  const { return pd_inb_mkr;  }
+  inline void* outPtr() const { return pd_outb_mkr; }
+
 protected:
 
   _CORBA_Boolean pd_unmarshal_byte_swap;
@@ -935,10 +938,23 @@ public:
 		  _CORBA_Boolean clearMemory = 0);
   virtual ~cdrMemoryStream();
 
-  void rewindInputPtr();
+  inline void rewindInputPtr()
+  {
+    pd_inb_mkr = pd_bufp_8;
+    pd_inb_end = (pd_readonly_and_external_buffer) ? pd_inb_end : pd_outb_mkr;
+  }
   // Rewind the input pointer to the beginning of the buffer
 
-  void rewindPtrs();
+  inline void rewindPtrs()
+  {
+    if (!pd_readonly_and_external_buffer) {
+      pd_outb_mkr = pd_inb_mkr = pd_inb_end = pd_bufp_8;
+    }
+    else {
+      pd_outb_mkr = pd_outb_end = 0;
+      pd_inb_mkr  = pd_bufp;
+    }
+  }
   // Rewind the both input and output pointers to the beginning of the buffer
   // bufSize() returns 0 after this call.
 
@@ -953,16 +969,6 @@ public:
     return pd_bufp_8;
   }
   // Returns a pointer to the beginning of the buffer.
-
-  inline void* inPtr() const {
-    return pd_inb_mkr;
-  }
-  // Current input pointer
-
-  inline void* outPtr() const {
-    return pd_outb_mkr;
-  }
-  // Current output pointer
 
   void setByteSwapFlag(_CORBA_Boolean littleendian);
   // Data in the buffer is little-endian (<littleendian> = TRUE(1)) or

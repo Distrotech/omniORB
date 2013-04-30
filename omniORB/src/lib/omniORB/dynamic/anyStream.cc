@@ -81,3 +81,6 @@ cdrAnyMemoryStream::ptrToClass(int* cptr)
 }
 
 int cdrAnyMemoryStream::_classid;
+
+cdrAnyMemoryStream the_empty;
+cdrAnyMemoryStream* cdrAnyMemoryStream::_empty = &the_empty;

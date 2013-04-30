@@ -59,6 +59,7 @@ public:
     return (cdrAnyMemoryStream*)s->ptrToClass(&_classid);
   }
   static _dyn_attr int _classid;
+  static _dyn_attr cdrAnyMemoryStream* _empty;
 
   inline omniTypedefs::ValueBaseSeq& valueSeq()
   {

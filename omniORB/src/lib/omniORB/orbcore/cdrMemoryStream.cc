@@ -271,25 +271,6 @@ cdrMemoryStream::copy_to(cdrStream& s, int size, omni::alignment_t align) {
 
 
 void
-cdrMemoryStream::rewindInputPtr()
-{
-  pd_inb_mkr = pd_bufp_8;
-  pd_inb_end = (pd_readonly_and_external_buffer) ? pd_inb_end : pd_outb_mkr;
-}
-
-void
-cdrMemoryStream::rewindPtrs()
-{
-  if (!pd_readonly_and_external_buffer) {
-    pd_outb_mkr = pd_inb_mkr = pd_inb_end = pd_bufp_8;
-  }
-  else {
-    pd_outb_mkr = pd_outb_end = 0;
-    pd_inb_mkr  = pd_bufp;
-  }
-}
-  
-void
 cdrMemoryStream::setByteSwapFlag(CORBA::Boolean littleendian)
 {
   pd_marshal_byte_swap = pd_unmarshal_byte_swap = (littleendian == ((CORBA::Boolean)omni::myByteOrder)) ? 0 : 1; 

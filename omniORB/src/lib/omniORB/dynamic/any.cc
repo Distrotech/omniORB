@@ -177,15 +177,6 @@ CORBA::Any::operator=(const CORBA::Any& a)
 // Nasty deprecated constructor and replace() taking a void* buffer
 //
 
-#if 0
-static void voidDestructor_fn(void* ptr) {
-  delete [] (char*) ptr;
-}
-static void voidInvalidMarshal_fn(cdrStream&, void*) {
-  OMNIORB_ASSERT(0);
-}
-#endif
-
 CORBA::
 Any::Any(TypeCode_ptr tc, void* value, Boolean release)
 {
@@ -466,15 +457,17 @@ CORBA::Any::PR_streamToRead() const
 
   if (!snap_mbuf) {
 
-    cdrAnyMemoryStream* mbuf = new cdrAnyMemoryStream;
-
     if (pd_marshal) {
-      pd_marshal(*mbuf, pd_data);
+      snap_mbuf = new cdrAnyMemoryStream;
+      pd_marshal(*snap_mbuf, pd_data);
     }
     else {
       CORBA::TCKind kind = get(pd_tc)->kind();
-      if (!(kind == CORBA::tk_void || kind == CORBA::tk_null)) {
-	delete mbuf;
+      if (kind == CORBA::tk_void || kind == CORBA::tk_null) {
+        snap_mbuf = cdrAnyMemoryStream::_empty;
+        snap_mbuf->add_ref();
+      }
+      else {
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_InvalidAny, CORBA::COMPLETED_NO);
       }
     }
@@ -484,12 +477,12 @@ CORBA::Any::PR_streamToRead() const
 
       if (pd_mbuf) {
 	// Another thread beat us to it
-	delete mbuf;
+        snap_mbuf->remove_ref();
 	snap_mbuf = pd_mbuf;
       }
       else {
 	CORBA::Any* me = OMNI_CONST_CAST(CORBA::Any*, this);
-	snap_mbuf = me->pd_mbuf = mbuf;
+	me->pd_mbuf = snap_mbuf;
       }
     }
   }
