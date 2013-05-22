@@ -1,3 +1,11 @@
+Wed May 22 13:10:29 BST 2013 dgrisby
+====================================
+
+- Remove old TypeCode cyclic garbage collection scheme.
+
+python/omniORB/tcInternal.py
+
+
 Fri Apr 12 13:57:21 BST 2013 dgrisby
 ====================================
 
