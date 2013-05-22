@@ -571,15 +571,15 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
     giopStream* gs = giopStream::downcast(&s);
     if (gs) {
       giopStrand& g = gs->strand();
-      if (g.biDir && !g.isClient()) {
+      if (g.isBiDir() && !g.isClient()) {
 	// Check the POA policy to see if the servant's POA is willing
 	// to use bidirectional on its callback objects.
-	omniCurrent* current = omniCurrent::get();
-	omniCallDescriptor* desc = ((current)? current->callDescriptor() :0);
+	omniCurrent*        current = omniCurrent::get();
+	omniCallDescriptor* desc    = current ? current->callDescriptor() : 0;
 
 	if (desc && desc->poa() && desc->poa()->acceptBiDirectional()) {
 	  const char* sendfrom = g.connection->peeraddress();
-	  omniIOR::add_TAG_OMNIORB_BIDIR(sendfrom,*ior);
+	  omniIOR::add_TAG_OMNIORB_BIDIR(sendfrom, *ior);
 	}
       }
     }

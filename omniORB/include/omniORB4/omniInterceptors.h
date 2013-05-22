@@ -42,6 +42,7 @@ class omniServant;
 OMNI_NAMESPACE_BEGIN(omni)
 
 class omniInterceptorP;
+class giopRope;
 class giopStrand;
 class GIOP_S;
 class GIOP_C;
@@ -321,6 +322,27 @@ public:
 
 
   //////////////////////////////////////////////////////////////////
+  class createRope_T {
+  public:
+    
+    class info_T {
+    public:
+      const giopAddressList& addrlist;
+      omniIOR::IORInfo*      ior_info;
+      giopRope*&             rope;
+
+      info_T(const giopAddressList& a, omniIOR::IORInfo* i, giopRope*& r) :
+        addrlist(a), ior_info(i), rope(r) {}
+    };
+
+    typedef CORBA::Boolean (*interceptFunc)(info_T& info);
+
+    void add(interceptFunc);
+    void remove(interceptFunc);
+  };
+
+
+  //////////////////////////////////////////////////////////////////
   class createIdentity_T {
   public:
     
@@ -451,6 +473,7 @@ public:
   serverReceiveRequest_T     serverReceiveRequest;
   serverSendReply_T          serverSendReply;
   serverSendException_T      serverSendException;
+  createRope_T               createRope;
   createIdentity_T           createIdentity;
   createORBServer_T          createORBServer;
   createPolicy_T             createPolicy;

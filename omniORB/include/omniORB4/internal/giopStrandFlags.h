@@ -45,16 +45,19 @@
 // Allocated flag bits
 //
 
-#define GIOPSTRAND_ENABLE_TRANSPORT_BATCHING (1 << 0)
+#define GIOPSTRAND_BIDIR (1 << 0)
+// Strand supports bidirectional GIOP.
+
+#define GIOPSTRAND_ENABLE_TRANSPORT_BATCHING (1 << 1)
 // Normally omniORB sets connections to send data as soon as possible,
 // e.g. with the TCP_NODELAY socket option. This flag means that
 // message batching in the transport should be enabled.
 
-#define GIOPSTRAND_HOLD_OPEN (1 << 1)
+#define GIOPSTRAND_HOLD_OPEN (1 << 2)
 // If set, the connection is held open, rather than being scavenged
 // when idle.
 
-#define GIOPSTRAND_COMPRESSION (1 << 2)
+#define GIOPSTRAND_COMPRESSION (1 << 3)
 // If set, the connection supports ZIOP compression.
 
 

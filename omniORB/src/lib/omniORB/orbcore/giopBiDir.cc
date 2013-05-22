@@ -3,7 +3,7 @@
 // giopBiDir.cc               Created on: 17/7/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -173,7 +173,7 @@ RopeLink BiDirServerRope::ropes;
 
 ////////////////////////////////////////////////////////////////////////
 BiDirServerRope::BiDirServerRope(giopStrand* strand, giopAddress* addr) : 
-  giopRope(addr,0), 
+  giopRope(addr),
   pd_sendfrom((const char*)strand->connection->peeraddress()) 
 {
   pd_maxStrands = 1;
@@ -199,7 +199,7 @@ BiDirServerRope::addRope(giopStrand* strand, const giopAddressList& addrlist) {
 
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
-  OMNIORB_ASSERT(!strand->isClient() && strand->biDir == 1);
+  OMNIORB_ASSERT(!strand->isClient() && strand->isBiDir());
 
   const char* sendfrom = strand->connection->peeraddress();
 
@@ -259,7 +259,7 @@ BiDirServerRope::addRope(giopStrand* strand, const giopAddressList& addrlist) {
 int
 BiDirServerRope::selectRope(const giopAddressList& addrlist,
 			    omniIOR::IORInfo* info,
-			    Rope*& r) {
+			    Rope*& rope) {
 
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
@@ -287,7 +287,7 @@ BiDirServerRope::selectRope(const giopAddressList& addrlist,
     br = (BiDirServerRope*)p;
     if (br->match(sendfrom,addrlist)) {
       br->realIncrRefCount();
-      r = (Rope*)br;
+      rope = (Rope*)br;
       return 1;
     }
     else if (br->pd_refcount == 0 &&
@@ -434,22 +434,41 @@ BiDirServerRope::realIncrRefCount() {
 
 ////////////////////////////////////////////////////////////////////////
 BiDirClientRope::BiDirClientRope(const giopAddressList& addrlist,
-				 const omnivector<CORBA::ULong>& preferred) :
-  giopRope(addrlist,preferred),
+                                 omniIOR::IORInfo*      info) :
+  giopRope(addrlist, info),
   pd_lock("BiDirClientRope::pd_lock")
 {
-  pd_maxStrands = 1;
-  pd_oneCallPerConnection = 0;
 }
+
+
+////////////////////////////////////////////////////////////////////////
+void
+BiDirClientRope::filterAndSortAddressList()
+{
+  giopRope::filterAndSortAddressList();
+  
+  if (pd_flags & GIOPSTRAND_BIDIR) {
+    omniORB::logs(25, "Enable rope for bidirectional GIOP.");
+
+    pd_maxStrands           = 1;
+    pd_oneCallPerConnection = 0;
+  }
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 IOP_C*
-BiDirClientRope::acquireClient(const omniIOR* ior,
+BiDirClientRope::acquireClient(const omniIOR*      ior,
 			       const CORBA::Octet* key,
-			       CORBA::ULong keysize,
+			       CORBA::ULong        keysize,
 			       omniCallDescriptor* calldesc) {
 
   GIOP_C* giop_c = (GIOP_C*) giopRope::acquireClient(ior,key,keysize,calldesc);
+
+  if (!(pd_flags & GIOPSTRAND_BIDIR)) {
+    // Bidir not enabled for this rope
+    return giop_c;
+  }
 
   // Bidirectional is only supported in GIOP 1.2 and above
   GIOP::Version v = ior->getIORInfo()->version();
@@ -477,7 +496,7 @@ BiDirClientRope::acquireClient(const omniIOR* ior,
     }
 
     // Make the connection managed by the giopServer.
-    s.biDir = 1;
+    s.flags = s.flags | GIOPSTRAND_BIDIR;
     s.gatekeeper_checked = 1;
     giopActiveCollection* watcher = c->registerMonitor();
     if (omniORB::trace(20)) {
@@ -491,7 +510,7 @@ BiDirClientRope::acquireClient(const omniIOR* ior,
 	s.connection->decrRefCount();
       }
       s.connection = 0;
-      s.biDir = 0;
+      s.flags = s.flags & ~GIOPSTRAND_BIDIR;
       giopRope::releaseClient(giop_c);
       OMNIORB_THROW(TRANSIENT,
 		    TRANSIENT_BiDirConnUsedWithNoPOA,
@@ -500,6 +519,7 @@ BiDirClientRope::acquireClient(const omniIOR* ior,
   }
   return giop_c;
 }
+
 
 /////////////////////////////////////////////////////////////////////////////
 //            Server side interceptor for code set service context         //
@@ -575,7 +595,7 @@ getBiDirServiceContext(omniInterceptors::serverReceiveRequest_T::info_T& info)
       // Check serverTransportRule to see if we should allow bidir from
       // this client.
       {
-	transportRules::sequenceString actions;
+	CORBA::StringSeq actions;
 	CORBA::ULong matchedRule;
 	CORBA::Boolean acceptbidir;
 	CORBA::Boolean dumprule = 0;
@@ -634,14 +654,14 @@ getBiDirServiceContext(omniInterceptors::serverReceiveRequest_T::info_T& info)
 
 	omni_tracedmutex_lock sync(*omniTransportLock);
 
-	if (!strand.biDir) {
-	  strand.biDir = 1;
+	if (!strand.isBiDir()) {
+	  strand.flags = strand.flags | GIOPSTRAND_BIDIR;
 	  strand.stopIdleCounter();
 	  if (!strand.server->notifySwitchToBiDirectional(strand.connection))
 	    return 1;
 	}
 
-	BiDirServerRope* r = BiDirServerRope::addRope(&strand,addrList);
+	BiDirServerRope* rope = BiDirServerRope::addRope(&strand,addrList);
       }
       
       giopAddressList::const_iterator addr, last;
@@ -671,7 +691,7 @@ setBiDirServiceContext(omniInterceptors::clientSendRequest_T::info_T& info) {
   giopStrand&   g   = info.giop_c.strand();
   GIOP::Version ver = info.giop_c.version();
 
-  if (ver.minor != 2 || !g.biDir || !g.isClient() || g.biDir_initiated) {
+  if (ver.minor != 2 || !g.isBiDir() || !g.isClient() || g.biDir_initiated) {
     // Only send service context if the GIOP version is 1.2, this is
     // a bidirectional connection, on the client side and it has not
     // been used yet.

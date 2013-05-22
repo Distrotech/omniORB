@@ -4614,6 +4614,13 @@ Called just before the server marshals a reply header.
 Called just before the server marshals an exception reply header.
 
 
+\item[createRope]\mbox{}\\
+%
+Called when the ORB is about to create a `rope' that encapsulates a
+bundle of connections (`strands') to a remote address space. It allows
+application code to override omniORB's normal connection management.
+
+
 \item[createIdentity]\mbox{}\\
 %
 Called when the ORB is about to create an `identity' object to

@@ -49,14 +49,15 @@ OMNI_NAMESPACE_BEGIN(omni)
 
 class restrictedGiopRope : public giopRope {
 public:
-  restrictedGiopRope(const giopAddressList&          addrlist,
-		     const omnivector<CORBA::ULong>& preferred,
-		     CORBA::ULong                    connection_id,
-		     CORBA::ULong                    max_connections,
-		     CORBA::Boolean                  data_batch,
-		     CORBA::Boolean                  permit_interleaved)
+  restrictedGiopRope(const giopAddressList& addrlist,
+                     omniIOR::IORInfo*      info,
+		     CORBA::ULong           connection_id,
+		     CORBA::ULong           max_connections,
+		     CORBA::Boolean         data_batch,
+		     CORBA::Boolean         permit_interleaved)
 
-    : giopRope(addrlist, preferred), pd_connection_id(connection_id),
+    : giopRope(addrlist, info),
+      pd_connection_id(connection_id),
       pd_data_batch(data_batch)
   {
     if (max_connections < maxStrands())
@@ -64,16 +65,6 @@ public:
 
     oneCallPerConnection(!permit_interleaved);
   }
-
-  static int selectRope(const giopAddressList& addrlist,
-			omniIOR::IORInfo*      info,
-			CORBA::ULong           connection_id,
-			CORBA::ULong           max_connections,
-			CORBA::Boolean         data_batch,
-			CORBA::Boolean         permit_interleaved,
-			Rope*&                 r,
-			CORBA::Boolean&        is_local);
-  // Equivalent of giopRope::selectRope that obeys connection_id.
 
   virtual IOP_C* acquireClient(const omniIOR*      ior,
 			       const CORBA::Octet* key,
@@ -83,19 +74,13 @@ public:
   // battching flags if need be.
 
 protected:
-  CORBA::Boolean match(const giopAddressList& addrlist,
-		       CORBA::ULong           connection_id) const;
-  // Returns true if the address list and connection id match those of
-  // this rope.
+  CORBA::Boolean match(const giopAddressList&, omniIOR::IORInfo* info) const;
+  // Override giopRope to additionally check connection id.
 
 private:
   CORBA::ULong   pd_connection_id;
   CORBA::Boolean pd_data_batch;
-
-  static RopeLink ropes;
 };
-
-RopeLink restrictedGiopRope::ropes;
 
 
 //
@@ -112,6 +97,22 @@ public:
 
   omniConnectionData::ComponentData data;
 
+  static inline RestrictedInfo*
+  get(omniIOR::IORInfo* info)
+  {
+    omniIOR::IORExtraInfoList& extras = info->extraInfo();
+    CORBA::ULong idx;
+    for (idx=0; idx < extras.length(); ++idx) {
+      if (extras[idx]->compid == omniConnectionData::TAG_RESTRICTED_CONNECTION)
+        break;
+    }
+    if (idx == extras.length()) {
+      // Tag not found
+      return 0;
+    }
+    return (RestrictedInfo*)extras[idx];
+  }
+
 private:
   RestrictedInfo(const RestrictedInfo&);
   RestrictedInfo& operator=(const RestrictedInfo&);
@@ -120,98 +121,8 @@ private:
 
 
 //
-// selectRope function is a cut-and-paste of ORB core code, with small
-// modifications to track connection id.
+// giopRope::acquireClient specialisation
 //
-
-int
-restrictedGiopRope::selectRope(const giopAddressList& addrlist,
-			       omniIOR::IORInfo*      info,
-			       CORBA::ULong           connection_id,
-			       CORBA::ULong           max_connections,
-			       CORBA::Boolean         data_batch,
-			       CORBA::Boolean         permit_interleaved,
-			       Rope*&                 r,
-			       CORBA::Boolean&        loc)
-{
-  omni_tracedmutex_lock sync(*omniTransportLock);
-
-  // Check if these are our addresses
-  giopAddressList::const_iterator i, last;
-  i    = addrlist.begin();
-  last = addrlist.end();
-  for (; i != last; i++) {
-    if (omniObjAdapter::matchMyEndpoints((*i)->address())) {
-      r = 0; loc = 1;
-      return 1;
-    }
-  }
-
-  restrictedGiopRope* gr;
-
-  // Check if there already exists a rope that goes to the same
-  // addresses, with the same connection id.
-  RopeLink* p = restrictedGiopRope::ropes.next;
-  while ( p != &restrictedGiopRope::ropes ) {
-    gr = (restrictedGiopRope*)p;
-    if (gr->match(addrlist, connection_id)) {
-      gr->realIncrRefCount();
-      r = (Rope*)gr; loc = 0;
-      return 1;
-    }
-    else if (gr->pd_refcount == 0 &&
-	     RopeLink::is_empty(gr->pd_strands) &&
-	     !gr->pd_nwaiting) {
-      // garbage rope, remove it
-      p = p->next;
-      gr->RopeLink::remove();
-      delete gr;
-    }
-    else {
-      p = p->next;
-    }
-  }
-
-  // Reach here because we cannot find an existing rope that matches,
-  // must create a new one.
-
-  omnivector<CORBA::ULong> prefer_list;
-  CORBA::Boolean use_bidir;
-  CORBA::ULong   flags;
-
-  filterAndSortAddressList(addrlist, prefer_list, use_bidir, flags);
-
-  if (use_bidir) {
-    omniORB::logs(1, "Warning: client transport rules specify a bidirectional "
-		  "connection, which is not supported with restricted "
-		  "connections.");
-  }
-
-  gr = new restrictedGiopRope(addrlist, prefer_list, connection_id,
-			      max_connections, data_batch, permit_interleaved);
-  gr->RopeLink::insert(restrictedGiopRope::ropes);
-  gr->realIncrRefCount();
-  r = (Rope*)gr; loc = 0;
-  return 1;
-}
-
-CORBA::Boolean
-restrictedGiopRope::match(const giopAddressList& addrlist,
-			  CORBA::ULong connection_id) const
-{
-  if (pd_connection_id != connection_id) return 0;
-
-  if (addrlist.size() != pd_addresses.size()) return 0;
-
-  giopAddressList::const_iterator i, last, j;
-  i    = addrlist.begin();
-  j    = pd_addresses.begin();
-  last = addrlist.end();
-  for (; i != last; i++, j++) {
-    if (!omni::ptrStrMatch((*i)->address(),(*j)->address())) return 0;
-  }
-  return 1;
-}
 
 IOP_C*
 restrictedGiopRope::acquireClient(const omniIOR*      ior,
@@ -252,8 +163,7 @@ decodeIORInterceptor(omniInterceptors::decodeIOR_T::info_T& iinfo)
 	omniORB::logs(25, "Found a restricted connection IOR component.");
 
 	const IOP::TaggedComponent& c = components[index];
-	cdrEncapsulationStream stream(c.component_data.get_buffer(),
-				      c.component_data.length(), 1);
+	cdrEncapsulationStream      stream(c.component_data, 1);
 
 	RestrictedInfo* rinfo = new RestrictedInfo();
 	rinfo->data <<= stream;
@@ -282,50 +192,20 @@ decodeIORInterceptor(omniInterceptors::decodeIOR_T::info_T& iinfo)
 
 
 //
-// createIdentity interceptor contains a lot of the same code as
-// createIdentity, for the case of restricted connections.
+// createRope interceptor
 //
 
 static CORBA::Boolean
-createIdentityInterceptor(omniInterceptors::createIdentity_T::info_T& iinfo)
+createRopeInterceptor(omniInterceptors::createRope_T::info_T& iinfo)
 {
-  omniIOR*    	 ior    = iinfo.ior;
-  const char* 	 target = iinfo.targetRepoId;
-  CORBA::Boolean locked = iinfo.held_internalLock;
+  const giopAddressList& addrlist = iinfo.addrlist;
+  omniIOR::IORInfo*      info     = iinfo.ior_info;
 
-  // Decode the profiles
-  const IOP::TaggedProfileList& profiles = ior->iopProfiles();
-
-  if (ior->addr_selected_profile_index() < 0) {
-
-    // Pick the first TAG_INTERNET_IOP profile
-
-    CORBA::ULong total = profiles.length();
-    CORBA::ULong index;
-    for (index = 0; index < total; index++) {
-      if ( profiles[index].tag == IOP::TAG_INTERNET_IOP ) break;
-    }
-    if (index < total)
-      ior->addr_selected_profile_index(index);
-    else
-      omniORB::logs(25, "createIdentity for IOR with no IIOP profiles.");
-  }
-
-  omniIOR::IORInfo* info = ior->getIORInfo();
-
-  // Does the IOR have a TAG_RESTRICTED_CONNECTION component?
-  omniIOR::IORExtraInfoList& extras = info->extraInfo();
-  CORBA::ULong i;
-  for (i=0; i < extras.length(); ++i) {
-    if (extras[i]->compid == omniConnectionData::TAG_RESTRICTED_CONNECTION)
-      break;
-  }
-  if (i == extras.length()) {
-    // Tag not found -- return from interceptor
+  RestrictedInfo* rinfo = RestrictedInfo::get(info);
+  if (!rinfo)
     return 1;
-  }
 
-  RestrictedInfo* rinfo = (RestrictedInfo*)extras[i];
+
   CORBA::ULong   connection_id      = rinfo->data.connection_id;
   CORBA::ULong   max_connections    = rinfo->data.max_connections;
   CORBA::Boolean data_batch         =
@@ -334,38 +214,17 @@ createIdentityInterceptor(omniInterceptors::createIdentity_T::info_T& iinfo)
   CORBA::Boolean permit_interleaved =
     rinfo->data.flags & omniConnectionData::COMP_PERMIT_INTERLEAVED;
 
-  // Find a suitable rope
-  CORBA::Boolean is_local = 0;
-  Rope* rope;
-
-  restrictedGiopRope::selectRope(info->addresses(), info,
-				 connection_id, max_connections,
-				 data_batch, permit_interleaved,
-				 rope, is_local);
-
-  if (is_local) {
-    // Local object -- return from interceptor and handle normally.
-    return 1;
-  }
-
   if (omniORB::trace(25)) {
     omniORB::logger log;
-    log << "Create identity for object using restricted connection id "
-	<< connection_id << ".\n";
+    log << "Create rope using restricted connection id "
+        << connection_id << ".\n";
   }
 
-  _CORBA_Unbounded_Sequence_Octet object_key;
-
-  if (ior->addr_selected_profile_index() >= 0)
-    IIOP::unmarshalObjectKey(profiles[ior->addr_selected_profile_index()],
-			     object_key);
-
-  
-  omni_optional_lock sync(*internalLock,locked,locked);
-  iinfo.invoke_handle = new omniRemoteIdentity(ior,
-					       object_key.get_buffer(),
-					       object_key.length(),
-					       rope);
+  iinfo.rope = new restrictedGiopRope(addrlist, info,
+                                      connection_id,
+                                      max_connections,
+                                      data_batch,
+                                      permit_interleaved);
   return 1;
 }
 
@@ -378,7 +237,7 @@ static CORBA::Boolean
 clientSendRequestInterceptor(omniInterceptors::
 			     clientSendRequest_T::info_T& iinfo)
 {
-  GIOP_C& giop_c     = iinfo.giop_c;
+  GIOP_C&     giop_c = iinfo.giop_c;
   giopStrand& strand = giop_c.strand();
 
   if (!strand.first_call) {
@@ -386,19 +245,12 @@ clientSendRequestInterceptor(omniInterceptors::
     return 1;
   }
 
-  // Look for restricted connection component in IOR
-  omniIOR::IORExtraInfoList& extras = giop_c.ior()->getIORInfo()->extraInfo();
-  CORBA::ULong i;
-  for (i=0; i < extras.length(); ++i) {
-    if (extras[i]->compid == omniConnectionData::TAG_RESTRICTED_CONNECTION)
-      break;
-  }
-  if (i == extras.length()) {
-    // Tag not found -- return from interceptor
+  RestrictedInfo* rinfo = RestrictedInfo::get(giop_c.ior()->getIORInfo());
+  if (!rinfo) {
+    // Not restricted -- return from interceptor
     return 1;
   }
 
-  RestrictedInfo* rinfo = (RestrictedInfo*)extras[i];
   CORBA::ULong   connection_id = rinfo->data.connection_id;
   CORBA::ULong   max_threads   = rinfo->data.max_threads;
   CORBA::Boolean hold_open     =
@@ -415,15 +267,11 @@ clientSendRequestInterceptor(omniInterceptors::
   data >>= stream;
 
   // Copy the encapsulation contents into the service context data.
-  CORBA::Octet* octets;
-  CORBA::ULong max,datalen;
-  stream.getOctetStream(octets,max,datalen);
-
   CORBA::ULong len = iinfo.service_contexts.length();
-  iinfo.service_contexts.length(len+1);
+
   iinfo.service_contexts[len].context_id = (omniConnectionData::
 					    SVC_RESTRICTED_CONNECTION);
-  iinfo.service_contexts[len].context_data.replace(max,datalen,octets,1);
+  stream.setOctetSeq(iinfo.service_contexts[len].context_data);
 
   if (omniORB::trace(25)) {
     omniORB::logger log;
@@ -449,10 +297,9 @@ serverReceiveRequestInterceptor(omniInterceptors::
   // Search for the context we handle
   for (i=0; i < len; ++i) {
     if (contexts[i].context_id ==
-	omniConnectionData::SVC_RESTRICTED_CONNECTION) {
+        omniConnectionData::SVC_RESTRICTED_CONNECTION) {
 
-      cdrEncapsulationStream stream(contexts[i].context_data.get_buffer(),
-				    contexts[i].context_data.length(), 1);
+      cdrEncapsulationStream stream(contexts[i].context_data, 1);
 
       omniConnectionData::ServiceData data;
       data <<= stream;
@@ -529,12 +376,8 @@ addComponentData(IOP::MultipleComponentProfile& components,
 
   data >>= stream;
 
-  CORBA::Octet* p;
-  CORBA::ULong max, len;
-  stream.getOctetStream(p, max, len);
-
   components[index].tag = omniConnectionData::TAG_RESTRICTED_CONNECTION;
-  components[index].component_data.replace(max, len, p, 1);
+  stream.setOctetSeq(components[index].component_data);
 }
 
 OMNI_NAMESPACE_END(omni)
@@ -641,7 +484,7 @@ public:
     // Register interceptors
     omniInterceptors* interceptors = omniORB::getInterceptors();
 
-    interceptors->createIdentity      .add(createIdentityInterceptor);
+    interceptors->createRope          .add(createRopeInterceptor);
     interceptors->decodeIOR           .add(decodeIORInterceptor);
     interceptors->clientSendRequest   .add(clientSendRequestInterceptor);
     interceptors->serverReceiveRequest.add(serverReceiveRequestInterceptor);

@@ -266,7 +266,7 @@ GIOP_C::notifyCommFailure(CORBA::Boolean  heldlock,
       }
     }
   }
-  else if (pd_strand->biDir && 
+  else if (pd_strand->isBiDir() && 
 	   pd_strand->isClient() && 
 	   pd_strand->biDir_has_callbacks) {
 

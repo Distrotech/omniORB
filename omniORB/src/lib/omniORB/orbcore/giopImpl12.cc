@@ -174,7 +174,7 @@ giopImpl12::inputQueueMessage(giopStream* g, giopStream_Buffer* b) {
 			       "Received a MessageError message");
     // never reach here
   }
-  else if (g->pd_strand->isClient() || g->pd_strand->biDir) {
+  else if (g->pd_strand->isClient() || g->pd_strand->isBiDir()) {
     // orderly shutdown.
     CORBA::ULong   minor;
     CORBA::Boolean retry;
@@ -206,7 +206,7 @@ giopImpl12::inputQueueMessage(giopStream* g, giopStream_Buffer* b) {
   switch (mtype) {
   case GIOP::Reply:
   case GIOP::LocateReply:
-    if (!(g->pd_strand->isClient() || g->pd_strand->biDir)) {
+    if (!(g->pd_strand->isClient() || g->pd_strand->isBiDir())) {
       omniTransportLock->unlock();
       giopStream_Buffer::deleteBuffer(b);
       inputTerminalProtocolError(g, __FILE__, __LINE__,
@@ -277,7 +277,7 @@ giopImpl12::inputQueueMessage(giopStream* g, giopStream_Buffer* b) {
     case GIOP::Request:
     case GIOP::LocateRequest:
       {
-	if (g->pd_strand->isClient() && !g->pd_strand->biDir) {
+	if (g->pd_strand->isClient() && !g->pd_strand->isBiDir()) {
 	  omniTransportLock->unlock();
 	  giopStream_Buffer::deleteBuffer(b);
 	  inputTerminalProtocolError(g, __FILE__, __LINE__,
@@ -313,7 +313,7 @@ giopImpl12::inputQueueMessage(giopStream* g, giopStream_Buffer* b) {
       }
       // falls through
     case GIOP::CancelRequest:
-      if (g->pd_strand->isClient() && !g->pd_strand->biDir) {
+      if (g->pd_strand->isClient() && !g->pd_strand->isBiDir()) {
 	omniTransportLock->unlock();
 	giopStream_Buffer::deleteBuffer(b);
 	inputTerminalProtocolError(g, __FILE__, __LINE__,
@@ -452,7 +452,7 @@ giopImpl12::inputNewServerMessage(giopStream* g) {
     return;
   case GIOP::Reply:
   case GIOP::LocateReply:
-    if (g->pd_strand->biDir) {
+    if (g->pd_strand->isBiDir()) {
       break;
     }
     else {
@@ -496,7 +496,7 @@ giopImpl12::inputNewFragment(giopStream* g) {
   char* hdr = (char*)g->inputBufferStart();
 
   if (hdr[7] == GIOP::CancelRequest) {
-    if (g->pd_strand->biDir || !g->pd_strand->isClient()) {
+    if (g->pd_strand->isBiDir() || !g->pd_strand->isClient()) {
       throw GIOP_S::terminateProcessing();
     }
     else {
@@ -536,7 +536,7 @@ giopImpl12::inputReplyBegin(giopStream* g,
   {
     omni_tracedmutex_lock sync(*omniTransportLock);
 
-    if (!g->pd_strand->biDir) {
+    if (!g->pd_strand->isBiDir()) {
 
       while (!(g->inputFullyBuffered() || g->pd_rdlocked)) {
 	if (!g->rdLockNonBlocking()) {
@@ -893,7 +893,7 @@ giopImpl12::unmarshalWildCardRequestHeader(giopStream* g) {
     break;
 
   case GIOP::CloseConnection:
-    if (g->pd_strand->biDir && g->pd_strand->isClient()) {
+    if (g->pd_strand->isBiDir() && g->pd_strand->isClient()) {
       // proper shutdown of a connection.
       if (omniORB::trace(30)) {
 	omniORB::logger l;

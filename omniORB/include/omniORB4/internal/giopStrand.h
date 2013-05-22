@@ -32,6 +32,7 @@
 #define __GIOPSTRAND_H__
 
 #include <omniORB4/omniTransport.h>
+#include <giopStrandFlags.h>
 
 #ifdef _core_attr
 # error "A local CPP macro _core_attr has already been defined."
@@ -187,7 +188,7 @@ public:
 	                // convenient time.
 
 	       TIMEDOUT // This strand can still be used when required but
-       	                // it can also be removed if resources is scarce.
+       	                // it can also be removed if resources are scarce.
   };
 
   State state() const { return pd_state; }
@@ -243,6 +244,9 @@ public:
   // biDir is TRUE, only those messages expected by a GIOP client can be
   // received from this connection.
 
+  inline CORBA::Boolean isBiDir() { return (flags & GIOPSTRAND_BIDIR) ? 1 : 0; }
+  // Return TRUE if this is a bidirectional strand.
+
   const giopAddress*  address;
   // address is provided as ctor arg if this is a active strand, otherwise
   // it is 0.
@@ -259,9 +263,6 @@ public:
   // Flags for use by interceptors. See giopStrandFlags.h for
   // allocated flags values.
   // Initialised to 0 in the constructor.
-
-  CORBA::Boolean      biDir;
-  // Indicate if the strand is used for bidirectional GIOP.
 
   CORBA::Boolean      gatekeeper_checked;
   // only applies to passive strand. TRUE(1) means that the serverTransportRule

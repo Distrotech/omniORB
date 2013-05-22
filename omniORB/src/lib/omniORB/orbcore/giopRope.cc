@@ -29,6 +29,9 @@
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/IOP_C.h>
+#include <omniORB4/callDescriptor.h>
+#include <omniORB4/minorCode.h>
+#include <omniORB4/omniInterceptors.h>
 #include <giopRope.h>
 #include <giopStream.h>
 #include <giopStrand.h>
@@ -38,12 +41,11 @@
 #include <GIOP_C.h>
 #include <objectAdapter.h>
 #include <exceptiondefs.h>
-#include <omniORB4/minorCode.h>
 #include <initialiser.h>
 #include <orbOptions.h>
 #include <orbParameters.h>
 #include <transportRules.h>
-#include <omniORB4/callDescriptor.h>
+#include <interceptors.h>
 #include <libcWrapper.h>
 
 #include <stdlib.h>
@@ -74,8 +76,7 @@ CORBA::ULong orbParameters::maxGIOPConnectionPerServer = 5;
 RopeLink giopRope::ropes;
 
 ////////////////////////////////////////////////////////////////////////
-giopRope::giopRope(const giopAddressList& addrlist,
-		   const omnivector<CORBA::ULong>& preferred) :
+giopRope::giopRope(const giopAddressList& addrlist, omniIOR::IORInfo* info) :
   pd_refcount(0),
   pd_address_in_use(0),
   pd_maxStrands(orbParameters::maxGIOPConnectionPerServer),
@@ -83,7 +84,10 @@ giopRope::giopRope(const giopAddressList& addrlist,
   pd_nwaiting(0),
   pd_cond(omniTransportLock, "giopRope::pd_cond"),
   pd_flags(0),
-  pd_offerBiDir(orbParameters::offerBiDirectionalGIOP)
+  pd_ior_flags(info->flags()),
+  pd_offerBiDir(orbParameters::offerBiDirectionalGIOP),
+  pd_addrs_filtered(0),
+  pd_filtering(0)
 {
   {
     giopAddressList::const_iterator i, last;
@@ -94,30 +98,27 @@ giopRope::giopRope(const giopAddressList& addrlist,
       pd_addresses.push_back(a);
     }
   }
-
-  {
-    omnivector<CORBA::ULong>::const_iterator i, last;
-    i    = preferred.begin();
-    last = preferred.end();
-    for (; i != last; i++) {
-      pd_addresses_order.push_back(*i);
-    }
-  }
+  pd_ior_addr_size = pd_addresses.size();
 }
 
 
 ////////////////////////////////////////////////////////////////////////
-giopRope::giopRope(giopAddress* addr,int initialRefCount) :
-  pd_refcount(initialRefCount),
+giopRope::giopRope(giopAddress* addr) :
+  pd_refcount(0),
   pd_address_in_use(0),
   pd_maxStrands(orbParameters::maxGIOPConnectionPerServer),
   pd_oneCallPerConnection(orbParameters::oneCallPerConnection),
   pd_nwaiting(0),
   pd_cond(omniTransportLock, "giopRope::pd_cond"),
-  pd_flags(0)
+  pd_flags(0),
+  pd_ior_flags(0),
+  pd_offerBiDir(orbParameters::offerBiDirectionalGIOP),
+  pd_addrs_filtered(1),
+  pd_filtering(0)
 {
   pd_addresses.push_back(addr);
   pd_addresses_order.push_back(0);
+  pd_ior_addr_size = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -133,11 +134,11 @@ giopRope::~giopRope() {
 
 ////////////////////////////////////////////////////////////////////////
 IOP_C*
-giopRope::acquireClient(const omniIOR* ior,
+giopRope::acquireClient(const omniIOR*      ior,
 			const CORBA::Octet* key,
-			CORBA::ULong keysize,
-			omniCallDescriptor* calldesc) {
-
+			CORBA::ULong        keysize,
+			omniCallDescriptor* calldesc)
+{
   GIOP::Version v = ior->getIORInfo()->version();
   giopStreamImpl* impl = giopStreamImpl::matchVersion(v);
   if (!impl) {
@@ -145,17 +146,37 @@ giopRope::acquireClient(const omniIOR* ior,
     v = impl->version();
   }
 
-  ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,0);
-
   omni_tracedmutex_lock sync(*omniTransportLock);
+
+  if (!pd_addrs_filtered) {
+
+    if (pd_filtering) {
+      // Another thread is filtering. Wait until it is done
+      while (pd_filtering)
+        pd_cond.wait();
+
+      OMNIORB_ASSERT(pd_addrs_filtered);
+    }
+    else {
+      pd_filtering = 1;
+      {
+        omni_tracedmutex_unlock ul(*omniTransportLock);
+        filterAndSortAddressList();
+      }
+      pd_filtering      = 0;
+      pd_addrs_filtered = 1;
+
+      pd_cond.broadcast();
+    }
+  }
 
  again:
 
-  unsigned int nbusy = 0;
-  unsigned int ndying = 0;
+  unsigned int nbusy     = 0;
+  unsigned int ndying    = 0;
   unsigned int nwrongver = 0;
-  CORBA::ULong max = pd_maxStrands;  // snap the value now as it may
-                                     // change by the application anytime.
+  CORBA::ULong max       = pd_maxStrands; // snap the value now as it may
+                                          // change by the application any time.
   RopeLink* p = pd_strands.next;
   for (; p != &pd_strands; p = p->next) {
     giopStrand* s = (giopStrand*)p;
@@ -170,8 +191,9 @@ giopRope::acquireClient(const omniIOR* ior,
 	// strand alive, leading to a deadlock. To avoid the
 	// situation, we do not count dying bidir strands, allowing us
 	// to create a new one, and release the one that is dying.
-	if (!s->biDir)
+	if (!s->isBiDir())
 	  ndying++;
+
 	break;
       }
     case giopStrand::TIMEDOUT:
@@ -308,10 +330,8 @@ giopRope::acquireClient(const omniIOR* ior,
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopRope::releaseClient(IOP_C* iop_c) {
-
-  ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,0);
-
+giopRope::releaseClient(IOP_C* iop_c)
+{
   omni_tracedmutex_lock sync(*omniTransportLock);
 
   GIOP_C* giop_c = (GIOP_C*) iop_c;
@@ -341,7 +361,7 @@ giopRope::releaseClient(IOP_C* iop_c) {
   CORBA::Boolean remove = 0;
   CORBA::Boolean avail = 1;
 
-  if (giop_c->state() != IOP_C::Idle && s->state() != giopStrand::DYING ) {
+  if (giop_c->state() != IOP_C::Idle && s->state() != giopStrand::DYING) {
     if (omniORB::trace(30)) {
       omniORB::logger l;
 
@@ -362,7 +382,7 @@ giopRope::releaseClient(IOP_C* iop_c) {
     s->state(giopStrand::DYING);
   }
 
-  if ( s->state()== giopStrand::DYING ) {
+  if (s->state()== giopStrand::DYING) {
     remove = 1;
     avail = s->safeDelete(); // If safeDelete() returns 1, this strand
                              // can be regarded as deleted. Therefore, we
@@ -370,8 +390,8 @@ giopRope::releaseClient(IOP_C* iop_c) {
                              // on the rope to have a chance to create
                              // another strand.
   }
-  else if ( (s->biDir && !s->isClient()) || 
-	    !giopStreamList::is_empty(s->clients) ) {
+  else if ((s->isBiDir() && !s->isClient()) || 
+	    !giopStreamList::is_empty(s->clients)) {
     // We do not cache the GIOP_C if this is server side bidirectional or
     // we already have other GIOP_Cs active or available.
     remove = 1;
@@ -382,7 +402,7 @@ giopRope::releaseClient(IOP_C* iop_c) {
     giop_c->giopStreamList::insert(s->clients);
     // The strand is definitely idle from this point onwards, we
     // reset the idle counter so that it will be retired at the right time.
-    if ( s->isClient() && !s->biDir_has_callbacks ) 
+    if (s->isClient() && !s->biDir_has_callbacks) 
       s->startIdleCounter();
   }
 
@@ -400,7 +420,8 @@ giopRope::releaseClient(IOP_C* iop_c) {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopRope::realIncrRefCount() {
+giopRope::realIncrRefCount()
+{
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
 
   OMNIORB_ASSERT(pd_refcount >= 0);
@@ -426,19 +447,18 @@ giopRope::realIncrRefCount() {
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopRope::incrRefCount() {
-  ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,0);
-
+giopRope::incrRefCount()
+{
   omni_tracedmutex_lock sync(*omniTransportLock);
   realIncrRefCount();
 }
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopRope::decrRefCount() {
-  ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,0);
-
+giopRope::decrRefCount()
+{
   omni_tracedmutex_lock sync(*omniTransportLock);
+
   pd_refcount--;
   OMNIORB_ASSERT(pd_refcount >=0);
 
@@ -486,15 +506,9 @@ giopRope::hasAddress(const giopAddress* addr)
 ////////////////////////////////////////////////////////////////////////
 const giopAddress*
 giopRope::notifyCommFailure(const giopAddress* addr,
-			    CORBA::Boolean heldlock) {
-
-  if (heldlock) {
-    ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,1);
-  }
-  else {
-    ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,0);
-    omniTransportLock->lock();
-  }
+			    CORBA::Boolean heldlock)
+{
+  omni_optional_lock sync(*omniTransportLock, heldlock, heldlock);
 
   const giopAddress* addr_in_use;
 
@@ -510,102 +524,87 @@ giopRope::notifyCommFailure(const giopAddress* addr,
       l << "Switch rope to use address " << addr_in_use->address() << "\n";
     }
   }
-
-  if (!heldlock) {
-    omniTransportLock->unlock();
-  }
   return addr_in_use;
 }
 
 ////////////////////////////////////////////////////////////////////////
 int
 giopRope::selectRope(const giopAddressList& addrlist,
-		     omniIOR::IORInfo* info,
-		     Rope*& r,CORBA::Boolean& loc) {
-
+		     omniIOR::IORInfo*      info,
+		     Rope*&                 rope,
+                     CORBA::Boolean&        is_local)
+{
   giopRope* gr;
 
-  {
-    omni_tracedmutex_lock sync(*omniTransportLock);
+  omni_tracedmutex_lock sync(*omniTransportLock);
 
-    // Check if we have to use a bidirectional connection.
-    if (orbParameters::acceptBiDirectionalGIOP &&
-	BiDirServerRope::selectRope(addrlist,info,r)) {
-      loc = 0;
+  // Check if we have to use an existing bidirectional connection for
+  // a callback
+  if (orbParameters::acceptBiDirectionalGIOP &&
+      BiDirServerRope::selectRope(addrlist, info, rope)) {
+    is_local = 0;
+    return 1;
+  }
+
+  // Check if these are our addresses
+  giopAddressList::const_iterator i, last;
+  i    = addrlist.begin();
+  last = addrlist.end();
+  for (; i != last; i++) {
+    if (omniObjAdapter::matchMyEndpoints((*i)->address())) {
+      rope = 0; is_local = 1;
       return 1;
     }
+  }
 
-    // Check if these are our addresses
-    giopAddressList::const_iterator i, last;
-    i    = addrlist.begin();
-    last = addrlist.end();
-    for (; i != last; i++) {
-      if (omniObjAdapter::matchMyEndpoints((*i)->address())) {
-	r = 0; loc = 1;
-	return 1;
-      }
+  // Check if there already exists a rope that goes to the same
+  // addresses and matches the IOR
+  RopeLink* p = giopRope::ropes.next;
+  while (p != &giopRope::ropes) {
+    gr = (giopRope*)p;
+    if (gr->match(addrlist, info)) {
+      gr->realIncrRefCount();
+      rope = (Rope*)gr; is_local = 0;
+      return 1;
     }
-
-    // Check if there already exists a rope that goes to the same addresses
-    RopeLink* p = giopRope::ropes.next;
-    while ( p != &giopRope::ropes ) {
-      gr = (giopRope*)p;
-      if (gr->match(addrlist, info)) {
-	gr->realIncrRefCount();
-	r = (Rope*)gr; loc = 0;
-	return 1;
-      }
-      else if (gr->pd_refcount == 0 &&
-	       RopeLink::is_empty(gr->pd_strands) &&
-	       !gr->pd_nwaiting) {
-	// garbage rope, remove it
-	p = p->next;
-	gr->RopeLink::remove();
-	delete gr;
-      }
-      else {
-	p = p->next;
-      }
+    else if (gr->pd_refcount == 0 &&
+             RopeLink::is_empty(gr->pd_strands) &&
+             !gr->pd_nwaiting) {
+      // garbage rope, remove it
+      p = p->next;
+      gr->RopeLink::remove();
+      delete gr;
+    }
+    else {
+      p = p->next;
     }
   }
 
   // Reach here because we cannot find an existing rope that matches,
   // must create a new one.
 
-  omnivector<CORBA::ULong> prefer_list;
-  CORBA::Boolean use_bidir;
+  gr = 0;
 
-  // filterAndSortAddressList may spend time resolving host names, so
-  // we ensure we do not hold omniTransportLock while we do it. A
-  // consequence of this is that we may race with another thread and
-  // create two ropes for the same addresses, but although that is
-  // wasteful, it doesn't do any real harm.
-  CORBA::ULong match_flags;
-  filterAndSortAddressList(addrlist, prefer_list, use_bidir, match_flags);
+  if (omniInterceptorP::createRope) {
+    omniInterceptors::createRope_T::info_T iinfo(addrlist, info, gr);
+    omniInterceptorP::visit(iinfo);
+  }
 
-  {
-    omni_tracedmutex_lock sync(*omniTransportLock);
+  if (!gr) {
+    if (orbParameters::offerBiDirectionalGIOP &&
+        omniObjAdapter::isInitialised()) {
 
-    if (!use_bidir) {
-      gr = new giopRope(addrlist,prefer_list);
+      gr = new BiDirClientRope(addrlist, info);
     }
     else {
-      if (omniObjAdapter::isInitialised()) {
-	gr = new BiDirClientRope(addrlist,prefer_list);
-      }
-      else {
-	omniORB::logs(10, "Client policies specify a bidirectional connection, "
-		      "but no object adapters have been initialised. Using a "
-		      "non-bidirectional connection.");
-	gr = new giopRope(addrlist,prefer_list);
-      }
+      gr = new giopRope(addrlist, info);
     }
-    gr->pd_flags = info->flags() & match_flags;
-    gr->RopeLink::insert(giopRope::ropes);
-    gr->realIncrRefCount();
-    r = (Rope*)gr; loc = 0;
-    return 1;
   }
+
+  gr->RopeLink::insert(giopRope::ropes);
+  gr->realIncrRefCount();
+  rope = (Rope*)gr; is_local = 0;
+  return 1;
 }
 
 
@@ -613,8 +612,11 @@ giopRope::selectRope(const giopAddressList& addrlist,
 CORBA::Boolean
 giopRope::match(const giopAddressList& addrlist, omniIOR::IORInfo* info) const
 {
-  if (addrlist.size() != pd_addresses.size()) return 0;
-  if (orbParameters::offerBiDirectionalGIOP != pd_offerBiDir) return 0;
+  if ((info->flags() != pd_ior_flags) ||
+      (addrlist.size() != pd_ior_addr_size) ||
+      (orbParameters::offerBiDirectionalGIOP != pd_offerBiDir)) {
+    return 0;
+  }
 
   giopAddressList::const_iterator i, last, j;
   i    = addrlist.begin();
@@ -623,100 +625,152 @@ giopRope::match(const giopAddressList& addrlist, omniIOR::IORInfo* info) const
   for (; i != last; i++, j++) {
     if (!omni::ptrStrMatch((*i)->address(),(*j)->address())) return 0;
   }
-  return pd_flags == info->flags();
+  return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////
 void
-giopRope::filterAndSortAddressList(const giopAddressList&    addrlist,
-				   omnivector<CORBA::ULong>& ordered_list,
-				   CORBA::Boolean&           use_bidir,
-                                   CORBA::ULong&             flags)
+giopRope::filterAndSortAddressList()
 {
-  // We consult the clientTransportRules to decide which address is more
-  // preferable than others. The rules may forbid the use of some of the
-  // addresses and these will be filtered out. We then record the order
-  // of the remaining addresses in order_list.
-  // If any of the non-exlusion clientTransportRules have the "bidir"
-  // attribute, use_bidir will be set to 1, otherwise it is set to 0.
+  // We consult the clientTransportRules to decide the preference
+  // orders for the addresses. The rules may forbid the use of some of
+  // the addresses and these will be filtered out. We then record the
+  // order of the remaining addresses in pd_addresses_order.
 
-  use_bidir = 0;
-  flags     = 0;
+  // First, resolve any names in pd_addresses and add their
+  // resolutions to the end.
+
+  giopAddressList resolved;
+  giopAddressList::const_iterator it;
+
+  for (it = pd_addresses.begin(); it != pd_addresses.end(); ++it) {
+    giopAddress* ga   = *it;
+    const char*  host = ga->host();
+
+    if (host && !LibcWrapper::isipaddr(host)) {
+      if (omniORB::trace(25)) {
+        omniORB::logger log;
+        log << "Resolve name '" << host << "'...\n";
+      }
+
+      LibcWrapper::AddrInfo_var aiv;
+      aiv = LibcWrapper::getAddrInfo(host, 0);
+
+      LibcWrapper::AddrInfo* ai = aiv;
+
+      if (ai == 0) {
+        if (omniORB::trace(25)) {
+          omniORB::logger log;
+          log << "Unable to resolve '" << host << "'.\n";
+        }
+      }
+      else {
+        while (ai) {
+          CORBA::String_var addr = ai->asString();
+
+          if (omniORB::trace(25)) {
+            omniORB::logger log;
+            log << "Name '" << host << "' resolved to " << addr << "\n";
+          }
+          resolved.push_back(ga->duplicate(addr));
+          ai = ai->next();
+        }
+      }
+    }
+  }
+
+  if (!resolved.empty()) {
+    for (it = resolved.begin(); it != resolved.end(); ++it) {
+      pd_addresses.push_back(*it);
+    }
+  }
 
   // For each address, find the rule that is applicable. Record the
   // rules priority in the priority list.
-  omnivector<CORBA::ULong> prioritylist;
+  omnivector<CORBA::ULong> priority_list;
 
   CORBA::ULong index;
-  CORBA::ULong total = addrlist.size();
+  CORBA::ULong total = pd_addresses.size();
+
   for (index = 0; index < total; index++) {
-    transportRules::sequenceString actions;
-    CORBA::ULong matchedRule;
+    giopAddress* ga   = pd_addresses[index];
+    const char*  host = ga->host();
 
-    if ( transportRules::clientRules().match(addrlist[index]->address(),
-					     actions,matchedRule)        ) {
+    if (host && !LibcWrapper::isipaddr(host)) {
+      // Skip address -- it has been resolved to an address above
+      continue;
+    }
 
-      const char* transport = strchr(addrlist[index]->type(),':');
+    CORBA::StringSeq actions;
+    CORBA::ULong     matchedRule;
+
+    if (transportRules::clientRules().match(ga->address(),
+                                            actions, matchedRule)) {
+
+      const char* transport = strchr(ga->type(),':');
       OMNIORB_ASSERT(transport);
       transport++;
       
-      CORBA::ULong i;
-      CORBA::Boolean matched = 0;
-      CORBA::Boolean usebidir = 0;
-      CORBA::ULong priority;
-      for (i = 0; i < actions.length(); i++ ) {
+      CORBA::ULong   i;
+      CORBA::Boolean matched  = 0;
+      CORBA::ULong   flags    = 0;
+      CORBA::ULong   priority;
+
+      for (i = 0; i < actions.length(); i++) {
 	size_t len = strlen(actions[i]);
-	if (strncmp(actions[i],transport,len) == 0 ) {
+	if (strncmp(actions[i],transport,len) == 0) {
 	  priority = (matchedRule << 16) + i;
-	  matched = 1;
+	  matched  = 1;
 	}
-	else if ( strcmp(actions[i],"none") == 0 ) {
+	else if (strcmp(actions[i],"none") == 0) {
 	  break;
 	}
-	else if ( strcmp(actions[i],"bidir") == 0 ) {
-	  usebidir = 1;
+	else if (orbParameters::offerBiDirectionalGIOP &&
+                 strcmp(actions[i],"bidir") == 0) {
+          flags |= GIOPSTRAND_BIDIR;
 	}
-        else if ( strcmp(actions[i],"ziop") == 0 ) {
+        else if (strcmp(actions[i],"ziop") == 0) {
           flags |= GIOPSTRAND_COMPRESSION;
         }
       }
       if (matched) {
-	ordered_list.push_back(index);
-	prioritylist.push_back(priority);
-	if (usebidir && orbParameters::offerBiDirectionalGIOP) {
-	  use_bidir = 1;
-	}
+	pd_addresses_order.push_back(index);
+	priority_list.push_back(priority);
+        pd_flags |= flags;
       }
     }
   }
 
-  // If we have more than 1 addresses to use, sort them according to
+  // If we have more than 1 address to use, sort them according to
   // their value in prioritylist.
-  if ( ordered_list.size() > 1 ) {
+
+  if (pd_addresses_order.size() > 1) {
     // Won't it be nice to just use stl qsort? It is tempting to just
     // forget about old C++ compiler and use stl. Until the time has come
     // use shell sort to sort the addresses in order.
-    int n = ordered_list.size();
-    for (int gap=n/2; gap > 0; gap=gap/2 ) {
-      for (int i=gap; i < n ; i++)
-	for (int j =i-gap; j>=0; j=j-gap) {
-	  if ( prioritylist[j] > prioritylist[j+gap] ) {
-	    CORBA::ULong temp = ordered_list[j];
-	    ordered_list[j] = ordered_list[j+gap];
-	    ordered_list[j+gap] = temp;
-	    temp = prioritylist[j];
-	    prioritylist[j] = prioritylist[j+gap];
-	    prioritylist[j+gap] = temp;
+
+    int n = pd_addresses_order.size();
+    for (int gap=n/2; gap > 0; gap=gap/2) {
+      for (int i=gap; i < n; i++)
+	for (int j = i-gap; j>=0; j=j-gap) {
+	  if (priority_list[j] > priority_list[j+gap]) {
+	    CORBA::ULong temp         = pd_addresses_order[j];
+	    pd_addresses_order[j]     = pd_addresses_order[j+gap];
+	    pd_addresses_order[j+gap] = temp;
+	    temp                      = priority_list[j];
+	    priority_list[j]          = priority_list[j+gap];
+	    priority_list[j+gap]      = temp;
 	  }
 	}
     }
   }
+
 #if 0
   {
     omniORB::logger log;
     log << "Sorted addresses are: \n";
-    for (int i=0; i<ordered_list.size(); i++) {
-      log << addrlist[ordered_list[i]]->address() << "\n";
+    for (size_t i=0; i < pd_addresses_order.size(); i++) {
+      log << pd_addresses[pd_addresses_order[i]]->address() << "\n";
     }
   }
 #endif

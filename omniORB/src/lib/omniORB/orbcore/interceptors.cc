@@ -3,7 +3,7 @@
 // interceptors.cc            Created on: 22/09/2000
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -62,6 +62,7 @@ omniInterceptorP::elmT* omniInterceptorP::serverAcceptConnection = 0;
 omniInterceptorP::elmT* omniInterceptorP::serverReceiveRequest   = 0;
 omniInterceptorP::elmT* omniInterceptorP::serverSendReply        = 0;
 omniInterceptorP::elmT* omniInterceptorP::serverSendException    = 0;
+omniInterceptorP::elmT* omniInterceptorP::createRope             = 0;
 omniInterceptorP::elmT* omniInterceptorP::createIdentity         = 0;
 omniInterceptorP::elmT* omniInterceptorP::createORBServer        = 0;
 omniInterceptorP::elmT* omniInterceptorP::createPolicy           = 0;
@@ -125,6 +126,7 @@ INTERCEPTOR_IMPLEMENTATION(serverAcceptConnection)
 INTERCEPTOR_IMPLEMENTATION(serverReceiveRequest)
 INTERCEPTOR_IMPLEMENTATION(serverSendReply)
 INTERCEPTOR_IMPLEMENTATION(serverSendException)
+INTERCEPTOR_IMPLEMENTATION(createRope)
 INTERCEPTOR_IMPLEMENTATION(createIdentity)
 INTERCEPTOR_IMPLEMENTATION(createORBServer)
 INTERCEPTOR_IMPLEMENTATION(createPolicy)
@@ -221,6 +223,7 @@ public:
       list_del(&omniInterceptorP::serverReceiveRequest);
       list_del(&omniInterceptorP::serverSendReply);
       list_del(&omniInterceptorP::serverSendException);
+      list_del(&omniInterceptorP::createRope);
       list_del(&omniInterceptorP::createIdentity);
       list_del(&omniInterceptorP::createORBServer);
       list_del(&omniInterceptorP::createPolicy);

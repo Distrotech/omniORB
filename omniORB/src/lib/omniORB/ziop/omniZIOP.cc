@@ -1007,13 +1007,13 @@ serverReceiveRequestInterceptor(omniInterceptors::
       // Check serverTransportRule to see if we should allow ziop from
       // this client.
       {
-	transportRules::sequenceString actions;
-	CORBA::ULong   matched_rule;
-	CORBA::Boolean accept_ziop;
-	CORBA::Boolean dump_rule = 0;
-	const char*    why;
+	CORBA::StringSeq actions;
+	CORBA::ULong     matched_rule;
+	CORBA::Boolean   accept_ziop;
+	CORBA::Boolean   dump_rule = 0;
+	const char*      why;
 
-        transportRules& rules = transportRules::serverRules();
+        transportRules&  rules = transportRules::serverRules();
 
 	if ((accept_ziop = rules.match(strand.connection->peeraddress(),
                                        actions, matched_rule))) {

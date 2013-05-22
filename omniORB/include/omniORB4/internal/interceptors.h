@@ -3,7 +3,7 @@
 // interceptors.h             Created on: 2002/03/21
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2006-2012 Apasphere Ltd
+//    Copyright (C) 2006-2013 Apasphere Ltd
 //    Copyright (C) 2002 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -60,6 +60,7 @@ public:
   static _core_attr elmT* serverReceiveRequest;
   static _core_attr elmT* serverSendReply;
   static _core_attr elmT* serverSendException;
+  static _core_attr elmT* createRope;
   static _core_attr elmT* createIdentity;
   static _core_attr elmT* createORBServer;
   static _core_attr elmT* createPolicy;
@@ -84,6 +85,7 @@ public:
   VISIT_FUNCTION(serverReceiveRequest)
   VISIT_FUNCTION(serverSendReply)
   VISIT_FUNCTION(serverSendException)
+  VISIT_FUNCTION(createRope)
   VISIT_FUNCTION(createIdentity)
   VISIT_FUNCTION(createORBServer)
   VISIT_FUNCTION(createPolicy)

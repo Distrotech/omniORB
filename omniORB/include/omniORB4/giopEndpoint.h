@@ -197,6 +197,11 @@ public:
   // Return the string that describes this remote address.
   // The string format is described in str2Address().
 
+  virtual const char* host() const;
+  // Return a string containing the host name or IP address for the
+  // address, if that is meaningful for the address type. Returns 0 if
+  // not relevant.
+
   virtual giopActiveConnection*
   Connect(const omni_time_t& deadline,
 	  _CORBA_ULong       strand_flags,
@@ -207,6 +212,10 @@ public:
 
   virtual giopAddress* duplicate() const = 0;
   // Return an identical instance.
+
+  virtual giopAddress* duplicate(const char* host) const;
+  // Return an instance that is identical except with a different
+  // host. Used when resolving a host name into an address.
 
   giopAddress() {}
   virtual ~giopAddress() {}

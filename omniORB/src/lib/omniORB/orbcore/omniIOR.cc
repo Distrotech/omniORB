@@ -3,7 +3,7 @@
 // omniIOR.cc                 Created on: 19/09/2000
 //                            Author    : Sai-Lai Lo
 //
-//    Copyright (C) 2005-2012 Apasphere Ltd
+//    Copyright (C) 2005-2013 Apasphere Ltd
 //    Copyright (C) 1999-2000 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -26,64 +26,6 @@
 //
 // Description:
 //
-
-/*
-  $Log$
-  Revision 1.1.4.3  2006/07/18 16:21:21  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.4.2  2005/01/06 23:10:36  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:02:11  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.14  2003/02/03 16:53:14  dgrisby
-  Force type in constructor argument to help confused compilers.
-
-  Revision 1.1.2.13  2002/09/08 21:12:39  dgrisby
-  Properly handle IORs with no usable profiles.
-
-  Revision 1.1.2.12  2002/03/27 11:44:53  dpg1
-  Check in interceptors things left over from last week.
-
-  Revision 1.1.2.11  2001/12/04 14:32:27  dpg1
-  Minor corbaloc bugs.
-
-  Revision 1.1.2.10  2001/09/19 17:26:50  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.2.9  2001/08/21 10:49:39  dpg1
-  Fix incorrect sequence expansion.
-
-  Revision 1.1.2.8  2001/08/15 10:26:13  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.2.7  2001/06/11 17:53:22  sll
-   The omniIOR ctor used by genior and corbaloc now has the option to
-   select whether to call interceptors and what set of interceptors to call.
-
-  Revision 1.1.2.6  2001/05/01 17:39:09  sll
-  Reading uninitialised variable in ~IORInfo().
-
-  Revision 1.1.2.5  2001/04/18 18:18:07  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.4  2000/11/15 17:25:11  sll
-  Added char, wchar codeset convertor support.
-
-  Revision 1.1.2.3  2000/10/04 16:53:48  sll
-  Make sure IIOP version is set in the iiop member.
-
-  Revision 1.1.2.2  2000/10/03 17:37:07  sll
-  Changed omniIOR synchronisation mutex from omni::internalLock to its own
-  mutex.
-
-  Revision 1.1.2.1  2000/09/27 17:30:30  sll
-  *** empty log message ***
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniIdentity.h>
@@ -116,7 +58,7 @@ omniIOR::omniIOR(char* repoId, IOP::TaggedProfile* iop, CORBA::ULong niops,
   pd_refCount(1)
 {    
   pd_repositoryID = repoId;
-  pd_iopProfiles = new IOP::TaggedProfileList(niops,niops,iop,1);
+  pd_iopProfiles  = new IOP::TaggedProfileList(niops,niops,iop,1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -357,8 +299,8 @@ omniIOR::decodeIOPprofile(const IIOP::ProfileBody& iiop) {
 
 /////////////////////////////////////////////////////////////////////////////
 omniIOR::IORInfo*
-omniIOR::getIORInfo() const {
-
+omniIOR::getIORInfo() const
+{
   if (!pd_iorInfo) {
 
     omni_tracedmutex_lock sync(*omniIOR::lock);
@@ -373,12 +315,12 @@ omniIOR::getIORInfo() const {
 	is_iiop = (profiles[pd_addr_selected_profile_index].tag
 		   == IOP::TAG_INTERNET_IOP);
 
-	if ( is_iiop )
+	if (is_iiop)
 	  IIOP::unmarshalProfile(profiles[pd_addr_selected_profile_index],
 				 iiop);
 
 	for (CORBA::ULong index = 0; index < profiles.length(); index++) {
-	  if ( profiles[index].tag == IOP::TAG_MULTIPLE_COMPONENTS ) {
+	  if (profiles[index].tag == IOP::TAG_MULTIPLE_COMPONENTS) {
 	    IIOP::unmarshalMultiComponentProfile(profiles[index],
 						 iiop.components);
 	    is_iiop = 1;

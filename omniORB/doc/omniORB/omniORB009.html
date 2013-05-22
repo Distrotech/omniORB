@@ -95,7 +95,10 @@ Called when the server receives a request, just after unmarshalling
 the request header. See the <TT>getCodeSetServiceContext()</TT> function in
 <TT>src/lib/omniORB/orbcore/cdrStream.cc</TT> for an example.</DD><DT CLASS="dt-description"><B>serverSendReply</B></DT><DD CLASS="dd-description"><BR>
 Called just before the server marshals a reply header.</DD><DT CLASS="dt-description"><B>serverSendException</B></DT><DD CLASS="dd-description"><BR>
-Called just before the server marshals an exception reply header.</DD><DT CLASS="dt-description"><B>createIdentity</B></DT><DD CLASS="dd-description"><BR>
+Called just before the server marshals an exception reply header.</DD><DT CLASS="dt-description"><B>createRope</B></DT><DD CLASS="dd-description"><BR>
+Called when the ORB is about to create a &#X2018;rope&#X2019; that encapsulates a
+bundle of connections (&#X2018;strands&#X2019;) to a remote address space. It allows
+application code to override omniORB&#X2019;s normal connection management.</DD><DT CLASS="dt-description"><B>createIdentity</B></DT><DD CLASS="dd-description"><BR>
 Called when the ORB is about to create an &#X2018;identity&#X2019; object to
 represent a CORBA object. It allows application code to provide its
 own identity implementations. It is very unlikely that an application

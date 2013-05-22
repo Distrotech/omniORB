@@ -67,9 +67,25 @@ sslAddress::address() const {
 }
 
 /////////////////////////////////////////////////////////////////////////
+const char*
+sslAddress::host() const {
+  return pd_address.host;
+}
+
+/////////////////////////////////////////////////////////////////////////
 giopAddress*
 sslAddress::duplicate() const {
   return new sslAddress(pd_address,pd_ctx);
+}
+
+/////////////////////////////////////////////////////////////////////////
+giopAddress*
+sslAddress::duplicate(const char* host) const {
+  IIOP::Address addr;
+  addr.host = host;
+  addr.port = pd_address.port;
+
+  return new sslAddress(addr, pd_ctx);
 }
 
 

@@ -663,8 +663,8 @@ templates, see the CORBA C++ mapping specification.</P><H2 CLASS="section"><A NA
 <I>//</I>
 <I>// Usage: eg2_impl</I>
 <I>//</I>
-<I>//        On startup, the object reference is printed to cerr as a</I>
-<I>//        stringified IOR. This string should be used as the argument to </I>
+<I>//        On startup, the object reference is printed to cout as a</I>
+<I>//        stringified IOR. This string should be used as the argument to</I>
 <I>//        eg2_clt.</I>
 <I>//</I>
 
@@ -676,6 +676,7 @@ templates, see the CORBA C++ mapping specification.</P><H2 CLASS="section"><A NA
 <B>#else</B>
 <B>#  include</B> &lt;iostream.h&gt;
 <B>#endif</B>
+
 
 <B>class</B> Echo_i : <B>public</B> POA_Echo
 {
@@ -737,7 +738,6 @@ templates, see the CORBA C++ mapping specification.</P><H2 CLASS="section"><A NA
 
 <B>#ifdef</B> HAVE_STD
 <B>#  include</B> &lt;iostream&gt;
-<B>#  include</B> &lt;fstream&gt;
    <B>using</B> <B>namespace</B> std;
 <B>#else</B>
 <B>#  include</B> &lt;iostream.h&gt;

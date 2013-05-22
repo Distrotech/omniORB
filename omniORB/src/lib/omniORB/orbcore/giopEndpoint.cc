@@ -3,7 +3,7 @@
 // giopEndpoint.cc            Created on: 29 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -129,6 +129,20 @@ giopAddress::str2Address(const char* address) {
 }
 
 ////////////////////////////////////////////////////////////////////////
+const char*
+giopAddress::host() const {
+  return 0;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+giopAddress*
+giopAddress::duplicate(const char* host) const {
+  return duplicate();
+}
+
+
+////////////////////////////////////////////////////////////////////////
 giopAddress*
 giopAddress::fromTcpAddress(const IIOP::Address& addr) {
 
@@ -248,7 +262,7 @@ giopConnection::peerdetails() {
 _CORBA_Boolean
 giopConnection::gatekeeperCheck(giopStrand* strand)
 {
-  transportRules::sequenceString actions;
+  CORBA::StringSeq actions;
   CORBA::ULong matchedRule;
 
   CORBA::Boolean acceptconnection;

@@ -903,8 +903,8 @@ templates, see the CORBA C++ mapping specification.</P><!--TOC section Source Li
 <I>//</I>
 <I>// Usage: eg2_impl</I>
 <I>//</I>
-<I>//        On startup, the object reference is printed to cerr as a</I>
-<I>//        stringified IOR. This string should be used as the argument to </I>
+<I>//        On startup, the object reference is printed to cout as a</I>
+<I>//        stringified IOR. This string should be used as the argument to</I>
 <I>//        eg2_clt.</I>
 <I>//</I>
 
@@ -916,6 +916,7 @@ templates, see the CORBA C++ mapping specification.</P><!--TOC section Source Li
 <B>#else</B>
 <B>#  include</B> &lt;iostream.h&gt;
 <B>#endif</B>
+
 
 <B>class</B> Echo_i : <B>public</B> POA_Echo
 {
@@ -978,7 +979,6 @@ templates, see the CORBA C++ mapping specification.</P><!--TOC section Source Li
 
 <B>#ifdef</B> HAVE_STD
 <B>#  include</B> &lt;iostream&gt;
-<B>#  include</B> &lt;fstream&gt;
    <B>using</B> <B>namespace</B> std;
 <B>#else</B>
 <B>#  include</B> &lt;iostream.h&gt;
@@ -3308,7 +3308,10 @@ Called when the server receives a request, just after unmarshalling
 the request header. See the <TT>getCodeSetServiceContext()</TT> function in
 <TT>src/lib/omniORB/orbcore/cdrStream.cc</TT> for an example.</DD><DT CLASS="dt-description"><B>serverSendReply</B></DT><DD CLASS="dd-description"><BR>
 Called just before the server marshals a reply header.</DD><DT CLASS="dt-description"><B>serverSendException</B></DT><DD CLASS="dd-description"><BR>
-Called just before the server marshals an exception reply header.</DD><DT CLASS="dt-description"><B>createIdentity</B></DT><DD CLASS="dd-description"><BR>
+Called just before the server marshals an exception reply header.</DD><DT CLASS="dt-description"><B>createRope</B></DT><DD CLASS="dd-description"><BR>
+Called when the ORB is about to create a &#X2018;rope&#X2019; that encapsulates a
+bundle of connections (&#X2018;strands&#X2019;) to a remote address space. It allows
+application code to override omniORB&#X2019;s normal connection management.</DD><DT CLASS="dt-description"><B>createIdentity</B></DT><DD CLASS="dd-description"><BR>
 Called when the ORB is about to create an &#X2018;identity&#X2019; object to
 represent a CORBA object. It allows application code to provide its
 own identity implementations. It is very unlikely that an application

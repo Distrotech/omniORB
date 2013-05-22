@@ -955,7 +955,7 @@ omniObjRef::_marshal(omniObjRef* objref, cdrStream& s)
   giopStream* gs = giopStream::downcast(&s);
   if (gs) {
     giopStrand& g = gs->strand();
-    if (g.biDir && g.isClient()) {
+    if (g.isBiDir() && g.isClient()) {
       g.biDir_has_callbacks = 1;
     }
   }
@@ -1033,7 +1033,7 @@ omniObjRef::_unMarshal(const char* repoId, cdrStream& s)
   giopStream* gs = giopStream::downcast(&s);
   if (gs) {
     giopStrand& g = gs->strand();
-    if (g.biDir && !g.isClient()) {
+    if (g.isBiDir() && !g.isClient()) {
       // Check the POA policy to see if the servant's POA is willing
       // to use bidirectional on its callback objects.
       omniCurrent* current = omniCurrent::get();

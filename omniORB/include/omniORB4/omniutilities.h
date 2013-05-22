@@ -24,21 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
-//	
-
-/*
-  $Log$
-  Revision 1.1.6.1  2003/03/23 21:04:06  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.2  2002/11/21 14:24:59  dgrisby
-  More unique guard name (thanks Daniel Bell).
-
-  Revision 1.1.4.1  2001/04/18 17:26:25  sll
-  Big checkin with the brand new internal APIs.
-
-*/
+//	*** PROPRIETARY INTERFACE ***
+//
 
 #ifndef __OMNIUTILITIES_H__
 #define __OMNIUTILITIES_H__

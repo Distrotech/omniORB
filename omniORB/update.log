@@ -1,3 +1,46 @@
+Wed May 22 15:02:51 BST 2013 dgrisby
+====================================
+
+- Refactored rope management and transport rules.
+
+doc/omniORB.pdf
+doc/omniORB/omniORB.html
+doc/omniORB/omniORB002.html
+doc/omniORB/omniORB009.html
+doc/tex/omniORB.tex
+include/omniORB4/IIOP.h
+include/omniORB4/giopEndpoint.h
+include/omniORB4/internal/giopBiDir.h
+include/omniORB4/internal/giopRope.h
+include/omniORB4/internal/giopStrand.h
+include/omniORB4/internal/giopStrandFlags.h
+include/omniORB4/internal/interceptors.h
+include/omniORB4/internal/orbOptions.h
+include/omniORB4/internal/transportRules.h
+include/omniORB4/omniInterceptors.h
+include/omniORB4/omniutilities.h
+include/omniORB4/tracedthread.h
+src/lib/omniORB/connections/omniConnectionMgmt.cc
+src/lib/omniORB/orbcore/GIOP_C.cc
+src/lib/omniORB/orbcore/GIOP_S.cc
+src/lib/omniORB/orbcore/giopBiDir.cc
+src/lib/omniORB/orbcore/giopEndpoint.cc
+src/lib/omniORB/orbcore/giopImpl12.cc
+src/lib/omniORB/orbcore/giopRope.cc
+src/lib/omniORB/orbcore/giopServer.cc
+src/lib/omniORB/orbcore/giopStrand.cc
+src/lib/omniORB/orbcore/interceptors.cc
+src/lib/omniORB/orbcore/omniIOR.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/lib/omniORB/orbcore/ssl/sslAddress.cc
+src/lib/omniORB/orbcore/ssl/sslAddress.h
+src/lib/omniORB/orbcore/tcp/tcpAddress.cc
+src/lib/omniORB/orbcore/tcp/tcpAddress.h
+src/lib/omniORB/orbcore/transportRules.cc
+src/lib/omniORB/ziop/omniZIOP.cc
+
+
+
 Tue Apr 30 18:21:01 BST 2013 dgrisby
 ====================================
 

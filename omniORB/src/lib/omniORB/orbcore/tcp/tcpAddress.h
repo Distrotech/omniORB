@@ -3,6 +3,7 @@
 // tcpAddress.h               Created on: 19 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -24,32 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.3  2006/04/28 18:40:46  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.2  2006/03/25 18:54:03  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.4.1  2003/03/23 21:01:58  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2001/07/31 16:16:18  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.2.2  2001/06/20 18:35:16  sll
-  Upper case send,recv,connect,shutdown to avoid silly substutition by
-  macros defined in socket.h to rename these socket functions
-  to something else.
-
-  Revision 1.1.2.1  2001/04/18 18:10:44  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #ifndef __TCPADDRESS_H__
 #define __TCPADDRESS_H__
@@ -60,9 +37,13 @@ class tcpAddress : public giopAddress {
  public:
 
   tcpAddress(const IIOP::Address& address);
-  const char* type() const;
-  const char* address() const;
+
+  const char*  type()      const;
+  const char*  address()   const;
+  const char*  host()      const;
   giopAddress* duplicate() const;
+  giopAddress* duplicate(const char* host) const;
+
   giopActiveConnection* Connect(const omni_time_t& deadline,
 				CORBA::ULong  	   strand_flags,
 				CORBA::Boolean&    timed_out) const;

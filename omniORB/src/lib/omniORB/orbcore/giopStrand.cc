@@ -136,7 +136,7 @@ giopStrand::giopStrand(const giopAddress* addr) :
   pd_safelyDeleted(0),
   idlebeats(-1),
   address(addr), connection(0), server(0), flags(0),
-  biDir(0), gatekeeper_checked(0), first_use(1), first_call(1),
+  gatekeeper_checked(0), first_use(1), first_call(1),
   orderly_closed(0), biDir_initiated(0), biDir_has_callbacks(0),
   tcs_selected(0), tcs_c(0), tcs_w(0), giopImpl(0), compressor(0),
   rdcond(omniTransportLock, "giopStrand::rdcond"),
@@ -155,7 +155,7 @@ giopStrand::giopStrand(giopConnection* conn, giopServer* serv) :
   pd_safelyDeleted(0),
   idlebeats(-1),
   address(0), connection(conn), server(serv), flags(0),
-  biDir(0), gatekeeper_checked(0), first_use(0), first_call(0),
+  gatekeeper_checked(0), first_use(0), first_call(0),
   orderly_closed(0), biDir_initiated(0), biDir_has_callbacks(0),
   tcs_selected(0), tcs_c(0), tcs_w(0), giopImpl(0), compressor(0),
   rdcond(omniTransportLock, "giopStrand::rdcond"),
@@ -285,7 +285,7 @@ giopStrand::deleteStrandAndConnection(CORBA::Boolean forced)
 	// The only condition when this happen is when the connection
 	// is bidirectional. giopServer still holds a refcount on this
 	// connection.
-	OMNIORB_ASSERT(biDir);
+	OMNIORB_ASSERT(isBiDir());
 	connection->Shutdown(); // This would cause the giopServer to
 	                        // remove this connection as well.
 	return;                 // Do not delete the strand. Do so
@@ -521,7 +521,7 @@ giopStrand::releaseServer(IOP_S* iop_s)
       restart_idle = 0;
   }
 
-  if (restart_idle && !biDir) {
+  if (restart_idle && !isBiDir()) {
     CORBA::Boolean success = startIdleCounter();
     if (!success) {
       if (omniORB::trace(1)) {

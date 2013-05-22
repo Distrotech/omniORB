@@ -610,7 +610,7 @@ GIOP_S::ReceiveRequest(omniCallDescriptor& desc) {
   // Check if this call comes in from a bidirectional connection.
   // If so check if the servant's POA policy allows this.
   giopStrand& g = strand();
-  if (g.biDir && g.isClient()) {
+  if (g.isBiDir() && g.isClient()) {
     if (!(pd_calldescriptor->poa() &&
 	  pd_calldescriptor->poa()->acceptBiDirectional())) {
       OMNIORB_THROW(OBJ_ADAPTER,OBJ_ADAPTER_BiDirNotAllowed,

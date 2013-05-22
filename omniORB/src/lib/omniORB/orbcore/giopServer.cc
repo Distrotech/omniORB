@@ -204,7 +204,7 @@ giopServer::publish(const orbServer::PublishSpecs& publish_specs,
 CORBA::Boolean
 giopServer::addBiDirStrand(giopStrand* s,giopActiveCollection* watcher) {
 
-  OMNIORB_ASSERT(s->isClient() && s->biDir && s->connection);
+  OMNIORB_ASSERT(s->isClient() && s->isBiDir() && s->connection);
   {
     ASSERT_OMNI_TRACEDMUTEX_HELD(*omniTransportLock,0);
     omni_tracedmutex_lock sync(*omniTransportLock);
@@ -492,7 +492,7 @@ giopServer::deactivate()
       connectionState** head = &(pd_connectionState[i]);
       while (*head) {
 	if ((*head)->connection->pd_has_dedicated_thread ||
-	    (*head)->strand->biDir) {
+	    (*head)->strand->isBiDir()) {
 
 	  sendCloseConnection((*head)->strand);
 	  (*head)->connection->Shutdown();
@@ -594,7 +594,7 @@ giopServer::deactivate()
       connectionState** head = &(pd_connectionState[i]);
       while (*head) {
 	if (!((*head)->connection->pd_has_dedicated_thread ||
-	      (*head)->strand->biDir)) {
+	      (*head)->strand->isBiDir())) {
 
 	  sendCloseConnection((*head)->strand);
 	  (*head)->connection->Shutdown();
@@ -796,7 +796,7 @@ giopServer::csInsert(giopStrand* s)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock,1);
 
-  OMNIORB_ASSERT(s->biDir && s->isClient());
+  OMNIORB_ASSERT(s->isBiDir() && s->isClient());
 
   giopConnection* conn = s->connection;
 

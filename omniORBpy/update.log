@@ -1,3 +1,11 @@
+Wed May 22 15:02:51 BST 2013 dgrisby
+====================================
+
+- Refactored rope management and transport rules.
+
+modules/pyObjectRef.cc
+
+
 Wed May 22 13:10:29 BST 2013 dgrisby
 ====================================
 

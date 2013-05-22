@@ -3,7 +3,7 @@
 // tracedthread.h             Created on: 15/6/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2010      Apasphere Ltd
+//    Copyright (C) 2010-2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -158,6 +158,23 @@ private:
   omni_optional_lock& operator = (const omni_optional_lock&);
 
   int               pd_locked;
+  omni_tracedmutex& pd_m;
+};
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////// omni_tracedmutex_unlock /////////////////////
+//////////////////////////////////////////////////////////////////////
+
+class omni_tracedmutex_unlock {
+public:
+  inline omni_tracedmutex_unlock(omni_tracedmutex& m) : pd_m(m) { m.unlock(); }
+  inline ~omni_tracedmutex_unlock() { pd_m.lock(); }
+
+private:
+  omni_tracedmutex_unlock(const omni_tracedmutex_unlock&);
+  omni_tracedmutex_unlock& operator=(const omni_tracedmutex_unlock&);
+
   omni_tracedmutex& pd_m;
 };
 
