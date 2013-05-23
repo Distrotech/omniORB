@@ -142,6 +142,26 @@ restrictedGiopRope::acquireClient(const omniIOR*      ior,
 
 
 //
+// giopRope::match specialisation
+//
+
+CORBA::Boolean
+restrictedGiopRope::match(const giopAddressList& addrlist,
+                          omniIOR::IORInfo*      info) const
+{
+  CORBA::Boolean m = giopRope::match(addrlist, info);
+
+  if (!m)
+    return 0;
+
+  RestrictedInfo* rinfo = RestrictedInfo::get(info);
+  if (!rinfo)
+    return 0;
+
+  return rinfo->data.connection_id == pd_connection_id;
+}
+
+//
 // decodeIOR interceptor handles the restricted connection component
 //
 
@@ -204,7 +224,6 @@ createRopeInterceptor(omniInterceptors::createRope_T::info_T& iinfo)
   RestrictedInfo* rinfo = RestrictedInfo::get(info);
   if (!rinfo)
     return 1;
-
 
   CORBA::ULong   connection_id      = rinfo->data.connection_id;
   CORBA::ULong   max_connections    = rinfo->data.max_connections;
