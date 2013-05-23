@@ -112,13 +112,7 @@ omniCallHandle::upcall(omniServant* servant, omniCallDescriptor& desc)
   desc.poa(pd_poa);
   desc.localId(pd_localId);
 
-  omniCallDescriptor* to_insert;
-  if (pd_mainthread_mu)
-    to_insert = 0;
-  else
-    to_insert = &desc;
-
-  _OMNI_NS(poaCurrentStackInsert) insert(to_insert, pd_self_thread);
+  _OMNI_NS(poaCurrentStackInsert) insert(&desc, pd_self_thread);
 
   if (pd_iop_s) { // Remote call
     pd_iop_s->ReceiveRequest(desc);

@@ -1,3 +1,13 @@
+Thu May 23 12:52:34 BST 2013 dgrisby
+====================================
+
+- Current state was not set on a thread destined to dispatch to the
+  main thread, meaning that the need for bidirectional was not
+  registered on unmarshalled object references.
+
+src/lib/omniORB/orbcore/callHandle.cc
+
+
 Wed May 22 15:02:51 BST 2013 dgrisby
 ====================================
 
@@ -38,7 +48,6 @@ src/lib/omniORB/orbcore/tcp/tcpAddress.cc
 src/lib/omniORB/orbcore/tcp/tcpAddress.h
 src/lib/omniORB/orbcore/transportRules.cc
 src/lib/omniORB/ziop/omniZIOP.cc
-
 
 
 Tue Apr 30 18:21:01 BST 2013 dgrisby
