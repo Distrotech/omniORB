@@ -733,6 +733,10 @@ ifeq (@ENABLE_LONGDOUBLE@,no)
 DisableLongDouble = 1
 endif
 
+#
+# Enable ZIOP?
+#
+
 ifeq (@ENABLE_ZIOP@,yes)
 EnableZIOP = 1
 endif
