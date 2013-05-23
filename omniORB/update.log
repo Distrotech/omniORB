@@ -1,3 +1,12 @@
+Thu May 23 17:39:00 BST 2013 dgrisby
+====================================
+
+- Rearrange platform dependencies.
+
+include/omniORB4/internal/SocketCollection.h
+include/omniORB4/internal/tcpSocket.h
+
+
 Thu May 23 16:56:30 BST 2013 dgrisby
 ====================================
 

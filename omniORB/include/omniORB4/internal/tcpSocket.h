@@ -34,15 +34,179 @@
 #include <libcWrapper.h>
 #include <omniORB4/omniServer.h>
 
-OMNI_NAMESPACE_BEGIN(omni)
+////////////////////////////////////////////////////////////////////////
+//  Platform feature selection
 
+#if !defined(OMNI_DISABLE_IPV6) && defined(HAVE_STRUCT_SOCKADDR_IN6) && defined(HAVE_STRUCT_SOCKADDR_STORAGE) && defined(HAVE_GETADDRINFO) && defined(HAVE_GETNAMEINFO)
+#  define OMNI_SUPPORT_IPV6
+#  define OMNI_SOCKADDR_STORAGE sockaddr_storage
+#else
+#  define OMNI_SOCKADDR_STORAGE sockaddr_in
+#endif
+
+#define SOCKNAME_SIZE_T OMNI_SOCKNAME_SIZE_T
+#define USE_NONBLOCKING_CONNECT
+#define OMNI_IPV6_SOCKETS_ACCEPT_IPV4_CONNECTIONS
+#define OMNIORB_HOSTNAME_MAX 512
+
+#ifdef HAVE_POLL
+#   define USE_POLL
+#endif
+
+// Darwin implementation of poll() appears to be broken
+#if defined(__darwin__)
+#   undef USE_POLL
+#endif
+
+#if defined(__hpux__)
+#   if __OSVERSION__ < 11
+#       undef USE_POLL
+#   endif
+#   define USE_FAKE_INTERRUPTABLE_RECV
+#endif
+
+#if defined(__WIN32__)
+#   define USE_FAKE_INTERRUPTABLE_RECV
+#   undef OMNI_IPV6_SOCKETS_ACCEPT_IPV4_CONNECTIONS
+#endif
+
+#if defined(__freebsd__) || defined(__netbsd__)
+#   undef OMNI_IPV6_SOCKETS_ACCEPT_IPV4_CONNECTIONS
+#endif
+
+// By default, Linux does accept IPv4 connections on IPv6, but some
+// distributions misconfigure it not to.
+#if defined(__linux__) || defined(IPV6_V6ONLY)
+#   undef OMNI_IPV6_SOCKETS_ACCEPT_IPV4_CONNECTIONS
+#endif
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+//             win32 API
+//
+#if defined(__WIN32__)
+
+#  include <sys/types.h>
+
+#  if defined(OMNI_SUPPORT_IPV6)
+#    include <ws2tcpip.h>
+#    include <Wspiapi.h>
+#    if !defined(IPV6_V6ONLY)
+#      define IPV6_V6ONLY 27  // Defined to this on Vista
+#    endif
+#  endif
+
+#  define RC_INADDR_NONE       INADDR_NONE
+#  define RC_INVALID_SOCKET    INVALID_SOCKET
+#  define RC_SOCKET_ERROR      SOCKET_ERROR
+#  define INETSOCKET           PF_INET
+#  define CLOSESOCKET(sock)    closesocket(sock)
+#  define SHUTDOWNSOCKET(sock) ::shutdown(sock,2)
+#  define ERRNO                ::WSAGetLastError()
+#  define RC_EINPROGRESS       WSAEWOULDBLOCK
+#  define RC_EINTR             WSAEINTR
+#  define RC_EBADF             WSAENOTSOCK
+
+#  define RC_TRY_AGAIN(err)       ((err == WSAEINTR) || (err == WSAEWOULDBLOCK))
+
+#else
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+//             unix(ish)
+//
+#  if defined(__vxWorks__)
+#    include <sockLib.h>
+#    include <hostLib.h>
+#    include <ioLib.h>
+#    include <iosLib.h>
+#    include <netinet/tcp.h>
+#  else
+#    include <sys/time.h>
+#  endif
+#  include <sys/socket.h>
+#  include <netinet/in.h>
+#  include <netinet/tcp.h>
+#  include <arpa/inet.h>
+#  include <unistd.h>
+#  include <sys/types.h>
+#  include <errno.h>
+#  include <libcWrapper.h>
+
+#  if defined(USE_POLL)
+#    include <poll.h>
+#  endif
+
+#  include <fcntl.h>
+
+#  if defined (__uw7__)
+#    ifdef shutdown
+#      undef shutdown
+#    endif
+#  endif
+
+#  if defined(__VMS) && defined(USE_tcpSocketVaxRoutines)
+#    include "tcpSocketVaxRoutines.h"
+#    undef accept
+#    undef recv
+#    undef send
+#    define accept(a,b,c) tcpSocketVaxAccept(a,b,c)
+#    define recv(a,b,c,d) tcpSocketVaxRecv(a,b,c,d)
+#    define send(a,b,c,d) tcpSocketVaxSend(a,b,c,d)
+#  endif
+
+#  ifdef __rtems__
+extern "C" int select (int,fd_set*,fd_set*,fd_set*,struct timeval *);
+#  endif
+
+#  define RC_INADDR_NONE     ((CORBA::ULong)-1)
+#  define RC_INVALID_SOCKET  (-1)
+#  define RC_SOCKET_ERROR    (-1)
+#  define INETSOCKET         AF_INET
+#  define CLOSESOCKET(sock)  close(sock)
+
+#  if defined(__sunos__) && defined(__sparc__) && __OSVERSION__ >= 5
+#    define SHUTDOWNSOCKET(sock)  ::shutdown(sock,2)
+#  elif defined(__osf1__) && defined(__alpha__)
+#    define SHUTDOWNSOCKET(sock)  ::shutdown(sock,2)
+#  else
+     // XXX none of the above, calling shutdown() may not have the
+     // desired effect.
+#    define SHUTDOWNSOCKET(sock)  ::shutdown(sock,2)
+#  endif
+
+#  define ERRNO              errno
+#  define RC_EINTR           EINTR
+#  define RC_EINPROGRESS     EINPROGRESS
+#  if defined (__vxWorks__)
+#    define RC_EBADF         S_iosLib_INVALID_FILE_DESCRIPTOR  
+#  else
+#    define RC_EBADF         EBADF
+#  endif
+#  define RC_EAGAIN          EAGAIN
+
+#  define RC_TRY_AGAIN(err) ((err == EINTR) ||\
+                             (err == EWOULDBLOCK) ||\
+                             (err == EAGAIN))
+
+#endif
+
+#if defined(NEED_GETHOSTNAME_PROTOTYPE)
+extern "C" int gethostname(char *name, int namelen);
+#endif
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+OMNI_NAMESPACE_BEGIN(omni)
 
 #if defined(__WIN32__)
 typedef SOCKET SocketHandle_t;
 #else
 typedef int SocketHandle_t;
 #endif
-
 
 class tcpSocket {
 public:
