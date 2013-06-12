@@ -32,7 +32,7 @@
 #define __GIOPSTRAND_H__
 
 #include <omniORB4/omniTransport.h>
-#include <giopStrandFlags.h>
+#include "giopStrandFlags.h"
 
 #ifdef _core_attr
 # error "A local CPP macro _core_attr has already been defined."

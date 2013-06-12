@@ -1,3 +1,11 @@
+Wed Jun 12 15:12:11 BST 2013 dgrisby
+====================================
+
+- Use relative include for giopStrandFlags.h.
+
+include/omniORB4/internal/giopStrand.h
+
+
 Thu May 23 17:39:00 BST 2013 dgrisby
 ====================================
 
