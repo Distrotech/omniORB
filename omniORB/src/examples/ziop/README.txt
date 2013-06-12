@@ -4,8 +4,8 @@ Experimental ZIOP support
 omniORB has experimental support for ZIOP, which compresses
 transmitted messages.
 
-To enable ZIOP on Unix platforms, give an argument of --enable-ziop to
-the configure script.
+On Unix platforms, ZIOP support is automatically enabled if the
+configure script detects zlib.
 
 To enable it on Windows, set the EnableZIOP make variable in the
 platform configuration file.

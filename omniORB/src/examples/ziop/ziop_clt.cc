@@ -20,6 +20,8 @@ using namespace std;
 
 static void hello(Echo_ptr e)
 {
+  // Send this source code as the message
+
   stringstream buf;
   ifstream stream(__FILE__);
 
@@ -39,6 +41,8 @@ int main(int argc, char** argv)
   try {
     CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
 
+    // Set empty global ZIOP policies. This enables ZIOP with the
+    // default settings.
     CORBA::PolicyList pl;
     omniZIOP::setGlobalPolicies(pl);
 
@@ -51,7 +55,8 @@ int main(int argc, char** argv)
     CORBA::Object_var obj = orb->string_to_object(argv[1]);
 
     Echo_var echoref = Echo::_narrow(obj);
-    if( CORBA::is_nil(echoref) ) {
+
+    if (CORBA::is_nil(echoref)) {
       cerr << "Can't narrow reference to type Echo (or it was nil)." << endl;
       return 1;
     }

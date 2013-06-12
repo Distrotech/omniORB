@@ -1,3 +1,13 @@
+Wed Jun 12 15:13:04 BST 2013 dgrisby
+====================================
+
+- Update ZIOP example.
+
+src/examples/ziop/README.txt
+src/examples/ziop/ziop_clt.cc
+src/examples/ziop/ziop_impl.cc
+
+
 Wed Jun 12 15:12:11 BST 2013 dgrisby
 ====================================
 
