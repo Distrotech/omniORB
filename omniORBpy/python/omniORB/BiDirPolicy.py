@@ -63,6 +63,8 @@ def _create_policy(ptype, val):
         return BidirectionalPolicy(val)
     return None
 
+omniORB.policyMakers.append(_create_policy)
+
 
 # typedef unsigned short BidirectionalPolicyValue
 

@@ -198,19 +198,12 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
     PortableServer::Current_var pc = PortableServer::Current::_narrow(objref);
     if (!CORBA::is_nil(pc)) return createPyPOACurrentObject(pc);
   }
-  do {
+
+  {
     // No built in converter. Try the list of registered external functions
-    PyObject* fnlist = PyObject_GetAttrString(omniPy::py_omnipymodule,
-					      (char*)"pseudoFns");
-    if (!fnlist || !PySequence_Check(fnlist)) {
-      PyErr_Clear();
-      omniORB::logs(1, "WARNING: _omnipy.pseudoFns is not a sequence.");
-      Py_XDECREF(fnlist);
-      break;
-    }
-    int len = PySequence_Length(fnlist);
+    int len = PySequence_Length(omniPy::py_pseudoFns);
     for (int i=0; i < len; i++) {
-      PyObject* pyf = PySequence_GetItem(fnlist, i);
+      PyObject* pyf = PySequence_GetItem(omniPy::py_pseudoFns, i);
       if (!PyCObject_Check(pyf)) {
 	omniORB::logs(1, "WARNING: Entry in _omnipy.pseudoFns "
 		      "is not a PyCObject.");
@@ -218,14 +211,10 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
       }
       omniORBpyPseudoFn f = (omniORBpyPseudoFn)PyCObject_AsVoidPtr(pyf);
       PyObject* ret = f(objref);
-      if (ret) {
-	Py_DECREF(fnlist);
+      if (ret)
 	return ret;
-      }
     }
-    Py_DECREF(fnlist);
-
-  } while (0);
+  };
 
   try {
     // Use OMNIORB_THROW to get a nice trace message
@@ -636,21 +625,8 @@ extern "C" {
 	return Py_None;
       }
     }
-    catch (Py_BAD_PARAM& ex) {
-      omniPy::handleSystemException(ex, ex.getInfo());
-    }
-#ifdef HAS_Cplusplus_catch_exception_by_base
-    catch (const CORBA::SystemException& ex) {
-      omniPy::handleSystemException(ex);
-    }
-#else
-#define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
-    catch (const CORBA::exc& ex) { \
-      omniPy::handleSystemException(ex);        \
-    }
-OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
-#undef DO_CALL_DESC_SYSTEM_EXCEPTON
-#endif
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     catch (omniPy::PyUserException& ex) {
       ex.setPyExceptionState();
     }

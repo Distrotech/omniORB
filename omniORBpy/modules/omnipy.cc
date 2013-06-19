@@ -47,6 +47,8 @@ OMNI_USING_NAMESPACE(omni)
 PyInterpreterState* omniPy::pyInterpreter;
 
 PyObject* omniPy::py_omnipymodule;	// The _omnipy extension
+PyObject* omniPy::py_pseudoFns;         //  pseudoFns
+PyObject* omniPy::py_policyFns;         //  policyFns
 PyObject* omniPy::pyCORBAmodule;	// The CORBA module
 PyObject* omniPy::pyCORBAsysExcMap;	//  The system exception map
 PyObject* omniPy::pyCORBAORBClass;	//  ORB class
@@ -642,11 +644,17 @@ extern "C" {
     PyDict_SetItemString(d, (char*)"API", api);
     Py_DECREF(api);
 
-    // Create an empty list for external modules to register
-    // additional pseudo object creation functions.
-    PyObject* pseudolist = PyList_New(0);
-    PyDict_SetItemString(d, (char*)"pseudoFns", pseudolist);
-    Py_DECREF(pseudolist);
+    // Empty list for external modules to register additional pseudo
+    // object creation functions.
+    omniPy::py_pseudoFns = PyList_New(0);
+    PyDict_SetItemString(d, (char*)"pseudoFns", omniPy::py_pseudoFns);
+    Py_DECREF(omniPy::py_pseudoFns);
+
+    // Empty dict for external modules to register additional policy
+    // object creation functions.
+    omniPy::py_policyFns = PyDict_New();
+    PyDict_SetItemString(d, (char*)"policyFns", omniPy::py_policyFns);
+    Py_DECREF(omniPy::py_policyFns);
 
     omniInitialiser::install(&the_omni_python_initialiser);
   }

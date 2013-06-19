@@ -47,6 +47,30 @@ raisePOAException(const char* ename, PyObject* args=0)
   return 0;
 }
 
+
+static CORBA::ULong
+getEnumVal(PyObject* pyenum)
+{
+  omniPy::PyRefHolder ev(PyObject_GetAttrString(pyenum, (char*)"_v"));
+
+  if (!(ev.valid() && PyInt_Check(ev)))
+    THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO,
+                       omniPy::formatString("Expecting enum item, got %r", "O",
+                                            pyenum->ob_type));
+  return PyInt_AS_LONG(ev);
+}
+
+static CORBA::ULong
+getULongVal(PyObject* pyval)
+{
+  if (!PyInt_Check(pyval))
+    THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO,
+                       omniPy::formatString("Expecting int, got %r", "O",
+                                            pyval->ob_type));
+  return PyInt_AS_LONG(pyval);
+}
+
+
 static CORBA::Policy_ptr
 createPolicyObject(PortableServer::POA_ptr poa, PyObject* pypolicy)
 {
@@ -54,90 +78,96 @@ createPolicyObject(PortableServer::POA_ptr poa, PyObject* pypolicy)
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
 
   CORBA::Policy_ptr policy = 0;
+  
+  omniPy::PyRefHolder pyptype(PyObject_GetAttrString(pypolicy,
+                                                     (char*)"_policy_type"));
 
-  PyObject* pyptype  = PyObject_GetAttrString(pypolicy, (char*)"_policy_type");
-  PyObject* pyvalue  = PyObject_GetAttrString(pypolicy, (char*)"_value");
-  PyObject* pyivalue = 0;
+  omniPy::PyRefHolder pyvalue(PyObject_GetAttrString(pypolicy,
+                                                     (char*)"_value"));
 
-  if (PyInt_Check(pyvalue)) {
-    Py_INCREF(pyvalue);
-    pyivalue = pyvalue;
-  }
-  else {
-    pyivalue = PyObject_GetAttrString(pyvalue, (char*)"_v");
-  }
+  if (pyptype.valid() && pyvalue.valid()) {
 
-  if (pyptype && PyInt_Check(pyptype) &&
-      pyivalue && PyInt_Check(pyivalue)) {
-
-    CORBA::ULong ivalue = PyInt_AS_LONG(pyivalue);
-
-    switch (PyInt_AS_LONG(pyptype)) {
+    switch (getULongVal(pyptype)) {
 
     case 16: // ThreadPolicy
       policy = poa->
 	create_thread_policy((PortableServer::
 			      ThreadPolicyValue)
-			     ivalue);
+			     getEnumVal(pyvalue));
       break;
 
     case 17: // LifespanPolicy
       policy = poa->
 	create_lifespan_policy((PortableServer::
 				LifespanPolicyValue)
-			       ivalue);
+			       getEnumVal(pyvalue));
       break;
 
     case 18: // IdUniquenessPolicy
       policy = poa->
 	create_id_uniqueness_policy((PortableServer::
 				     IdUniquenessPolicyValue)
-				    ivalue);
+				    getEnumVal(pyvalue));
       break;
 
     case 19: // IdAssignmentPolicy
       policy = poa->
 	create_id_assignment_policy((PortableServer::
 				     IdAssignmentPolicyValue)
-				    ivalue);
+				    getEnumVal(pyvalue));
       break;
 
     case 20: // ImplicitActivationPolicy
       policy = poa->
 	create_implicit_activation_policy((PortableServer::
 					   ImplicitActivationPolicyValue)
-					  ivalue);
+					  getEnumVal(pyvalue));
       break;
 
     case 21: // ServantRetentionPolicy
       policy = poa->
 	create_servant_retention_policy((PortableServer::
 					 ServantRetentionPolicyValue)
-					ivalue);
+					getEnumVal(pyvalue));
       break;
 
     case 22: // RequestProcessingPolicy
       policy = poa->
 	create_request_processing_policy((PortableServer::
 					  RequestProcessingPolicyValue)
-					 ivalue);
+					 getEnumVal(pyvalue));
       break;
 
     case 37: // BidirectionalPolicy
-      policy = new BiDirPolicy::BidirectionalPolicy(ivalue);
+      policy = new BiDirPolicy::BidirectionalPolicy(getULongVal(pyvalue));
       break;
+
+    default:
+      {
+        // Is there a function registered in _omnipy.policyFns?
+        PyObject* pyf = PyDict_GetItem(omniPy::py_policyFns, pyptype);
+        
+        if (pyf) {
+          if (PyCObject_Check(pyf)) {
+            omniORBpyPolicyFn f = (omniORBpyPolicyFn)PyCObject_AsVoidPtr(pyf);
+            policy = f(pyvalue);
+          }
+          else {
+            omniORB::logs(1, "WARNING: Entry in _omnipy.policyFns is not a "
+                          "PyCObject.");
+          }
+        }
+      }
     }
   }
-  Py_XDECREF(pyptype);
-  Py_XDECREF(pyvalue);
-  Py_XDECREF(pyivalue);
-  Py_DECREF(pypolicy);
 
-  if (policy) return policy;
-
-  PyErr_Clear();
-  OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
-  return 0; // For MSVC
+  if (!policy || CORBA::is_nil(policy)) {
+    PyErr_Clear();
+    THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO,
+                       omniPy::formatString("Invalid Policy object %r", "O",
+                                            pypolicy));
+  }
+  return policy;
 }
   
 

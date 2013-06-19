@@ -447,6 +447,8 @@ def _create_policy(ptype, val):
         return RequestProcessingPolicy(val)
     return None
 
+omniORB.policyMakers.append(_create_policy)
+
 
 class ThreadPolicy (CORBA.Policy):
     _NP_RepositoryId = "IDL:omg.org/PortableServer/ThreadPolicy:2.4"

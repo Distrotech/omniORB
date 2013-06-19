@@ -19,7 +19,6 @@ ifndef VPATH
 VPATH=.
 endif
 
-
 #############################################################################
 #
 # Standard directories in import/export trees
@@ -94,7 +93,7 @@ IMPORT_CPPFLAGS += -I. $(patsubst %,-I%,$(VPATH)) \
                    -I$(TOP)/include -I$(BASE_OMNI_TREE)/include \
                    -D__OSVERSION__=@OSVERSION@
 
-CPPFLAGS = $(DIR_CPPFLAGS) $(IMPORT_CPPFLAGS)
+CPPFLAGS = @CPPFLAGS@ $(DIR_CPPFLAGS) $(IMPORT_CPPFLAGS)
 
 CFLAGS = $(CDEBUGFLAGS) $(COPTIONS) $(CPPFLAGS)
 
@@ -522,6 +521,8 @@ OMNIORB_CONNECTIONS_LIB = $(patsubst %,$(LibSearchPattern),omniConnectionMgmt$(O
 lib_depend := $(patsubst %,$(LibPattern),omniConnectionMgmt$(OMNIORB_MAJOR_VERSION))
 OMNIORB_CONNECTIONS_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
 
+
+
 # omniORB SSL transport
 OMNIORB_SSL_VERSION = $(OMNIORB_VERSION)
 OMNIORB_SSL_MAJOR_VERSION = $(word 1,$(subst ., ,$(OMNIORB_SSL_VERSION)))
@@ -536,6 +537,12 @@ OMNIORB_SSL_LIB += $(OPEN_SSL_LIB)
 OMNIORB_SSL_CPPFLAGS += $(OPEN_SSL_CPPFLAGS)
 
 
+# ZIOP
+OMNIORB_ZIOP_LIB = $(patsubst %,$(LibSearchPattern),omniZIOP$(OMNIORB_MAJOR_VERSION))
+lib_depend := $(patsubst %,$(LibPattern),omniZIOP$(OMNIORB_MAJOR_VERSION))
+OMNIORB_ZIOP_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
+
+
 ##########################################################################
 #
 # Shared library support stuff
@@ -546,9 +553,10 @@ OMNIORB_SSL_CPPFLAGS += $(OPEN_SSL_CPPFLAGS)
 BuildSharedLibrary = 1       # Enable by default
 SHAREDLIB_SUFFIX = so
 
-SharedLibraryFullNameTemplate = lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
-SharedLibrarySoNameTemplate   = lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3
-SharedLibraryLibNameTemplate  = lib$$1$$2.$(SHAREDLIB_SUFFIX)
+SharedLibraryFullNameTemplate 	= lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
+SharedLibrarySoNameTemplate   	= lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3
+SharedLibraryLibNameTemplate  	= lib$$1$$2.$(SHAREDLIB_SUFFIX)
+SharedLibraryImplibNameTemplate = lib$$1$$2.a
 
 SharedLibraryPlatformLinkFlagsTemplate = -shared -Wl,-soname,$$soname
 
@@ -556,6 +564,13 @@ define SharedLibraryFullName
 fn() { \
 if [ $$2 = "_" ] ; then set $$1 "" $$3 $$4 ; fi ; \
 echo $(SharedLibraryFullNameTemplate); \
+}; fn
+endef
+
+define SharedLibraryImplibName
+fn() { \
+if [ $$2 = "_" ] ; then set $$1 "" $$3 $$4 ; fi ; \
+echo $(SharedLibraryImplibNameTemplate); \
 }; fn
 endef
 
@@ -604,15 +619,30 @@ define ExportSharedLibrary
  $(ExportSharedLibraryToDir)
 endef
 
+define ExportImplibLibrary
+ dir="$(EXPORT_TREE)/$(LIBDIR)"; \
+ $(ExportLibraryToDir)
+endef
+
 define InstallSharedLibrary
  dir="$(INSTALLLIBDIR)"; \
  $(ExportSharedLibraryToDir)
+endef
+
+define InstallImplibLibrary
+ dir="$(INSTALLLIBDIR)"; \
+ $(ExportLibraryToDir)
 endef
 
 
 define CleanSharedLibrary
 ( set -x; \
 $(RM) $${dir:-.}/*.$(SHAREDLIB_SUFFIX).* )
+endef
+
+define CleanImplibLibrary
+( set -x; \
+$(RM) $${dir:-.}/*.a )
 endef
 
 
@@ -693,6 +723,7 @@ OMNINAMES_LOG_DEFAULT_LOCATION  = @OMNINAMES_LOGDIR@
 #
 # OpenSSL
 #
+
 OPEN_SSL_ROOT = @OPEN_SSL_ROOT@
 OPEN_SSL_LIB = @OPEN_SSL_LIB@
 OPEN_SSL_CPPFLAGS = @OPEN_SSL_CPPFLAGS@
@@ -705,17 +736,25 @@ ifeq (@ENABLE_STATIC@,no)
 NoStaticLibrary = 1
 endif
 
+#
+# Enable ZIOP?
+#
+
+ifeq (@ENABLE_ZIOP@,yes)
+EnableZIOP = 1
+endif
+
 
 ###########################################################################
 #
 # Default compiler rules
 #
-CDEBUGFLAGS     = -O
+CDEBUGFLAGS     = @CFLAGS@
 CLINK           = $(CC)
-CLINKOPTIONS    = $(CDEBUGFLAGS) $(COPTIONS)
-CXXDEBUGFLAGS   = -O2
+CLINKOPTIONS    = @LDFLAGS@ $(CDEBUGFLAGS) $(COPTIONS)
+CXXDEBUGFLAGS   = @CXXFLAGS@
 CXXLINK         = $(CXX)
-CXXLINKOPTIONS  = $(CXXDEBUGFLAGS) $(CXXOPTIONS)
+CXXLINKOPTIONS  = @LDFLAGS@ $(CXXDEBUGFLAGS) $(CXXOPTIONS)
 
 
 ###########################################################################
@@ -726,7 +765,7 @@ CXXLINKOPTIONS  = $(CXXDEBUGFLAGS) $(CXXOPTIONS)
 ifdef Compiler_GCC
 CMAKEDEPEND     += -D__GNUC__
 CXXMAKEDEPEND   += -D__GNUG__ -D__GNUC__
-CXXOPTIONS       = -Wall -Wno-unused -fexceptions
+CXXOPTIONS       = -Wall -Wno-unused -fexceptions @EXTRA_GCC_CXXFLAGS@
 EgcsMajorVersion = 1
 EgcsMinorVersion = 1
 SHAREDLIB_CPPFLAGS = -fPIC
@@ -749,10 +788,23 @@ OMNITHREAD_LIB += -lpthread
 endif
 
 ###################
+ifdef kFreeBSD
+OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10
+OMNITHREAD_CPPFLAGS = -D_REENTRANT -pthread
+OMNITHREAD_LIB += -lpthread
+endif
+
+###################
+ifdef GNU
+OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10
+OMNITHREAD_CPPFLAGS = -D_REENTRANT -pthread
+OMNITHREAD_LIB += -lpthread
+endif
+
+###################
 ifdef SunOS
 IMPORT_CPPFLAGS += -D__sunos__
-OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10 \
-			    -DPthreadSupportThreadPriority
+OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10
 OMNITHREAD_CPPFLAGS = -DUsePthread -D_REENTRANT $(CXXMTFLAG)
 SOCKET_LIB = -lsocket -lnsl
 THREAD_LIB = -lthread $(CXXMTFLAG)
@@ -849,7 +901,13 @@ define StaticLinkLibrary
 )
 endef
 
+ifdef ia64Processor
+SHAREDLIB_SUFFIX = so
+endif
+
+ifndef ia64Processor
 SHAREDLIB_SUFFIX = sl
+endif
 
 ifdef Compiler_KCC
 AR = KCC --thread_safe -o
@@ -866,18 +924,16 @@ ifdef Compiler_GCC
 # -D_CMA_NOWRAPPERS_ is needed otherwise linking omniNames results in
 #                    /opt/aCC/lbin/ld: Unsatisfied symbols:
 #                    fstreambase::cma_close(void)(code)
-CXXOPTIONS    =  -fhandle-exceptions -Wall -Wno-unused \
-                 -D_CMA_NOWRAPPERS_
+CXXOPTIONS    =  -Wall -Wno-unused \
+                 -D_CMA_NOWRAPPERS_ @EXTRA_GCC_CXXFLAGS@
+SharedLibraryPlatformLinkFlagsTemplate = -Wl,-b -Wl,+h$$soname -lCsup				 
 endif
 
 ifdef Compiler_aCC
 CXXDEBUGFLAGS     = -O
-CXXOPTIONS   	 += -AA -w -mr +DAportable \
-                    -D_THREAD_SAFE \
-                    -DRWSTD_MULTI_THREAD \
-                    -DRW_MULTI_THREAD 
+CXXOPTIONS       += -AA -w -mt
 CDEBUGFLAGS       = -O
-COPTIONS	  = -w -mt +DAportable
+COPTIONS          = -w -mt
 
 SHAREDLIB_CPPFLAGS += +Z
 SharedLibraryPlatformLinkFlagsTemplate = -b -Wl,+h$$soname -lCsup
@@ -1004,7 +1060,7 @@ IMPORT_CPPFLAGS += -D__darwin__
 OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10 \
                             -DPthreadSupportThreadPriority -DNoNanoSleep
 
-CXXOPTIONS = -fno-common -bind_at_load
+CXXOPTIONS = -fno-common -bind_at_load @EXTRA_GCC_CXXFLAGS@
 SHAREDLIB_SUFFIX = dylib
 
 SharedLibraryFullNameTemplate = lib$$1$$2.$$3.$$4.$(SHAREDLIB_SUFFIX)
@@ -1047,6 +1103,24 @@ OMNITHREAD_LIB += -pthread
 endif
 
 ###################
+ifdef NetBSD
+IMPORT_CPPFLAGS += -D__netbsd__
+
+OMNITHREAD_CPPFLAGS = -D_REENTRANT
+OMNITHREAD_POSIX_CPPFLAGS = -DUsePthread -DPthreadDraftVersion=10
+OMNITHREAD_LIB += -pthread
+endif
+
+###################
+ifdef OpenBSD
+IMPORT_CPPFLAGS += -D__openbsd__
+
+OMNITHREAD_CPPFLAGS = -D_REENTRANT -D_THREAD_SAFE
+OMNITHREAD_POSIX_CPPFLAGS = -DUsePthread -DPthreadDraftVersion=10
+OMNITHREAD_LIB += -pthread
+endif
+
+###################
 ifdef OSR5
 IMPORT_CPPFLAGS += -D__osr5__
 
@@ -1055,7 +1129,6 @@ COPTIONS = -fpcc-struct-return
 OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=6 \
 			    -DPthreadSupportThreadPriority -DNoNanoSleep
 endif
-
 
 ###################
 ifdef Cygwin

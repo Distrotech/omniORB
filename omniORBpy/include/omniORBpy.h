@@ -169,4 +169,16 @@ catch (const CORBA::exc& ex) { \
 typedef PyObject* (*omniORBpyPseudoFn)(const CORBA::Object_ptr);
 
 
+// Extensions may register functions to translate Python Policy
+// objects to C++ CORBA::Policy objects. _omnipy.policyFns is a
+// dictionary mapping CORBA::PolicyType to PyCObjects containing
+// functions pointers. Functions take a policy value (i.e. the value
+// inside the Python Policy object, not the Policy object itself), and
+// must return a valid CORBA::Policy object, CORBA::Policy::_nil, or
+// throw a CORBA::SystemException.
+
+typedef CORBA::Policy_ptr (*omniORBpyPolicyFn)(PyObject*);
+
+
+
 #endif // _omniORBpy_h_

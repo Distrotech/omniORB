@@ -322,6 +322,9 @@ typeMapping         = {}
 typeCodeMapping     = {}
 valueFactoryMapping = {}
 
+# List of policy creation functions
+policyMakers = []
+
 
 def registerObjref(repoId, objref):
     objrefMapping[repoId] = objref

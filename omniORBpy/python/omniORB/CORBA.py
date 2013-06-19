@@ -489,13 +489,10 @@ class ORB(object):
         if isinstance(val, Any):
             val = val._v
 
-        import PortableServer
-        p = PortableServer._create_policy(ptype, val)
-        if p: return p
-
-        import BiDirPolicy
-        p = BiDirPolicy._create_policy(ptype, val)
-        if p: return p
+        for maker in omniORB.policyMakers:
+            p = maker(ptype, val)
+            if p is not None:
+                return p
 
         raise PolicyError(BAD_POLICY)
 
@@ -790,10 +787,6 @@ class Policy (Object):
     def __init__(self):
         raise RuntimeError("Cannot construct objects of this type.")
 
-    def __del__(self):
-        # Override base CORBA.Object
-        pass
-
     def _get_policy_type(self):
         return self._policy_type
 
@@ -840,9 +833,6 @@ class Context (Object):
             self.__values = values
         else:
             self.__values = {}
-
-    def __del__(self):
-        pass
 
     def set_one_value(self, name, val):
         if type(name) is not types.StringType or \

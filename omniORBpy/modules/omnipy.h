@@ -179,6 +179,8 @@ public:
   ////////////////////////////////////////////////////////////////////////////
 
   static PyObject* py_omnipymodule;    	// _omnipy module
+  static PyObject* py_pseudoFns;        //  pseudoFns
+  static PyObject* py_policyFns;        //  policyFns
   static PyObject* pyCORBAmodule;      	// CORBA module
   static PyObject* pyCORBAsysExcMap;   	//  The system exception map
   static PyObject* pyCORBAORBClass;    	//  ORB class
@@ -1350,6 +1352,9 @@ public:
 #ifdef HAS_Cplusplus_catch_exception_by_base
 
 #define OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS \
+catch (Py_BAD_PARAM& ex) { \
+  return omniPy::handleSystemException(ex, ex.getInfo()); \
+} \
 catch (const CORBA::SystemException& ex) { \
   return omniPy::handleSystemException(ex); \
 }
@@ -1360,7 +1365,10 @@ catch (const CORBA::exc& ex) { \
   return omniPy::handleSystemException(ex); \
 }
 #define OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS \
-  OMNIORB_FOR_EACH_SYS_EXCEPTION(OMNIPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION)
+catch (Py_BAD_PARAM& ex) { \
+  return omniPy::handleSystemException(ex, ex.getInfo()); \
+} \
+OMNIORB_FOR_EACH_SYS_EXCEPTION(OMNIPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION)
 
 #endif
 

@@ -21,11 +21,14 @@ AC_PROG_MAKE_SET
 AM_PATH_PYTHON
 AC_LANG(C++)
 
+AC_SUBST(EXTRA_GCC_CXXFLAGS)
+
 
 dnl ** Libraries
 
 OMNI_OMNIORB_ROOT
 OMNI_OPENSSL_ROOT
+OMNI_ENABLE_ZIOP
 
 
 dnl ** More programs
@@ -144,6 +147,7 @@ AC_CONFIG_FILES(
                 modules/codesets/GNUmakefile
                 modules/sslTP/GNUmakefile
                 modules/connections/GNUmakefile
+                modules/ziop/GNUmakefile
                 omniidl_be/GNUmakefile
                 python/GNUmakefile
                 python/COS/GNUmakefile

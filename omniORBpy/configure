@@ -575,6 +575,7 @@ PLATFORM_NAME
 COMPILER_NAME
 MKDIRHIER
 OMKDEPEND
+ENABLE_ZIOP
 OPEN_SSL_LIB
 OPEN_SSL_CPPFLAGS
 OPEN_SSL_ROOT
@@ -584,6 +585,7 @@ PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
 OMNIORB_ROOT
+EXTRA_GCC_CXXFLAGS
 pkgpyexecdir
 pyexecdir
 pkgpythondir
@@ -1510,6 +1512,52 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_cpp
+
+# ac_fn_cxx_try_link LINENO
+# -------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_cxx_try_link ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_cxx_try_link
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -3553,6 +3601,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for omniORB root" >&5
 $as_echo_n "checking for omniORB root... " >&6; }
 if ${omni_cv_omniorb_root+:} false; then :
@@ -3717,16 +3767,7 @@ else
 if test "${with_openssl+set}" = set; then :
   withval=$with_openssl; omni_cv_openssl_root=$withval
 else
-  if test "x$prefix" != "xNONE"; then
-               omni_cv_openssl_root=$prefix/openssl
-             else
-               omni_cv_openssl_root=$ac_default_prefix/openssl
-             fi
-	     if test -d $omni_cv_openssl_root/lib; then
-               :
-             else
-               omni_cv_openssl_root=no
-	     fi
+  omni_cv_openssl_root=no
 fi
 
 
@@ -3738,48 +3779,26 @@ $as_echo "$omni_cv_openssl_root" >&6; }
 if test "$omni_cv_openssl_root" = "no"; then
   :
 else
-  # Extract the first word of "pkg-config", so it can be a program name with args.
-set dummy pkg-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_PKG_CONFIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $PKG_CONFIG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_path_PKG_CONFIG" && ac_cv_path_PKG_CONFIG="no"
-  ;;
-esac
-fi
-PKG_CONFIG=$ac_cv_path_PKG_CONFIG
-if test -n "$PKG_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKG_CONFIG" >&5
-$as_echo "$PKG_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
   if test "$PKG_CONFIG" != "no" ; then
+    set_pkg_config_path=no
+    if test "$omni_cv_openssl_root" = "yes"; then
+      do_pkg_config=yes
+    else
+      if test -d $omni_cv_openssl_root/lib/pkgconfig; then
+        saved_pkg_config_libdir="$PKG_CONFIG_LIBDIR"
+        saved_pkg_config_path="$PKG_CONFIG_PATH"
+        PKG_CONFIG_LIBDIR=$omni_cv_openssl_root/lib/pkgconfig
+        PKG_CONFIG_PATH=
+        export PKG_CONFIG_LIBDIR
+        export PKG_CONFIG_PATH
+        do_pkg_config=yes
+        set_pkg_config_path=yes
+      else
+        do_pkg_config=no
+      fi
+    fi
+
+    if test "$do_pkg_config" = "yes"; then
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
@@ -3848,26 +3867,42 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	open_ssl_root=`$PKG_CONFIG --variable=prefix openssl`
-	 open_ssl_cppflags="$OPENSSL_CFLAGS"
-	 open_ssl_libs="$OPENSSL_LIBS"
-	 open_ssl_pkgconfig="yes"
-	 omni_cv_openssl_root="$open_ssl_root"
+           open_ssl_cppflags="$OPENSSL_CFLAGS"
+           open_ssl_lib="$OPENSSL_LIBS"
+           open_ssl_pkgconfig="yes"
+           omni_cv_openssl_root="$open_ssl_root"
 
 fi
+    fi
+
+    if test "$set_pkg_config_path" = "yes"; then
+      if test "x$saved_pkg_config_libdir" = "x"; then
+        unset PKG_CONFIG_LIBDIR
+      else
+        PKG_CONFIG_LIBDIR=$saved_pkg_config_libdir
+        export PKG_CONFIG_LIBDIR
+      fi
+      if test "x$saved_pkg_config_path" = "x"; then
+        unset PKG_CONFIG_PATH
+      else
+        PKG_CONFIG_PATH=$saved_pkg_config_path
+        export PKG_CONFIG_PATH
+      fi
+    fi
   fi
   if test "$omni_cv_openssl_root" = "yes"; then
-    if test "x$open_ssl_pkgconfig" != "yes"; then
-      if test "x$prefix" != "xNONE"; then
-        omni_cv_openssl_root=$prefix/openssl
-      else
-        omni_cv_openssl_root=$ac_default_prefix/openssl
-      fi
-      if test -d $omni_cv_openssl_root; then
-        :
-      else
-        as_fn_error $? "Can't find OpenSSL in '$omni_cv_openssl_root'. Please give me the full path or leave out --with-openssl." "$LINENO" 5
-        omni_cv_openssl_root=no
-      fi
+    if test "x$prefix" != "xNONE"; then
+      omni_cv_openssl_root=$prefix
+    else
+      omni_cv_openssl_root=$ac_default_prefix
+    fi
+    if test -d $omni_cv_openssl_root/openssl/lib; then
+      omni_cv_openssl_root=$omni_cv_openssl_root/openssl
+    elif test -d $omni_cv_openssl_root/lib; then
+      :
+    else
+      as_fn_error $? "Can't find OpenSSL in '$omni_cv_openssl_root'. Please give me the full path or leave out --with-openssl." "$LINENO" 5
+      omni_cv_openssl_root=no
     fi
   fi
 fi
@@ -3881,7 +3916,7 @@ else
     :
   else
     open_ssl_cppflags="-I$open_ssl_root/include"
-    open_ssl_libs="-L$open_ssl_root/lib -lssl -lcrypto"
+    open_ssl_lib="-L$open_ssl_root/lib -lssl -lcrypto"
   fi
 fi
 OPEN_SSL_ROOT=$open_ssl_root
@@ -3890,6 +3925,51 @@ OPEN_SSL_CPPFLAGS=$open_ssl_cppflags
 
 OPEN_SSL_LIB=$open_ssl_lib
 
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for compress2 in -lz" >&5
+$as_echo_n "checking for compress2 in -lz... " >&6; }
+if ${ac_cv_lib_z_compress2+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lz  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char compress2 ();
+int
+main ()
+{
+return compress2 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_z_compress2=yes
+else
+  ac_cv_lib_z_compress2=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_compress2" >&5
+$as_echo "$ac_cv_lib_z_compress2" >&6; }
+if test "x$ac_cv_lib_z_compress2" = xyes; then :
+  omni_cv_enable_ziop=yes
+else
+  omni_cv_enable_ziop=no
+fi
+
+ENABLE_ZIOP=$omni_cv_enable_ziop
 
 
 
@@ -4094,7 +4174,7 @@ PROCESSOR_DEFINE=$proc_def
 ac_config_files="$ac_config_files mk/beforeauto.mk mk/afterauto.mk"
 
 
-ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile modules/codesets/GNUmakefile modules/sslTP/GNUmakefile modules/connections/GNUmakefile omniidl_be/GNUmakefile python/GNUmakefile python/COS/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
+ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile modules/codesets/GNUmakefile modules/sslTP/GNUmakefile modules/connections/GNUmakefile modules/ziop/GNUmakefile omniidl_be/GNUmakefile python/GNUmakefile python/COS/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
 
 
 cat >confcache <<\_ACEOF
@@ -4823,6 +4903,7 @@ do
     "modules/codesets/GNUmakefile") CONFIG_FILES="$CONFIG_FILES modules/codesets/GNUmakefile" ;;
     "modules/sslTP/GNUmakefile") CONFIG_FILES="$CONFIG_FILES modules/sslTP/GNUmakefile" ;;
     "modules/connections/GNUmakefile") CONFIG_FILES="$CONFIG_FILES modules/connections/GNUmakefile" ;;
+    "modules/ziop/GNUmakefile") CONFIG_FILES="$CONFIG_FILES modules/ziop/GNUmakefile" ;;
     "omniidl_be/GNUmakefile") CONFIG_FILES="$CONFIG_FILES omniidl_be/GNUmakefile" ;;
     "python/GNUmakefile") CONFIG_FILES="$CONFIG_FILES python/GNUmakefile" ;;
     "python/COS/GNUmakefile") CONFIG_FILES="$CONFIG_FILES python/COS/GNUmakefile" ;;
