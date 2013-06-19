@@ -5,7 +5,7 @@
 //              src/examples/echo directory. Alternatively you can use the
 //              DSI echo server in src/examples/dsi.
 //
-// Usage: eg2_clt <object reference>
+// Usage: echo_diiclt <object reference>
 //
 
 #include <omniORB4/CORBA.h>
@@ -20,8 +20,9 @@
 
 static void hello(CORBA::Object_ptr obj)
 {
-  CORBA::String_var arg = (const char*) "Hello!";
+  CORBA::String_var  arg = (const char*) "Hello!";
   CORBA::Request_var req = obj->_request("echoString");
+
   req->add_in_arg() <<= arg;
   req->set_return_type(CORBA::_tc_string);
 
@@ -42,8 +43,9 @@ static void hello(CORBA::Object_ptr obj)
 
 static void hello_deferred(CORBA::Object_ptr obj)
 {
-  CORBA::String_var arg = (const char*) "Hello!";
+  CORBA::String_var  arg = (const char*) "Hello deferred!";
   CORBA::Request_var req = obj->_request("echoString");
+
   req->add_in_arg() <<= arg;
   req->set_return_type(CORBA::_tc_string);
 
@@ -75,15 +77,14 @@ int main(int argc, char** argv)
     CORBA::ORB_var orb = CORBA::ORB_init(argc, argv, "omniORB4");
 
     if (argc != 2) {
-      cerr << "usage:  eg2_clt <object reference>" << endl;
+      cerr << "usage:  echo_diiclt <object reference>" << endl;
       return 1;
     }
 
-    {
-      CORBA::Object_var obj = orb->string_to_object(argv[1]);
-      hello(obj);
-      hello_deferred(obj);
-    }
+    CORBA::Object_var obj = orb->string_to_object(argv[1]);
+
+    hello(obj);
+    hello_deferred(obj);
 
     orb->destroy();
   }
