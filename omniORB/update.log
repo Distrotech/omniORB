@@ -1,3 +1,29 @@
+Fri Jul  5 14:16:01 BST 2013 dgrisby
+====================================
+
+- Refactor deferred DII to use AMI framework.
+
+include/omniORB4/CORBA_Context.h
+include/omniORB4/CORBA_Exception.h
+include/omniORB4/CORBA_ExceptionList.h
+include/omniORB4/CORBA_Request.h
+include/omniORB4/CORBA_ServerRequest.h
+include/omniORB4/CORBA_basetypes.h
+include/omniORB4/ami.h
+include/omniORB4/callDescriptor.h
+include/omniORB4/internal/GNUmakefile.in
+include/omniORB4/internal/context.h
+include/omniORB4/internal/deferredRequest.h
+include/omniORB4/internal/request.h
+src/lib/omniORB/dynamic/ami.cc
+src/lib/omniORB/dynamic/deferredRequest.cc
+src/lib/omniORB/dynamic/dir.mk
+src/lib/omniORB/dynamic/orbMultiRequest.cc
+src/lib/omniORB/dynamic/request.cc
+src/lib/omniORB/dynamic/serverRequest.cc
+src/lib/omniORB/dynamic/valueType.cc
+
+
 Wed Jun 19 14:52:04 BST 2013 dgrisby
 ====================================
 
