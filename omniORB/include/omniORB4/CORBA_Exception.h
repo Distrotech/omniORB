@@ -27,22 +27,6 @@
 //    CORBA::Exception, SystemException, UserException
 //
 
-/*
-  $Log$
-  Revision 1.1.2.4  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.1.2.3  2001/11/01 12:04:31  dpg1
-  Function in SystemException to return minor code string.
-
-  Revision 1.1.2.2  2001/10/17 16:44:00  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:46  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

@@ -27,47 +27,6 @@
 //    Core valuetype marshalling.
 //
 
-/*
-  $Log$
-  Revision 1.1.2.12  2008/04/02 15:48:30  dgrisby
-  Always initialise variable to avoid over-zealous complaint from MSVC
-  that it is passed (safely) uninitialised.
-
-  Revision 1.1.2.11  2006/10/28 15:48:23  dgrisby
-  Typo in indirection constant.
-
-  Revision 1.1.2.10  2006/09/17 23:22:43  dgrisby
-  Invalid assertion with indirections in counting streams.
-
-  Revision 1.1.2.9  2006/01/18 19:21:54  dgrisby
-  Clarifying comment.
-
-  Revision 1.1.2.8  2005/07/21 10:00:17  dgrisby
-  Bugs with valuetypes in Anys.
-
-  Revision 1.1.2.7  2005/06/08 09:37:47  dgrisby
-  Leak of a value reference if a factory made the wrong type of value.
-
-  Revision 1.1.2.6  2004/10/13 17:58:21  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.5  2004/07/26 22:56:39  dgrisby
-  Support valuetypes in Anys.
-
-  Revision 1.1.2.4  2004/07/23 10:29:58  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.2.3  2004/07/04 23:53:37  dgrisby
-  More ValueType TypeCode and Any support.
-
-  Revision 1.1.2.2  2004/02/16 10:10:30  dgrisby
-  More valuetype, including value boxes. C++ mapping updates.
-
-  Revision 1.1.2.1  2003/09/26 16:12:54  dgrisby
-  Start of valuetype support.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/valueType.h>
 #include <omniORB4/anyStream.h>

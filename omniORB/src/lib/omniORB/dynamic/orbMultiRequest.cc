@@ -3,6 +3,7 @@
 // orbMultiRequest.cc         Created on: 17/2/1999
 //                            Author    : David Riddoch (djr)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -56,8 +57,8 @@ static omni_tracedmutex q_lock("orbMultiRequest::q_lock");
 // Lock for accessing the above data.
 
 static omni_tracedcondition q_cv(&q_lock, "orbMultiRequest::q_cv");
-// This is signalled if( queue_waiters > 0 ) and there might be
-// something to receive now.                           =====
+// This is signalled if (queue_waiters > 0) and there might be
+// something to receive now.                          =====
 
 OMNI_NAMESPACE_END(omni)
 
@@ -66,7 +67,7 @@ OMNI_USING_NAMESPACE(omni)
 void
 CORBA::ORB::send_multiple_requests_oneway(const RequestSeq& rs)
 {
-  for( CORBA::ULong i = 0; i < rs.length(); i++ ) {
+  for (CORBA::ULong i = 0; i < rs.length(); i++) {
     try {
       rs[i]->send_oneway();
     }
@@ -80,29 +81,33 @@ CORBA::ORB::send_multiple_requests_oneway(const RequestSeq& rs)
 void
 CORBA::ORB::send_multiple_requests_deferred(const RequestSeq& rs)
 {
-  unsigned nwaiters;
+  unsigned int nwaiters;
 
   {
     omni_tracedmutex_lock sync(q_lock);
 
-    for( CORBA::ULong i = 0; i < rs.length(); i++ ) {
+    for (CORBA::ULong i = 0; i < rs.length(); i++) {
       rs[i]->send_deferred();
 
       RequestLink* rl = new RequestLink(CORBA::Request::_duplicate(rs[i]));
-      if( outgoing_q ) {
+      if (outgoing_q) {
 	outgoing_q_tail->next = rl;
 	outgoing_q_tail = rl;
-      } else
+      }
+      else {
 	outgoing_q = outgoing_q_tail = rl;
+      }
     }
-
     nwaiters = queue_waiters;
   }
 
-  if( rs.length() >= nwaiters )  q_cv.broadcast();
-  else
-    for( CORBA::ULong i = 0; i < rs.length(); i++ )
+  if (rs.length() >= nwaiters) {
+    q_cv.broadcast();
+  }
+  else {
+    for (CORBA::ULong i = 0; i < rs.length(); i++)
       q_cv.signal();
+  }
 }
 
 
@@ -116,31 +121,37 @@ CORBA::ORB::poll_next_response()
 
   omni_tracedmutex_lock sync(q_lock);
 
-  if( incoming_q )  return 1;
+  if (incoming_q) 
+    return 1;
 
-  if( !outgoing_q )
+  if (!outgoing_q)
     OMNIORB_THROW(BAD_INV_ORDER, BAD_INV_ORDER_RequestNotSentYet,
 		  CORBA::COMPLETED_NO);
 
   RequestLink** rlp = &outgoing_q;
   RequestLink*  rlp_1 = 0;
 
-  while( *rlp ) {
+  while (*rlp) {
     RequestLink* rl = *rlp;
 
-    if( rl->request->poll_response() ) {
+    if (rl->request->poll_response()) {
       // Transfer from outgoing to incoming queue.
       RequestLink* next = rl->next;
       rl->next = 0;
-      if( incoming_q ) {
+      if (incoming_q) {
 	incoming_q_tail->next = rl;
 	incoming_q_tail = rl;
-      } else
+      }
+      else {
 	incoming_q = incoming_q_tail = rl;
+      }
       *rlp = next;
+
       if (outgoing_q_tail == rl)
 	outgoing_q_tail = rlp_1;
-    } else {
+
+    }
+    else {
       rlp = &rl->next;
       rlp_1 = rl;
     }
@@ -157,12 +168,13 @@ internal_get_response(CORBA::Request_ptr req)
   try {
     req->get_response();
   }
-  catch(CORBA::SystemException& ex) {
-    ((RequestImpl*) req)->storeExceptionInEnv();
+  catch (CORBA::SystemException& ex) {
+    ((RequestImpl*)req)->storeExceptionInEnv();
   }
 }
 
 OMNI_NAMESPACE_END(omni)
+
 
 void
 CORBA::ORB::get_next_response(Request_out req_out)
@@ -171,13 +183,13 @@ CORBA::ORB::get_next_response(Request_out req_out)
     omni_tracedmutex_lock sync(q_lock);
 
     // Complain if there's nothing pending
-    if( !(outgoing_q || incoming_q) ) {
+    if (!(outgoing_q || incoming_q)) {
       OMNIORB_THROW(BAD_INV_ORDER, BAD_INV_ORDER_RequestNotSentYet,
 		    CORBA::COMPLETED_NO);
     }
 
     // If we've received any replies, return one of those.
-    if( incoming_q ) {
+    if (incoming_q) {
       req_out = incoming_q->request;
       RequestLink* next = incoming_q->next;
       delete incoming_q;
@@ -187,21 +199,24 @@ CORBA::ORB::get_next_response(Request_out req_out)
     }
 
     // Check the outgoing queue to see if any of them have completed.
-    RequestLink** rlp = &outgoing_q;
+    RequestLink** rlp   = &outgoing_q;
     RequestLink*  rlp_1 = 0;
 
-    while( *rlp ) {
+    while (*rlp) {
       RequestLink* rl = *rlp;
 
-      if( rl->request->poll_response() ) {
+      if (rl->request->poll_response()) {
 	*rlp = rl->next;
 	req_out = rl->request;
+
 	if (outgoing_q_tail == rl)
 	  outgoing_q_tail = rlp_1;
+
 	delete rl;
 	internal_get_response(req_out._data);
 	return;
-      } else {
+      }
+      else {
 	rlp = &rl->next;
 	rlp_1 = rl;
       }

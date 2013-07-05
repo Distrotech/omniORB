@@ -27,16 +27,6 @@
 //    CORBA::ExceptionList
 //
 
-/*
-  $Log$
-  Revision 1.1.2.2  2001/11/06 15:41:34  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.2.1  2001/08/17 13:39:46  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif
@@ -53,6 +43,9 @@ typedef _CORBA_PseudoObj_Out<ExceptionList,ExceptionList_var> ExceptionList_out;
 
 class ExceptionList {
 public:
+  typedef ExceptionList_ptr _ptr_type;
+  typedef ExceptionList_var _var_type;
+
   virtual ~ExceptionList();
 
   virtual ULong count() const = 0;

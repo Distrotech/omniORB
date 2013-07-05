@@ -455,6 +455,13 @@ public:
       pd_exception->_raise();
   }
 
+  inline CORBA::Exception* getException()
+  {
+    CORBA::Exception* ex = pd_exception;
+    pd_exception = 0;
+    return ex;
+  }
+  
   inline _CORBA_Boolean addToSet(omni_tracedcondition* set_cond)
   {
     ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);

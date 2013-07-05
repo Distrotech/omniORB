@@ -29,6 +29,10 @@
 #ifndef _OMNIORB_AMI_H_
 #define _OMNIORB_AMI_H_
 
+#include <omniORB4/messaging.hh>
+#include <omniORB4/callDescriptor.h>
+
+
 #ifdef _dyn_attr
 # error "A local CPP macro _dyn_attr has already been defined."
 #endif
@@ -112,6 +116,81 @@ protected:
 
 
 //
+// DIIPollable implementation
+
+class DIIPollableImpl
+  : public virtual ::CORBA::DIIPollable
+{
+public:
+  DIIPollableImpl()
+    : pd_cond(&omniAsyncCallDescriptor::sd_lock, "DIIPollableImpl::pd_cond"),
+      pd_set_cond(0),
+      pd_ready(0)
+  {}
+
+  ~DIIPollableImpl();
+
+  void           _add_ref();
+  void           _remove_ref();
+  ::CORBA::ULong _refcount_value();
+
+  // Standard interface
+  ::CORBA::Boolean         is_ready(::CORBA::ULong timeout);
+  ::CORBA::PollableSet_ptr create_pollable_set();
+
+  inline ::CORBA::Boolean _addToSet(omni_tracedcondition* set_cond)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(omniAsyncCallDescriptor::sd_lock, 1);
+
+    if (pd_set_cond)
+      return 0;
+
+    pd_set_cond = set_cond;
+    return 1;
+  }
+
+  inline ::CORBA::Boolean _remFromSet(omni_tracedcondition* set_cond)
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);
+
+    if (pd_set_cond)
+      return 0;
+    
+    pd_set_cond = set_cond;
+    return 1;
+  }
+
+  inline void _replyReady()
+  {
+    omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+    ++pd_ready;
+    pd_cond.broadcast();
+    if (pd_set_cond)
+      pd_set_cond->signal();
+  }
+
+  inline void _replyCollected()
+  {
+    omni_tracedmutex_lock l(omniAsyncCallDescriptor::sd_lock);
+    --pd_ready;
+  }
+
+  inline ::CORBA::Boolean _lockedIsReady()
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(sd_lock, 1);
+    return pd_ready ? 1 : 0;
+  }
+
+  static _dyn_attr DIIPollableImpl _PD_instance;
+
+private:
+  omni_tracedcondition  pd_cond;
+  omni_tracedcondition* pd_set_cond;
+  CORBA::ULong          pd_ready;
+};
+
+
+//
 // PollableSet implementation
 
 typedef _CORBA_Value_Element<
@@ -126,6 +205,8 @@ class PollableSetImpl
 {
 public:
   PollableSetImpl(PollerImpl* poller);
+  PollableSetImpl(DIIPollableImpl* dii_pollable);
+
   ~PollableSetImpl();
 
   // Standard interface
@@ -140,12 +221,12 @@ public:
   void _remove_ref();
 
 private:
-  omni_tracedcondition  pd_cond;
-  PollerImplSeq         pd_ami_pollers;
-  ::CORBA::DIIPollable* pd_dii_pollable;
-  omni_refcount         pd_ref_count;
+  omni_tracedcondition pd_cond;
+  PollerImplSeq        pd_ami_pollers;
+  DIIPollableImpl*     pd_dii_pollable;
+  omni_refcount        pd_ref_count;
 
-  ::CORBA::Pollable*    getAndRemoveReadyPollable();
+  ::CORBA::Pollable*   getAndRemoveReadyPollable();
 
   // Not implemented
   PollableSetImpl(const PollableSetImpl&);
