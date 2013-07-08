@@ -895,19 +895,6 @@ private:
   friend class cdrValueChunkStream;
   // cdrStreamAdapter and cdrValueChunkStream need to access protected
   // pointers and virtual functions.
-
-  // Private shift operators to catch code that incorrectly attempts
-  // to marshal char, octet, bool.
-  void operator>>=(signed char);
-  void operator<<=(signed char&);
-
-  void operator>>=(unsigned char);
-  void operator<<=(unsigned char&);
-
-#ifdef HAS_Cplusplus_Bool
-  void operator>>=(bool);
-  void operator<<=(bool&);
-#endif
 };
 
 
@@ -939,6 +926,23 @@ marshallingOperators(LongDouble)
 #endif
 
 #undef marshallingOperators
+
+//
+// These are not implemented. They are here to cause linker errors in
+// code that accidentally tries to use them.
+
+void operator>>=(char  a, cdrStream& s);
+void operator<<=(char& a, cdrStream& s);
+
+void operator>>=(unsigned char  a, cdrStream& s);
+void operator<<=(unsigned char& a, cdrStream& s);
+
+#ifdef HAS_Cplusplus_Bool
+
+void operator>>=(bool  a, cdrStream& s);
+void operator<<=(bool& a, cdrStream& s);
+
+#endif
 
 
 //
