@@ -519,11 +519,7 @@ omniObjTableEntry::setDeactivatingOA()
     l << "State " << this << " -> deactivating (OA destruction)\n";
   }
 
-  if (pd_nInvocations == 1)
-    pd_state = DEACTIVATING_OA;
-  else
-    pd_state = DEACTIVATING;
-
+  pd_state = DEACTIVATING_OA;
   --pd_nInvocations;
 
   if (pd_waiters)

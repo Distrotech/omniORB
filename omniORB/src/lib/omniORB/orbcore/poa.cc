@@ -1977,36 +1977,24 @@ omniOrbPOA::lastInvocationHasCompleted(omniLocalIdentity* id)
 
   PortableServer::ServantActivator_ptr sa = 0;
 
-  // This lock _could_ go inside the body of the 'if' below, but I want
-  // to ensure that we take this lock no matter what.  The reason is to
-  // ensure that detached_object() is called (in deactivate_object())
-  // before met_detached_object() (below).  Otherwise we get a nasty
-  // race ...
-  pd_lock.lock();
+  // We must take pd_lock both to protect pd_servantActivator and to
+  // ensure synchronisation with a thread in deactivate_object().
+  // Otherwise we could call met_detached_object() below before
+  // deactivate_object() has called detached_object().
 
-  if( (pd_policy.req_processing == RPP_SERVANT_MANAGER &&
-       pd_policy.retain_servants) || pd_dying ) {
+  {
+    omni_tracedmutex_lock sync(pd_lock);
 
-    // The omniLocalIdentity still holds a reference to us, and
-    // we hold a reference to the servant activator, so we don't
-    // need to grab a reference to pd_servantActivator here.
-    // (since it is also immutable once set).
-    sa = pd_servantActivator;
+    if (pd_policy.req_processing == RPP_SERVANT_MANAGER &&
+        pd_policy.retain_servants) {
 
-    if( pd_dying && !pd_destroyed ) {
-      // We cannot etherealise until apparent destruction is complete.
-      // Wait for apparent destruction.
-      if (omniORB::trace(25)) {
-	omniORB::logger l;
-	l << "Waiting for destruction of POA before etherealising "
-	  << entry << ".\n";
-      }
-      while( !pd_destroyed )  pd_deathSignal.wait();
-      omniORB::logs(25, "POA destroyed; continuing with etherealisation.");
+      // The omniLocalIdentity still holds a reference to us, and
+      // we hold a reference to the servant activator, so we don't
+      // need to grab a reference to pd_servantActivator here.
+      // (since it is also immutable once set).
+      sa = pd_servantActivator;
     }
   }
-
-  pd_lock.unlock();
 
   PortableServer::Servant servant = DOWNCAST(id->servant());
 
@@ -2949,18 +2937,6 @@ omniOrbPOA::deactivate_objects(omniObjTableEntry* entry)
     if (entry->state() == omniObjTableEntry::ACTIVE)
       entry->setDeactivatingOA();
 
-    if (!entry->is_idle()) {
-      // Entry has outstanding invocations. When the last invocation
-      // finishes, lastInvocationHasCompleted() will be called. We
-      // detach the entry here, so the destroying thread doesn't try
-      // to etherealise it.
-      if (omniORB::trace(20)) {
-	omniORB::logger l;
-	l << entry << " is not idle, etherealise from other thread\n";
-      }
-      entry->removeFromOAObjList();
-      detached_object();
-    }
     entry = next;
   }
 }
