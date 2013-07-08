@@ -862,7 +862,6 @@ public:
   // pre-allocate a suitable sized chunk.
 
 
-public:
   /////////////////////////////////////////////////////////////////////
   virtual _CORBA_ULong completion();
   // If an error occurs when a value is marshalled or unmarshalled, a
@@ -896,6 +895,19 @@ private:
   friend class cdrValueChunkStream;
   // cdrStreamAdapter and cdrValueChunkStream need to access protected
   // pointers and virtual functions.
+
+  // Private shift operators to catch code that incorrectly attempts
+  // to marshal char, octet, bool.
+  void operator>>=(signed char);
+  void operator<<=(signed char&);
+
+  void operator>>=(unsigned char);
+  void operator<<=(unsigned char&);
+
+#ifdef HAS_Cplusplus_Bool
+  void operator>>=(bool);
+  void operator<<=(bool&);
+#endif
 };
 
 

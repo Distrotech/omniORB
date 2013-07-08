@@ -1,3 +1,17 @@
+Mon Jul  8 13:45:12 BST 2013 dgrisby
+====================================
+
+- Avoid deadlock in POA destruction during nested calls.
+
+include/omniORB4/internal/objectAdapter.h
+src/lib/omniORB/orbcore/omniInternal.cc
+src/lib/omniORB/orbcore/poa.cc
+
+- Private shift operators for char to prevent mistakes.
+
+include/omniORB4/cdrStream.h
+
+
 Fri Jul  5 14:16:01 BST 2013 dgrisby
 ====================================
 
