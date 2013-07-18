@@ -28,49 +28,6 @@
 //    Implementation of dynamic library 'hook' functions.
 //
 
-/*
-  $Log$
-  Revision 1.4.2.2  2003/10/23 11:25:54  dgrisby
-  More valuetype support.
-
-  Revision 1.4.2.1  2003/03/23 21:02:49  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.9  2003/01/16 11:08:26  dgrisby
-  Patches to support Digital Mars C++. Thanks Christof Meerwald.
-
-  Revision 1.2.2.8  2001/11/27 14:35:08  dpg1
-  Context, DII fixes.
-
-  Revision 1.2.2.7  2001/11/06 15:41:36  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.2.2.6  2001/08/17 17:08:35  sll
-  Use LinkHack mechanism to ensure dynamicLib is linked.
-
-  Revision 1.2.2.5  2001/04/19 09:14:14  sll
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.2.2.4  2000/10/09 16:26:28  sll
-  Temporary disable IR support.
-
-  Revision 1.2.2.3  2000/10/06 16:40:54  sll
-  Changed to use cdrStream.
-
-  Revision 1.2.2.2  2000/09/27 17:25:42  sll
-  Changed include/omniORB3 to include/omniORB4.
-
-  Revision 1.2.2.1  2000/07/17 10:35:42  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:02  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/22 14:26:33  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #define ENABLE_CLIENT_IR_SUPPORT
 #include <omniORB4/CORBA.h>
 #include <omniORB4/callDescriptor.h>

@@ -26,8 +26,6 @@
 # Description:
 #
 #   Global state of the C++ backend is stored here
-#
-# $Id$
 
 state = {
     # Name of this program

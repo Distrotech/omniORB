@@ -28,20 +28,6 @@
 //
 //      Define various symbols based on things detected by autoconf
 
-/*
- $Log$
- Revision 1.1.4.1  2003/03/23 21:04:21  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.2.2  2002/02/18 11:59:12  dpg1
- Full autoconf support.
-
- Revision 1.1.2.1  2002/01/15 16:38:10  dpg1
- On the road to autoconf. Dependencies refactored, configure.ac
- written. No makefiles yet.
-
-*/
-
 #ifndef __CORBA_SYSDEP_AUTO_H__
 #define __CORBA_SYSDEP_AUTO_H__
 

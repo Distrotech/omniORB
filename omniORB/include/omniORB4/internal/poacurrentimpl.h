@@ -28,29 +28,6 @@
 //    Internal implementation of PortableServer::Current
 //
 
-/*
-  $Log$
-  Revision 1.1.4.2  2006/07/02 22:52:05  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.4.1  2003/03/23 21:03:43  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.4  2001/08/17 17:12:34  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.2.3  2001/08/01 10:08:20  dpg1
-  Main thread policy.
-
-  Revision 1.1.2.2  2001/06/11 11:38:17  dpg1
-  Failed to initialise refcount in Current object.
-
-  Revision 1.1.2.1  2001/06/07 16:24:09  dpg1
-  PortableServer::Current support.
-
-*/
-
 #include <omnithread.h>
 #include <omniORB4/callDescriptor.h>
 #include <omniCurrent.h>

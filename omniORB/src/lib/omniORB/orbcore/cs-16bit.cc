@@ -27,60 +27,6 @@
 // Description:
 //    16 bit code sets
 
-/*
-  $Log$
-  Revision 1.1.4.5  2008/08/08 16:52:56  dgrisby
-  Option to validate untransformed UTF-8; correct data conversion minor
-  codes; better logging for MessageErrors.
-
-  Revision 1.1.4.4  2006/05/22 15:44:51  dgrisby
-  Make sure string length and body are never split across a chunk
-  boundary.
-
-  Revision 1.1.4.3  2005/12/08 14:22:31  dgrisby
-  Better string marshalling performance; other minor optimisations.
-
-  Revision 1.1.4.2  2003/05/20 16:53:16  dgrisby
-  Valuetype marshalling support.
-
-  Revision 1.1.4.1  2003/03/23 21:02:21  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.9  2001/10/17 16:47:08  dpg1
-  New minor codes
-
-  Revision 1.1.2.8  2001/08/03 17:41:19  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.2.7  2001/04/18 18:18:09  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.6  2000/12/05 17:43:30  dpg1
-  Check for input over-run in string and wstring unmarshalling.
-
-  Revision 1.1.2.5  2000/11/22 14:37:59  dpg1
-  Code set marshalling functions now take a string length argument.
-
-  Revision 1.1.2.4  2000/11/16 12:34:40  dpg1
-  Clarify marshalling of non-UTF-16 wchar.
-
-  Revision 1.1.2.3  2000/11/10 15:41:35  dpg1
-  Native code sets throw BAD_PARAM if they are given a null transmission
-  code set.
-
-  Revision 1.1.2.2  2000/11/03 18:49:17  sll
-  Separate out the marshalling of byte, octet and char into 3 set of distinct
-  marshalling functions.
-  Renamed put_char_array and get_char_array to put_octet_array and
-  get_octet_array.
-  New string marshal member functions.
-
-  Revision 1.1.2.1  2000/10/27 15:42:07  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <codeSetUtil.h>
 

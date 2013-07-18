@@ -27,10 +27,6 @@
 //    CORBA::LocalObject
 //
 
-/*
-  $Log$
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/objTracker.h>
 

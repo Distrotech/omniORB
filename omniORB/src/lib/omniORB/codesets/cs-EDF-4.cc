@@ -27,15 +27,6 @@
 //    Code set tables for Siemens EBCDIC DF.04
 //
 
-/*
-  $Log$
-  Revision 1.1.2.1  2003/03/03 12:32:32  dgrisby
-  EBCDIC code sets. Thanks Coleman Corrigan.
-
-  Initial code based on dpg's cs-8859-1.cc
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/linkHacks.h>
 #include <codeSetUtil.h>

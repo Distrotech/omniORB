@@ -27,22 +27,6 @@
 //    CORBA::Object
 //
 
-/*
-  $Log$
-  Revision 1.1.2.4  2002/02/25 11:15:14  dpg1
-  Typo in _unchecked_narrow().
-
-  Revision 1.1.2.3  2001/11/12 13:46:07  dpg1
-  _unchecked_narrow, improved _narrow.
-
-  Revision 1.1.2.2  2001/11/06 15:41:34  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.2.1  2001/08/17 13:39:47  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

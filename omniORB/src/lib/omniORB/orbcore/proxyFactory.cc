@@ -28,49 +28,6 @@
 //    Implementation of proxyObjectFactory.
 //
 
-/*
-  $Log$
-  Revision 1.5.2.5  2006/12/07 11:09:20  dgrisby
-  Typo in log message.
-
-  Revision 1.5.2.4  2005/04/08 00:35:46  dgrisby
-  Merging again.
-
-  Revision 1.5.2.3  2005/01/06 23:10:40  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.5.2.2  2003/09/26 16:12:55  dgrisby
-  Start of valuetype support.
-
-  Revision 1.5.2.1  2003/03/23 21:02:04  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.6  2003/03/03 15:00:52  dgrisby
-  Safe unloading of proxy object factories. Thanks Christian Perez.
-
-  Revision 1.2.2.5  2001/09/19 17:26:53  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.2.2.4  2001/04/18 18:18:05  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.2.2.3  2000/11/09 12:27:59  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.2.2.2  2000/09/27 17:58:56  sll
-  Changed include/omniORB3 to include/omniORB4
-
-  Revision 1.2.2.1  2000/07/17 10:35:58  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:55  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/22 14:27:05  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/proxyFactory.h>
 

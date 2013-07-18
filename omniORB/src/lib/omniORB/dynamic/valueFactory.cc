@@ -27,29 +27,6 @@
 //    ValueFactory map
 //
 
-/*
-  $Log$
-  Revision 1.1.2.6  2005/01/13 21:55:58  dgrisby
-  Turn off -g debugging; suppress some compiler warnings.
-
-  Revision 1.1.2.5  2005/01/06 16:39:25  dgrisby
-  DynValue and DynValueBox implementations; misc small fixes.
-
-  Revision 1.1.2.4  2004/04/02 13:26:23  dgrisby
-  Start refactoring TypeCode to support value TypeCodes, start of
-  abstract interfaces support.
-
-  Revision 1.1.2.3  2004/02/16 10:10:29  dgrisby
-  More valuetype, including value boxes. C++ mapping updates.
-
-  Revision 1.1.2.2  2003/10/23 11:25:54  dgrisby
-  More valuetype support.
-
-  Revision 1.1.2.1  2003/09/26 16:12:54  dgrisby
-  Start of valuetype support.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/valueType.h>
 #include <omniORB4/objTracker.h>

@@ -27,19 +27,6 @@
 //   
 //   Implementation of fixed point type
 
-/*
-  $Log$
-  Revision 1.1.4.2  2005/03/30 23:35:57  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:01:45  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/03/13 10:32:12  dpg1
-  Fixed point support.
-
-*/
-
 #include <idlfixed.h>
 #include <idlutil.h>
 #include <idlerr.h>

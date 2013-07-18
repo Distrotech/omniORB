@@ -25,7 +25,7 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
 
 #ifndef __SSLCONTEXT_H__

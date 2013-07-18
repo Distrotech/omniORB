@@ -26,21 +26,6 @@
 //   
 //   Visitor object to dump the tree
 
-// $Id$
-// $Log$
-// Revision 1.3.2.3  2000/11/01 12:45:56  dpg1
-// Update to CORBA 2.4 specification.
-//
-// Revision 1.3.2.2  2000/10/10 10:18:50  dpg1
-// Update omniidl front-end from omni3_develop.
-//
-// Revision 1.1.2.1  2000/08/14 14:35:14  dpg1
-// IDL dumping now properly escapes string and char constants
-//
-// Revision 1.1  1999/10/27 14:05:58  dpg1
-// *** empty log message ***
-//
-
 #ifndef _idldump_h_
 #define _idldump_h_
 

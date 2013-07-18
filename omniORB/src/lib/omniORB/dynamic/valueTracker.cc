@@ -27,16 +27,6 @@
 //    Position trackers for indirections in valuetypes.
 //
 
-/*
-  $Log$
-  Revision 1.1.2.2  2005/01/17 14:44:47  dgrisby
-  Surprisingly few changes to compile on Windows.
-
-  Revision 1.1.2.1  2003/09/26 16:12:54  dgrisby
-  Start of valuetype support.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/valueType.h>
 #include <valueTrackerImpl.h>

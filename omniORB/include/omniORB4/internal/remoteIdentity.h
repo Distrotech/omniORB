@@ -28,51 +28,6 @@
 //    Encapsulation of the identity of a remote object implementation.
 //      
  
-/*
-  $Log$
-  Revision 1.1.6.2  2007/04/14 17:56:52  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.1.6.1  2003/03/23 21:03:42  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.6  2002/11/29 14:03:41  dgrisby
-  Rearrange declarations to make Code Warrior happy.
-
-  Revision 1.1.4.5  2001/09/19 17:26:47  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.4  2001/09/03 16:52:05  sll
-  New signature for locateRequest. Now accept a calldescriptor argument.
-
-  Revision 1.1.4.3  2001/08/22 13:31:31  dpg1
-  Christof's fixes for gcc 3.0.1.
-
-  Revision 1.1.4.2  2001/08/15 10:26:10  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.1  2001/04/18 17:18:14  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.3  2000/10/03 17:41:45  sll
-  Make sure object key is copied in ctor.
-
-  Revision 1.2.2.2  2000/09/27 17:46:29  sll
-  New data member pd_ior and the new ctor signature to match.
-
-  Revision 1.2.2.1  2000/07/17 10:35:40  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:03  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/22 14:26:26  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __OMNIORB_REMOTEIDENTITY_H__
 #define __OMNIORB_REMOTEIDENTITY_H__
 

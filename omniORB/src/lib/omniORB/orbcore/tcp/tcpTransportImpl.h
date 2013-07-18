@@ -24,21 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.2.3  2001/08/23 16:02:58  sll
-  Implement getInterfaceAddress().
-
-  Revision 1.1.2.2  2001/07/31 16:16:15  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.2.1  2001/04/18 18:10:43  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #ifndef __TCPTRANSPORTIMPL_H__
 #define __TCPTRANSPORTIMPL_H__

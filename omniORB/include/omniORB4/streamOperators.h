@@ -25,12 +25,6 @@
 //
 // Description:
 //    Stream operators
-//
-// $Id$
-
-/*
-  $Log$
-*/
 
 #ifndef __OMNI_STREAM_OPERATORS_H__
 #define __OMNI_STREAM_OPERATORS_H__

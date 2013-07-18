@@ -27,13 +27,6 @@
 //    CORBA::Current
 //
 
-/*
-  $Log$
-  Revision 1.1.2.1  2001/08/17 13:39:45  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

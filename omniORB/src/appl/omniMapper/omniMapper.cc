@@ -21,46 +21,6 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 //  02111-1307, USA.
 
-// $Id$
-// $Log$
-// Revision 1.5.2.2  2004/02/20 00:03:34  dgrisby
-// Compilation fixes. Thanks Gary Duzan for pointing them out.
-//
-// Revision 1.5.2.1  2003/03/23 21:03:18  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.2.2.7  2002/01/16 12:35:46  dpg1
-// omniMapper used -ORBendpoint instead of -ORBendPoint.
-//
-// Revision 1.2.2.6  2001/10/17 16:49:11  dpg1
-// Minor error message tweaks
-//
-// Revision 1.2.2.5  2001/09/19 17:33:17  dpg1
-// Update omniMapper and omniNames INS mapper to ORB core changes from a
-// while ago.
-//
-// Revision 1.2.2.4  2001/06/08 17:12:08  dpg1
-// Merge all the bug fixes from omni3_develop.
-//
-// Revision 1.2.2.3  2001/04/19 09:39:05  sll
-// Big checkin with the brand new internal APIs.
-//
-// Revision 1.2.2.2  2000/10/09 16:20:56  sll
-// Ported to omniORB 4 API.
-//
-// Revision 1.2.2.1  2000/07/17 10:35:38  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.3  2000/07/13 15:26:04  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.1.2.2  2000/06/19 15:25:57  dpg1
-// Explicit cast to (const char*) when using String_var with logger.
-//
-// Revision 1.1.2.1  2000/05/24 17:15:37  dpg1
-// Added omniMapper.
-//
-
 #include <omniORB4/CORBA.h>
 #include <stdlib.h>
 #include <stdio.h>

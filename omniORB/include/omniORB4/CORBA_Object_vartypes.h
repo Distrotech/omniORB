@@ -27,22 +27,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.4.3  2005/11/09 12:16:46  dgrisby
-  Remove obsolete tcDesc helper classes.
-
-  Revision 1.1.4.2  2004/02/16 10:10:28  dgrisby
-  More valuetype, including value boxes. C++ mapping updates.
-
-  Revision 1.1.4.1  2003/03/23 21:04:23  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/08/17 13:39:47  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

@@ -27,15 +27,6 @@
 //    Code set tables for EBCDIC IBM037
 //
 
-/*
-  $Log$
-  Revision 1.1.2.1  2003/03/03 12:32:32  dgrisby
-  EBCDIC code sets. Thanks Coleman Corrigan.
-
-  Initial code based on cs-EDF-4.cc
-  with definitions as per rfc1345
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/linkHacks.h>
 #include <codeSetUtil.h>

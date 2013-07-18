@@ -31,38 +31,6 @@
 //   yet, because they are using DSI, or because they are in a
 //   different language to the caller.
 
-/*
- $Log$
- Revision 1.1.4.2  2007/04/14 17:56:53  dgrisby
- Identity downcasting mechanism was broken by VC++ 8's
- over-enthusiastic optimiser.
-
- Revision 1.1.4.1  2003/03/23 21:03:46  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.2.7  2002/11/29 14:03:41  dgrisby
- Rearrange declarations to make Code Warrior happy.
-
- Revision 1.1.2.6  2001/11/27 14:36:17  dpg1
- Local _is_equivalent fix.
-
- Revision 1.1.2.5  2001/09/19 17:26:46  dpg1
- Full clean-up after orb->destroy().
-
- Revision 1.1.2.4  2001/09/03 16:52:04  sll
- New signature for locateRequest. Now accept a calldescriptor argument.
-
- Revision 1.1.2.3  2001/08/22 13:31:31  dpg1
- Christof's fixes for gcc 3.0.1.
-
- Revision 1.1.2.2  2001/08/15 10:26:09  dpg1
- New object table behaviour, correct POA semantics.
-
- Revision 1.1.2.1  2001/05/29 17:03:49  dpg1
- In process identity.
-
-*/
-
 #ifndef __OMNIORB_INPROCESSIDENTITY_H__
 #define __OMNIORB_INPROCESSIDENTITY_H__
 

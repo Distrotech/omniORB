@@ -27,39 +27,6 @@
 //    Implementation of the BOA interface, built upon the POA interface.
 //	
 
-/*
-  $Log$
-  Revision 1.1.6.1  2003/03/23 21:03:52  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.3  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.2  2001/05/29 17:03:49  dpg1
-  In process identity.
-
-  Revision 1.1.4.1  2001/04/18 17:18:18  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.1  2000/07/17 10:35:51  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:58  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.3  2000/06/02 14:20:15  dpg1
-  Using boa_lock for the nil BOA's condition variable caused an
-  assertion failure on exit.
-
-  Revision 1.1.2.2  1999/09/28 10:54:33  djr
-  Removed pretty-printing of object keys from object adapters.
-
-  Revision 1.1.2.1  1999/09/22 14:26:45  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __CORBABOA_H__
 #define __CORBABOA_H__
 

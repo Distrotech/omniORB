@@ -26,28 +26,6 @@
 //   
 //   Global configuration for omniidl
 
-// $Id$
-// $Log$
-// Revision 1.2.2.3  2000/12/05 17:45:19  dpg1
-// omniidl case sensitivity updates from omni3_develop.
-//
-// Revision 1.2.2.2  2000/10/27 16:31:08  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.2.2.1  2000/07/17 10:36:02  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.3  2000/07/13 15:25:53  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.1.2.2  2000/06/05 18:13:27  dpg1
-// Comments can be attached to subsequent declarations (with -K). Better
-// idea of most recent decl in operation declarations
-//
-// Revision 1.1.2.1  2000/03/06 15:03:48  dpg1
-// Minor bug fixes to omniidl. New -nf and -k flags.
-//
-
 #include <idlconfig.h>
 
 

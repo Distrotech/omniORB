@@ -24,24 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.4  2002/03/27 11:44:51  dpg1
-  Check in interceptors things left over from last week.
-
-  Revision 1.1.4.3  2001/08/03 17:48:43  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.4.2  2001/06/13 20:07:25  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:26:28  sll
-  Big checkin with the brand new internal APIs.
-
-  */
 
 #ifndef __OMNITRANSPORT_H__
 #define __OMNITRANSPORT_H__

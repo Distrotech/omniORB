@@ -24,19 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.2.2  2001/05/02 14:20:15  sll
-  Make sure that getStream() is used instead of casting to get a cdrStream
-  from a IOP_C and IOP_S.
-
-  Revision 1.1.2.1  2001/04/18 17:26:29  sll
-  Big checkin with the brand new internal APIs.
-
- */
 
 #ifndef __IOP_C_H__
 #define __IOP_C_H__

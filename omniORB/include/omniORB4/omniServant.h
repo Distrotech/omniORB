@@ -28,41 +28,6 @@
 //    Base class for object implementations (servants).
 //      
  
-/*
-  $Log$
-  Revision 1.4.2.2  2005/09/05 17:22:09  dgrisby
-  Reference counted local call shortcut.
-
-  Revision 1.4.2.1  2003/03/23 21:04:10  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.5  2001/08/15 10:26:08  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.2.2.4  2001/05/29 17:03:48  dpg1
-  In process identity.
-
-  Revision 1.2.2.3  2001/04/18 17:50:43  sll
-  Big checkin with the brand new internal APIs.
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.2.2.2  2000/09/27 17:12:47  sll
-  New member _upcall().
-
-  Revision 1.2.2.1  2000/07/17 10:35:35  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.2  1999/10/27 17:32:09  djr
-  omni::internalLock and objref_rc_lock are now pointers.
-
-  Revision 1.1.2.1  1999/09/24 09:51:48  djr
-  Moved from omniORB2 + some new files.
-
-*/
-
 #ifndef __OMNISERVANT_H__
 #define __OMNISERVANT_H__
 

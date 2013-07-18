@@ -27,49 +27,6 @@
 //   
 //   Implementation of repoId management
 
-// $Id$
-// $Log$
-// Revision 1.9.2.4  2005/07/22 17:18:36  dgrisby
-// Another merge from omni4_0_develop.
-//
-// Revision 1.9.2.3  2005/05/10 22:07:31  dgrisby
-// Merge again.
-//
-// Revision 1.9.2.2  2005/01/06 23:11:14  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.9.2.1  2003/03/23 21:01:45  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.5.2.6  2001/11/13 14:11:46  dpg1
-// Tweaks for CORBA 2.5 compliance.
-//
-// Revision 1.5.2.5  2001/10/17 16:48:33  dpg1
-// Minor error message tweaks
-//
-// Revision 1.5.2.4  2000/11/03 12:20:58  dpg1
-// #pragma ID can now be declared more than once for a type, as long as
-// the id is the same.
-//
-// Revision 1.5.2.3  2000/10/27 16:31:09  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.5.2.2  2000/10/10 10:18:51  dpg1
-// Update omniidl front-end from omni3_develop.
-//
-// Revision 1.3.2.1  2000/08/29 10:20:27  dpg1
-// Operations and attributes now have repository ids.
-//
-// Revision 1.3  1999/11/08 10:50:47  dpg1
-// Change to behaviour when files end inside a scope.
-//
-// Revision 1.2  1999/11/02 17:07:25  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.1  1999/10/27 14:05:56  dpg1
-// *** empty log message ***
-//
-
 #include <idlrepoId.h>
 #include <idlast.h>
 #include <idlutil.h>

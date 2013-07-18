@@ -26,27 +26,6 @@
 #   
 #   Base classes for Visitors
 
-# $Id$
-# $Log$
-# Revision 1.5.2.2  2000/11/01 12:46:00  dpg1
-# Update to CORBA 2.4 specification.
-#
-# Revision 1.5.2.1  2000/07/17 10:36:07  sll
-# Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-#
-# Revision 1.6  2000/07/13 15:25:51  dpg1
-# Merge from omni3_develop for 3.0 release.
-#
-# Revision 1.3  1999/11/15 15:49:23  dpg1
-# Documentation strings.
-#
-# Revision 1.2  1999/10/29 18:20:01  dpg1
-# Clean up
-#
-# Revision 1.1  1999/10/29 15:47:07  dpg1
-# First revision.
-#
-
 """Visitor pattern visitors for AST nodes and types
 
 This module declares abstract visitor classes for visiting AST nodes

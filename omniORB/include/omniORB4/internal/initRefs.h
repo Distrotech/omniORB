@@ -27,60 +27,6 @@
 //	*** PROPRIETARY INTERFACE ***
 //	
 
-/*
-  $Log$
-  Revision 1.1.4.4  2001/11/13 14:11:44  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.1.4.3  2001/10/17 16:44:05  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.4.2  2001/05/29 17:03:49  dpg1
-  In process identity.
-
-  Revision 1.1.4.1  2001/04/18 17:18:16  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.2  2000/09/27 17:38:58  sll
-  Updated include/omniORB3 to include/omniORB4
-
-  Revision 1.2.2.1  2000/07/17 10:35:39  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:03  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.2  2000/06/27 15:33:53  sll
-  Changed #include to match the new location of the stubs.
-
-  Revision 1.1.2.1  2000/04/27 10:39:18  dpg1
-  Interoperable Naming Service
-
-  Moved from bootstrap_i.h, and extended.
-
-  Revision 1.4.6.2  1999/09/27 08:48:31  djr
-  Minor corrections to get rid of warnings.
-
-  Revision 1.4.6.1  1999/09/22 14:26:24  djr
-  Major rewrite of orbcore to support POA.
-
-  Revision 1.4  1999/05/25 18:10:46  sll
-  Now CORBA::ORB::ObjectIdList and CORBA_InitialReference::ObjIdList
-  are different types.
-
-  Revision 1.3  1999/03/11 16:25:51  djr
-  Updated copyright notice
-
-  Revision 1.2  1998/08/25 18:52:09  sll
-  Added dummy marshalling functions in serviceRecord to make gcc-2.7.2 happy.
-
-  Revision 1.1  1998/08/21 19:28:15  sll
-  Initial revision
-
-*/
-
-
 #ifndef __INITREFS_H__
 #define __INITREFS_H__
 

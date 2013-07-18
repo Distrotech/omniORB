@@ -27,14 +27,6 @@
 //    AbstractBase definitions
 //
 
-/*
-  $Log$
-  Revision 1.1.2.1  2004/04/02 13:26:25  dgrisby
-  Start refactoring TypeCode to support value TypeCodes, start of
-  abstract interfaces support.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

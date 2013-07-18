@@ -25,64 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.6.5  2006/05/20 16:23:36  dgrisby
-  Minor cdrMemoryStream and TypeCode performance tweaks.
-
-  Revision 1.1.6.4  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.3  2005/01/06 23:10:12  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.2  2004/07/31 23:47:11  dgrisby
-  Properly set pd_clear_memory flag in all situations.
-
-  Revision 1.1.6.1  2003/03/23 21:02:24  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.10  2003/02/17 01:24:04  dgrisby
-  Grow cdrMemoryStreams exponentially rather than linearly.
-
-  Revision 1.1.4.9  2001/10/17 16:33:27  dpg1
-  New downcast mechanism for cdrStreams.
-
-  Revision 1.1.4.8  2001/08/22 13:29:48  dpg1
-  Re-entrant Any marshalling.
-
-  Revision 1.1.4.7  2001/08/17 17:12:34  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.6  2001/08/03 17:41:18  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.4.5  2001/04/18 18:18:11  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.4.4  2000/11/15 17:18:20  sll
-  Added char, wchar codeset convertor support to cdrMemoryStream and
-  cdrEncapsulationStream.
-
-  Revision 1.1.4.3  2000/11/03 18:49:16  sll
-  Separate out the marshalling of byte, octet and char into 3 set of distinct
-  marshalling functions.
-  Renamed put_char_array and get_char_array to put_octet_array and
-  get_octet_array.
-  New string marshal member functions.
-
-  Revision 1.1.4.2  2000/10/10 10:14:27  sll
-  Extra ctor for cdrEncapsulationStream which initialise the buffer by
-  fetching data from the argument cdrStream.
-
-  Revision 1.1.4.1  2000/09/27 17:30:28  sll
-  *** empty log message ***
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <orbParameters.h>

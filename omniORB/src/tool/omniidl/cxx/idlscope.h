@@ -26,35 +26,6 @@
 //   
 //   Definitions for scope manipulation
 
-// $Id$
-// $Log$
-// Revision 1.5.2.4  2001/10/29 17:42:43  dpg1
-// Support forward-declared structs/unions, ORB::create_recursive_tc().
-//
-// Revision 1.5.2.3  2000/10/27 16:31:10  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.5.2.2  2000/10/10 10:18:51  dpg1
-// Update omniidl front-end from omni3_develop.
-//
-// Revision 1.3.2.2  2000/09/19 09:14:26  dpg1
-// Scope::Entry::Kind renamed to Scope::Entry::EntryKind to avoid
-// problems with over-keen compilers
-//
-// Revision 1.3.2.1  2000/08/29 15:20:29  dpg1
-// New relativeScope() function. New -i flag to enter interactive loop
-// after parsing
-//
-// Revision 1.3  1999/11/02 17:07:25  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.2  1999/10/29 10:01:50  dpg1
-// Global scope initialisation changed.
-//
-// Revision 1.1  1999/10/27 14:05:55  dpg1
-// *** empty log message ***
-//
-
 #ifndef _idlscope_h_
 #define _idlscope_h_
 

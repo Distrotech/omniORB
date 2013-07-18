@@ -27,24 +27,6 @@
 //    Value tracker implementation classes for C++
 //
 
-// $Log$
-// Revision 1.1.2.5  2005/01/17 14:44:46  dgrisby
-// Surprisingly few changes to compile on Windows.
-//
-// Revision 1.1.2.4  2004/07/04 23:53:35  dgrisby
-// More ValueType TypeCode and Any support.
-//
-// Revision 1.1.2.3  2004/04/02 13:26:24  dgrisby
-// Start refactoring TypeCode to support value TypeCodes, start of
-// abstract interfaces support.
-//
-// Revision 1.1.2.2  2003/11/06 11:56:55  dgrisby
-// Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-//
-// Revision 1.1.2.1  2003/09/26 16:12:54  dgrisby
-// Start of valuetype support.
-//
-
 #ifndef __VALUETRACKERIMPL_H__
 #define __VALUETRACKERIMPL_H__
 

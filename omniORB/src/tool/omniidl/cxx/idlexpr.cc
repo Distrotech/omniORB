@@ -26,42 +26,6 @@
 //   
 //   Expression evaluation functions
 
-// $Id$
-// $Log$
-// Revision 1.6.2.6  2001/10/17 16:48:33  dpg1
-// Minor error message tweaks
-//
-// Revision 1.6.2.5  2001/08/29 11:54:20  dpg1
-// Clean up const handling in IDL compiler.
-//
-// Revision 1.6.2.4  2001/03/13 10:32:11  dpg1
-// Fixed point support.
-//
-// Revision 1.6.2.3  2000/10/27 16:31:09  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.6.2.2  2000/10/10 10:18:50  dpg1
-// Update omniidl front-end from omni3_develop.
-//
-// Revision 1.4.2.2  2000/08/07 15:34:36  dpg1
-// Partial back-port of long long from omni3_1_develop.
-//
-// Revision 1.4.2.1  2000/06/27 16:00:17  sll
-// Fixes to WIN 32 related build and compiler issues.
-//
-// Revision 1.4  2000/02/04 12:17:09  dpg1
-// Support for VMS.
-//
-// Revision 1.3  1999/11/02 17:07:26  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.2  1999/10/29 10:01:31  dpg1
-// Nicer error reporting.
-//
-// Revision 1.1  1999/10/27 14:05:57  dpg1
-// *** empty log message ***
-//
-
 #include <idlexpr.h>
 #include <idlerr.h>
 #include <idlmath.h>

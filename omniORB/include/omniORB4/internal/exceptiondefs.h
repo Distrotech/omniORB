@@ -26,54 +26,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.4.3  2001/10/17 16:44:05  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.4.2  2001/08/03 17:45:09  sll
-  Moved OMNIORB_THROW so that it can be used in stub headers
-
-  Revision 1.1.4.1  2001/04/18 17:18:17  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.4  2000/10/09 16:21:26  sll
-  Removed reference to omniConnectionBroken.
-
-  Revision 1.2.2.3  2000/10/06 16:36:07  sll
-  Removed omniConnectionBroken. Has been superceded by raiseException() in
-  the strand interface.
-
-  Revision 1.2.2.2  2000/09/27 17:42:38  sll
-  Updated to use the new cdrStream abstraction
-
-  Revision 1.2.2.1  2000/07/17 10:35:39  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:03  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  2000/06/22 10:37:49  dpg1
-  Transport code now throws omniConnectionBroken exception rather than
-  CORBA::COMM_FAILURE when things go wrong. This allows the invocation
-  code to distinguish between transport problems and COMM_FAILURES
-  propagated from the server side.
-
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.1.2.3  1999/10/18 11:27:37  djr
-  Centralised list of system exceptions.
-
-  Revision 1.1.2.2  1999/10/14 16:21:54  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.1.2.1  1999/09/22 14:26:25  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __OMNIORB_EXCEPTION_H__
 #define __OMNIORB_EXCEPTION_H__
 

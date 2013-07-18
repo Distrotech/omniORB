@@ -26,22 +26,6 @@
 // Description:
 //    DynamicAny module
 
-/*
-  $Log$
-  Revision 1.1.4.2  2005/01/06 16:39:23  dgrisby
-  DynValue and DynValueBox implementations; misc small fixes.
-
-  Revision 1.1.4.1  2003/03/23 21:04:16  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.2  2003/01/16 11:08:26  dgrisby
-  Patches to support Digital Mars C++. Thanks Christof Meerwald.
-
-  Revision 1.1.2.1  2001/10/17 16:44:01  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-*/
-
 #ifndef __OMNIDYNANY_H__
 #define __OMNIDYNANY_H__
 

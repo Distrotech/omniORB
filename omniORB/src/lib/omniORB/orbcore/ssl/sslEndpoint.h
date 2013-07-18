@@ -24,41 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.2  2005/01/13 21:10:01  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.1  2003/03/23 21:01:59  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.6  2002/09/09 22:11:51  dgrisby
-  SSL transport cleanup even if certificates are wrong.
-
-  Revision 1.1.2.5  2002/08/21 06:23:16  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.2.4  2001/07/31 16:16:22  sll
-  New transport interface to support the monitoring of active connections.
-
-  Revision 1.1.2.3  2001/07/13 15:36:53  sll
-  Added the ability to monitor connections and callback to the giopServer
-  when data has arrived at a connection.
-
-  Revision 1.1.2.2  2001/06/20 18:35:16  sll
-  Upper case send,recv,connect,shutdown to avoid silly substutition by
-  macros defined in socket.h to rename these socket functions
-  to something else.
-
-  Revision 1.1.2.1  2001/06/11 18:11:06  sll
-  *** empty log message ***
-
-
-*/
 
 #ifndef __SSLENDPOINT_H__
 #define __SSLENDPOINT_H__

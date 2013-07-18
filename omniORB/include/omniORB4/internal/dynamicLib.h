@@ -27,35 +27,6 @@
 //    Hook to allow orbcore to access dynamic library when linked.
 //
 
-/*
-  $Log$
-  Revision 1.1.4.3  2001/11/06 15:41:37  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.4.2  2001/08/17 17:09:39  sll
-  Use LinkHack.
-
-  Revision 1.1.4.1  2001/04/18 17:18:17  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.2  2000/09/27 17:42:38  sll
-  Updated to use the new cdrStream abstraction
-
-  Revision 1.2.2.1  2000/07/17 10:35:39  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:03  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.2  2000/02/08 13:25:24  djr
-  Added a couple of missing _core_attr.
-
-  Revision 1.1.2.1  1999/09/22 14:26:25  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __DYNAMICLIB_H__
 #define __DYNAMICLIB_H__
 

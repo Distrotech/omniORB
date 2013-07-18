@@ -27,26 +27,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.4.2  2005/01/06 23:10:36  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:02:12  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2001/04/18 18:18:07  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.2  2000/11/03 19:12:07  sll
-  Use new marshalling functions for byte, octet and char. Use get_octet_array
-  instead of get_char_array and put_octet_array instead of put_char_array.
-
-  Revision 1.1.2.1  2000/09/27 17:30:30  sll
-  *** empty log message ***
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/callDescriptor.h>
 #include <objectStub.h>

@@ -27,24 +27,6 @@
 //	*** PROPRIETARY INTERFACE ***
 //	
 
-/*
-  $Log$
-  Revision 1.1.4.3  2002/04/26 20:23:54  dgrisby
-  codeSetUtil didn't do the _core_attr thing for the GIOP version constants.
-
-  Revision 1.1.4.2  2001/10/17 16:47:08  dpg1
-  New minor codes
-
-  Revision 1.1.4.1  2001/04/18 17:18:18  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-
-  Revision 1.1.2.1  2000/10/27 15:42:04  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
-
 #ifndef __CODESETUTIL_H__
 #define __CODESETUTIL_H__
 

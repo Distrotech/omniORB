@@ -24,24 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.1  2003/03/23 21:02:15  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.2.2  2002/03/18 12:38:26  dpg1
-  Lower trace(0) to trace(1), propagate fatalException.
-
-  Revision 1.1.2.1  2001/07/31 16:36:01  sll
-  Added GIOP BiDir support.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/giopEndpoint.h>

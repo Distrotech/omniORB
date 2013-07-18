@@ -28,58 +28,6 @@
 //    Stubs for dynamic library 'hook' functions.
 //
 
-/*
-  $Log$
-  Revision 1.4.2.2  2004/10/13 17:58:25  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.4.2.1  2003/03/23 21:02:18  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.8  2001/11/06 15:41:38  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.2.2.7  2001/08/21 11:02:14  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.2.2.6  2001/08/17 17:12:36  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.2.2.5  2001/08/15 10:31:23  dpg1
-  Minor tweaks and fixes.
-
-  Revision 1.2.2.4  2001/08/03 17:41:20  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.2.2.3  2001/04/18 18:18:08  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.2.2.2  2000/09/27 17:59:38  sll
-  Updated to use the new cdrStream abstraction.
-
-  Revision 1.2.2.1  2000/07/17 10:35:53  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:58  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.4  2000/06/22 10:40:14  dpg1
-  exception.h renamed to exceptiondefs.h to avoid name clash on some
-  platforms.
-
-  Revision 1.1.2.3  1999/10/14 16:22:08  djr
-  Implemented logging when system exceptions are thrown.
-
-  Revision 1.1.2.2  1999/09/27 11:01:11  djr
-  Modifications to logging.
-
-  Revision 1.1.2.1  1999/09/22 14:26:48  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <dynamicLib.h>
 #include <exceptiondefs.h>

@@ -27,20 +27,6 @@
 //    AbstractBase implementation
 //
 
-/*
-  $Log$
-  Revision 1.1.2.3  2005/01/17 14:44:46  dgrisby
-  Surprisingly few changes to compile on Windows.
-
-  Revision 1.1.2.2  2004/10/13 17:58:20  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.1  2004/04/02 13:26:24  dgrisby
-  Start refactoring TypeCode to support value TypeCodes, start of
-  abstract interfaces support.
-
-*/
-
 #include <omniORB4/CORBA.h>
 
 

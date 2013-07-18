@@ -27,40 +27,6 @@
 //   
 //   System dependencies
 
-// $Id$
-// $Log$
-// Revision 1.8.2.2  2005/01/06 23:11:14  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.8.2.1  2003/03/23 21:01:44  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.4.2.5  2002/02/01 11:22:06  dpg1
-// strcasecmp/stricmp redefinition on Windows.
-//
-// Revision 1.4.2.4  2002/01/15 16:38:14  dpg1
-// On the road to autoconf. Dependencies refactored, configure.ac
-// written. No makefiles yet.
-//
-// Revision 1.4.2.3  2001/06/08 17:12:24  dpg1
-// Merge all the bug fixes from omni3_develop.
-//
-// Revision 1.4.2.2  2000/10/27 16:31:10  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.4.2.1  2000/07/17 10:36:05  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.5  2000/07/13 15:25:52  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.2  1999/11/09 12:41:40  dpg1
-// strcasecmp changes for NT, AIX.
-//
-// Revision 1.1  1999/11/05 09:43:01  dpg1
-// Changes for NT.
-//
-
 #ifndef _idlsysdep_h_
 #define _idlsysdep_h_
 

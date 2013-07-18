@@ -28,29 +28,6 @@
 //    Definitions for object table entries
 //
 
-/*
-  $Log$
-  Revision 1.1.4.3  2007/04/14 17:56:52  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.1.4.2  2005/01/06 23:08:25  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:03:44  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2003/01/16 11:08:26  dgrisby
-  Patches to support Digital Mars C++. Thanks Christof Meerwald.
-
-  Revision 1.1.2.2  2001/08/22 13:31:31  dpg1
-  Christof's fixes for gcc 3.0.1.
-
-  Revision 1.1.2.1  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-*/
-
 #ifndef __OMNIORB_OBJECTTABLE_H__
 #define __OMNIORB_OBJECTTABLE_H__
 

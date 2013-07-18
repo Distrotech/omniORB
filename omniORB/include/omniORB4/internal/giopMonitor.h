@@ -24,18 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.2.2  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.2.1  2001/07/31 16:28:02  sll
-  Added GIOP BiDir support.
-
-*/
 
 #ifndef __GIOPMONITOR_H__
 #define __GIOPMONITOR_H__

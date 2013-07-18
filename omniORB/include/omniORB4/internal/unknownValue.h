@@ -29,19 +29,6 @@
 //    this class.
 //
 
-/*
-  $Log$
-  Revision 1.1.2.3  2005/01/17 14:44:46  dgrisby
-  Surprisingly few changes to compile on Windows.
-
-  Revision 1.1.2.2  2004/10/13 17:58:19  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.1  2004/07/26 22:56:38  dgrisby
-  Support valuetypes in Anys.
-
-*/
-
 #ifndef __OMNI_UNKNOWNVALUE_H__
 #define __OMNI_UNKNOWNVALUE_H__
 

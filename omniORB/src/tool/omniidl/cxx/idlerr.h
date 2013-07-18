@@ -27,24 +27,6 @@
 //   
 //   IDL compiler error handling
 
-// $Id$
-// $Log$
-// Revision 1.4.2.2  2000/10/27 16:31:09  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.4.2.1  2000/07/17 10:36:03  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.5  2000/07/13 15:25:53  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.2  1999/10/29 15:43:44  dpg1
-// Error counts now reset when Report...() is called.
-//
-// Revision 1.1  1999/10/27 14:05:57  dpg1
-// *** empty log message ***
-//
-
 #ifndef _idlerr_h_
 #define _idlerr_h_
 

@@ -25,41 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.6.2  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:02:15  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.6  2002/09/09 22:11:50  dgrisby
-  SSL transport cleanup even if certificates are wrong.
-
-  Revision 1.1.4.5  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.4.4  2002/03/13 16:05:39  dpg1
-  Transport shutdown fixes. Reference count SocketCollections to avoid
-  connections using them after they are deleted. Properly close
-  connections when in thread pool mode.
-
-  Revision 1.1.4.3  2001/07/13 15:26:18  sll
-  notifyReadable now really tells the server a connection is ready to be
-  read. Use AcceptAndMonitor instead of Accept.
-
-  Revision 1.1.4.2  2001/06/20 18:35:18  sll
-  Upper case send,recv,connect,shutdown to avoid silly substutition by
-  macros defined in socket.h to rename these socket functions
-  to something else.
-
-  Revision 1.1.4.1  2001/04/18 18:10:50  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <invoker.h>

@@ -27,29 +27,6 @@
 //    Implementation of the WString interface.
 //	
 
-/*
-  $Log$
-  Revision 1.1.2.6  2001/10/17 16:47:08  dpg1
-  New minor codes
-
-  Revision 1.1.2.5  2001/08/03 17:41:19  sll
-  System exception minor code overhaul. When a system exeception is raised,
-  a meaning minor code is provided.
-
-  Revision 1.1.2.4  2000/11/17 19:11:16  dpg1
-  Rename _CORBA_Sequence__WString to _CORBA_Sequence_WString.
-
-  Revision 1.1.2.3  2000/11/16 12:33:44  dpg1
-  Minor fixes to permit use of UShort as WChar.
-
-  Revision 1.1.2.2  2000/11/15 17:20:23  sll
-  Removed obsoluted marshalling functions.
-
-  Revision 1.1.2.1  2000/10/27 15:42:07  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
-
 #include <omniORB4/CORBA.h>
 
 #ifdef HAS_pch

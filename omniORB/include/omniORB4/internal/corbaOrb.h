@@ -27,42 +27,6 @@
 //    Implementation of the ORB interface.
 //
 
-/*
-  $Log$
-  Revision 1.1.4.5  2001/11/13 14:11:44  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.1.4.4  2001/11/06 15:41:37  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.4.3  2001/09/19 17:26:46  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.2  2001/08/01 10:08:20  dpg1
-  Main thread policy.
-
-  Revision 1.1.4.1  2001/04/18 17:18:18  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.1  2000/07/17 10:35:52  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:58  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.3  2000/02/04 18:11:02  djr
-  Minor mods for IRIX (casting pointers to ulong instead of int).
-
-  Revision 1.1.2.2  2000/01/20 11:51:34  djr
-  (Most) Pseudo objects now used omni::poRcLock for ref counting.
-  New assertion check OMNI_USER_CHECK.
-
-  Revision 1.1.2.1  1999/09/22 14:26:46  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __CORBAORB_H__
 #define __CORBAORB_H__
 

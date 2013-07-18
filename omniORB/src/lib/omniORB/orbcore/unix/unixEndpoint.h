@@ -24,31 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.4  2006/04/09 19:52:29  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.1.4.3  2005/01/25 16:44:15  dgrisby
-  pd_socket member was not removed as it should have been.
-
-  Revision 1.1.4.2  2005/01/13 21:10:17  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.1  2003/03/23 21:01:57  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.2  2002/08/21 06:23:16  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.2.1  2001/08/06 15:47:45  sll
-  Added support to use the unix domain socket as the local transport.
-
-*/
 
 #ifndef __UNIXENDPOINT_H__
 #define __UNIXENDPOINT_H__

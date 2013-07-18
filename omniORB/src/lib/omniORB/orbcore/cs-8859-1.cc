@@ -27,19 +27,6 @@
 //    Code set tables for ISO 8859-1.
 //
 
-/*
-  $Log$
-  Revision 1.1.2.3  2001/07/26 16:37:20  dpg1
-  Make sure static initialisers always run.
-
-  Revision 1.1.2.2  2001/04/18 18:18:09  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2000/10/27 15:42:08  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/linkHacks.h>
 #include <codeSetUtil.h>

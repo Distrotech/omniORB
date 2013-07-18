@@ -28,27 +28,6 @@
 //	*** PROPRIETARY INTERFACE ***
 //
 
-// $Log$
-// Revision 1.1.4.2  2005/01/06 23:10:12  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:02:24  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.1.2.4  2001/10/17 16:33:28  dpg1
-// New downcast mechanism for cdrStreams.
-//
-// Revision 1.1.2.3  2001/06/13 20:12:32  sll
-// Minor updates to make the ORB compiles with MSVC++.
-//
-// Revision 1.1.2.2  2001/05/10 15:03:50  dpg1
-// Update cdrStreamAdapter to modified cdrStream interface.
-//
-// Revision 1.1.2.1  2001/01/09 17:17:00  dpg1
-// New cdrStreamAdapter class to allow omniORBpy to intercept buffer
-// management.
-//
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/cdrStream.h>
 

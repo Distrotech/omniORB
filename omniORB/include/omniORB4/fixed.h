@@ -27,13 +27,8 @@
 //
 //    Global definitions and operators for the Fixed type
 
-// $Log$
-// Revision 1.1.2.1  2001/03/13 10:32:05  dpg1
-// Fixed point support.
-//
-
-#ifndef __fixed_h__
-#define __fixed_h__
+#ifndef __omniorb_fixed_h__
+#define __omniorb_fixed_h__
 
 
 //
@@ -111,4 +106,4 @@ public:
     CORBA::Fixed(val) { PR_setLimits(idl_digits, idl_scale); }
 };
 
-#endif // __fixed_h__
+#endif // __omniorb_fixed_h__

@@ -26,21 +26,6 @@
 //   
 //   Simple main() function to test front-end
 
-// $Id$
-// $Log$
-// Revision 1.3.2.2  2000/10/27 16:31:08  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.3.2.1  2000/07/17 10:36:02  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.4  2000/07/13 15:25:53  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.1  1999/10/27 14:05:59  dpg1
-// *** empty log message ***
-//
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream.h>

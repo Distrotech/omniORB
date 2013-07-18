@@ -26,32 +26,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.4.2  2001/06/11 17:57:14  sll
-   External libraries can now hook-up to the orb initialiser list irrespective
-   of whether the global variables in the external libraries are initialised
-   before the core library.
-
-  Revision 1.1.4.1  2001/04/18 17:18:16  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.1  2000/07/17 10:35:40  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:03  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.2  2000/06/02 14:17:05  dpg1
-  Add static install() method to initialiser so extra initialisers /
-  deinitialisers can be added at run time (needed by omniORBpy).
-
-  Revision 1.1.2.1  1999/09/24 15:01:32  djr
-  Added module initialisers, and sll's new scavenger implementation.
-
-*/
-
 #ifndef __INITIALISER_H__
 #define __INITIALISER_H__
 

@@ -26,28 +26,6 @@
 //   
 //   Floating point maths functions
 
-// $Id$
-// $Log$
-// Revision 1.4.2.3  2002/01/15 16:38:14  dpg1
-// On the road to autoconf. Dependencies refactored, configure.ac
-// written. No makefiles yet.
-//
-// Revision 1.4.2.2  2000/10/27 16:31:09  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.4.2.1  2000/07/17 10:36:04  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.5  2000/07/13 15:25:53  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.2  1999/11/02 17:07:26  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.1  1999/10/27 14:05:56  dpg1
-// *** empty log message ***
-//
-
 #ifndef _idlmath_h_
 #define _idlmath_h_
 

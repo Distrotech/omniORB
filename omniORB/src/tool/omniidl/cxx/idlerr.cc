@@ -27,30 +27,6 @@
 //   
 //   IDL compiler error handling
 
-// $Id$
-// $Log$
-// Revision 1.5.2.2  2000/10/27 16:31:08  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.5.2.1  2000/07/17 10:36:03  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.6  2000/07/13 15:25:53  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.3.2.1  2000/03/06 15:03:48  dpg1
-// Minor bug fixes to omniidl. New -nf and -k flags.
-//
-// Revision 1.3  1999/11/02 17:07:27  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.2  1999/10/29 15:43:44  dpg1
-// Error counts now reset when Report...() is called.
-//
-// Revision 1.1  1999/10/27 14:05:58  dpg1
-// *** empty log message ***
-//
-
 #include <idlerr.h>
 #include <idlutil.h>
 #include <idlconfig.h>

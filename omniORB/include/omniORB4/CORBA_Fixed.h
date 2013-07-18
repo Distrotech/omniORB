@@ -27,22 +27,6 @@
 //    CORBA::Fixed
 //
 
-/*
-  $Log$
-  Revision 1.1.2.4  2002/11/25 21:06:59  dgrisby
-  Add new to_string() function to Fixed.
-
-  Revision 1.1.2.3  2002/10/15 23:24:14  dgrisby
-  Avoid clash with Solaris defining truncate to truncate64.
-
-  Revision 1.1.2.2  2001/10/17 16:44:00  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:46  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

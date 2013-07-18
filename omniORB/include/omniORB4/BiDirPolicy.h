@@ -24,24 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.2.3  2001/08/17 15:00:47  dpg1
-  Fixes for pre-historic compilers.
-
-  Revision 1.1.2.2  2001/08/16 09:54:44  sll
-  Hardwired the policy number instead of using the constant in the
-  declaration of BidirectionalPolicy because the latter does not work for
-  compilers without namespace support.
-
-  Revision 1.1.2.1  2001/07/31 16:10:39  sll
-  Added GIOP BiDir support.
-
-  */
-
 
 #ifndef __BIDIRPOLICY_H__
 #define __BIDIRPOLICY_H__

@@ -29,31 +29,6 @@
 //	
 //	
 
-/*
-  $Log$
-  Revision 1.2.2.3  2000/11/03 18:58:46  sll
-  Unbounded sequence of octet got a new type name.
-
-  Revision 1.2.2.2  2000/09/27 17:07:07  sll
-  Updated to include definitions for GIOP 1.1 and 1.2.
-
-  Revision 1.2.2.1  2000/07/17 10:35:33  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/24 09:51:40  djr
-  Moved from omniORB2 + some new files.
-
-  Revision 1.3  1999/06/18 21:12:56  sll
-  Updated copyright notice.
-
-  Revision 1.2  1997/05/06 16:06:27  sll
-  Public release.
-
-*/
-
 #ifndef __OMNIORB_GIOP_H__
 #define __OMNIORB_GIOP_H__
 

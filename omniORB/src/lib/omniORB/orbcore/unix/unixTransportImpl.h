@@ -24,18 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.2.2  2001/08/23 16:02:58  sll
-  Implement getInterfaceAddress().
-
-  Revision 1.1.2.1  2001/08/06 15:47:45  sll
-  Added support to use the unix domain socket as the local transport.
-
-*/
 
 #ifndef __UNIXTRANSPORTIMPL_H__
 #define __UNIXTRANSPORTIMPL_H__

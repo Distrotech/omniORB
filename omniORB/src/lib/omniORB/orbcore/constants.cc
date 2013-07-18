@@ -25,7 +25,7 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
 
 #include <omniORB4/CORBA.h>

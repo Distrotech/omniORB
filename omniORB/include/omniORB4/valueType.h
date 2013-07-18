@@ -27,22 +27,6 @@
 //    ValueType definitions
 //
 
-/*
-  $Log$
-  Revision 1.1.2.4  2004/10/13 17:58:19  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.3  2004/07/26 22:56:38  dgrisby
-  Support valuetypes in Anys.
-
-  Revision 1.1.2.2  2004/07/04 23:53:35  dgrisby
-  More ValueType TypeCode and Any support.
-
-  Revision 1.1.2.1  2003/09/26 16:12:53  dgrisby
-  Start of valuetype support.
-
-*/
-
 #ifndef __OMNI_VALUETYPE_H__
 #define __OMNI_VALUETYPE_H__
 

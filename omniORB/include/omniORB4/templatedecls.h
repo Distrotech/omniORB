@@ -24,7 +24,7 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 
 #ifndef __TEMPLATEDECLS_H__
 #define __TEMPLATEDECLS_H__

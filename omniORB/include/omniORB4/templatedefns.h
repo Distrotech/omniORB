@@ -24,7 +24,7 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 
 #ifndef __TEMPLATEDEFNS_H__
 #define __TEMPLATEDEFNS_H__

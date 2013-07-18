@@ -26,36 +26,6 @@
 // Description:
 //
 
-/*
- $Log$
- Revision 1.2.2.4  2001/10/17 16:44:00  dpg1
- Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
- Revision 1.2.2.3  2001/08/17 13:39:49  dpg1
- Split CORBA.h into separate bits.
-
- Revision 1.2.2.2  2000/09/27 17:07:25  sll
- Updated to use the new cdrStream abstraction.
-
- Revision 1.2.2.1  2000/07/17 10:35:33  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:26:05  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.3  2000/06/27 16:15:08  sll
- New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
- _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
- sequence of string and a sequence of object reference.
-
- Revision 1.1.2.2  1999/10/13 12:44:35  djr
- Added definition of TypeCode_out.
-
- Revision 1.1.2.1  1999/09/24 09:51:39  djr
- Moved from omniORB2 + some new files.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

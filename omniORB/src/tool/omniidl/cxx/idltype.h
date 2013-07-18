@@ -26,33 +26,6 @@
 //   
 //   Type objects
 
-// $Id$
-// $Log$
-// Revision 1.5.2.4  2001/03/13 10:32:13  dpg1
-// Fixed point support.
-//
-// Revision 1.5.2.3  2000/11/01 12:45:57  dpg1
-// Update to CORBA 2.4 specification.
-//
-// Revision 1.5.2.2  2000/10/27 16:31:10  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.5.2.1  2000/07/17 10:36:05  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.6  2000/07/13 15:25:52  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.3  1999/11/17 17:16:59  dpg1
-// Changes to remove static initialisation of objects.
-//
-// Revision 1.2  1999/10/29 15:44:23  dpg1
-// DeclaredType() now takes extra DeclRepoId* argument.
-//
-// Revision 1.1  1999/10/27 14:05:54  dpg1
-// *** empty log message ***
-//
-
 #ifndef _idltype_h_
 #define _idltype_h_
 

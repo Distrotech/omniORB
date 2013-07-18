@@ -28,41 +28,6 @@
 //    CORBA::ORB
 //
 
-/*
-  $Log$
-  Revision 1.1.4.4  2005/01/06 23:08:06  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.3  2004/04/02 13:26:25  dgrisby
-  Start refactoring TypeCode to support value TypeCodes, start of
-  abstract interfaces support.
-
-  Revision 1.1.4.2  2003/09/26 16:12:53  dgrisby
-  Start of valuetype support.
-
-  Revision 1.1.4.1  2003/03/23 21:04:24  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.6  2001/11/13 14:11:43  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.1.2.5  2001/11/06 15:41:34  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.2.4  2001/10/29 17:42:35  dpg1
-  Support forward-declared structs/unions, ORB::create_recursive_tc().
-
-  Revision 1.1.2.3  2001/10/17 16:44:00  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.2  2001/08/17 17:00:50  sll
-  ORB_init now takes an extra options argument.
-
-  Revision 1.1.2.1  2001/08/17 13:39:47  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

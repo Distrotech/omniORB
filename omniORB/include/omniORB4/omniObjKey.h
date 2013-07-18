@@ -27,25 +27,6 @@
 //    Representation of an object key.
 //      
  
-/*
-  $Log$
-  Revision 1.2.2.3  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.2.2.2  2000/09/27 17:11:40  sll
-  Removed reference to the obsoluted MemBufferedStream and NetBufferedStream.
-
-  Revision 1.2.2.1  2000/07/17 10:35:35  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/24 09:51:47  djr
-  Moved from omniORB2 + some new files.
-
-*/
-
 #ifndef __OMNIOBJKEY_H__
 #define __OMNIOBJKEY_H__
 

@@ -27,16 +27,6 @@
 //    Static is_nil() and release() functions
 //
 
-/*
-  $Log$
-  Revision 1.1.2.2  2001/10/17 16:44:00  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:49  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

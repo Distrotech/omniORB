@@ -27,10 +27,6 @@
 //    CORBA::LocalObject
 //
 
-/*
-  $Log$
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

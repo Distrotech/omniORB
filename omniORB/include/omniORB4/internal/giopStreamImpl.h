@@ -25,25 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.6.2  2008/08/08 16:52:56  dgrisby
-  Option to validate untransformed UTF-8; correct data conversion minor
-  codes; better logging for MessageErrors.
-
-  Revision 1.1.6.1  2003/03/23 21:03:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.1  2001/04/18 17:18:59  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:03  sll
-  Added new files.
-
-*/
 
 #ifndef __GIOPSTREAMIMPL_H__
 #define __GIOPSTREAMIMPL_H__

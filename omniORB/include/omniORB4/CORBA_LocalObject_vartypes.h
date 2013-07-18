@@ -23,10 +23,6 @@
 //    02111-1307, USA
 //
 
-/*
-  $Log$
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

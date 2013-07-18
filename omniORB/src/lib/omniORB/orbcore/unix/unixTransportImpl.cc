@@ -24,31 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.2.6  2002/11/21 16:16:35  dgrisby
-  Unix socket type bug. (Thanks Bastiaan Bakker.)
-
-  Revision 1.1.2.5  2002/04/16 12:44:27  dpg1
-  Fix SSL accept bug, clean up logging.
-
-  Revision 1.1.2.4  2001/08/23 16:02:58  sll
-  Implement getInterfaceAddress().
-
-  Revision 1.1.2.3  2001/08/17 17:12:42  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.2.2  2001/08/08 15:59:23  sll
-  Now accepts shorthand endpoint string "giop:unix:". Make use of
-  unixTransportDirectory.
-
-  Revision 1.1.2.1  2001/08/06 15:47:45  sll
-  Added support to use the unix domain socket as the local transport.
-
-*/
 
 #include <stdlib.h>
 #include <stdio.h>

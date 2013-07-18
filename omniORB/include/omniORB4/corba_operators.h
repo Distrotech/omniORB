@@ -24,7 +24,7 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 
 #ifndef __CORBA_OPERATORS_H__
 #define __CORBA_OPERATORS_H__

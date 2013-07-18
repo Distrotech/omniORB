@@ -28,35 +28,6 @@
 //    CORBA::TypeCode
 //
 
-/*
-  $Log$
-  Revision 1.1.4.4  2004/05/25 14:20:50  dgrisby
-  ValueType TypeCode support.
-
-  Revision 1.1.4.3  2004/04/02 13:26:25  dgrisby
-  Start refactoring TypeCode to support value TypeCodes, start of
-  abstract interfaces support.
-
-  Revision 1.1.4.2  2003/05/20 16:53:12  dgrisby
-  Valuetype marshalling support.
-
-  Revision 1.1.4.1  2003/03/23 21:04:23  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.4  2001/10/29 17:42:35  dpg1
-  Support forward-declared structs/unions, ORB::create_recursive_tc().
-
-  Revision 1.1.2.3  2001/10/17 16:44:00  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.2  2001/09/19 17:29:04  dpg1
-  Cosmetic changes.
-
-  Revision 1.1.2.1  2001/08/17 13:39:48  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

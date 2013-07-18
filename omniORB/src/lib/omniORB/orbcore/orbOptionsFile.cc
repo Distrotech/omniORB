@@ -25,41 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log$
-  Revision 1.1.4.2  2005/01/06 23:10:37  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:02:08  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.6  2002/03/18 15:13:09  dpg1
-  Fix bug with old-style ORBInitRef in config file; look for
-  -ORBtraceLevel arg before anything else; update Windows registry
-  key. Correct error message.
-
-  Revision 1.1.2.5  2002/01/02 18:18:26  dpg1
-  Old config file warning less obtrusive.
-
-  Revision 1.1.2.4  2001/08/29 17:54:00  sll
-  Make the old configuration parameter GATEKEEPER_ALLOWFILE and
-  GATEKEEPER_DENYFILE obsolute.
-
-  Revision 1.1.2.3  2001/08/21 11:02:17  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.1.2.2  2001/08/20 16:39:19  dpg1
-  Correct spelling mistake :-)
-
-  Revision 1.1.2.1  2001/08/20 08:19:23  sll
-  Read the new ORB configuration file format. Can still read old format.
-  Can also set configuration parameters from environment variables.
-
-*/
 
 #include <omniORB4/CORBA.h>
 #include <orbOptions.h>

@@ -29,20 +29,6 @@
 //    ORB is shutting down.
 //
 
-/*
-  $Log$
-  Revision 1.1.4.2  2007/04/14 17:56:52  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.1.4.1  2003/03/23 21:02:03  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/09/19 17:26:53  dpg1
-  Full clean-up after orb->destroy().
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/minorCode.h>
 

@@ -26,13 +26,6 @@
 // Description:
 //    Codesets library
 
-// $Id$
-
-// $Log$
-// Revision 1.1.2.1  2002/09/06 21:34:26  dgrisby
-// Add codesets and sslTP modules.
-//
-
 #ifdef __WIN32__
 #define DLL_EXPORT _declspec(dllexport)
 #else

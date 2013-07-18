@@ -28,25 +28,6 @@
 //    CORBA::Any_var, etc.
 //
 
-/*
-  $Log$
-  Revision 1.1.4.3  2004/10/13 17:58:18  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.4.2  2004/07/23 10:29:56  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.4.1  2003/03/23 21:04:25  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.2  2001/10/17 16:43:59  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:44  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

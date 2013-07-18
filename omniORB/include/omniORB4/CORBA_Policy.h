@@ -27,28 +27,6 @@
 //    CORBA::Policy
 //
 
-/*
-  $Log$
-  Revision 1.1.4.2  2005/01/06 23:08:07  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:04:23  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.4  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.1.2.3  2002/01/02 18:13:43  dpg1
-  Platform fixes/additions.
-
-  Revision 1.1.2.2  2001/11/12 13:47:09  dpg1
-  Minor fixes.
-
-  Revision 1.1.2.1  2001/08/17 13:39:47  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

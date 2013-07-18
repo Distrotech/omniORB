@@ -27,22 +27,6 @@
 //    ValueType _var definitions
 //
 
-/*
-  $Log$
-  Revision 1.1.2.4  2005/11/09 12:16:46  dgrisby
-  Remove obsolete tcDesc helper classes.
-
-  Revision 1.1.2.3  2004/10/13 17:58:18  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.2  2003/11/06 11:56:55  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.2.1  2003/09/26 16:12:53  dgrisby
-  Start of valuetype support.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

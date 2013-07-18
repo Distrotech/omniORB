@@ -25,24 +25,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.4.3  2006/10/09 09:47:12  dgrisby
-  Only delete giopServer if all threads are successfully shut down.
-
-  Revision 1.1.4.2  2006/04/09 19:52:31  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.1.4.1  2003/03/23 21:04:09  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/04/18 17:26:28  sll
-  Big checkin with the brand new internal APIs.
-
-*/
 
 #ifndef __OMNISERVER_H__
 #define __OMNISERVER_H__

@@ -24,21 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log$
-  Revision 1.1.4.2  2001/07/13 15:18:17  sll
-  New internal function notifyReadable.
-
-  Revision 1.1.4.1  2001/04/18 17:19:00  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:05  sll
-  Added new files.
-
-*/
 
 #ifndef __GIOPRENDEZVOUSER_H__
 #define __GIOPRENDEZVOUSER_H__

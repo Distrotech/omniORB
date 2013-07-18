@@ -26,30 +26,6 @@
 //   
 //   Expression tree and evaluator
 
-// $Id$
-// $Log$
-// Revision 1.4.2.4  2001/08/29 11:54:20  dpg1
-// Clean up const handling in IDL compiler.
-//
-// Revision 1.4.2.3  2001/03/13 10:32:12  dpg1
-// Fixed point support.
-//
-// Revision 1.4.2.2  2000/10/27 16:31:09  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.4.2.1  2000/07/17 10:36:03  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.5  2000/07/13 15:25:53  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.2  1999/11/02 17:07:26  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.1  1999/10/27 14:05:56  dpg1
-// *** empty log message ***
-//
-
 #ifndef _idlexpr_h_
 #define _idlexpr_h_
 

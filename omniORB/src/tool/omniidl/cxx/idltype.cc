@@ -26,42 +26,6 @@
 //   
 //   Type objects
 
-// $Id$
-// $Log$
-// Revision 1.7.2.4  2001/10/17 16:48:34  dpg1
-// Minor error message tweaks
-//
-// Revision 1.7.2.3  2000/11/01 12:45:57  dpg1
-// Update to CORBA 2.4 specification.
-//
-// Revision 1.7.2.2  2000/10/27 16:31:10  dpg1
-// Clean up of omniidl dependencies and types, from omni3_develop.
-//
-// Revision 1.7.2.1  2000/07/17 10:36:05  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.8  2000/07/13 15:25:52  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.5.2.1  2000/03/06 10:40:29  dpg1
-// Typo in string constant.
-//
-// Revision 1.5  1999/11/17 17:16:59  dpg1
-// Changes to remove static initialisation of objects.
-//
-// Revision 1.4  1999/11/04 17:16:54  dpg1
-// Changes for NT.
-//
-// Revision 1.3  1999/11/02 17:07:24  dpg1
-// Changes to compile on Solaris.
-//
-// Revision 1.2  1999/10/29 15:44:14  dpg1
-// DeclaredType() now takes extra DeclRepoId* argument.
-//
-// Revision 1.1  1999/10/27 14:05:54  dpg1
-// *** empty log message ***
-//
-
 #include <idltype.h>
 #include <idlast.h>
 #include <idlerr.h>

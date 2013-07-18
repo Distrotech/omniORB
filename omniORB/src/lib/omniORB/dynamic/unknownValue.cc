@@ -27,13 +27,6 @@
 //    Object to hold unknown valuetypes received in Anys.
 //
 
-/*
-  $Log$
-  Revision 1.1.2.1  2004/07/26 22:56:39  dgrisby
-  Support valuetypes in Anys.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/valueType.h>
 #include <omniORB4/anyStream.h>

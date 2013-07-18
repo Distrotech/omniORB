@@ -5,52 +5,6 @@
 // Description: vxWorks adaptation of the omnithread wrapper classes
 // Notes:		 Munching strategy is imperative
 //////////////////////////////////////////////////////////////////////////////
-// $Log$
-// Revision 1.1.4.4  2005/07/08 17:04:56  dgrisby
-// Merge from omni4_0_develop again.
-//
-// Revision 1.1.4.3  2005/04/25 18:24:23  dgrisby
-// Always release per thread data in the thread it belongs to.
-//
-// Revision 1.1.4.2  2005/01/06 23:11:01  dgrisby
-// Big merge from omni4_0_develop.
-//
-// Revision 1.1.4.1  2003/03/23 21:01:54  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.1.2.1  2003/02/17 02:03:11  dgrisby
-// vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-//
-// Revision 1.1.1.1  2002/11/19 14:58:04  sokcevti
-// OmniOrb4.0.0 VxWorks port
-//
-// Revision 1.4  2002/10/15 07:54:09  kuttlest
-// change semaphore from SEM_FIFO to SEM_PRIO
-// ---
-//
-// Revision 1.3  2002/07/05 07:38:52  engeln
-// made priority redefinable on load time by defining int variables
-// 	omni_thread_prio_low = 220;
-// 	omni_thread_prio_normal = 110;
-// 	omni_thread_prio_high = 55;
-// the default priority is prio_normal.
-// The normal priority default has been increased from 200 to 110 and the
-//     high priority from 100 to 55.
-// ---
-//
-// Revision 1.2  2002/06/14 12:44:57  engeln
-// replaced possibly unsafe wakeup procedure in broadcast.
-// ---
-//
-// Revision 1.1.1.1  2002/04/02 10:09:34  sokcevti
-// omniORB4 initial realease
-//
-// Revision 1.0	2001/10/23 14:22:45	sokcevti
-// Initial Version 4.00
-// ---
-//
-//////////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Include files

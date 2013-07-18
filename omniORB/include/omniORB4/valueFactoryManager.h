@@ -27,14 +27,6 @@
 //    Manager for ValueFactories
 //
 
-// $Log$
-// Revision 1.1.2.2  2004/02/16 10:10:29  dgrisby
-// More valuetype, including value boxes. C++ mapping updates.
-//
-// Revision 1.1.2.1  2003/09/26 16:12:53  dgrisby
-// Start of valuetype support.
-//
-
 #include <omniORB4/CORBA.h>
 
 

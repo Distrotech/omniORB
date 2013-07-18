@@ -26,17 +26,6 @@
 // Description:
 //
 
-/*
-  $Log$
-  Revision 1.1.4.1  2001/04/18 17:18:15  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.1.2.1  2000/09/27 17:30:30  sll
-  *** empty log message ***
-
-*/
-
 OMNI_NAMESPACE_BEGIN(omni)
 
 //////////////////////////////////////////////////////////////////////

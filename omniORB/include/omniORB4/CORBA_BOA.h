@@ -27,16 +27,6 @@
 //    CORBA::BOA
 //
 
-/*
-  $Log$
-  Revision 1.1.4.1  2003/03/23 21:04:25  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/08/17 13:39:44  dpg1
-  Split CORBA.h into separate bits.
-
-*/
-
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
 #endif

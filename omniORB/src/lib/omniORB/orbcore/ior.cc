@@ -397,7 +397,7 @@ omniIOR::unmarshal_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent& c,
   catch (...) {
     omniORB::logs(1," decode TAG_SSL_SEC_TRANS "
 		  "Warning: fail to decode the component. The format neither "
-                  "conforms to the standard or is Visibroker proprietory.");
+                  "conforms to the standard or is Visibroker proprietary.");
     return;
   }
 

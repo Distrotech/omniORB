@@ -27,45 +27,6 @@
 // Description:
 //
  
-/*
-  $Log$
-  Revision 1.1.4.6  2006/07/18 16:21:22  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.4.5  2005/07/22 17:18:38  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.4  2005/01/06 23:09:46  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.3  2004/07/23 10:29:58  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.4.2  2004/04/02 13:26:24  dgrisby
-  Start refactoring TypeCode to support value TypeCodes, start of
-  abstract interfaces support.
-
-  Revision 1.1.4.1  2003/03/23 21:02:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.5  2003/02/17 02:03:08  dgrisby
-  vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-
-  Revision 1.1.2.4  2001/11/08 16:33:50  dpg1
-  Local servant POA shortcut policy.
-
-  Revision 1.1.2.3  2001/08/22 13:29:47  dpg1
-  Re-entrant Any marshalling.
-
-  Revision 1.1.2.2  2001/08/17 15:00:47  dpg1
-  Fixes for pre-historic compilers.
-
-  Revision 1.1.2.1  2001/07/31 16:04:06  sll
-  Added ORB::create_policy() and associated types and operators.
-
-*/
-
 #include <omniORB4/CORBA.h>
 #include <omniORB4/omniInterceptors.h>
 #include <interceptors.h>

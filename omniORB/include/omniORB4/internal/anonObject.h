@@ -28,39 +28,6 @@
 //    of the interface).
 //      
  
-/*
-  $Log$
-  Revision 1.1.4.3  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.2  2001/05/31 16:21:13  dpg1
-  object references optionally just store a pointer to their repository
-  id string rather than copying it.
-
-  Revision 1.1.4.1  2001/04/18 17:18:19  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.2  2000/09/27 17:43:55  sll
-  Updated to match the changes in the proxyFactory class.
-
-  Revision 1.2.2.1  2000/07/17 10:35:50  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:59  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.3  1999/10/16 13:22:52  djr
-  Changes to support compiling on MSVC.
-
-  Revision 1.1.2.2  1999/10/04 17:08:30  djr
-  Some more fixes/MSVC work-arounds.
-
-  Revision 1.1.2.1  1999/09/22 14:26:42  djr
-  Major rewrite of orbcore to support POA.
-
-*/
-
 #ifndef __ANONOBJECT_H__
 #define __ANONOBJECT_H__
 

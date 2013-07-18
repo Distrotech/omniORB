@@ -24,29 +24,8 @@
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log$
-  Revision 1.1.2.4  2001/09/20 11:30:59  sll
-  On the server, the final state of a GIOP_S is ReplyCompleted instead of
-  Idle. This is necessary because the idle connection management code
-  treats Idle as a state where the idle counter can be restarted.
-
-  Revision 1.1.2.3  2001/09/10 17:41:30  sll
-  Added WaitForRequestHeader in IOP_S::State. Reorder the enum labels inside
-  IOP_S::State, any label that is larger than WaitForRequestHeader now
-  indicates that the IOP_S is actively processing a request.
-
-  Revision 1.1.2.2  2001/05/02 14:20:15  sll
-  Make sure that getStream() is used instead of casting to get a cdrStream
-  from a IOP_C and IOP_S.
-
-  Revision 1.1.2.1  2001/04/18 17:26:29  sll
-  Big checkin with the brand new internal APIs.
-
- */
 
 #ifndef __IOP_S_H__
 #define __IOP_S_H__
