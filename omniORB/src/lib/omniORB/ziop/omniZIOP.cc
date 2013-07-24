@@ -98,7 +98,7 @@ decodePolicies(const CORBA::PolicyList&            policies,
     CORBA::Policy* policy = policies[index];
 
     switch (policy->policy_type()) {
-    case ZIOP::COMPRESSION_ENABLING_POLICY_ID:
+    case 64: // ZIOP::COMPRESSION_ENABLING_POLICY_ID:
       {
         ZIOP::CompressionEnablingPolicy_var ep =
           ZIOP::CompressionEnablingPolicy::_narrow(policy);
@@ -114,7 +114,7 @@ decodePolicies(const CORBA::PolicyList&            policies,
         break;
       }
 
-    case ZIOP::COMPRESSOR_ID_LEVEL_LIST_POLICY_ID:
+    case 65: // ZIOP::COMPRESSOR_ID_LEVEL_LIST_POLICY_ID:
       {
         ZIOP::CompressionIdLevelListPolicy_var ep =
           ZIOP::CompressionIdLevelListPolicy::_narrow(policy);
@@ -131,7 +131,7 @@ decodePolicies(const CORBA::PolicyList&            policies,
         break;
       }
 
-    case ZIOP::COMPRESSION_LOW_VALUE_POLICY_ID:
+    case 66: // ZIOP::COMPRESSION_LOW_VALUE_POLICY_ID:
       {
         ZIOP::CompressionLowValuePolicy_var ep =
           ZIOP::CompressionLowValuePolicy::_narrow(policy);
@@ -146,7 +146,7 @@ decodePolicies(const CORBA::PolicyList&            policies,
         break;
       }
 
-    case ZIOP::COMPRESSION_MIN_RATIO_POLICY_ID:
+    case 67: // ZIOP::COMPRESSION_MIN_RATIO_POLICY_ID:
       {
         ZIOP::CompressionMinRatioPolicy_var ep =
           ZIOP::CompressionMinRatioPolicy::_narrow(policy);
@@ -213,7 +213,6 @@ setPoliciesInProfile(const CORBA::PolicyList*       policies,
     estream.setOctetSeq(c.component_data);
   }
 }
-
 
 
 CORBA::Object_ptr

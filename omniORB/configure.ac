@@ -264,6 +264,7 @@ AC_CONFIG_FILES(src/appl/GNUmakefile
                 src/examples/poa/persistent_objref/GNUmakefile
                 src/examples/poa/servant_manager/GNUmakefile
                 src/examples/poa/threading/GNUmakefile
+                src/examples/poa/shortcut/GNUmakefile
                 src/examples/ssl_echo/GNUmakefile
                 src/examples/thread/GNUmakefile
                 src/examples/valuetype/GNUmakefile
@@ -283,6 +284,7 @@ AC_CONFIG_FILES(src/appl/GNUmakefile
                 src/lib/omniORB/orbcore/ssl/GNUmakefile
                 src/lib/omniORB/connections/GNUmakefile
                 src/lib/omniORB/ziop/GNUmakefile
+                src/lib/omniORB/ziopdynamic/GNUmakefile
                 src/lib/omnithread/GNUmakefile
                 src/services/GNUmakefile
                 src/services/mklib/GNUmakefile

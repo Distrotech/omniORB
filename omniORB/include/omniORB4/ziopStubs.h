@@ -53,6 +53,17 @@
 // Definitions from standard ZIOP module
 //
 
+#ifdef _dyn_attr
+# error "A local CPP macro _dyn_attr has already been defined."
+#endif
+
+#if defined(_OMNIORB_ZIOP_DYNAMIC_LIBRARY)
+#  define _dyn_attr
+#else
+#  define _dyn_attr _OMNIORB_NTDLL_IMPORT
+#endif
+
+
 _CORBA_MODULE ZIOP
 _CORBA_MODULE_BEG
 
@@ -111,11 +122,14 @@ _CORBA_MODULE_BEG
 
 _CORBA_MODULE_END
 
+# include <omniORB4/ziop_operators.hh>
+
 
 #ifdef USE_core_stub_in_nt_dll_was_set
 #  undef USE_core_stub_in_nt_dll
 #endif
 
 #undef _ziop_attr
+#undef _dyn_attr
 
 #endif // _omni_ziop_stubs_h_

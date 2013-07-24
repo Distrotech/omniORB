@@ -531,6 +531,10 @@ OMNIORB_ZIOP_LIB = $(patsubst %,$(LibSearchPattern),omniZIOP$(OMNIORB_MAJOR_VERS
 lib_depend := $(patsubst %,$(LibPattern),omniZIOP$(OMNIORB_MAJOR_VERSION))
 OMNIORB_ZIOP_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
 
+OMNIORB_ZIOP_DYNAMIC_LIB = $(patsubst %,$(LibSearchPattern),omniZIOPDynamic$(OMNIORB_MAJOR_VERSION))
+lib_depend := $(patsubst %,$(LibPattern),omniZIOPDynamic$(OMNIORB_MAJOR_VERSION))
+OMNIORB_ZIOP_DYNAMIC_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
+
 
 ##########################################################################
 #

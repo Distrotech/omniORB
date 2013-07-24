@@ -1,3 +1,4 @@
+
 TOP=../../../..
-CURRENT=src/lib/omniORB/ziop
+CURRENT=src/examples/poa/shortcut
 include $(TOP)/config/config.mk

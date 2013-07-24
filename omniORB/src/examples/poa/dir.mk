@@ -1,4 +1,4 @@
-SUBDIRS = implicit_activation persistent_objref servant_manager threading
+SUBDIRS = implicit_activation persistent_objref servant_manager threading shortcut
 
 
 all::

@@ -1,3 +1,33 @@
+Wed Jul 24 14:21:40 BST 2013 dgrisby
+====================================
+
+- ZIOPDynamic library to enable orb->create_policy; shortcut policy example.
+
+configure.ac
+configure
+include/omniORB4/ziopStubs.h
+mk/beforeauto.mk.in
+mk/win32.mk
+src/examples/poa/dir.mak
+src/examples/poa/dir.mk
+src/examples/poa/shortcut
+src/examples/poa/shortcut/GNUmakefile.in
+src/examples/poa/shortcut/GNUmakefile
+src/examples/poa/shortcut/dir.mak
+src/examples/poa/shortcut/dir.mk
+src/examples/poa/shortcut/shortcut.cc
+src/examples/poa/shortcut/shortcut.idl
+src/lib/omniORB/ziop/GNUmakefile
+src/lib/omniORB/ziop/omniZIOP.cc
+src/lib/omniORB/ziopdynamic
+src/lib/omniORB/ziopdynamic/GNUmakefile.in
+src/lib/omniORB/ziopdynamic/GNUmakefile
+src/lib/omniORB/ziopdynamic/compressionDynStubs.cc
+src/lib/omniORB/ziopdynamic/dir.mk
+src/lib/omniORB/ziopdynamic/omniZIOPDynamic.cc
+src/lib/omniORB/ziopdynamic/ziopDynStubs.cc
+
+
 Wed Jul 24 14:17:40 BST 2013 dgrisby
 ====================================
 
