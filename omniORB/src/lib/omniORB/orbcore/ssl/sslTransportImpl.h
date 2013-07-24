@@ -3,7 +3,7 @@
 // sslTransportImpl.h         Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2011 Apasphere Ltd.
+//    Copyright (C) 2011-2013 Apasphere Ltd.
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -41,7 +41,7 @@ class sslTransportImpl : public giopTransportImpl {
   giopEndpoint*  toEndpoint(const char* param);
   giopAddress*   toAddress(const char* param);
   CORBA::Boolean isValid(const char* param);
-  CORBA::Boolean addToIOR(const char* param);
+  CORBA::Boolean addToIOR(const char* param, IORPublish* eps);
   sslContext*    getContext() const { return pd_ctx; }
   const omnivector<const char*>* getInterfaceAddress();
 

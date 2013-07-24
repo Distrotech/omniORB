@@ -3,6 +3,7 @@
 // CORBA_Exception.h          Created on: 2001/08/17
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -256,16 +257,21 @@ OMNIORB_DECLARE_USER_EXCEPTION_IN_CORBA(WrongTransaction, _dyn_attr)
 ////////////////////////// PolicyError      //////////////////////////
 //////////////////////////////////////////////////////////////////////
 typedef _CORBA_Short PolicyErrorCode;
-_CORBA_MODULE_VARINT const PolicyErrorCode 
-BAD_POLICY _init_in_decl_( = 0 );
-_CORBA_MODULE_VARINT const PolicyErrorCode 
-UNSUPPORTED_POLICY _init_in_decl_( = 1 );
-_CORBA_MODULE_VARINT const PolicyErrorCode 
-BAD_POLICY_TYPE _init_in_decl_( = 2 );
-_CORBA_MODULE_VARINT const PolicyErrorCode
-BAD_POLICY_VALUE _init_in_decl_( = 3 );
-_CORBA_MODULE_VARINT const PolicyErrorCode
-UNSUPPORTED_POLICY_VALUE _init_in_decl_( = 4 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode BAD_POLICY               _init_in_decl_( = 0 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode UNSUPPORTED_POLICY       _init_in_decl_( = 1 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode BAD_POLICY_TYPE          _init_in_decl_( = 2 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode BAD_POLICY_VALUE         _init_in_decl_( = 3 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode UNSUPPORTED_POLICY_VALUE _init_in_decl_( = 4 );
 
 _CORBA_MODULE_VAR _dyn_attr const CORBA::TypeCode_ptr _tc_PolicyErrorCode; 
 
@@ -291,10 +297,10 @@ public:
   void operator>>=(cdrStream&) const;
   void operator<<=(cdrStream&);
 
-  static _dyn_attr insertExceptionToAny    insertToAnyFn;
-  static _dyn_attr insertExceptionToAnyNCP insertToAnyFnNCP;
+  static _core_attr insertExceptionToAny    insertToAnyFn;
+  static _core_attr insertExceptionToAnyNCP insertToAnyFnNCP;
 
-  static _dyn_attr const char* _PD_repoId;
+  static _core_attr const char* _PD_repoId;
 
 private:
   virtual CORBA::Exception* _NP_duplicate() const;

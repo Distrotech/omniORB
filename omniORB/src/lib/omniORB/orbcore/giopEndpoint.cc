@@ -187,12 +187,12 @@ giopEndpoint::strIsValidEndpoint(const char* endpoint) {
 
 ////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-giopEndpoint::addToIOR(const char* endpoint) {
+giopEndpoint::addToIOR(const char* endpoint, IORPublish* eps) {
 
   const char* param;
-  giopTransportImpl* impl = matchType(endpoint,param,0);
+  giopTransportImpl* impl = matchType(endpoint, param, 0);
   if (impl) {
-    return impl->addToIOR(param);
+    return impl->addToIOR(param, eps);
   }
   return 0;
 }

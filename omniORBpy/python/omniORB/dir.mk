@@ -86,7 +86,7 @@ FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
         interceptors.py ami.py Compression.py ZIOP.py omniZIOP.py \
         corbaidl_idl.py ir_idl.py boxes_idl.py \
         pollable_idl.py messaging_idl.py compression_idl.py ziop_idl.py \
-        minorCodes.py omniConnectionMgmt.py
+        minorCodes.py omniConnectionMgmt.py omniPolicy.py
 
 ifdef OPEN_SSL_ROOT
 FILES += sslTP.py

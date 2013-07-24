@@ -3,7 +3,7 @@
 // tcpTransportImpl.cc        Created on: 29 Mar 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -126,12 +126,12 @@ tcpTransportImpl::toAddress(const char* param) {
 
 /////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-tcpTransportImpl::addToIOR(const char* param) {
+tcpTransportImpl::addToIOR(const char* param, IORPublish* eps) {
 
   IIOP::Address address;
 
   if (parseAddress(param,address)) {
-    omniIOR::add_IIOP_ADDRESS(address);
+    omniIOR::add_IIOP_ADDRESS(address, eps);
     return 1;
   }
   return 0;

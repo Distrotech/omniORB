@@ -3,7 +3,7 @@
 // sslTransportImpl.cc        Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -119,7 +119,7 @@ sslTransportImpl::toAddress(const char* param) {
 
 /////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-sslTransportImpl::addToIOR(const char* param) {
+sslTransportImpl::addToIOR(const char* param, IORPublish* eps) {
 
   IIOP::Address address;
   if (parseAddress(param,address)) {
@@ -127,7 +127,7 @@ sslTransportImpl::addToIOR(const char* param) {
     //       Integrity (0x02) Confidentiality (0x04) |
     //       EstablishTrustInTarget (0x20) | EstablishTrustInClient (0x40)
     // In future, this should be expanded configurable options.
-    omniIOR::add_TAG_SSL_SEC_TRANS(address,0x66,0x66);
+    omniIOR::add_TAG_SSL_SEC_TRANS(address, 0x66, 0x66, eps);
     return 1;
   }
   return 0;

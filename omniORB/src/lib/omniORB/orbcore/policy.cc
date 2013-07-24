@@ -3,6 +3,7 @@
 // policy.cc                  Created on: 11/5/99
 //                            Author    : David Riddoch (djr)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -29,6 +30,7 @@
 
 #include <omniORB4/CORBA.h>
 #include <omniORB4/objTracker.h>
+#include <exceptiondefs.h>
 
 #ifdef HAS_pch
 #pragma hdrstop
@@ -161,3 +163,66 @@ CORBA::Policy::_NP_decrRefCount()
 
 const char*
 CORBA::Policy::_PD_repoId = "IDL:omg.org/CORBA/Policy:1.0";
+
+
+//////////////////////////////////////////////////////////////////////
+///////////////// CORBA::PolicyError user exception //////////////////
+//////////////////////////////////////////////////////////////////////
+
+#if defined(HAS_Cplusplus_Namespace) && defined(_MSC_VER)
+// MSVC++ does not give the variables external linkage otherwise. Its a bug.
+namespace CORBA {
+
+_init_in_def_( const PolicyErrorCode BAD_POLICY               = 0; )
+_init_in_def_( const PolicyErrorCode UNSUPPORTED_POLICY       = 1; )
+_init_in_def_( const PolicyErrorCode BAD_POLICY_TYPE          = 2; )
+_init_in_def_( const PolicyErrorCode BAD_POLICY_VALUE         = 3; )
+_init_in_def_( const PolicyErrorCode UNSUPPORTED_POLICY_VALUE = 4; )
+
+}
+#else
+_init_in_def_( const PolicyErrorCode CORBA::BAD_POLICY               = 0; )
+_init_in_def_( const PolicyErrorCode CORBA::UNSUPPORTED_POLICY       = 1; )
+_init_in_def_( const PolicyErrorCode CORBA::BAD_POLICY_TYPE          = 2; )
+_init_in_def_( const PolicyErrorCode CORBA::BAD_POLICY_VALUE         = 3; )
+_init_in_def_( const PolicyErrorCode CORBA::UNSUPPORTED_POLICY_VALUE = 4; )
+#endif
+
+
+OMNIORB_DEFINE_USER_EX_COMMON_FNS(CORBA, PolicyError,
+				  "IDL:omg.org/CORBA/PolicyError:1.0")
+
+
+CORBA::PolicyError::PolicyError(const CORBA::PolicyError& _s) : CORBA::UserException(_s)
+{
+  reason = _s.reason;
+
+}
+
+CORBA::PolicyError::PolicyError(PolicyErrorCode _reason)
+{
+  pd_insertToAnyFn    = CORBA::PolicyError::insertToAnyFn;
+  pd_insertToAnyFnNCP = CORBA::PolicyError::insertToAnyFnNCP;
+  reason = _reason;
+
+}
+
+CORBA::PolicyError& CORBA::PolicyError::operator=(const CORBA::PolicyError& _s)
+{
+  ((CORBA::UserException*) this)->operator=(_s);
+  reason = _s.reason;
+
+  return *this;
+}
+
+void
+CORBA::
+PolicyError::operator>>=(cdrStream& _n) const {
+  reason >>= _n;
+}
+
+void
+CORBA::
+PolicyError::operator<<=(cdrStream& _n) {
+  (PolicyErrorCode&)reason <<= _n;
+}

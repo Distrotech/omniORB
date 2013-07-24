@@ -455,7 +455,7 @@ class ThreadPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in ThreadPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 16
 
@@ -470,7 +470,7 @@ class LifespanPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in LifespanPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 17
 
@@ -485,7 +485,7 @@ class IdUniquenessPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in IdUniquenessPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 18
 
@@ -500,7 +500,7 @@ class IdAssignmentPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in IdAssignmentPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 19
 
@@ -515,7 +515,7 @@ class ImplicitActivationPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in ImplicitActivationPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 20
 
@@ -530,7 +530,7 @@ class ServantRetentionPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in ServantRetentionPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 21
 
@@ -545,7 +545,7 @@ class RequestProcessingPolicy (CORBA.Policy):
 
     def __init__(self, value):
         if value not in RequestProcessingPolicyValue._items:
-            raise CORBA.PolicyError(CORBA.BAD_POLICY_TYPE)
+            raise CORBA.PolicyError(CORBA.BAD_POLICY_VALUE)
         self._value       = value
         self._policy_type = 22
 

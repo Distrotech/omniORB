@@ -3737,14 +3737,17 @@ transfer_and_check_policies(omniOrbPOA::Policies& pout,
     case /*ZIOP::COMPRESSOR_ID_LEVEL_LIST_POLICY_ID*/ 65:
     case /*ZIOP::COMPRESSION_LOW_VALUE_POLICY_ID*/    66:
     case /*ZIOP::COMPRESSION_MIN_RATIO_POLICY_ID*/    67:
+    case /*omniPolicy::ENDPOINT_PUBLISH_POLICY_TYPE*/ 0x41545402:
 
       // Allow these policies to pass here so they can be used in
       // encodeIOR interceptor.
       break;
 
     default:
-      throw PortableServer::POA::InvalidPolicy(i);
-
+      if (omniORB::trace(10)) {
+        omniORB::logger log;
+        log << "Skip unknown POA policy type " << pin[i]->policy_type() << "\n";
+      }
     }
   }
 

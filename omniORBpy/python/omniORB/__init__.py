@@ -32,7 +32,7 @@
 omniORB module -- omniORB specific features
 """
 
-import sys, types, string, imp, os, os.path, tempfile, exceptions
+import sys, types, imp, os, os.path, tempfile, exceptions
 
 try:
     import threading
@@ -132,8 +132,8 @@ sys.modules."""
     else:
         inline_str = ""
 
-    argstr  = string.join(args, " ")
-    modname = string.replace(os.path.basename(idlname), ".", "_")
+    argstr  = " ".join(args)
+    modname = os.path.basename(idlname).replace(".", "_")
     pipe    = os.popen("omniidl -q -bpython -Wbstdout " + inline_str + \
                        argstr + " " + idlname)
     try:
@@ -389,7 +389,7 @@ def openModule(mname, fname=None):
 # Function to create a new module, and any parent modules which do not
 # already exist
 def newModule(mname):
-    mlist   = string.split(mname, ".")
+    mlist   = mname.split(".")
     current = ""
     mod     = None
 
@@ -432,9 +432,9 @@ def promotePartialModule(mname):
 
 
 def skeletonModuleName(mname):
-    l = string.split(mname, ".")
+    l = mname.split(".")
     l[0] = l[0] + "__POA"
-    return string.join(l, ".")
+    return ".".join(l)
 
 
 
@@ -515,7 +515,7 @@ class StructBase(object):
             except AttributeError:
                 vals.append("%s=<not set>" % attr)
 
-        return "%s(%s)" % (cname, string.join(vals, ", "))
+        return "%s(%s)" % (cname, ", ".join(vals))
 
     def _tuple(self):
         desc = findType(self._NP_RepositoryId)
@@ -594,7 +594,7 @@ class Union(object):
 
 
 # Import sub-modules
-import CORBA, tcInternal
+import CORBA, tcInternal, omniPolicy
 
 def createUnknownStruct(repoId, members):
 
@@ -622,7 +622,7 @@ def createUnknownStruct(repoId, members):
                     vals.append(repr(val))
 
             return "UnknownStruct<%s>(%s)" % (self._NP_RepositoryId,
-                                              string.join(vals, ", "))
+                                              ", ".join(vals))
         def _tuple(self):
             return tuple(self._values)
 
@@ -676,7 +676,7 @@ def createUnknownUserException(repoId, members):
                     vals.append(repr(val))
 
             return "UnknownUserException<%s>(%s)" % (self._NP_RepositoryId,
-                                                     string.join(vals, ", "))
+                                                     ", ".join(vals))
 
     UnknownUserException._NP_RepositoryId = repoId
     UnknownUserException._members         = members

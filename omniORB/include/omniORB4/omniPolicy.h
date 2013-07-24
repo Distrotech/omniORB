@@ -3,6 +3,7 @@
 // omniPolicy.h               Created on: 2001/11/07
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -30,9 +31,15 @@
 #ifndef __OMNIPOLICY_H__
 #define __OMNIPOLICY_H__
 
+#include <omniORB4/giopEndpoint.h>
+
+
 _CORBA_MODULE omniPolicy
 
 _CORBA_MODULE_BEG
+
+//
+// Local shortcut
 
 typedef CORBA::UShort LocalShortcutPolicyValue;
 
@@ -47,6 +54,60 @@ const CORBA::PolicyType LOCAL_SHORTCUT_POLICY_TYPE
                                               _init_in_decl_( = 0x41545401 );
 
 OMNIORB_DECLARE_POLICY_OBJECT(LocalShortcutPolicy, 0x41545401)
+
+
+_CORBA_MODULE_FN LocalShortcutPolicy_ptr
+create_local_shortcut_policy(LocalShortcutPolicyValue v);
+
+
+//
+// EndPoint publishing
+
+typedef CORBA::StringSeq EndPointPublishPolicyValue;
+
+_CORBA_MODULE_VARINT
+const CORBA::PolicyType ENDPOINT_PUBLISH_POLICY_TYPE
+                                              _init_in_decl_( = 0x41545402 );
+
+
+// Cannot use the OMNIORB_DECLARE_POLICY_OBJECT macro because the
+// value is a sequence
+
+class EndPointPublishPolicy;
+typedef EndPointPublishPolicy* EndPointPublishPolicy_ptr;
+typedef EndPointPublishPolicy_ptr EndPointPublishPolicyRef;
+
+class EndPointPublishPolicy : public CORBA::Policy
+{
+public:
+  EndPointPublishPolicy(const EndPointPublishPolicyValue& value_);
+  inline EndPointPublishPolicy() : pd_eps(0) {}
+  virtual ~EndPointPublishPolicy();
+
+  virtual CORBA::Policy_ptr copy();
+  virtual const EndPointPublishPolicyValue& value() { return pd_value; }
+
+  virtual void* _ptrToObjRef(const char* repoId);
+
+  _OMNI_NS(IORPublish)* getEPs();
+
+  static EndPointPublishPolicy_ptr _duplicate(EndPointPublishPolicy_ptr p);
+  static EndPointPublishPolicy_ptr _narrow(CORBA::Object_ptr p);
+  static EndPointPublishPolicy_ptr _nil();
+
+  static _core_attr const char* _PD_repoId;
+
+private:
+  EndPointPublishPolicyValue pd_value;
+  _OMNI_NS(IORPublish)*      pd_eps;
+};
+
+typedef _CORBA_PseudoObj_Var<EndPointPublishPolicy> EndPointPublishPolicy_var;
+
+
+_CORBA_MODULE_FN EndPointPublishPolicy_ptr
+create_endpoint_publish_policy(const EndPointPublishPolicyValue& v);
+
 
 _CORBA_MODULE_END
 

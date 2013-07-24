@@ -142,6 +142,44 @@ createPolicyObject(PortableServer::POA_ptr poa, PyObject* pypolicy)
       policy = new BiDirPolicy::BidirectionalPolicy(getULongVal(pyvalue));
       break;
 
+    case 0x41545402: // EndPointPublishPolicy
+      {
+        if (!PyList_Check(pyvalue))
+          THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO,
+                             omniPy::formatString("EndPointPublishPolicy value "
+                                                  "should be a list of "
+                                                  "strings, not %r", "O",
+                                                  pyvalue->ob_type));
+
+        CORBA::ULong     len = PyList_GET_SIZE(pyvalue);
+        CORBA::StringSeq seq(len);
+        seq.length(len);
+
+        for (CORBA::ULong idx=0; idx != len; ++idx) {
+          PyObject* item = PyList_GET_ITEM(pyvalue, idx);
+
+          if (!PyString_Check(item))
+            THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO,
+                               omniPy::formatString("EndPointPublishPolicy "
+                                                    "value should be a list of "
+                                                    "strings, not list of %r",
+                                                    "O", item->ob_type));
+
+          seq[idx] = CORBA::string_dup(PyString_AS_STRING(item));
+        }
+        try {
+          policy = new omniPolicy::EndPointPublishPolicy(seq);
+        }
+        catch (CORBA::PolicyError& ex) {
+          THROW_PY_BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO,
+                             omniPy::formatString("Invalid "
+                                                  "EndPointPublishPolicy "
+                                                  "value %r",
+                                                  "O", pyvalue.obj()));
+        }
+      }
+      break;
+
     default:
       {
         // Is there a function registered in _omnipy.policyFns?

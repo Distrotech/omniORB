@@ -1,9 +1,33 @@
+Wed Jul 24 14:17:40 BST 2013 dgrisby
+====================================
+
+- New endpoint publishing policy.
+
+include/omniORB4/CORBA_Exception.h
+include/omniORB4/giopEndpoint.h
+include/omniORB4/omniIOR.h
+include/omniORB4/omniPolicy.h
+src/lib/omniORB/dynamic/policy.cc
+src/lib/omniORB/orbcore/giopEndpoint.cc
+src/lib/omniORB/orbcore/ior.cc
+src/lib/omniORB/orbcore/omniPolicy.cc
+src/lib/omniORB/orbcore/poa.cc
+src/lib/omniORB/orbcore/policy.cc
+src/lib/omniORB/orbcore/ssl/sslTransportImpl.cc
+src/lib/omniORB/orbcore/ssl/sslTransportImpl.h
+src/lib/omniORB/orbcore/tcp/tcpTransportImpl.cc
+src/lib/omniORB/orbcore/tcp/tcpTransportImpl.h
+src/lib/omniORB/orbcore/unix/unixTransportImpl.cc
+src/lib/omniORB/orbcore/unix/unixTransportImpl.h
+
+
 Thu Jul 18 12:26:45 BST 2013 dgrisby
 ====================================
 
 - Removed lots of old CVS log lines.
 
 *Many files*
+
 
 Mon Jul  8 17:25:27 BST 2013 dgrisby
 ====================================

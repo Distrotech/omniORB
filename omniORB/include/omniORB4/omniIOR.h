@@ -35,6 +35,7 @@
 
 OMNI_NAMESPACE_BEGIN(omni)
 class Rope;
+class IORPublish;
 OMNI_NAMESPACE_END(omni)
 
 class omniIORHints {
@@ -236,14 +237,16 @@ public:
   ////
   static void  unmarshal_TAG_ALTERNATE_IIOP_ADDRESS(const IOP::TaggedComponent&,
                                                    omniIOR&);
-  static void  add_TAG_ALTERNATE_IIOP_ADDRESS(const IIOP::Address&);
+  static void  add_TAG_ALTERNATE_IIOP_ADDRESS(const IIOP::Address&,
+                                              _OMNI_NS(IORPublish)* eps);
 
   ////
   static void  unmarshal_TAG_SSL_SEC_TRANS(const IOP::TaggedComponent&,
 					   omniIOR&);
   static void  add_TAG_SSL_SEC_TRANS(const IIOP::Address&,
-				     _CORBA_UShort supports,
-				     _CORBA_UShort requires);
+				     _CORBA_UShort         supports,
+				     _CORBA_UShort         requires,
+                                     _OMNI_NS(IORPublish)* eps);
 
   ////
   static void unmarshal_TAG_CSI_SEC_MECH_LIST(const IOP::TaggedComponent&,
@@ -258,14 +261,16 @@ public:
   ////
   static void  unmarshal_TAG_OMNIORB_UNIX_TRANS(const IOP::TaggedComponent&,
 						omniIOR&);
-  static void  add_TAG_OMNIORB_UNIX_TRANS(const char* filename);
+  static void  add_TAG_OMNIORB_UNIX_TRANS(const char*           filename,
+                                          _OMNI_NS(IORPublish)* eps);
 
   ////
   static void  unmarshal_TAG_OMNIORB_PERSISTENT_ID(const IOP::TaggedComponent&,
 						   omniIOR&);
 
   ////
-  static void  add_IIOP_ADDRESS(const IIOP::Address&);
+  static void  add_IIOP_ADDRESS(const IIOP::Address&,
+                                _OMNI_NS(IORPublish)* eps);
   // Add this address to the IIOP profile.
 
 private:

@@ -1,3 +1,15 @@
+Wed Jul 24 14:17:40 BST 2013 dgrisby
+====================================
+
+- New endpoint publishing policy.
+
+modules/pyPOAFunc.cc
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
+python/omniORB/dir.mk
+python/omniORB/omniPolicy.py
+
+
 Thu Jul 18 12:26:45 BST 2013 dgrisby
 ====================================
 

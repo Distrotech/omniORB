@@ -3,6 +3,7 @@
 // unixTransportImpl.h        Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -41,7 +42,7 @@ class unixTransportImpl : public giopTransportImpl {
   giopEndpoint*  toEndpoint(const char* param);
   giopAddress*   toAddress(const char* param);
   CORBA::Boolean isValid(const char* param);
-  CORBA::Boolean addToIOR(const char* param);
+  CORBA::Boolean addToIOR(const char* param, IORPublish* eps);
   const omnivector<const char*>* getInterfaceAddress();
 
  private:

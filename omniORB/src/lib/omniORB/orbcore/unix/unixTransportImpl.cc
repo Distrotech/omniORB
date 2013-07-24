@@ -3,6 +3,7 @@
 // unixTransportImpl.cc       Created on: 6 Aug 2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -151,10 +152,10 @@ unixTransportImpl::toAddress(const char* param) {
 
 /////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
-unixTransportImpl::addToIOR(const char* param) {
+unixTransportImpl::addToIOR(const char* param, IORPublish* eps) {
 
   if (param) {
-    omniIOR::add_TAG_OMNIORB_UNIX_TRANS(param);
+    omniIOR::add_TAG_OMNIORB_UNIX_TRANS(param, eps);
     return 1;
   }
   return 0;
