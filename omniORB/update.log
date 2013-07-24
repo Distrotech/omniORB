@@ -17,6 +17,7 @@ src/examples/poa/shortcut/dir.mak
 src/examples/poa/shortcut/dir.mk
 src/examples/poa/shortcut/shortcut.cc
 src/examples/poa/shortcut/shortcut.idl
+src/lib/omniORB/dir.mk
 src/lib/omniORB/ziop/GNUmakefile
 src/lib/omniORB/ziop/omniZIOP.cc
 src/lib/omniORB/ziopdynamic

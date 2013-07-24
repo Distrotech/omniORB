@@ -11,7 +11,7 @@ ifndef OrbCoreOnly
 SUBDIRS += dynamic codesets connections
 
 ifdef EnableZIOP
-SUBDIRS += ziop
+SUBDIRS += ziop ziopdynamic
 endif
 
 endif
@@ -41,7 +41,8 @@ EXPORTHEADERS = omniORB4/distdate.hh \
 ifdef EnableZIOP
 EXPORTHEADERS += omniORB4/compression.hh \
 		 omniORB4/messaging_policy.hh \
-		 omniORB4/ziop_defs.hh
+		 omniORB4/ziop_defs.hh \
+		 omniORB4/ziop_operators.hh
 endif
 
 
@@ -140,12 +141,12 @@ omniORB4/messaging_policy.hh: messaging_policy.idl
 	@(dir=omniORB4; $(CreateDir))
 	$(OMNIORB_IDL_ONLY) -v -ComniORB4 $<
 
-omniORB4/compression.hh : compression.idl
+omniORB4/compression.hh: compression.idl
 	@(dir=omniORB4; $(CreateDir))
-	$(OMNIORB_IDL_ONLY) -v $(IMPORT_IDLFLAGS) -ComniORB4 $<
+	$(OMNIORB_IDL_ONLY) -v -Wba $(IMPORT_IDLFLAGS) -ComniORB4 $<
 
-omniORB4/ziop_defs.hh : ziop.idl
+omniORB4/ziop_defs.hh omniORB4/ziop_operators.hh: ziop.idl
 	@(dir=omniORB4; $(CreateDir))
-	$(OMNIORB_IDL_ONLY) -v $(IMPORT_IDLFLAGS) -WbF -ComniORB4 $<
+	$(OMNIORB_IDL_ONLY) -v $(IMPORT_IDLFLAGS) -WbF -Wba -ComniORB4 $<
 
 endif
