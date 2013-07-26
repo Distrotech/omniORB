@@ -1,3 +1,13 @@
+Fri Jul 26 17:25:05 BST 2013 dgrisby
+====================================
+
+- DIIPollable example.
+
+src/examples/ami/dir.mk
+src/examples/ami/echo_dii_pollable_set.cc
+src/examples/ami/echo_pollable_set.cc
+
+
 Wed Jul 24 14:21:40 BST 2013 dgrisby
 ====================================
 

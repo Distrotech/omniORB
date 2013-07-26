@@ -1,6 +1,9 @@
-// AMI pollable set echo example. Use as a client to echo/eg2_impl
+// AMI pollable set echo example that uses the pollable set to watch
+// for a DII call as well as an AMI call.
 //
-// Usage: echo_pollable_set <object reference>
+// Use as a client to echo/eg2_impl
+//
+// Usage: echo_dii_pollable_set <object reference>
 //
 
 #include <echo_ami.hh>
@@ -34,13 +37,24 @@ int main(int argc, char** argv)
       return 1;
     }
 
-    // Make some asynchronous calls
-    AMI_EchoPoller_var poller1 = echoref->sendp_echoString("Hello async 1!");
-    AMI_EchoPoller_var poller2 = echoref->sendp_echoString("Hello async 2!");
+    // Make an asynchronous call
+    AMI_EchoPoller_var poller = echoref->sendp_echoString("Hello async");
 
-    // Create PollableSet containing both pollers
-    CORBA::PollableSet_var pset = poller1->create_pollable_set();
-    pset->add_pollable(poller2);
+    // Make a deferred synchronous DII call
+    CORBA::Request_var req = echoref->_request("echoString");
+    CORBA::String_var  arg = (const char*) "Hello DII";
+
+    req->add_in_arg() <<= arg;
+    req->set_return_type(CORBA::_tc_string);
+    req->send_deferred();
+
+
+    // Create PollableSet
+    CORBA::PollableSet_var pset = poller->create_pollable_set();
+
+    // Get DIIPollable and add to set
+    CORBA::DIIPollable_var dii_pollable = pset->create_dii_pollable();
+    pset->add_pollable(dii_pollable);
 
     try {
       while (1) {
@@ -49,9 +63,19 @@ int main(int argc, char** argv)
         CORBA::Pollable_var pollable = pset->get_ready_pollable(2000);
         AMI_EchoPoller*     poller   = AMI_EchoPoller::_downcast(pollable);
 
-        CORBA::String_var result;
-        poller->echoString(0, result.out());
-        cout << "The call returned: " << (const char*)result << endl;
+        if (poller) {
+          CORBA::String_var result;
+          poller->echoString(0, result.out());
+          cout << "AMI call returned: " << (const char*)result << endl;
+        }
+        else if (req->poll_response()) {
+          const char* dii_ret;
+          req->return_value() >>= dii_ret;
+          cout << "DII call returned: " << dii_ret << endl;
+        }
+        else {
+          cout << "Unexpected poller returned from pollable set!" << endl;
+        }
       }
     }
     catch (CORBA::PollableSet::NoPossiblePollable&) {
