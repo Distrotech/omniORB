@@ -3,7 +3,7 @@
 // giopImpl10.cc              Created on: 14/02/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -1484,18 +1484,35 @@ void
 giopImpl10::copyOutputData(giopStream* g,void* b, size_t sz,
 			   omni::alignment_t align) {
 
-  omni::ptr_arith_t newmkr = omni::align_to((omni::ptr_arith_t)g->pd_outb_mkr,
-					    align);
-  OMNIORB_ASSERT(newmkr <= (omni::ptr_arith_t)g->pd_outb_end);
+  omni::ptr_arith_t newmkr = g->outMkr(align);
+  OMNIORB_ASSERT(newmkr <= g->outEnd());
+
+  g->pd_outb_mkr = (void*)newmkr;
 
   if (sz >= giopStream::directSendCutOff) {
 
-    g->pd_outb_mkr = (void*)newmkr;
-    if (  (omni::ptr_arith_t)g->pd_outb_mkr !=
-	 ((omni::ptr_arith_t)g->pd_currentOutputBuffer + 
-	                     g->pd_currentOutputBuffer->start) ) {
+    omni::ptr_arith_t outbuf_begin = g->outputBufferStart();
+
+    if (g->outMkr() != outbuf_begin) {
+
+      if (newmkr - outbuf_begin < giopStream::minChunkBeforeDirectSend) {
+        // Copy some of the data into the buffer, to prevent
+        // transmission of a small chunk.
+        size_t current = newmkr - outbuf_begin;
+        size_t avail   = g->outEnd() - newmkr;
+        size_t filler  = giopStream::minChunkBeforeDirectSend - current;
+        if (filler > avail)
+          filler = avail;
+
+        memcpy(g->pd_outb_mkr, b, filler);
+        sz -= filler;
+        g->pd_outb_mkr = (void*)(g->outMkr() + filler);
+        b = (void*)((omni::ptr_arith_t)b + filler);
+      }
+
       outputFlush(g);
     }
+
     // After this vector of bytes is sent, the stream may or may not be
     // 8 bytes aligned. But our output buffer is now emptied and hence
     // is 8 bytes aligned. Since we send the whole vector out, we have
@@ -1506,21 +1523,23 @@ giopImpl10::copyOutputData(giopStream* g,void* b, size_t sz,
     size_t leftover = (newmkr + sz) & 0x7;
     if (leftover) {
       g->pd_currentOutputBuffer->start += leftover;
-      g->pd_outb_mkr = (void*) ((omni::ptr_arith_t) 
-				g->pd_currentOutputBuffer + 
-				g->pd_currentOutputBuffer->start);
+      g->pd_outb_mkr = (void*) g->outputBufferStart();
     }
   }
   else {
-    g->pd_outb_mkr = (void*)newmkr;
     while (sz) {
-      size_t avail = (omni::ptr_arith_t) g->pd_outb_end	- 
-	             (omni::ptr_arith_t) g->pd_outb_mkr;
-      if (avail > sz) avail = sz;
+      size_t avail = g->outEnd() - g->outMkr();
+
+      if (avail > sz)
+        avail = sz;
+
       memcpy(g->pd_outb_mkr,b,avail);
       sz -= avail;
-      g->pd_outb_mkr = (void*)((omni::ptr_arith_t) g->pd_outb_mkr + avail);
+
+      g->pd_outb_mkr = (void*)g->outMkr() + avail;
+
       b = (void*)((omni::ptr_arith_t) b + avail);
+
       if (g->pd_outb_mkr == g->pd_outb_end)
 	outputFlush(g);
     }

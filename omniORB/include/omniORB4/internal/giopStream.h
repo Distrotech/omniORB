@@ -343,8 +343,12 @@ public:
   static _core_attr CORBA::ULong directSendCutOff;
   static _core_attr CORBA::ULong directReceiveCutOff;
 
-  static _core_attr CORBA::ULong bufferSize;
+  // When performing a direct send, ensure that the previous chunk
+  // contains at least this much data. Must be a multiple of 8.
+  static _core_attr CORBA::ULong minChunkBeforeDirectSend;
+
   // Allocate this number of bytes for each giopStream_Buffer.
+  static _core_attr CORBA::ULong bufferSize;
 
   static _core_attr giopCompressorFactory* compressorFactory;
 

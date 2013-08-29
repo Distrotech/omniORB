@@ -3,7 +3,7 @@
 // giopImpl12.cc              Created on: 14/02/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2012 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
@@ -1987,6 +1987,23 @@ giopImpl12::copyOutputData(giopStream* g, void* b, size_t sz,
 
   if (sz >= giopStream::directSendCutOff && !g->pd_strand->compressor) {
 
+    omni::ptr_arith_t outbuf_begin = g->outputBufferStart();
+
+    if (newmkr - outbuf_begin < giopStream::minChunkBeforeDirectSend) {
+      // Copy some of the data into the buffer, to prevent
+      // transmission of a small chunk.
+      size_t current = newmkr - outbuf_begin;
+      size_t avail   = g->outEnd() - newmkr;
+      size_t filler  = giopStream::minChunkBeforeDirectSend - current;
+      if (filler > avail)
+        filler = avail;
+
+      memcpy(g->pd_outb_mkr, b, filler);
+      sz -= filler;
+      g->pd_outb_mkr = (void*)(g->outMkr() + filler);
+      b = (void*)((omni::ptr_arith_t)b + filler);
+    }
+
     // The fragment including this vector of bytes must end on a 8 byte
     // boundary. Therefore we may have to leave behind 0-7 bytes in the
     // next fragment.
@@ -1994,11 +2011,7 @@ giopImpl12::copyOutputData(giopStream* g, void* b, size_t sz,
     size_t leftover = (newmkr + sz) & 0x7;
 
     if (!g->outputFragmentSize()) {
-
-      omni::ptr_arith_t outbuf_begin = g->outputBufferStart();
-
       CORBA::ULong fsz = g->outMkr() - outbuf_begin + sz - leftover - 12;
-
       *((CORBA::ULong*)((omni::ptr_arith_t)outbuf_begin + 8)) = fsz;
     }
 

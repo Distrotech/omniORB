@@ -43,9 +43,10 @@
 OMNI_NAMESPACE_BEGIN(omni)
 
 ////////////////////////////////////////////////////////////////////////
-CORBA::ULong giopStream::directSendCutOff    = 16384;
-CORBA::ULong giopStream::directReceiveCutOff = 1024;
-CORBA::ULong giopStream::bufferSize          = 8192;
+CORBA::ULong giopStream::directSendCutOff         = 16384;
+CORBA::ULong giopStream::directReceiveCutOff      = 1024;
+CORBA::ULong giopStream::minChunkBeforeDirectSend = 1024;
+CORBA::ULong giopStream::bufferSize               = 8192;
 
 
 ////////////////////////////////////////////////////////////////////////
