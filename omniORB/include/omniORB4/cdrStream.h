@@ -491,7 +491,18 @@ public:
   // <size> must be a multiple of <align>.
   // For instance, if <align> == omni::ALIGN_8 then <size> % 8 == 0.
 
-  void put_small_octet_array(const _CORBA_Octet* b, int size);
+  inline void put_small_octet_array(const _CORBA_Octet* b, int size) {
+    omni::ptr_arith_t p1 = (omni::ptr_arith_t)pd_outb_mkr;
+    omni::ptr_arith_t p2 = p1 + size;
+
+    if ((void*)p2 <= pd_outb_end) {
+      memcpy(pd_outb_mkr, b, size);
+      pd_outb_mkr = (void*)p2;
+    }
+    else {
+      put_octet_array(b, size);
+    } 
+  }
   // Put a small octet array which must have ALIGN_1. Since it is
   // small, we expect it to fit in the stream's current buffer without
   // having to allocate more space.

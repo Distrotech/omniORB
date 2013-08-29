@@ -27,11 +27,14 @@
 #   
 #   Skeleton utility functions designed for the C++ backend
 
+SMALL_ARRAY_THRESHOLD = 128
+
 try:
     # Python 3 does not have a built in reduce()
     from functools import reduce
 except ImportError:
     pass
+
 
 from omniidl import idltype, idlast
 from omniidl_be.cxx import util, types, id, ast, output, cxx
@@ -128,8 +131,14 @@ else """,
                     to.out("""
 #if !defined(HAS_Cplusplus_Bool) || (SIZEOF_BOOL == 1)""")
 
-                to.out("@where@.put_octet_array((_CORBA_Octet*)(@slice_cast@@name@),@num@);",
+                if n_elements <= SMALL_ARRAY_THRESHOLD:
+                    put_op = "put_small_octet_array"
+                else:
+                    put_op = "put_octet_array"
+
+                to.out("@where@.@put_op@((_CORBA_Octet*)(@slice_cast@@name@),@num@);",
                        where = to_where,
+                       put_op = put_op,
                        name = argname,
                        slice_cast = slice_cast,
                        num = str(n_elements))

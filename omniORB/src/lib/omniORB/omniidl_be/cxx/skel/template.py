@@ -527,6 +527,11 @@ if (omni::strMatch(repoId, @repoID_str@)) {
 """
 
 
+interface_operation_marker = """
+//
+// Code for @iface@::@operation@
+"""
+
 interface_operation = """\
 @call_descriptor@ _call_desc(@call_desc_args@);
 @assign_args@

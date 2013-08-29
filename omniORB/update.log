@@ -1,3 +1,28 @@
+Thu Aug 29 12:53:57 BST 2013 dgrisby
+====================================
+
+- Store plain TypeCode pointer in Any.
+
+include/omniORB4/CORBA_Any.h
+src/lib/omniORB/dynamic/any.cc
+
+- New giopStream::minChunkBeforeDirectSend setting.
+
+include/omniORB4/internal/giopStream.h
+src/lib/omniORB/orbcore/giopImpl10.cc
+src/lib/omniORB/orbcore/giopImpl11.cc
+src/lib/omniORB/orbcore/giopImpl12.cc
+src/lib/omniORB/orbcore/giopStream.cc
+
+- Inline put_small_octet_array; use it for small arrays.
+
+include/omniORB4/cdrStream.h
+src/lib/omniORB/omniidl_be/cxx/iface.py
+src/lib/omniORB/omniidl_be/cxx/skel/template.py
+src/lib/omniORB/omniidl_be/cxx/skutil.py
+src/lib/omniORB/orbcore/cdrStream.cc
+
+
 Fri Jul 26 17:25:05 BST 2013 dgrisby
 ====================================
 

@@ -664,6 +664,10 @@ class _objref_I(Class):
         for method in self.methods():
             callable = self._callables[method]
 
+            stream.out(skel_template.interface_operation_marker,
+                       iface = self.interface().name().fullyQualify(),
+                       operation = callable.operation_name())
+
             # signature is a text string form of the complete
             # operation signature
             signature = callable.signature()
