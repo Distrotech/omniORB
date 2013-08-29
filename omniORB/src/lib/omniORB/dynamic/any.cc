@@ -60,12 +60,34 @@ static omni_tracedmutex anyLock("anyLock");
 #define SNAP_LOCK do{}while(0)
 
 
-// Extract possibly nil typecode.
+// Extract possibly zero typecode.
 static inline
 CORBA::TypeCode_ptr
 get(CORBA::TypeCode_ptr tc)
 {
-  return CORBA::is_nil(tc) ? CORBA::_tc_null : tc;
+  return tc ? tc : CORBA::_tc_null;
+}
+
+// Set typecode, possibly releasing existing one. Takes ownership of new_tc.
+static inline
+void
+grabTC(CORBA::TypeCode_ptr& tc, CORBA::TypeCode_ptr new_tc)
+{
+  if (tc)
+    CORBA::release(tc);
+
+  tc = new_tc;
+}
+
+// Set typecode, possibly releasing existing one. Duplicates new_tc.
+static inline
+void
+dupTC(CORBA::TypeCode_ptr& tc, CORBA::TypeCode_ptr new_tc)
+{
+  if (tc)
+    CORBA::release(tc);
+
+  tc = new_tc ? CORBA::TypeCode::_duplicate(new_tc) : 0;
 }
 
 
@@ -74,7 +96,7 @@ get(CORBA::TypeCode_ptr tc)
 //////////////////////////////////////////////////////////////////////
 
 CORBA::Any::Any()
-  : pd_mbuf(0), pd_data(0), pd_marshal(0), pd_destructor(0)
+  : pd_tc(0), pd_mbuf(0), pd_data(0), pd_marshal(0), pd_destructor(0)
 {
 }
 
@@ -88,6 +110,9 @@ CORBA::Any::~Any()
     OMNIORB_ASSERT(pd_destructor);
     pd_destructor(pd_data);
   }
+
+  if (pd_tc)
+    CORBA::release(pd_tc);
 }
 
 void
@@ -108,9 +133,9 @@ CORBA::Any::PR_clearData()
 
 
 CORBA::Any::Any(const Any& a) 
-  : pd_data(0), pd_marshal(0), pd_destructor(0)
+  : pd_tc(0), pd_data(0), pd_marshal(0), pd_destructor(0)
 {
-  pd_tc = CORBA::TypeCode::_duplicate(a.pd_tc);
+  dupTC(pd_tc, a.pd_tc);
 
   cdrAnyMemoryStream* snap_mbuf;
   void*               snap_data;
@@ -147,7 +172,7 @@ CORBA::Any::operator=(const CORBA::Any& a)
 {
   if (&a != this) {
     PR_clearData();
-    pd_tc = CORBA::TypeCode::_duplicate(a.pd_tc);
+    dupTC(pd_tc, a.pd_tc);
 
     cdrAnyMemoryStream* snap_mbuf;
     void*               snap_data;
@@ -179,8 +204,9 @@ CORBA::Any::operator=(const CORBA::Any& a)
 
 CORBA::
 Any::Any(TypeCode_ptr tc, void* value, Boolean release)
+  : pd_tc(0)
 {
-  pd_tc = CORBA::TypeCode::_duplicate(tc);
+  dupTC(pd_tc, tc);
 
   if (value == 0) {
     // No value yet.
@@ -201,7 +227,7 @@ Any::Any(TypeCode_ptr tc, void* value, Boolean release)
 void
 CORBA::Any::replace(TypeCode_ptr tc, void* value, Boolean release)
 {
-  pd_tc = CORBA::TypeCode::_duplicate(tc);
+  dupTC(pd_tc, tc);
 
   PR_clearData();
 
@@ -276,7 +302,7 @@ CORBA::Any::operator<<= (cdrStream& s)
 {
   PR_clearData();
 
-  pd_tc   = CORBA::TypeCode::unmarshalTypeCode(s);
+  grabTC(pd_tc, CORBA::TypeCode::unmarshalTypeCode(s));
   pd_mbuf = new cdrAnyMemoryStream;
   tcParser::copyStreamToStream(get(pd_tc), s, *pd_mbuf);
 }
@@ -339,7 +365,7 @@ CORBA::Any::
 PR_insert(CORBA::TypeCode_ptr newtc, pr_marshal_fn marshal, void* data)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(newtc);
+  dupTC(pd_tc, newtc);
   pd_mbuf = new cdrAnyMemoryStream();
   marshal(*pd_mbuf, data);
 }
@@ -350,7 +376,7 @@ PR_insert(CORBA::TypeCode_ptr newtc, pr_marshal_fn marshal,
 	  pr_destructor_fn destructor, void* data)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(newtc);
+  dupTC(pd_tc, newtc);
   pd_data = data;
   pd_marshal = marshal;
   pd_destructor = destructor;
@@ -508,7 +534,7 @@ void
 CORBA::Any::operator<<=(Short s)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_short);
+  dupTC(pd_tc, CORBA::_tc_short);
   pd_mbuf = new cdrAnyMemoryStream();
   s >>= *pd_mbuf;
 }
@@ -517,7 +543,7 @@ CORBA::Any::operator<<=(Short s)
 void CORBA::Any::operator<<=(UShort u)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_ushort);
+  dupTC(pd_tc, CORBA::_tc_ushort);
   pd_mbuf = new cdrAnyMemoryStream();
   u >>= *pd_mbuf;
 }
@@ -527,7 +553,7 @@ void
 CORBA::Any::operator<<=(Long l)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_long);
+  dupTC(pd_tc, CORBA::_tc_long);
   pd_mbuf = new cdrAnyMemoryStream();
   l >>= *pd_mbuf;
 }
@@ -537,7 +563,7 @@ void
 CORBA::Any::operator<<=(ULong u)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_ulong);
+  dupTC(pd_tc, CORBA::_tc_ulong);
   pd_mbuf = new cdrAnyMemoryStream();
   u >>= *pd_mbuf;
 }
@@ -547,7 +573,7 @@ void
 CORBA::Any::operator<<=(LongLong l)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_longlong);
+  dupTC(pd_tc, CORBA::_tc_longlong);
   pd_mbuf = new cdrAnyMemoryStream();
   l >>= *pd_mbuf;
 }
@@ -556,7 +582,7 @@ void
 CORBA::Any::operator<<=(ULongLong u)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_ulonglong);
+  dupTC(pd_tc, CORBA::_tc_ulonglong);
   pd_mbuf = new cdrAnyMemoryStream();
   u >>= *pd_mbuf;
 }
@@ -568,7 +594,7 @@ void
 CORBA::Any::operator<<=(Float f)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_float);
+  dupTC(pd_tc, CORBA::_tc_float);
   pd_mbuf = new cdrAnyMemoryStream();
   f >>= *pd_mbuf;
 }
@@ -577,7 +603,7 @@ void
 CORBA::Any::operator<<=(Double d)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_double);
+  dupTC(pd_tc, CORBA::_tc_double);
   pd_mbuf = new cdrAnyMemoryStream();
   d >>= *pd_mbuf;
 }
@@ -587,7 +613,7 @@ void
 CORBA::Any::operator<<=(LongDouble d)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_longdouble);
+  dupTC(pd_tc, CORBA::_tc_longdouble);
   pd_mbuf = new cdrAnyMemoryStream();
   d >>= *pd_mbuf;
 }
@@ -600,7 +626,7 @@ void
 CORBA::Any::operator<<=(from_boolean b)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_boolean);
+  dupTC(pd_tc, CORBA::_tc_boolean);
   pd_mbuf = new cdrAnyMemoryStream();
   pd_mbuf->marshalBoolean(b.val);
 }
@@ -609,7 +635,7 @@ void
 CORBA::Any::operator<<=(from_char c)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_char);
+  dupTC(pd_tc, CORBA::_tc_char);
   pd_mbuf = new cdrAnyMemoryStream();
   pd_mbuf->marshalChar(c.val);
 }
@@ -618,7 +644,7 @@ void
 CORBA::Any::operator<<=(from_wchar c)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_wchar);
+  dupTC(pd_tc, CORBA::_tc_wchar);
   pd_mbuf = new cdrAnyMemoryStream();
   pd_mbuf->marshalWChar(c.val);
 }
@@ -627,7 +653,7 @@ void
 CORBA::Any::operator<<=(from_octet o)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_octet);
+  dupTC(pd_tc, CORBA::_tc_octet);
   pd_mbuf = new cdrAnyMemoryStream();
   pd_mbuf->marshalOctet(o.val);
 }
@@ -1208,7 +1234,7 @@ void
 CORBA::Any::operator<<=(const char* s)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_string);
+  dupTC(pd_tc, CORBA::_tc_string);
 
   char* ns = CORBA::string_dup(s);
   PR_insert(CORBA::_tc_string, marshalString_fn, deleteString_fn, ns);
@@ -1225,7 +1251,7 @@ CORBA::Any::operator<<=(from_string s)
     tc = CORBA::TypeCode::_duplicate(CORBA::_tc_string);
 
   PR_clearData();
-  pd_tc = tc;
+  grabTC(pd_tc, tc);
 
   if (s.nc) {
     PR_insert(tc, marshalString_fn, deleteString_fn, s.val);
@@ -1285,7 +1311,7 @@ void
 CORBA::Any::operator<<=(const CORBA::WChar* s)
 {
   PR_clearData();
-  pd_tc = CORBA::TypeCode::_duplicate(CORBA::_tc_string);
+  dupTC(pd_tc, CORBA::_tc_string);
 
   CORBA::WChar* ns = CORBA::wstring_dup(s);
   PR_insert(CORBA::_tc_wstring, marshalWString_fn, deleteWString_fn, ns);
@@ -1302,7 +1328,7 @@ CORBA::Any::operator<<=(from_wstring s)
     tc = CORBA::TypeCode::_duplicate(CORBA::_tc_wstring);
 
   PR_clearData();
-  pd_tc = tc;
+  grabTC(pd_tc, tc);
 
   if (s.nc) {
     PR_insert(tc, marshalWString_fn, deleteWString_fn, s.val);
@@ -1380,7 +1406,7 @@ CORBA::Any::type(CORBA::TypeCode_ptr tc)
 		  BAD_TYPECODE_NotEquivalent,
 		  CORBA::COMPLETED_NO);
 
-  pd_tc = CORBA::TypeCode::_duplicate(tc);
+  dupTC(pd_tc, tc);
 }
 
 const void*

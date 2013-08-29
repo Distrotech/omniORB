@@ -233,18 +233,19 @@ public:
 
   inline void NP_swap(CORBA::Any& other)
   {
+    CORBA::TypeCode_ptr tc         = pd_tc;
     cdrAnyMemoryStream* mbuf	   = pd_mbuf;
     void*		data	   = pd_data;
     pr_marshal_fn	marshal	   = pd_marshal;
     pr_destructor_fn	destructor = pd_destructor;
 
-    pd_tc.NP_swap(other.pd_tc);
-
+    pd_tc         = other.pd_tc;
     pd_mbuf	  = other.pd_mbuf;
     pd_data	  = other.pd_data;
     pd_marshal	  = other.pd_marshal;
     pd_destructor = other.pd_destructor;
 
+    other.pd_tc         = tc;
     other.pd_mbuf	= mbuf;
     other.pd_data	= data;
     other.pd_marshal	= marshal;
@@ -322,7 +323,7 @@ private:
   Boolean operator>>=(unsigned char&) const;
   // Not implemented.
 
-  TypeCode_member pd_tc;
+  TypeCode_ptr pd_tc;
 
   // The Any contents can be stored in marshalled form, or as a
   // pointer to the unmarshalled data, or both. When stored as a
