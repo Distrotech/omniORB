@@ -194,7 +194,7 @@ public:
     return pd_deadline;
   }
 
-  inline void setDeadline(omni_time_t& deadline) {
+  inline void setDeadline(const omni_time_t& deadline) {
     pd_deadline = deadline;
   }
 
