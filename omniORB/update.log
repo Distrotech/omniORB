@@ -1,3 +1,11 @@
+Tue Sep  3 13:58:28 BST 2013 dgrisby
+====================================
+
+- New inData() cdrStream method.
+
+include/omniORB4/cdrStream.h
+
+
 Mon Sep  2 22:31:47 BST 2013 dgrisby
 ====================================
 

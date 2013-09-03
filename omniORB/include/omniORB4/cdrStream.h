@@ -582,10 +582,6 @@ public:
   inline _CORBA_Boolean
   marshal_byte_swap() const { return pd_marshal_byte_swap; }
 
-  inline void*
-  PR_get_outb_mkr() { return pd_outb_mkr; }
-  // internal function used by cdrStream implementations
-
 
   //
   // Marshalling methods: array types
@@ -729,6 +725,17 @@ public:
 
   inline void* inPtr()  const { return pd_inb_mkr;  }
   inline void* outPtr() const { return pd_outb_mkr; }
+
+  inline void* inData(_CORBA_ULong size)
+  {
+    if (inEnd() - inMkr() <= size)
+      return pd_inb_mkr;
+    else
+      return 0;
+  }
+  // Return pointer to <size> bytes of input data, if there is enough
+  // data in the buffer. If there is insufficient data, return zero.
+
 
 protected:
 
