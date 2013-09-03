@@ -728,13 +728,19 @@ public:
 
   inline void* inData(_CORBA_ULong size)
   {
-    if (inEnd() - inMkr() <= size)
-      return pd_inb_mkr;
+    omni::ptr_arith_t p1 = inMkr();
+    omni::ptr_arith_t p2 = p1 + size;
+
+    if ((void*)p2 <= pd_inb_end) {
+      pd_inb_mkr = (void*)p2;
+      return (void*)p1;
+    }
     else
       return 0;
   }
-  // Return pointer to <size> bytes of input data, if there is enough
-  // data in the buffer. If there is insufficient data, return zero.
+  // If there is enough data in the buffer, return pointer to <size>
+  // bytes of input data, and skip the input pointer forwards
+  // accordingly. If there is insufficient data, return zero.
 
 
 protected:
