@@ -1,3 +1,11 @@
+Tue Sep  3 22:29:44 BST 2013 dgrisby
+====================================
+
+- Optionally disable callback.
+
+include/omniORB4/callDescriptor.h
+
+
 Tue Sep  3 15:25:36 BST 2013 dgrisby
 ====================================
 

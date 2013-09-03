@@ -349,7 +349,8 @@ public:
       pd_exception(0),
       pd_cond(0),
       pd_set_cond(0),
-      pd_complete(0)
+      pd_complete(0),
+      pd_do_callback(1)
   {}
 
   virtual ~omniAsyncCallDescriptor();
@@ -364,8 +365,10 @@ public:
 
   inline void setComplete()
   {
+    _CORBA_Boolean do_callback;
     {
       omni_tracedmutex_lock l(sd_lock);
+      do_callback = pd_do_callback;
       pd_complete = 1;
 
       if (pd_cond)
@@ -374,7 +377,8 @@ public:
       if (pd_set_cond)
         pd_set_cond->signal();
     }
-    completeCallback();
+    if (do_callback)
+      completeCallback();
   }
 
   inline bool isComplete()
@@ -415,9 +419,7 @@ public:
       pd_cond = new omni_tracedcondition(&sd_lock,
 					 "omniAsyncCallDescriptor::pd_cond");
 
-    if (!pd_complete)
-      pd_cond->timedwait(t);
-
+    pd_cond->timedwait(t);
     return pd_complete;
   }
 
@@ -488,6 +490,7 @@ protected:
   omni_tracedcondition*   pd_cond;
   omni_tracedcondition*   pd_set_cond;
   _CORBA_Boolean          pd_complete;
+  _CORBA_Boolean          pd_do_callback;
 
   // Not implemented
   omniAsyncCallDescriptor(const omniAsyncCallDescriptor&);
