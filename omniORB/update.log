@@ -1,3 +1,13 @@
+Tue Oct 29 18:16:09 GMT 2013 dgrisby
+====================================
+
+- Fix omniConnectionMgmt extension broken by giopRope changes.
+
+include/omniORB4/internal/giopStrandFlags.h
+src/appl/utils/catior/catior.cc
+src/lib/omniORB/connections/omniConnectionMgmt.cc
+
+
 Tue Sep  3 22:29:44 BST 2013 dgrisby
 ====================================
 

@@ -60,5 +60,8 @@
 #define GIOPSTRAND_COMPRESSION (1 << 3)
 // If set, the connection supports ZIOP compression.
 
+#define GIOPSTRAND_CONNECTION_MANAGEMENT (1 << 4)
+// If set, the connection is managed by the omniConnectionMgmt extension.
+
 
 #endif // __GIOPSTRANDFLAGS_H__

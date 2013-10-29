@@ -856,6 +856,36 @@ static
 void
 print_tag_omniorb_restricted_connection(const IOP::TaggedComponent& c)
 {
+  cdrEncapsulationStream e(c.component_data, 1);
+
+  CORBA::Octet  version;
+  CORBA::UShort flags;
+  CORBA::ULong  connection_id, max_connections, max_threads;
+
+  version           = e.unmarshalOctet();
+  flags           <<= e;
+  connection_id   <<= e;
+  max_connections <<= e;
+  max_threads     <<= e;
+
+  cout << "      TAG_OMNIORB_RESTRICTED_CONNECTION version         "
+       << (unsigned long)version << endl;
+
+  cout << "                                        flags          ";
+  if (flags & 0x0001) cout << " data_batch";
+  if (flags & 0x0002) cout << " permit_interleaved";
+  if (flags & 0x0004) cout << " hold_open";
+  if (flags == 0)     cout << " (none)";
+  cout << endl;
+
+  cout << "                                        connection_id   "
+       << connection_id << endl;
+
+  cout << "                                        max_connections "
+       << max_connections << endl;
+
+  cout << "                                        max_threads     "
+       << max_threads << endl;
 }
 
 

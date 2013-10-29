@@ -71,7 +71,7 @@ public:
 			       CORBA::ULong        keysize,
 			       omniCallDescriptor* cd);
   // Override giopRope acquireClient, so we can set the connection
-  // battching flags if need be.
+  // batching flags if need be.
 
 protected:
   CORBA::Boolean match(const giopAddressList&, omniIOR::IORInfo* info) const;
@@ -168,8 +168,8 @@ restrictedGiopRope::match(const giopAddressList& addrlist,
 static CORBA::Boolean
 decodeIORInterceptor(omniInterceptors::decodeIOR_T::info_T& iinfo)
 {
-  const IIOP::ProfileBody& iiop    = iinfo.iiop;
-  omniIOR&                 ior     = iinfo.ior;
+  const IIOP::ProfileBody& iiop = iinfo.iiop;
+  omniIOR&                 ior  = iinfo.ior;
 
   const IOP::MultipleComponentProfile& components = iiop.components;
 
@@ -195,7 +195,15 @@ decodeIORInterceptor(omniInterceptors::decodeIOR_T::info_T& iinfo)
 	}
 
 	// Add the information to the omniIOR's extra info list.
-	omniIOR::IORExtraInfoList& infolist = ior.getIORInfo()->extraInfo();
+        omniIOR::IORInfo* info  = ior.getIORInfo();
+        CORBA::ULong      flags = GIOPSTRAND_CONNECTION_MANAGEMENT;
+
+        if (rinfo->data.flags & omniConnectionData::COMP_DATA_BATCH)
+          flags |= GIOPSTRAND_ENABLE_TRANSPORT_BATCHING;
+
+        info->flags(info->flags() | flags);
+
+	omniIOR::IORExtraInfoList& infolist = info->extraInfo();
 	CORBA::ULong i = infolist.length();
 	infolist.length(i+1);
 	infolist[i] = (omniIOR::IORExtraInfo*)rinfo;
@@ -288,6 +296,7 @@ clientSendRequestInterceptor(omniInterceptors::
   // Copy the encapsulation contents into the service context data.
   CORBA::ULong len = iinfo.service_contexts.length();
 
+  iinfo.service_contexts.length(len+1);
   iinfo.service_contexts[len].context_id = (omniConnectionData::
 					    SVC_RESTRICTED_CONNECTION);
   stream.setOctetSeq(iinfo.service_contexts[len].context_data);
