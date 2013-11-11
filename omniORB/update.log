@@ -1,3 +1,15 @@
+Mon Nov 11 15:08:29 GMT 2013 dgrisby
+====================================
+
+- sendChunk and buffer dump logs got out of order.
+
+src/lib/omniORB/orbcore/giopStream.cc
+
+- Log more detail if fragment sizes are unexpected.
+
+src/lib/omniORB/orbcore/giopImpl12.cc
+
+
 Tue Oct 29 18:16:09 GMT 2013 dgrisby
 ====================================
 

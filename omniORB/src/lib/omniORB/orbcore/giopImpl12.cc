@@ -1001,15 +1001,20 @@ giopImpl12::getInputData(giopStream* g,omni::alignment_t align,size_t sz) {
     size_t extra = end - g->inEnd();
 
     if (extra != sz) {
+      if (omniORB::trace(25)) {
+        omniORB::logger log;
+        log << "getInputData requires " << sz << " bytes but buffer contains "
+            << sz - extra << ".\n";
+      }
       if (!(g->inputFragmentToCome() || g->inputExpectAnotherFragment()) ) {
 	// The full message is already in the buffer. The unmarshalling
-	// code is asking for more. This is an error causes by the received
+	// code is asking for more. This is an error caused by the received
 	// data. We'll let the code below to raise a MARSHAL exception
 	sz = extra;            // in case sz == 0
       }
       else {
 	if (g->inputExpectAnotherFragment()) {
-	  // The incoming message is fragmented at the wrong boundary!!!
+	  // The incoming message is fragmented at the wrong boundary!
 	  inputTerminalProtocolError(g, __FILE__, __LINE__,
 				     "Message fragmented at incorrect "
 				     "boundary");
