@@ -1070,9 +1070,9 @@ giopStream::sendChunk(giopStream_Buffer* buf)
 	<< pd_strand->connection->peeraddress() << " "
 	<< buf->last - buf->start << " bytes\n";
 
-    if (omniORB::trace(30))
-      dumpbuf((unsigned char*)buf+buf->start, buf->last-buf->start);
   }
+  if (omniORB::trace(30))
+    dumpbuf((unsigned char*)buf+buf->start, buf->last-buf->start);
 
   while ((total = buf->last - first)) {
     int ssz = pd_strand->connection->Send((void*)
@@ -1102,10 +1102,9 @@ giopStream::sendCopyChunk(void* buf,CORBA::ULong size)
     log << "sendCopyChunk: to " 
 	<< pd_strand->connection->peeraddress() << " "
 	<< size << " bytes\n";
-
-    if (omniORB::trace(30))
-      dumpbuf((unsigned char*)buf,size);
   }
+  if (omniORB::trace(30))
+    dumpbuf((unsigned char*)buf,size);
 
   while (size) {
     int ssz = pd_strand->connection->Send(buf, size, pd_deadline);
