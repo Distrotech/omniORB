@@ -107,10 +107,9 @@ sendCloseConnection(giopStrand* s)
     omniORB::logger log;
     log << "sendCloseConnection: to " << s->connection->peeraddress()
 	<< " 12 bytes\n";
-
-    if (omniORB::trace(30))
-      giopStream::dumpbuf((unsigned char*)hdr, 12);
   }
+  if (omniORB::trace(30))
+    giopStream::dumpbuf((unsigned char*)hdr, 12);
 
   omni_time_t timeout(orbParameters::scanGranularity);
   omni_time_t deadline;

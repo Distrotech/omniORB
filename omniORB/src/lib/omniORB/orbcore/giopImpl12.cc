@@ -1003,8 +1003,8 @@ giopImpl12::getInputData(giopStream* g,omni::alignment_t align,size_t sz) {
     if (extra != sz) {
       if (omniORB::trace(25)) {
         omniORB::logger log;
-        log << "getInputData requires " << sz << " bytes but buffer contains "
-            << sz - extra << ".\n";
+        log << "getInputData requires invalid size " << extra <<
+          " bytes to satisfy input size " << sz << ".\n";
       }
       if (!(g->inputFragmentToCome() || g->inputExpectAnotherFragment()) ) {
 	// The full message is already in the buffer. The unmarshalling
@@ -2007,6 +2007,7 @@ giopImpl12::copyOutputData(giopStream* g, void* b, size_t sz,
       sz -= filler;
       g->pd_outb_mkr = (void*)(g->outMkr() + filler);
       b = (void*)((omni::ptr_arith_t)b + filler);
+      newmkr = g->outMkr();
     }
 
     // The fragment including this vector of bytes must end on a 8 byte

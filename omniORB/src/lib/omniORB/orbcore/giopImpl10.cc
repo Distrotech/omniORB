@@ -1508,17 +1508,19 @@ giopImpl10::copyOutputData(giopStream* g,void* b, size_t sz,
         sz -= filler;
         g->pd_outb_mkr = (void*)(g->outMkr() + filler);
         b = (void*)((omni::ptr_arith_t)b + filler);
+        newmkr = g->outMkr();
       }
 
       outputFlush(g);
     }
 
+    g->sendCopyChunk(b,sz);
+
     // After this vector of bytes is sent, the stream may or may not be
     // 8 bytes aligned. But our output buffer is now emptied and hence
-    // is 8 bytes aligned. Since we send the whole vector out, we have
+    // is 8 bytes aligned. Since we sent the whole vector out, we have
     // to make sure that the next byte will be marshalled at the correct
     // alignment by adjusting the start of the currentOutputBuffer.
-    g->sendCopyChunk(b,sz);
 
     size_t leftover = (newmkr + sz) & 0x7;
     if (leftover) {
@@ -1536,7 +1538,7 @@ giopImpl10::copyOutputData(giopStream* g,void* b, size_t sz,
       memcpy(g->pd_outb_mkr,b,avail);
       sz -= avail;
 
-      g->pd_outb_mkr = (void*)g->outMkr() + avail;
+      g->pd_outb_mkr = (void*)(g->outMkr() + avail);
 
       b = (void*)((omni::ptr_arith_t) b + avail);
 

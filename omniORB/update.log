@@ -1,3 +1,15 @@
+Mon Nov 11 22:29:44 GMT 2013 dgrisby
+====================================
+
+- Ensure correct alignment after copyOutputData that triggers
+  minChunkBeforeDirectSend.
+
+src/lib/omniORB/orbcore/giopImpl10.cc
+src/lib/omniORB/orbcore/giopImpl11.cc
+src/lib/omniORB/orbcore/giopImpl12.cc
+src/lib/omniORB/orbcore/giopStrand.cc
+
+
 Mon Nov 11 15:08:29 GMT 2013 dgrisby
 ====================================
 
