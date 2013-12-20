@@ -347,7 +347,6 @@ removeService()
       LOG(1, "...waiting...");
       Sleep(1000);
     }
-    LOG(1, endl;
 
     if (status.dwCurrentState == SERVICE_STOPPED)
       LOG(1, WIN32_DISP_NAME << " stopped.");
