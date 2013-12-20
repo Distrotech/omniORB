@@ -13,10 +13,10 @@
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORB015.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
 <HR>
-<H1 CLASS="chapter"><A NAME="htoc168">Chapter&#XA0;14</A>&#XA0;&#XA0;Packaging stubs into DLLs</H1><P>
+<H1 CLASS="chapter"><A NAME="htoc175">Chapter&#XA0;14</A>&#XA0;&#XA0;Packaging stubs into DLLs</H1><P>
 <A NAME="chap:dlls"></A></P><P>omniORB&#X2019;s stubs can be packaged into shared libraries or DLLs. On Unix
 platforms this is mostly painless, but on Windows things are slightly
-more tricky.</P><H2 CLASS="section"><A NAME="toc67"></A><A NAME="htoc169">14.1</A>&#XA0;&#XA0;Dynamic loading and unloading</H2><P>As long as your platform supports running static initialisers and
+more tricky.</P><H2 CLASS="section"><A NAME="toc69"></A><A NAME="htoc176">14.1</A>&#XA0;&#XA0;Dynamic loading and unloading</H2><P>As long as your platform supports running static initialisers and
 destructors as libraries are loaded and unloaded, you can package
 stubs into shared libraries / DLLs, and load them dynamically at
 runtime.</P><P>There is one minor problem with this, which is that normally nil
@@ -29,10 +29,10 @@ when the ORB is destroyed. To avoid that problem, define the
 compiling the stub files. Unfortunately, with that define set, there
 is a risk that object reference _vars at global scope will segfault
 as they are unloaded. You must not create _vars at global scope if
-you are using <TT>OMNI_UNLOADABLE_STUBS</TT>.</P><H2 CLASS="section"><A NAME="toc68"></A><A NAME="htoc170">14.2</A>&#XA0;&#XA0;Windows DLLs</H2><P>On Unix platforms, the linker figures out how to link the symbols
+you are using <TT>OMNI_UNLOADABLE_STUBS</TT>.</P><H2 CLASS="section"><A NAME="toc70"></A><A NAME="htoc177">14.2</A>&#XA0;&#XA0;Windows DLLs</H2><P>On Unix platforms, the linker figures out how to link the symbols
 exported by a library in to the running program. On Windows,
 unfortunately, you have to tell the linker where symbols are coming
-from. This causes all manner of difficulties.</P><H3 CLASS="subsection"><A NAME="htoc171">14.2.1</A>&#XA0;&#XA0;Exporting symbols</H3><P>To (statically) link with a DLL file in Windows, you link with a LIB
+from. This causes all manner of difficulties.</P><H3 CLASS="subsection"><A NAME="htoc178">14.2.1</A>&#XA0;&#XA0;Exporting symbols</H3><P>To (statically) link with a DLL file in Windows, you link with a LIB
 file which references the symbols exported from the DLL. To build the
 LIB and DLL files, the correct symbols must be exported. One way to do
 that is to decorate the source code with magic tags that tell the
@@ -50,7 +50,7 @@ Compile the source:<P><TT>cl -c -O2 -MD -GX -Fofoo.o -Tpfoo.cc</TT></P></LI><LI 
 the -MD switch to cl, but we just need it to get the symbols
 out):<P><TT>lib -out:foo_static.lib foo.o</TT></P></LI><LI CLASS="li-enumerate">Use the script to build a .def file:<P><TT>makedeffile.py foo_static.lib foo 1.0 foo.def</TT></P></LI><LI CLASS="li-enumerate">Build the .dll and .lib with the def file.<P><TT>link -out:foo.dll -dll -def:foo.def -implib:foo.lib foo.o</TT>
 </P></LI></OL><P>Of course, you can link together many separate C++ files, rather than
-just the one shown here.</P><H3 CLASS="subsection"><A NAME="htoc172">14.2.2</A>&#XA0;&#XA0;Importing constant symbols</H3><P>As if exporting the symbols from a DLL was not complicated enough, any
+just the one shown here.</P><H3 CLASS="subsection"><A NAME="htoc179">14.2.2</A>&#XA0;&#XA0;Importing constant symbols</H3><P>As if exporting the symbols from a DLL was not complicated enough, any
 constant values exported by a DLL have to be explicitly
 <EM>imported</EM> into the code using them. omniORB&#X2019;s stub files declare
 a number of such constants. This time, the constant declarations in

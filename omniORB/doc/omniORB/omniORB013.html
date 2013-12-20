@@ -13,14 +13,14 @@
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORB014.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
 <HR>
-<H1 CLASS="chapter"><A NAME="htoc165">Chapter&#XA0;13</A>&#XA0;&#XA0;Interface Type Checking</H1><P>
+<H1 CLASS="chapter"><A NAME="htoc172">Chapter&#XA0;13</A>&#XA0;&#XA0;Interface Type Checking</H1><P>
 <A NAME="ch_intf"></A></P><P>This chapter describes the mechanism used by omniORB to ensure type
 safety when object references are exchanged across the network. This
 mechanism is handled completely within the ORB. There is no
 programming interface visible at the application level. However, for
 the sake of diagnosing the problem when there is a type violation, it
 is useful to understand the underlying mechanism in order to interpret
-the error conditions reported by the ORB.</P><H2 CLASS="section"><A NAME="toc65"></A><A NAME="htoc166">13.1</A>&#XA0;&#XA0;Introduction</H2><P>In GIOP/IIOP, an object reference is encoded as an Interoperable
+the error conditions reported by the ORB.</P><H2 CLASS="section"><A NAME="toc67"></A><A NAME="htoc173">13.1</A>&#XA0;&#XA0;Introduction</H2><P>In GIOP/IIOP, an object reference is encoded as an Interoperable
 Object Reference (IOR) when it is sent across a network connection.
 The IOR contains a Repository ID (RepoId) and one or more
 communication profiles. The communication profiles describe where and
@@ -49,7 +49,7 @@ is <TT>B</TT>, which inherits from <TT>A</TT>. In this case, the RepoId of
 RepoId field of an IOR. It is up to the receiving end to work out the
 real type of the object. omniORB never sends out null strings as
 RepoIds, but it may receive null RepoIds from other ORBs. In that
-case, it will use the mechanism described below to ensure type safety.</P><H2 CLASS="section"><A NAME="toc66"></A><A NAME="htoc167">13.2</A>&#XA0;&#XA0;Interface Inheritance</H2><P>When the ORB receives an IOR of interface type B when it expects the
+case, it will use the mechanism described below to ensure type safety.</P><H2 CLASS="section"><A NAME="toc68"></A><A NAME="htoc174">13.2</A>&#XA0;&#XA0;Interface Inheritance</H2><P>When the ORB receives an IOR of interface type B when it expects the
 type to be A, it must find out if B inherits from A. When the ORB has
 no local knowledge of the type B, it must work out the type of B
 dynamically.</P><P>The CORBA specification defines an Interface Repository (IR) from

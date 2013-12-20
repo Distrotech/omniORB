@@ -1,4 +1,4 @@
-\documentclass[11pt,twoside,a4paper]{book}
+\documentclass[11pt,oneside,a4paper]{book}
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
 %\usepackage{bera}
@@ -82,11 +82,17 @@
   {\vspace{\baselineskip}\par\noindent\code{#1} ~~ \textit{default} =
    \code{#2}}
 
+\newcommand{\confoptnd}[1]
+  {\vspace{\baselineskip}\par\noindent\code{#1}}
+
+
 %BEGIN LATEX
 \makeatletter
 \renewcommand{\confopt}[2]
   {\vspace{\baselineskip}\par\noindent\code{#1} ~~ \textit{default} =
    \code{#2}\\[-1ex]\@afterheading}
+\renewcommand{\confoptnd}[1]
+  {\vspace{\baselineskip}\par\noindent\code{#1}\\[-1ex]\@afterheading}
 \makeatother
 %END LATEX
 
@@ -201,7 +207,7 @@ April 2012
 
 \clearpage
 
-{\Large \bf Changes and Additions, April 2012}
+{\Large \bf Changes and Additions, November 2013}
 \begin{itemize}
 \item Updates for omniORB 4.2.
 \end{itemize}
@@ -3770,7 +3776,7 @@ addresses to be published. e.g.:
 
 \vspace{\baselineskip}
 
-\begin{tabular}{p{.25\textwidth}p{.65\textwidth}}
+\begin{tabular}{p{.3\textwidth}p{.7\textwidth}}
 \code{all(addr)} & all addresses are published\\
 \code{all(name)} & all addresses that resolve to names are published\\
 \code{all(name|addr)} & all addresses are published by name if they have
@@ -3969,11 +3975,11 @@ correctly. On the client side, these conditions must be met:
 \end{itemize}
 
 
-\section{SSL transport}
+\section{TLS / SSL transport}
 
-omniORB supports an SSL transport, using OpenSSL. It is only built if
-OpenSSL is available. On platforms using Autoconf, it is autodetected
-in many locations, or its location can be given with the
+omniORB supports a TLS / SSL transport, using OpenSSL. It is only
+built if OpenSSL is available. On platforms using Autoconf, it is
+autodetected in many locations, or its location can be given with the
 \code{-{}-with-openssl=} argument to \code{configure}. On other
 platforms, the \code{OPEN\_SSL\_ROOT} make variable must be set in the
 platform file.
@@ -3982,6 +3988,246 @@ To use the SSL transport, you must link your application with the
 \file{omnisslTP} library, and correctly set up certificates. See the
 \file{src/examples/ssl_echo} directory for an example. That directory
 contains a \file{README} file with more details.
+
+\subsection{Self-signed certificate authority}
+
+By default, omniORB configures OpenSSL to require both clients and
+servers to have certificates that are signed by a Certificate
+Authority (CA). It is possible to use a public CA to obtain keys that
+can be independently verified, but for many purposes, it is sufficient
+to use a private CA to sign all the keys in use in an application. The
+following is a brief description of how to become your own certificate
+authority and issue and sign certificates, using the OpenSSL command
+line tools.
+
+Before starting, find the default \file{openssl.cnf} file that was
+installed with OpenSSL, copy it to a suitable location, and edit it as
+you feel appropriate. Now, build a certificate directory structure,
+authority key and certificate:
+
+\begin{verbatim}
+  mkdir demoCA demoCA/private demoCA/newcerts
+
+  openssl req -config openssl.cnf -x509 -newkey rsa:2048 \
+     -keyout demoCA/private/cakey.pem -out demoCA/cacert.pem -days 3650
+
+  echo 01 >demoCA/serial
+  touch demoCA/index.txt
+\end{verbatim}
+
+\noindent Next, issue a key request and sign it:
+
+\begin{verbatim}
+  openssl req -config openssl.cnf -new -keyout server_key.pem \
+     -out server_req.pem -days 3650
+
+  openssl ca -config openssl.cnf -policy policy_anything \
+     -out server_cert.pem -in server_req.pem 
+\end{verbatim}
+
+\noindent Amongst other things, you now have a server key file in
+\file{server_key.pem} and a certificate in \file{server_cert.pem}. To
+make a single file containing both the key and the certificate,
+suitable for use in omniORB, concatenate the key and certificate files
+together.  You can skip the human-readable(ish) text in the
+certificate file before the \verb|-----BEGIN CERTIFICATE-----| marker.
+
+If need be, create more certificates for servers and clients in the
+same way.
+
+
+\section{ZIOP}
+
+omniORB has support for ZIOP, which compresses transmitted
+messages. To use it, link with the \code{omniZIOP4} library.
+
+On Unix platforms, ZIOP support is automatically enabled if the
+configure script detects zlib. To enable it on Windows, set the
+\code{EnableZIOP} make variable in the platform configuration file.
+
+omniORB has an almost complete implementation of the ZIOP
+specification, with the following extensions and differences:
+
+\begin{enumerate}
+\item To avoid a dependency on \code{CORBA::Any}, compression policies
+  can be obtained with functions in the \code{omniZIOP} namespace,
+  rather than with the standard \op{orb->create\_policy}. See
+  \file{include/omniORB4/omniZIOP.h} for details. To use \code{Any}
+  with the standard \op{orb->create\_policy}, link with the
+  \code{omniZIOPDynamic4} library in addition to \code{omniZIOP4}.
+
+\item Client-side policies are global, set with
+  \op{omniZIOP::setGlobalPolicies}.
+  \op{CORBA::Object::\_set\_policy\_overrides} is not supported.
+
+\item POAs can be given ZIOP policies as shown in the
+  \file{src/examples/ziop/ziop_impl.cc}, but they can also use the
+  global policies set with \op{omniZIOP::\dsc{}setGlobalPolicies}.  This
+  is useful to apply ZIOP policies to the RootPOA or omniINSPOA.
+\end{enumerate}
+
+\noindent In addition to the standard policies, whether or not to
+enable ZIOP is determined by client and server transport rules. For a
+client to use ZIOP, the matching client transport rule must include
+`\code{ziop}'; similarly, for a server to use ZIOP, the matching
+server transport rule must include `\code{ziop}'. e.g.\ to use the
+examples:
+
+\begin{verbatim}
+  ziop_impl -ORBserverTransportRule "* unix,ssl,tcp,ziop"
+
+  ziop_clt -ORBclientTransportRule "* unix,ssl,tcp,ziop" IOR:...
+\end{verbatim}
+
+\noindent This allows you to enable ZIOP for WAN links, but disable it
+for LAN communication, for example.
+
+
+\subsection{Forcing ZIOP Policies}
+
+The fact that a server supports ZIOP is encoded in its IORs. This
+means that if a client uses a \corbauri{corbaloc} URI to reference an
+object, the object reference does not contain ZIOP details, and thus
+the communication cannot use ZIOP. If a client is absolutely certain
+that a server supports ZIOP, it can extend an object reference with
+ZIOP details using \op{omniZIOP::setServerPolicies}. Using the new
+object reference, the client will be able to make ZIOP calls.
+
+Creating a ZIOP-enabling object reference in this way is dangerous!
+If the server does not actually support ZIOP, it will receive
+compressed messages that it cannot handle. A well-behaved server will
+throw a \code{CORBA::MARSHAL} exception in response, or perhaps just
+drop the invalid connection.
+
+
+
+\section{Connection Management Extension}
+
+The \code{omniConnectionMgmt} library provides an omniORB-specific
+extension for application-level connection management. Its purpose is
+to allow clients and servers to negotiate private GIOP connections,
+and to control how the connections are used in multi-threaded
+situations.
+
+The \code{omniConnectionMgmt} library has two functions, defined in
+\file{include/omniORB4/omniConnectionMgmt.h}:
+
+\begin{cxxlisting}
+namespace omniConnectionMgmt {
+
+  void init();
+
+  CORBA::Object_ptr
+  makeRestrictedReference(CORBA::Object_ptr obj,
+			  CORBA::ULong      connection_id,
+			  CORBA::ULong      max_connections,
+			  CORBA::ULong      max_threads,
+			  CORBA::Boolean    data_batch,
+			  CORBA::Boolean    permit_interleaved,
+			  CORBA::Boolean    server_hold_open);
+};
+\end{cxxlisting}
+
+\noindent The \op{init} function must be called before
+\op{CORBA::ORB\_init} in every process that is to take part in the
+connection management.
+
+The \op{makeRestrictedReference} function is the single entry-point to
+the connection management functionality. It builds an annotated object
+reference that contains information for the connection management
+system. It returns a new reference, leaving the original object
+reference unchanged.
+
+\subsection{Client-side parameters}
+
+These parameters affect the client side of a connection:
+
+\confoptnd{connection\_id}
+
+This number identifies the private connection set. All object
+references with the same \code{connection\_id} will share the same set
+of GIOP connections. Object references with different connection ids
+are guaranteed to use different connections from each other, and from
+object references that have not been annotated with
+\op{makeRestrictedReference}.
+
+\confoptnd{max\_connections}
+
+This parameter overrides the omniORB \code{maxGIOPConnectionPerServer}
+configuration parameter for the given \code{connection\_id}. It
+determines the maximum number of separate GIOP connections that will
+be opened to the object's server to service concurrent calls. It is
+common to set this value to 1, indicating that only one connection
+will be used for the given \code{connection\_id}. Note that this
+parameter can only be used to reduce the default
+\code{maxGIOPConnectionPerServer} value, not increase it.
+
+\confoptnd{data\_batch}
+
+omniORB usually configures its TCP connections to disable Nagle's
+algorithm, which batches small messages together into single IP
+packages, since that is best for the usual CORBA usage pattern of
+two-way requests. Setting this parameter to true overrides that, and
+enables Nagle's algorithm on TCP connections or equivalent
+functionality on other transports. This can increase throughput if a
+client is sending a large number of small oneway calls.
+
+\confoptnd{permit\_interleaved}
+
+This parameter overrides the \code{oneCallPerConnection} configuration
+parameter that determines whether multi-threaded clients can
+interleave calls on a single connection, issuing a new request message
+while a previous request is still waiting for a reply. If
+\code{permit\_interleaved} is true, clients can interleave messages;
+if it is false, they cannot.
+
+
+\subsection{Server-side parameters}
+
+These parameters affect the client side of a connection:
+
+\confoptnd{max\_threads}
+
+This parameter overrides the global
+\code{maxServerThreadPerConnection} configuration parameter that
+determines the maximum number of concurrent threads the server will
+use to service requests coming from a connection. Note that this
+parameter is only relevant if either the client permits interleaved
+calls, or if oneway operations are used, since those are the only
+circumstances under which the server can receive a new request on a
+connection while already handling a request. As with the
+\code{max\_connections} client-side parameter, this parameter can only
+reduce the default number of threads, not increase it.
+
+\confoptnd{server\_hold\_open}
+
+Normally, both clients and servers can decide to close a GIOP
+connection at any time. When using normal two-way calls, this is no
+problem since if a server closes a connection, the client is
+guaranteed to notice it when it waits for a reply, and can retry the
+call if necessary. With oneway calls, however, if a server closes a
+connection just as the client is sending a request, the client will
+not know whether the oneway call was received or not, and the call
+will potentially be lost. By setting the \code{server\_hold\_open}
+parameter to true, the server will not close the connection, relying
+on the client to do so. In that case, oneway calls will not be lost
+unless there is a network problem that breaks the GIOP connection.
+
+
+\subsection{Usage}
+
+The omniConnectionMgmt extension is very easy to use---simply call the
+\op{init} method in all processes involved, then restrict references
+as required. The \op{makeRestrictedReference} function adds profile
+information to the object reference's IOR, meaning that the parameters
+become part of the object reference and are transmitted along with
+it. In other words, a server can create a restricted reference and
+send it to a client, and the client will automatically make use of the
+restricted parameters when it invokes operations on the object
+reference. Alternatively, a client can restrict a normal reference it
+receives, in order to change its own behaviour.
+
+
 
 
 
