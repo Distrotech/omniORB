@@ -516,10 +516,16 @@ RequestImpl::get_response()
 
   if (pd_state == RS_DONE_DEFERRED)
     OMNIORB_THROW(BAD_INV_ORDER,
-		  BAD_INV_ORDER_ResultAlreadyReceived,
-		  CORBA::COMPLETED_NO);
+                  BAD_INV_ORDER_ResultAlreadyReceived,
+                  CORBA::COMPLETED_NO);
+
+  if (pd_state == RS_POLLED_DONE_DEFERRED)
+    pd_state = RS_DONE_DEFERRED;
 
   if (pd_sysExceptionToThrow)  pd_sysExceptionToThrow->_raise();
+
+  if (pd_state == RS_DONE_DEFERRED)
+    return;
 
   pd_cd.wait();
   pd_state = RS_DONE_DEFERRED;
@@ -551,7 +557,7 @@ RequestImpl::poll_response()
 		  BAD_INV_ORDER_RequestIsSynchronous,
 		  CORBA::COMPLETED_NO);
 
-  if (pd_state == RS_DONE_DEFERRED)
+  if (pd_state == RS_DONE_DEFERRED || pd_state == RS_POLLED_DONE_DEFERRED)
     OMNIORB_THROW(BAD_INV_ORDER,
 		  BAD_INV_ORDER_ResultAlreadyReceived,
 		  CORBA::COMPLETED_NO);
@@ -559,7 +565,7 @@ RequestImpl::poll_response()
   if (!pd_cd.isComplete())
     return 0;
 
-  pd_state = RS_DONE_DEFERRED;
+  pd_state = RS_POLLED_DONE_DEFERRED;
   omniAMI::DIIPollableImpl::_PD_instance._replyCollected();
 
   CORBA::Exception* ex = pd_cd.getException();

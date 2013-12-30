@@ -142,10 +142,11 @@ public:
 
 private:
   enum State {
-    RS_READY,         // Not used yet
-    RS_DONE,          // Result got synchronously
-    RS_DEFERRED,      // Sent deferred
-    RS_DONE_DEFERRED  // Result got with a deferred request
+    RS_READY,                // Not used yet
+    RS_DONE,                 // Result got synchronously
+    RS_DEFERRED,             // Sent deferred
+    RS_POLLED_DONE_DEFERRED, // Result got with poll_response
+    RS_DONE_DEFERRED         // Result got with get_response
   };
 
   CORBA::Object_var pd_target;
