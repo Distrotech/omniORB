@@ -1,7 +1,7 @@
 Mon 30 Dec 15:07:34 GMT 2013 dgrisby
 ====================================
 
-- Rebuld configure scripts.
+- Rebuild configure scripts.
 
 aclocal.m4
 configure
