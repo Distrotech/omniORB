@@ -1253,13 +1253,9 @@ CORBA::Any::operator<<=(from_string s)
   PR_clearData();
   grabTC(pd_tc, tc);
 
-  if (s.nc) {
-    PR_insert(tc, marshalString_fn, deleteString_fn, s.val);
-  }
-  else {
-    char* ns = CORBA::string_dup(s.val);
-    PR_insert(tc, marshalString_fn, deleteString_fn, ns);
-  }
+  pd_data       = s.nc ? s.val : CORBA::string_dup(s.val);
+  pd_marshal    = marshalString_fn;
+  pd_destructor = deleteString_fn;
 }
 
 CORBA::Boolean
@@ -1330,13 +1326,9 @@ CORBA::Any::operator<<=(from_wstring s)
   PR_clearData();
   grabTC(pd_tc, tc);
 
-  if (s.nc) {
-    PR_insert(tc, marshalWString_fn, deleteWString_fn, s.val);
-  }
-  else {
-    CORBA::WChar* ns = CORBA::wstring_dup(s.val);
-    PR_insert(tc, marshalWString_fn, deleteWString_fn, ns);
-  }
+  pd_data       = s.nc ? s.val : CORBA::wstring_dup(s.val);
+  pd_marshal    = marshalWString_fn;
+  pd_destructor = deleteWString_fn;
 }
 
 CORBA::Boolean
