@@ -591,9 +591,7 @@ giopRope::selectRope(const giopAddressList& addrlist,
   }
 
   if (!gr) {
-    if (orbParameters::offerBiDirectionalGIOP &&
-        omniObjAdapter::isInitialised()) {
-
+    if (orbParameters::offerBiDirectionalGIOP) {
       gr = new BiDirClientRope(addrlist, info);
     }
     else {
