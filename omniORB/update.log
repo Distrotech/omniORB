@@ -1,3 +1,11 @@
+Mon  6 Jan 16:39:02 GMT 2014 dgrisby
+====================================
+
+- Validate UTF-8 more thoroughly. Thanks Peter Klotz.
+
+src/lib/omniORB/orbcore/cs-UTF-8.cc
+
+
 Mon 30 Dec 23:20:08 GMT 2013 dgrisby
 ====================================
 

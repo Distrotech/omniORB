@@ -3,7 +3,7 @@
 // cs-UTF-8.cc                Created on: 20/10/2000
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2003-2012 Apasphere Ltd
+//    Copyright (C) 2003-2014 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -103,6 +103,19 @@ public:
   { }
 
   virtual ~TCS_C_UTF_8() {}
+
+private:
+  inline int width(CORBA::ULong cp)
+  {
+    if (cp <= 0x7f)
+      return 1;
+    else if (cp <= 0x7ff) 
+      return 2;
+    else if (cp <= 0xffff) 
+      return 3;
+    else 
+      return 4;
+  }
 };
 
 // Table indicating how many bytes follow the first byte of a UTF-8 sequence
@@ -136,8 +149,11 @@ static CORBA::Octet utf8Count[256] = {
   // 111110xx four more bytes. Too big for UTF-16
   4, 4, 4, 4,
 
-  // 111111xx five more bytes. *** How does this work?
-  5, 5, 5, 5
+  // 1111110x five more bytes.
+  5, 5, 
+  
+  // 11111110 and 11111111 are illegal in UTF-8
+  6, 6
 };
 
 // Mask to remove the prefix bits from the first byte of a UTF-8 sequence
@@ -183,8 +199,14 @@ static CORBA::Char utf8Mask[256] = {
   // 11110xxx
   0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07,
 
-  // 111110xx and 111111xx
-  0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03
+  // 111110xx
+  0x03, 0x03, 0x03, 0x03, 
+
+  // 1111110x
+  0x01, 0x01, 
+  
+  // 11111110 and 11111111 are illegal in UTF-8
+  0x00, 0x00
 };
 
 
@@ -194,9 +216,9 @@ static inline void
 validateExt(_CORBA_Char c, CORBA::CompletionStatus completion)
 {
   if ((c & 0xc0) ^ 0x80)
-	OMNIORB_THROW(DATA_CONVERSION,
-		      DATA_CONVERSION_BadInput,
-		      completion);
+    OMNIORB_THROW(DATA_CONVERSION,
+                  DATA_CONVERSION_BadInput,
+                  completion);
 }
 
 
@@ -786,21 +808,38 @@ void
 TCS_C_UTF_8::validateString(const char* cs, CORBA::CompletionStatus completion)
 {
   // Check that string is valid UTF-8 data.
-  int bytes;
-
   const unsigned char* s = (const unsigned char*)cs;
-  while (*s) {
-    bytes = utf8Count[*s++];
 
-    switch (bytes) {
-    case 6:
-    case 5: OMNIORB_THROW(DATA_CONVERSION,
-			  DATA_CONVERSION_BadInput,
-			  completion);
-    case 4: validateExt(*s++, completion);
-    case 3: validateExt(*s++, completion);
-    case 2: validateExt(*s++, completion);
-    case 1: validateExt(*s++, completion);
+  int          bytes;
+  CORBA::ULong cp;
+  CORBA::Char  c;
+
+  while (*s) {
+    c     = *s++;         // leading byte
+    bytes = utf8Count[c]; // number of trailing bytes
+
+    if (bytes != 0) {
+      cp = c & ((1<<(6-bytes))-1);	
+
+      switch (bytes) { // trailing bytes
+      case 6:
+      case 5:
+      case 4: OMNIORB_THROW(DATA_CONVERSION,
+                            DATA_CONVERSION_BadInput,
+                            completion);
+      case 3: c = *s++; validateExt(c, completion); cp = (cp << 6) | (c & 0x3f);
+      case 2: c = *s++; validateExt(c, completion); cp = (cp << 6) | (c & 0x3f);
+      case 1: c = *s++; validateExt(c, completion); cp = (cp << 6) | (c & 0x3f);
+      }
+
+      if (cp > 0x10ffff ||
+          (0xd800 <= cp && cp <= 0xdfff) ||
+          width(cp) != bytes+1) {
+
+        OMNIORB_THROW(DATA_CONVERSION,
+                      DATA_CONVERSION_BadInput,
+                      completion);		
+      }
     }
   }
 }
