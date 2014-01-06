@@ -53,7 +53,7 @@ case "$1" in
                 OMNINAMES_OPTIONS="-errlog $OMNINAMES_DEBUG_LOG -logdir $OMNINAMES_DIR -start $TCPPORT $OPTIONS"
 
                 # Run it
-                su - omni -c "$OMNINAMES $OMNINAMES_OPTIONS" &> /dev/null &
+                su - omni -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH $OMNINAMES $OMNINAMES_OPTIONS" &> /dev/null &
                 OMNINAMES_PID=$!
 
                 # Sleep a while, and then check if omniNames is still running
