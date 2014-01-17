@@ -11,29 +11,11 @@
 <BODY >
 <!--HEVEA command line is: hevea omniORBpy -->
 <!--HACHA command line is: hacha omniORBpy.html -->
-<DIV CLASS="center"><P> <FONT SIZE=7>The omniORBpy version 3<BR>
+<DIV CLASS="center"><P> <FONT SIZE=7>The omniORBpy version 4.2<BR>
 User&#X2019;s Guide
 </FONT></P><P> <FONT SIZE=5>Duncan Grisby<BR>
-</FONT><FONT SIZE=3>(</FONT><FONT SIZE=3><I>email: </I></FONT><A HREF="mailto:dgrisby@apasphere.com"><FONT SIZE=3><I><FONT COLOR=purple>dgrisby@apasphere.com</FONT></I></FONT></A><FONT SIZE=3>)</FONT><FONT SIZE=5><BR>
-Apasphere Ltd.<BR>
-</FONT></P><P>July 2009
-</P></DIV><P><FONT SIZE=5><B>Changes and Additions, June 2007</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Updates for omniORBpy 3.1.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, June 2005</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-New omniORBpy 3 features.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, July 2004</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Minor updates.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, November 2002</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Per thread timeouts.
-</LI><LI CLASS="li-itemize">Minor fixes.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, August 2002</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Updated to omniORBpy 2.
-</LI></UL><P><FONT SIZE=5><B>Contents</B></FONT></P><UL>
+</FONT><FONT SIZE=3>(</FONT><A HREF="mailto:dgrisby@apasphere.com"><FONT SIZE=3><I><FONT COLOR=purple>dgrisby@apasphere.com</FONT></I></FONT></A><FONT SIZE=3>)</FONT><FONT SIZE=5><BR>
+</FONT></P></DIV><P><FONT SIZE=5><B>Contents</B></FONT></P><UL>
 <LI><A HREF="omniORBpy001.html">Introduction</A>
 <UL>
 <LI><A HREF="omniORBpy001.html#toc1">Features</A>
@@ -74,42 +56,51 @@ Updated to omniORBpy 2.
 </LI><LI><A HREF="omniORBpy005.html#toc24">Python back-end options</A>
 </LI><LI><A HREF="omniORBpy005.html#toc25">Examples</A>
 </LI></UL>
-</LI><LI><A HREF="omniORBpy006.html">Interoperable Naming Service</A>
+</LI><LI><A HREF="omniORBpy006.html">Connection and Thread Management</A>
 <UL>
-<LI><A HREF="omniORBpy006.html#toc26">Object URIs</A>
-</LI><LI><A HREF="omniORBpy006.html#toc27">Configuring resolve_initial_references</A>
-</LI><LI><A HREF="omniORBpy006.html#toc28">omniNames</A>
-</LI><LI><A HREF="omniORBpy006.html#toc29">omniMapper</A>
-</LI><LI><A HREF="omniORBpy006.html#toc30">Creating objects with simple object keys</A>
+<LI><A HREF="omniORBpy006.html#toc26">Background</A>
+</LI><LI><A HREF="omniORBpy006.html#toc27">The model</A>
+</LI><LI><A HREF="omniORBpy006.html#toc28">Client side behaviour</A>
+</LI><LI><A HREF="omniORBpy006.html#toc29">Server side behaviour</A>
+</LI><LI><A HREF="omniORBpy006.html#toc30">Idle connection shutdown</A>
+</LI><LI><A HREF="omniORBpy006.html#toc31">Transports and endpoints</A>
+</LI><LI><A HREF="omniORBpy006.html#toc32">Connection selection and acceptance</A>
+</LI><LI><A HREF="omniORBpy006.html#toc33">Bidirectional GIOP</A>
+</LI><LI><A HREF="omniORBpy006.html#toc34">TLS / SSL transport</A>
+</LI><LI><A HREF="omniORBpy006.html#toc35">ZIOP</A>
+</LI><LI><A HREF="omniORBpy006.html#toc36">Connection Management Extension</A>
 </LI></UL>
-</LI><LI><A HREF="omniORBpy007.html">Connection and Thread Management</A>
+</LI><LI><A HREF="omniORBpy007.html">Interoperable Naming Service</A>
 <UL>
-<LI><A HREF="omniORBpy007.html#toc31">Background</A>
-</LI><LI><A HREF="omniORBpy007.html#toc32">The model</A>
-</LI><LI><A HREF="omniORBpy007.html#toc33">Client side behaviour</A>
-</LI><LI><A HREF="omniORBpy007.html#toc34">Server side behaviour</A>
-</LI><LI><A HREF="omniORBpy007.html#toc35">Idle connection shutdown</A>
-</LI><LI><A HREF="omniORBpy007.html#toc36">Transports and endpoints</A>
-</LI><LI><A HREF="omniORBpy007.html#toc37">Connection selection and acceptance</A>
-</LI><LI><A HREF="omniORBpy007.html#toc38">Bidirectional GIOP</A>
-</LI><LI><A HREF="omniORBpy007.html#toc39">SSL transport</A>
+<LI><A HREF="omniORBpy007.html#toc37">Object URIs</A>
+</LI><LI><A HREF="omniORBpy007.html#toc38">Configuring resolve_initial_references</A>
+</LI><LI><A HREF="omniORBpy007.html#toc39">omniNames</A>
+</LI><LI><A HREF="omniORBpy007.html#toc40">omniMapper</A>
+</LI><LI><A HREF="omniORBpy007.html#toc41">Creating objects with simple object keys</A>
 </LI></UL>
 </LI><LI><A HREF="omniORBpy008.html">Code set conversion</A>
 <UL>
-<LI><A HREF="omniORBpy008.html#toc40">Native code set</A>
-</LI><LI><A HREF="omniORBpy008.html#toc41">Code set library</A>
-</LI><LI><A HREF="omniORBpy008.html#toc42">Implementing new code sets</A>
+<LI><A HREF="omniORBpy008.html#toc42">Native code set</A>
+</LI><LI><A HREF="omniORBpy008.html#toc43">Code set library</A>
+</LI><LI><A HREF="omniORBpy008.html#toc44">Implementing new code sets</A>
 </LI></UL>
 </LI><LI><A HREF="omniORBpy009.html">Interceptors</A>
 </LI><LI><A HREF="omniORBpy010.html">Objects by value</A>
 <UL>
-<LI><A HREF="omniORBpy010.html#toc43">Features</A>
-</LI><LI><A HREF="omniORBpy010.html#toc44">Value sharing and local calls</A>
-</LI><LI><A HREF="omniORBpy010.html#toc45">Value factories</A>
-</LI><LI><A HREF="omniORBpy010.html#toc46">Standard value boxes</A>
-</LI><LI><A HREF="omniORBpy010.html#toc47">Values inside Anys</A>
+<LI><A HREF="omniORBpy010.html#toc45">Features</A>
+</LI><LI><A HREF="omniORBpy010.html#toc46">Value sharing and local calls</A>
+</LI><LI><A HREF="omniORBpy010.html#toc47">Value factories</A>
+</LI><LI><A HREF="omniORBpy010.html#toc48">Standard value boxes</A>
+</LI><LI><A HREF="omniORBpy010.html#toc49">Values inside Anys</A>
 </LI></UL>
-</LI><LI><A HREF="omniORBpy011.html">References</A>
+</LI><LI><A HREF="omniORBpy011.html">Asynchronous Method Invocation</A>
+<UL>
+<LI><A HREF="omniORBpy011.html#toc50">Implied IDL</A>
+</LI><LI><A HREF="omniORBpy011.html#toc51">Generating AMI stubs</A>
+</LI><LI><A HREF="omniORBpy011.html#toc52">AMI examples</A>
+</LI></UL>
+</LI><LI><A HREF="omniORBpy012.html">Resources</A>
+</LI><LI><A HREF="omniORBpy013.html">References</A>
 </LI></UL>
 <!--FOOTER-->
 <HR SIZE=2><BLOCKQUOTE CLASS="quote"><EM>This document was translated from L<sup>A</sup>T<sub>E</sub>X by

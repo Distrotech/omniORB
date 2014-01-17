@@ -31,7 +31,7 @@ follows:</P><DIV CLASS="lstlisting"><I>// echo_example.idl</I>
 };</DIV><P>The important difference from the omniORB Echo example is that our
 <TT>Echo</TT> interface is declared within an IDL module named
 <TT>Example</TT>. The reason for this will become clear in a moment.</P><P>If you are new to IDL, you can learn about its syntax in Chapter 3 of
-the CORBA specification 2.6&#XA0;[<A HREF="omniORBpy011.html#corba26-spec">OMG01a</A>]. For the moment, you
+the CORBA specification 2.6&#XA0;[<A HREF="omniORBpy013.html#corba26-spec">OMG01a</A>]. For the moment, you
 only need to know that the interface consists of a single operation,
 <TT>echoString()</TT>, which takes a string as an argument and returns a
 copy of the same string.</P><P>The interface is written in a file, called <TT>example_echo.idl</TT>. It
@@ -104,7 +104,7 @@ implement all of the operations declared in the IDL. Note that since
 Python is a dynamic language, errors due to missing operations and
 operations with incorrect type signatures are only reported when
 someone tries to call those operations.</P></DD></DL><H3 CLASS="subsection"><A NAME="htoc16">2.4.3</A>&#XA0;&#XA0;ORB initialisation</H3><DL CLASS="description"><DT CLASS="dt-description"><B>Line 12</B></DT><DD CLASS="dd-description"><BR>
-The ORB is initialised by calling the <TT>CORBA.ORB_init()</TT> function.
+The ORB is initialised by calling <TT>CORBA.ORB_init()</TT>.
 <TT>ORB_init()</TT> is passed a list of command-line arguments, and
 an ORB identifier. The ORB identifier should be &#X2018;omniORB4&#X2019;, but it is
 usually best to use <TT>CORBA.ORB_ID</TT>, which is initialised to a
@@ -118,7 +118,7 @@ must register it with a POA. In this example, we use the <I>Root
 POA</I>, rather than creating any child POAs. The Root POA is found with
 <TT>orb.resolve_initial_references()</TT>.<P>A POA&#X2019;s behaviour is governed by its <I>policies</I>. The Root POA has
 suitable policies for many simple servers. Chapter 11 of the CORBA 2.6
-specification [<A HREF="omniORBpy011.html#corba26-spec">OMG01a</A>] has details of all the POA policies
+specification [<A HREF="omniORBpy013.html#corba26-spec">OMG01a</A>] has details of all the POA policies
 which are available.</P></DD></DL><H3 CLASS="subsection"><A NAME="htoc18">2.4.5</A>&#XA0;&#XA0;Object initialisation</H3><DL CLASS="description"><DT CLASS="dt-description"><B>Line 15</B></DT><DD CLASS="dd-description"><BR>
 An instance of the Echo servant object is created.</DD><DT CLASS="dt-description"><B>Line 16</B></DT><DD CLASS="dd-description"><BR>
 The object is implicitly activated in the Root POA, and an object
@@ -144,7 +144,28 @@ Even though the object is local, the operation goes through the ORB
 and POA, so the types of the arguments can be checked, and any mutable
 arguments can be copied. This ensures that the semantics of local and
 remote calls are identical. If any of the arguments (or return values)
-are of the wrong type, a <TT>CORBA.BAD_PARAM</TT> exception is raised.</DD></DL><H2 CLASS="section"><A NAME="toc7"></A><A NAME="htoc21">2.5</A>&#XA0;&#XA0;Example 2 &#X2014; Different Address Spaces</H2><P>In this example, the client and the object implementation reside in
+are of the wrong type, a <TT>CORBA.BAD_PARAM</TT> exception is raised.</DD></DL><H3 CLASS="subsection"><A NAME="htoc21">2.4.8</A>&#XA0;&#XA0;Parameter type checking</H3><P>CORBA IDL is statically typed, and so in statically typed programming
+languages like C++, the compiler reports errors for code where the
+types of operation parameters and return values do not match what is
+defined in the IDL. Since Python is dynamically typed, it is not until
+run time that parameter and return types can be checked against the
+IDL definitions.</P><P>When operations are called, omniORBpy checks the types of parameters
+and return values against the IDL. If the types do not match, it
+raises a <TT>CORBA.BAD_PARAM</TT> exception, with the minor code
+<TT>omniORB.BAD_PARAM_WrongPythonType</TT>. With complex parameter
+types, it can be hard to work out exactly what part of a type was
+incorrect so, new in omniORBpy 4.2, the exception contains a list of
+information about where exactly a type check failed. The information
+is stored as a list of strings in the <TT>_info</TT> attribute of the
+exception object, and output as part of the string form of the
+exception:</P><DIV CLASS="lstlisting">&gt;&gt;&gt; eo.echoString(123)
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, <B>in</B> &lt;module&gt;
+  File "example_echo_idl.py", line 54, <B>in</B> echoString
+    <B>return</B> self._obj.invoke("echoString", _0_Example.Echo._d_echoString, args)
+omniORB.CORBA.BAD_PARAM: CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType,
+  CORBA.COMPLETED_NO, ["Expecting string, got &lt;type 'int'&gt;",
+                       "Operation 'echoString' parameter 0"])</DIV><H2 CLASS="section"><A NAME="toc7"></A><A NAME="htoc22">2.5</A>&#XA0;&#XA0;Example 2 &#X2014; Different Address Spaces</H2><P>In this example, the client and the object implementation reside in
 two different address spaces. The code of this example is almost the
 same as the previous example. The only difference is the extra work
 which needs to be done to pass the object reference from the object
@@ -154,7 +175,7 @@ of the object reference and to pass this string to the client as a
 command-line argument. The string is then converted by the client
 into a proper object reference. This method is used in this
 example. In the next example, we shall introduce a better way of
-passing the object reference using the CORBA Naming Service.</P><H3 CLASS="subsection"><A NAME="htoc22">2.5.1</A>&#XA0;&#XA0;Object Implementation: Making a Stringified Object Reference</H3><DIV CLASS="lstlisting"><FONT SIZE=1>   1</FONT> <I>#!/usr/bin/env python</I>
+passing the object reference using the CORBA Naming Service.</P><H3 CLASS="subsection"><A NAME="htoc23">2.5.1</A>&#XA0;&#XA0;Server: Making a Stringified Object Reference</H3><DIV CLASS="lstlisting"><FONT SIZE=1>   1</FONT> <I>#!/usr/bin/env python</I>
 <FONT SIZE=1>   2</FONT> 
 <FONT SIZE=1>   3</FONT> <B>import</B> sys
 <FONT SIZE=1>   4</FONT> <B>from</B> omniORB <B>import</B> CORBA, PortableServer
@@ -191,7 +212,7 @@ had some other work to do, it could do so, and remote invocations
 would be dispatched in separate threads. However, in the absence of
 anything else to do, <TT>orb.run()</TT> is called so the thread blocks
 rather than exiting immediately when the end-of-file is reached.
-<TT>orb.run()</TT> stays blocked until the ORB is shut down.</P><H3 CLASS="subsection"><A NAME="htoc23">2.5.2</A>&#XA0;&#XA0;Client: Using a Stringified Object Reference</H3><P>
+<TT>orb.run()</TT> stays blocked until the ORB is shut down.</P><H3 CLASS="subsection"><A NAME="htoc24">2.5.2</A>&#XA0;&#XA0;Client: Using a Stringified Object Reference</H3><P>
 <A NAME="clnt2"></A></P><DIV CLASS="lstlisting"><FONT SIZE=1>   1</FONT> <I>#!/usr/bin/env python</I>
 <FONT SIZE=1>   2</FONT> 
 <FONT SIZE=1>   3</FONT> <B>import</B> sys
@@ -221,15 +242,14 @@ reference. If the IOR was not actually of type <TT>Example.Echo</TT>, or
 something derived from it, <TT>_narrow()</TT> returns <TT>None</TT>.</P><P>In fact, since Python is a dynamically-typed language,
 <TT>string_to_object()</TT> is often able to return an object reference of
 a more derived type than <TT>CORBA.Object</TT>. See
-section&#XA0;<A HREF="omniORBpy003.html#sec:narrowing">3.1</A> for details.</P><H3 CLASS="subsection"><A NAME="htoc24">2.5.3</A>&#XA0;&#XA0;System exceptions</H3><P>The keep it short, the client code shown above performs no exception
+section&#XA0;<A HREF="omniORBpy003.html#sec:narrowing">3.1</A> for details.</P><H3 CLASS="subsection"><A NAME="htoc25">2.5.3</A>&#XA0;&#XA0;System exceptions</H3><P>The keep it short, the client code shown above performs no exception
 handling. A robust client (and server) should do, since there are a
 number of system exceptions which can arise.</P><P>As already mentioned, <TT>ORB_init()</TT> can raise the
 <TT>CORBA.INITIALIZE</TT> exception if the command line arguments or
 configuration file are invalid. <TT>string_to_object()</TT> can
-raise two exceptions: if the string is not an IOR (or a valid URI with
-omniORB 3), it raises <TT>CORBA.BAD_PARAM</TT>; if the string looks
-like an IOR, but contains invalid data, is raises
-<TT>CORBA.MARSHAL</TT>.</P><P>The call to <TT>echoString()</TT> can result in any of the CORBA system
+raise two exceptions: if the string is not an IOR (or a valid URI), it
+raises <TT>CORBA.BAD_PARAM</TT>; if the string looks like an IOR, but
+contains invalid data, is raises <TT>CORBA.MARSHAL</TT>.</P><P>The call to <TT>echoString()</TT> can result in any of the CORBA system
 exceptions, since any exceptions not caught on the server side are
 propagated back to the client. Even if the implementation of
 <TT>echoString()</TT> does not raise any system exceptions itself, failures
@@ -243,7 +263,7 @@ type. This means that <TT>_narrow()</TT> can also raise
 <TT>CORBA.TRANSIENT</TT>, <TT>CORBA.OBJECT_NOT_EXIST</TT>, and
 <TT>CORBA.COMM_FAILURE</TT>.</P><P>Section&#XA0;<A HREF="omniORBpy004.html#sec:exHandlers">4.7</A> describes how exception handlers can be
 installed for all the various system exceptions, to avoid surrounding
-all code with <TT>try</TT>&#X2026;<TT>except</TT> blocks.</P><H3 CLASS="subsection"><A NAME="htoc25">2.5.4</A>&#XA0;&#XA0;Lifetime of a CORBA object</H3><P>CORBA objects are either <I>transient</I> or <I>persistent</I>. The
+all code with <TT>try</TT>&#X2026;<TT>except</TT> blocks.</P><H3 CLASS="subsection"><A NAME="htoc26">2.5.4</A>&#XA0;&#XA0;Lifetime of a CORBA object</H3><P>CORBA objects are either <I>transient</I> or <I>persistent</I>. The
 majority are transient, meaning that the lifetime of the CORBA object
 (as contacted through an object reference) is the same as the lifetime
 of its servant object. Persistent objects can live beyond the
@@ -259,11 +279,11 @@ references in a <I>naming service</I> and bind them to fixed
 pathnames. Clients can bind to the object implementations at runtime
 by asking the naming service to resolve the pathnames to the object
 references. CORBA defines a standard naming service, which is a
-component of the Common Object Services (COS)&#XA0;[<A HREF="omniORBpy011.html#corbaservices">OMG98</A>],
+component of the Common Object Services (COS)&#XA0;[<A HREF="omniORBpy013.html#corbaservices">OMG98</A>],
 that can be used for this purpose. The next section describes an
-example of how to use the COS Naming Service.</P><H2 CLASS="section"><A NAME="toc8"></A><A NAME="htoc26">2.6</A>&#XA0;&#XA0;Example 3 &#X2014; Using the Naming Service</H2><P>
+example of how to use the COS Naming Service.</P><H2 CLASS="section"><A NAME="toc8"></A><A NAME="htoc27">2.6</A>&#XA0;&#XA0;Example 3 &#X2014; Using the Naming Service</H2><P>
 <A NAME="sec:usingNS"></A></P><P>In this example, the object implementation uses the Naming
-Service&#XA0;[<A HREF="omniORBpy011.html#corbaservices">OMG98</A>] to pass on the object reference to the
+Service&#XA0;[<A HREF="omniORBpy013.html#corbaservices">OMG98</A>] to pass on the object reference to the
 client. This method is far more practical than using stringified
 object references. The full listings of the server and client are
 below.</P><P>The names used by the Naming service consist of a sequence of
@@ -282,7 +302,7 @@ or manage these values. However, both the name and the kind attribute
 must match for a name lookup to succeed. In this example, the kind
 values for <TT>test</TT> and <TT>ExampleEcho</TT> are chosen to be
 &#X2018;<TT>my_context</TT>&#X2019; and &#X2018;<TT>Object</TT>&#X2019; respectively. This is an
-arbitrary choice as there is no standardised set of kind values.</P><H3 CLASS="subsection"><A NAME="htoc27">2.6.1</A>&#XA0;&#XA0;Obtaining the Root Context object reference</H3><P>
+arbitrary choice as there is no standardised set of kind values.</P><H3 CLASS="subsection"><A NAME="htoc28">2.6.1</A>&#XA0;&#XA0;Obtaining the Root Context object reference</H3><P>
 <A NAME="resolveinit"></A></P><P>The initial contact with the Naming Service can be established via the
 <I>root</I> context. The object reference to the root context is
 provided by the ORB and can be obtained by calling
@@ -298,9 +318,9 @@ line. If this file is not present, the internal list will be empty and
 <TT>CORBA.ORB.InvalidName</TT> exception.</P><P>Note that, like <TT>string_to_object()</TT>,
 <TT>resolve_initial_references()</TT> returns base <TT>CORBA.Object</TT>, so
 we should narrow it to the interface we want. In this case, we want
-<TT>CosNaming.NamingContext</TT><SUP><A NAME="text5" HREF="#note5">5</A></SUP>.</P><H3 CLASS="subsection"><A NAME="htoc28">2.6.2</A>&#XA0;&#XA0;The Naming Service interface</H3><P>It is beyond the scope of this chapter to describe in detail the
+<TT>CosNaming.NamingContext</TT><SUP><A NAME="text5" HREF="#note5">5</A></SUP>.</P><H3 CLASS="subsection"><A NAME="htoc29">2.6.2</A>&#XA0;&#XA0;The Naming Service interface</H3><P>It is beyond the scope of this chapter to describe in detail the
 Naming Service interface. You should consult the CORBA services
-specification&#XA0;[<A HREF="omniORBpy011.html#corbaservices">OMG98</A>] (chapter 3).</P><H3 CLASS="subsection"><A NAME="htoc29">2.6.3</A>&#XA0;&#XA0;Server code</H3><P>Hopefully, the server code is self-explanatory:</P><DIV CLASS="lstlisting"><I>#!/usr/bin/env python</I>
+specification&#XA0;[<A HREF="omniORBpy013.html#corbaservices">OMG98</A>] (chapter 3).</P><H3 CLASS="subsection"><A NAME="htoc30">2.6.3</A>&#XA0;&#XA0;Server code</H3><P>Hopefully, the server code is self-explanatory:</P><DIV CLASS="lstlisting"><I>#!/usr/bin/env python</I>
 <B>import</B> sys
 <B>from</B> omniORB <B>import</B> CORBA, PortableServer
 <B>import</B> CosNaming, Example, Example__POA
@@ -356,7 +376,7 @@ poaManager = poa._get_the_POAManager()
 poaManager.activate()
 
 <I># Block for ever (or until the ORB is shut down)</I>
-orb.run()</DIV><H3 CLASS="subsection"><A NAME="htoc30">2.6.4</A>&#XA0;&#XA0;Client code</H3><P>Hopefully the client code is self-explanatory too:</P><DIV CLASS="lstlisting"><I>#!/usr/bin/env python</I>
+orb.run()</DIV><H3 CLASS="subsection"><A NAME="htoc31">2.6.4</A>&#XA0;&#XA0;Client code</H3><P>Hopefully the client code is self-explanatory too:</P><DIV CLASS="lstlisting"><I>#!/usr/bin/env python</I>
 <B>import</B> sys
 <B>from</B> omniORB <B>import</B> CORBA
 <B>import</B> CosNaming, Example
@@ -393,7 +413,7 @@ eo = obj._narrow(Example.Echo)
 message = "Hello from Python"
 result  = eo.echoString(message)
 
-<B>print</B> "I said '%s'. The object said '%s'." % (message,result)</DIV><H2 CLASS="section"><A NAME="toc9"></A><A NAME="htoc31">2.7</A>&#XA0;&#XA0;Global IDL definitions</H2><P>
+<B>print</B> "I said '%s'. The object said '%s'." % (message,result)</DIV><H2 CLASS="section"><A NAME="toc9"></A><A NAME="htoc32">2.7</A>&#XA0;&#XA0;Global IDL definitions</H2><P>
 <A NAME="sec:globalIDL"></A></P><P>As we have seen, the Python mapping maps IDL modules to Python
 packages with the same name. This poses a problem for IDL declarations
 at global scope. Global declarations are generally a bad idea since
@@ -428,9 +448,9 @@ actually an IOR on the command line!
 can be activated on demand with an adapter activator.
 </DD><DT CLASS="dt-thefootnotes"><A NAME="note4" HREF="#text4">4</A></DT><DD CLASS="dd-thefootnotes">There are escaping rules to cope
 with id and kind fields which contain &#X2018;.&#X2019; and &#X2018;/&#X2019; characters. See
-chapter&#XA0;<A HREF="omniORBpy006.html#chap:ins">6</A> of this manual, and chapter 3 of the CORBA
+chapter&#XA0;<A HREF="omniORBpy007.html#chap:ins">7</A> of this manual, and chapter 3 of the CORBA
 services specification, as updated for the Interoperable Naming
-Service&#XA0;[<A HREF="omniORBpy011.html#inschapters">OMG00</A>].
+Service&#XA0;[<A HREF="omniORBpy013.html#inschapters">OMG00</A>].
 </DD><DT CLASS="dt-thefootnotes"><A NAME="note5" HREF="#text5">5</A></DT><DD CLASS="dd-thefootnotes">If you are on-the-ball, you
 will have noticed that we didn&#X2019;t call <TT>_narrow()</TT> when resolving the
 Root POA. The reason it is safe to miss it out is given in
