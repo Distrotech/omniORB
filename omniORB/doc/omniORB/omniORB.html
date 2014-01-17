@@ -50,36 +50,8 @@ TD P{margin:0px;}
 <!--CUT DEF chapter 1 --><DIV CLASS="center"><P> <FONT SIZE=7>The omniORB version 4.2<BR>
 Users&#X2019; Guide
 </FONT></P><P> <FONT SIZE=5>Duncan Grisby<BR>
-</FONT><FONT SIZE=3>(</FONT><FONT SIZE=3><I>email: </I></FONT><A HREF="mailto:dgrisby@apasphere.com"><FONT SIZE=3><I><FONT COLOR=purple>dgrisby@apasphere.com</FONT></I></FONT></A><FONT SIZE=3>)</FONT><FONT SIZE=5><BR>
-Apasphere Ltd.<BR>
-Sai-Lai Lo<BR>
-David Riddoch<BR>
-AT&amp;T Laboratories Cambridge<BR>
-</FONT></P><P>April 2012
-</P></DIV><P><FONT SIZE=5><B>Changes and Additions, November 2013</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Updates for omniORB 4.2.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, July 2007</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Updates for omniORB 4.1.1.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, June 2005</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-New omniORB 4.1 features.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, October 2004</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Packaging stubs into DLLs.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, July 2004</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Minor updates.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, November 2002</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Per thread timeouts.
-</LI><LI CLASS="li-itemize">Implement missing interceptors.
-</LI><LI CLASS="li-itemize">Minor fixes.
-</LI></UL><P><FONT SIZE=5><B>Changes and Additions, June 2002</B></FONT>
-</P><UL CLASS="itemize"><LI CLASS="li-itemize">
-Updated to omniORB 4.0.
-</LI></UL><P><FONT SIZE=5><B>Contents</B></FONT></P><!--TOC chapter Introduction-->
+</FONT><FONT SIZE=3>(</FONT><A HREF="mailto:dgrisby@apasphere.com"><FONT SIZE=3><I><FONT COLOR=purple>dgrisby@apasphere.com</FONT></I></FONT></A><FONT SIZE=3>)</FONT><FONT SIZE=5><BR>
+</FONT></P></DIV><P><FONT SIZE=5><B>Contents</B></FONT></P><!--TOC chapter Introduction-->
 <H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc1">Chapter&#XA0;1</A>&#XA0;&#XA0;Introduction</H1><!--SEC END --><P>omniORB is an Object Request Broker (ORB) that implements version 2.6
 of the Common Object Request Broker Architecture
 (CORBA)&#XA0;[<A HREF="#corba26-spec">OMG01</A>] specification. Where possible, backward
@@ -135,8 +107,8 @@ platform that either supports the POSIX thread standard or has a
 thread package that supports similar capabilities.</P><P>Partly for historical reasons, and partly to support users with
 archaic compilers, omniORB does not use the C++ standard library.</P><P>The omniORB IDL compiler, omniidl, requires Python 2.5, 2.6 or 2.7.</P><!--TOC subsection Missing features-->
 <H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc5">1.1.3</A>&#XA0;&#XA0;Missing features</H3><!--SEC END --><P>
-<A NAME="sec:missing"></A></P><P>omniORB is not (yet) a complete implementation of the CORBA 2.6 core.
-The following is a list of the most significant missing features.</P><UL CLASS="itemize"><LI CLASS="li-itemize">omniORB does not have its own Interface Repository. However, it
+<A NAME="sec:missing"></A></P><P>omniORB is not a complete implementation of the CORBA 2.6 core. The
+following is a list of the most significant missing features.</P><UL CLASS="itemize"><LI CLASS="li-itemize">omniORB does not have its own Interface Repository. However, it
 can act as a client to an IfR. The omniifr project
 (<A HREF="http://omniifr.sourceforge.net/"><TT>http://omniifr.sourceforge.net/</TT></A>) aims to create an IfR for
 omniORB.</LI><LI CLASS="li-itemize">omniORB supports interceptors, but not the standard Portable
@@ -3006,7 +2978,10 @@ object, the object reference does not contain ZIOP details, and thus
 the communication cannot use ZIOP. If a client is absolutely certain
 that a server supports ZIOP, it can extend an object reference with
 ZIOP details using <TT>omniZIOP::setServerPolicies()</TT>. Using the new
-object reference, the client will be able to make ZIOP calls.</P><P>Creating a ZIOP-enabling object reference in this way is dangerous!
+object reference, the client will be able to make ZIOP calls.</P><DIV CLASS="lstlisting"><B>namespace</B> omniZIOP {
+  CORBA::Object_ptr
+  setServerPolicies(CORBA::Object_ptr obj, <B>const</B> CORBA::PolicyList&amp; policies);
+};</DIV><P>Creating a ZIOP-enabling object reference in this way is dangerous!
 If the server does not actually support ZIOP, it will receive
 compressed messages that it cannot handle. A well-behaved server will
 throw a <TT>CORBA::MARSHAL</TT> exception in response, or perhaps just

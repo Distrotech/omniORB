@@ -505,7 +505,10 @@ object, the object reference does not contain ZIOP details, and thus
 the communication cannot use ZIOP. If a client is absolutely certain
 that a server supports ZIOP, it can extend an object reference with
 ZIOP details using <TT>omniZIOP::setServerPolicies()</TT>. Using the new
-object reference, the client will be able to make ZIOP calls.</P><P>Creating a ZIOP-enabling object reference in this way is dangerous!
+object reference, the client will be able to make ZIOP calls.</P><DIV CLASS="lstlisting"><B>namespace</B> omniZIOP {
+  CORBA::Object_ptr
+  setServerPolicies(CORBA::Object_ptr obj, <B>const</B> CORBA::PolicyList&amp; policies);
+};</DIV><P>Creating a ZIOP-enabling object reference in this way is dangerous!
 If the server does not actually support ZIOP, it will receive
 compressed messages that it cannot handle. A well-behaved server will
 throw a <TT>CORBA::MARSHAL</TT> exception in response, or perhaps just

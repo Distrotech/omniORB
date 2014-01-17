@@ -1,3 +1,20 @@
+Fri Jan 17 15:06:06 GMT 2014 dgrisby
+====================================
+
+- Helpful script to process invocation logs.
+
+bin/scripts/process_invocations.py
+
+- Documentation updates.
+
+doc/omniORB.pdf
+doc/omniORB/index.html
+doc/omniORB/omniORB.html
+doc/omniORB/omniORB001.html
+doc/omniORB/omniORB006.html
+doc/tex/omniORB.tex
+
+
 Mon  6 Jan 17:44:08 GMT 2014 dgrisby
 ====================================
 

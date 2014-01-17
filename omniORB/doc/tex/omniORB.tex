@@ -1,7 +1,6 @@
 \documentclass[11pt,oneside,a4paper]{book}
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
-%\usepackage{bera}
 \usepackage[scaled=0.9]{DejaVuSansMono}
 \usepackage[scaled=0.9]{DejaVuSans}
 \usepackage[scaled=0.9]{DejaVuSerif}
@@ -9,7 +8,7 @@
 
 \usepackage{tocloft}
 
-% To make the PDF version (having already made the PS version):
+% To make the PDF version:
 %
 %  $ pdflatex omniORB
 %  $ bibtex omniORB
@@ -160,7 +159,7 @@
   \pdftrue
 \fi
 \ifpdf
-  \hypersetup{colorlinks,citecolor=red,urlcolor=blue}
+  \hypersetup{colorlinks,citecolor=blue,urlcolor=blue}
 \fi
 
 
@@ -184,78 +183,14 @@ Users' Guide
 
 { \Large
 Duncan Grisby\\
-{\normalsize (\textit{email: \href{mailto:dgrisby@apasphere.com}%
-                                  {\email{dgrisby@apasphere.com}}})}%
-                                  \\[2ex]
-%
-Apasphere Ltd.\\[4ex]
-%
-Sai-Lai Lo\\[2ex]
-%
-David Riddoch\\[2ex]
-%
-AT\&T Laboratories Cambridge\\
+{\normalsize (\textit{\href{mailto:dgrisby@apasphere.com}%
+                           {\email{dgrisby@apasphere.com}}})}%
+                           \\[2ex]
 }
 
-
-\vfill
-\vfill
-April 2012
 \vfill
 
 \end{center}
-
-\clearpage
-
-{\Large \bf Changes and Additions, November 2013}
-\begin{itemize}
-\item Updates for omniORB 4.2.
-\end{itemize}
-
-\vspace{\baselineskip}
-
-{\Large \bf Changes and Additions, July 2007}
-\begin{itemize}
-\item Updates for omniORB 4.1.1.
-\end{itemize}
-
-\vspace{\baselineskip}
-
-{\Large \bf Changes and Additions, June 2005}
-\begin{itemize}
-\item New omniORB 4.1 features.
-\end{itemize}
-
-\vspace{\baselineskip}
-
-{\Large \bf Changes and Additions, October 2004}
-\begin{itemize}
-\item Packaging stubs into DLLs.
-\end{itemize}
-
-\vspace{\baselineskip}
-
-{\Large \bf Changes and Additions, July 2004}
-\begin{itemize}
-\item Minor updates.
-\end{itemize}
-
-\vspace{\baselineskip}
-
-{\Large \bf Changes and Additions, November 2002}
-\begin{itemize}
-\item Per thread timeouts.
-\item Implement missing interceptors.
-\item Minor fixes.
-\end{itemize}
-
-\vspace{\baselineskip}
-
-{\Large \bf Changes and Additions, June 2002}
-\begin{itemize}
-\item Updated to omniORB 4.0.
-\end{itemize}
-
 
 \cleardoublepage
 
@@ -396,8 +331,8 @@ The omniORB IDL compiler, omniidl, requires Python 2.5, 2.6 or 2.7.
 \subsection{Missing features}
 \label{sec:missing}
 
-omniORB is not (yet) a complete implementation of the CORBA 2.6 core.
-The following is a list of the most significant missing features.
+omniORB is not a complete implementation of the CORBA 2.6 core.  The
+following is a list of the most significant missing features.
 
 \begin{itemize}
 
@@ -4092,6 +4027,13 @@ the communication cannot use ZIOP. If a client is absolutely certain
 that a server supports ZIOP, it can extend an object reference with
 ZIOP details using \op{omniZIOP::setServerPolicies}. Using the new
 object reference, the client will be able to make ZIOP calls.
+
+\begin{cxxlisting}
+namespace omniZIOP {
+  CORBA::Object_ptr
+  setServerPolicies(CORBA::Object_ptr obj, const CORBA::PolicyList& policies);
+};
+\end{cxxlisting}
 
 Creating a ZIOP-enabling object reference in this way is dangerous!
 If the server does not actually support ZIOP, it will receive
