@@ -65,7 +65,9 @@
 #define HAVE_LOCALTIME 1
 // Unset if no localtime() function
 
-#define HAVE_STRFTIME 1
+#ifndef HAVE_STRFTIME
+#  define HAVE_STRFTIME 1
+#endif
 // Unset if no strftime() function
 
 #define HAVE_GETTIMEOFDAY 1
