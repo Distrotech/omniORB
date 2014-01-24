@@ -889,6 +889,10 @@ omniPy::Py_omniCallDescriptor::raisePyException()
   if (ue)
     return ue->setPyExceptionState();
 
+  Py_BAD_PARAM* bp = Py_BAD_PARAM::_downcast(pd_exception);
+  if (bp)
+    return handleSystemException(*bp, bp->getInfo());
+
   CORBA::SystemException* se = CORBA::SystemException::_downcast(pd_exception);
   if (se)
     return handleSystemException(*se);

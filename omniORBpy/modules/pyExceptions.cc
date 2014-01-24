@@ -55,6 +55,31 @@ Py_BAD_PARAM::raise(const char* file, int line,
   throw Py_BAD_PARAM(minor, completed, message);
 }
 
+CORBA::Exception*
+Py_BAD_PARAM::_NP_duplicate() const
+{
+  return new Py_BAD_PARAM(*this);
+}
+
+void
+Py_BAD_PARAM::_raise() const
+{
+  throw *this;
+}
+
+const char*
+Py_BAD_PARAM::_NP_typeId() const
+{
+  return "Exception/SystemException/BAD_PARAM/Py_BAD_PARAM";
+}
+
+Py_BAD_PARAM*
+Py_BAD_PARAM::_downcast(CORBA::Exception* e)
+{
+  return (Py_BAD_PARAM*)
+    _NP_is_a(e, "Exception/SystemException/BAD_PARAM/Py_BAD_PARAM");
+}
+
 
 PyObject*
 omniPy::handleSystemException(const CORBA::SystemException& ex, PyObject* info)

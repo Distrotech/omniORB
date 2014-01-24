@@ -149,6 +149,22 @@ public:
     throw CORBA::BAD_PARAM(minor(), completed());
   }
 
+
+  // Virtual functions inherited from CORBA::SystemException
+  CORBA::Exception* _NP_duplicate() const;
+  void              _raise()        const;
+  const char*       _NP_typeId()    const;
+
+  // Copy constructor that transfers ownership of info_
+  inline Py_BAD_PARAM(const Py_BAD_PARAM& e)
+    : CORBA::BAD_PARAM(e.minor(), e.completed())
+  {
+    Py_BAD_PARAM* ne = OMNI_CONST_CAST(Py_BAD_PARAM*, &e);
+    info_ = ne->getInfo();
+  }
+
+  static Py_BAD_PARAM* _downcast(CORBA::Exception* e);
+
 private:
   PyObject* info_; // Stack of messages.
 };
@@ -979,11 +995,6 @@ public:
     virtual void unmarshalReturnedValues(cdrStream& stream);
     virtual void userException(cdrStream& stream, _OMNI_NS(IOP_C)* iop_client,
 			       const char* repoId);
-
-    inline void systemException(const CORBA::SystemException& ex,
-				PyObject* info = 0) {
-      handleSystemException(ex, info);
-    }
 
 
     //
