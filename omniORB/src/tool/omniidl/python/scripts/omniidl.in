@@ -1,4 +1,4 @@
-#!@PYTHON@
+#!/usr/bin/python
 # -*- python -*-
 #                           Package   : omniidl
 # omniidl.in                Created on: 1999/10/29
