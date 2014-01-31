@@ -1136,6 +1136,16 @@ void @name@ (const @const_type@ _value) {
   _pd_@name@ = new @memtype@_slice[@first_dim@];
   @loop@
 }
+#ifdef OMNIORB_EXTENDED_UNION_MAPPING
+void @name@ (@memtype@_slice* _value) {
+  // Non-standard method, consumes _value
+  _release_member();
+  _pd__initialised = 1;
+  _pd__d = @discrimvalue@;
+  _pd__default = @isDefault@;
+  _pd_@name@ = _value;
+}
+#endif
 """
 
 union_any = """\
@@ -1148,6 +1158,16 @@ void @name@ (const @type@& _value) {
   _pd__default = @isDefault@;
   _pd_@name@ = new @type@(_value);
 }
+#ifdef OMNIORB_EXTENDED_UNION_MAPPING
+void @name@ (@type@* _value) {
+  // Non-standard method, consumes _value
+  _release_member();
+  _pd__initialised = 1;
+  _pd__d = @discrimvalue@;
+  _pd__default = @isDefault@;
+  _pd_@name@ = _value;
+}
+#endif
 """
 
 union_typecode = """\
@@ -1293,6 +1313,16 @@ void @name@ (const @type@& _value) {
   _pd__default = @isDefault@;
   _pd_@name@ = new @type@(_value);
 }
+#ifdef OMNIORB_EXTENDED_UNION_MAPPING
+void @name@ (@type@* _value) {
+  // Non-standard method, consumes _value
+  _release_member();
+  _pd__initialised = 1;
+  _pd__d = @discrimvalue@;
+  _pd__default = @isDefault@;
+  _pd_@name@ = _value;
+}
+#endif
 """
 
 union_sequence = """\
@@ -1306,6 +1336,16 @@ void @member@ (const _@member@_seq& _value) {
   _pd__default = @isDefault@;
   _pd_@member@ = new _@member@_seq(_value);
 }
+#ifdef OMNIORB_EXTENDED_UNION_MAPPING
+void @name@ (@member@_seq* _value) {
+  // Non-standard method, consumes _value
+  _release_member();
+  _pd__initialised = 1;
+  _pd__d = @discrimvalue@;
+  _pd__default = @isDefault@;
+  _pd_@member@ = _value;
+}
+#endif
 """
 
 union_value = """\
