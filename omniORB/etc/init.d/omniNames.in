@@ -53,8 +53,7 @@ case "$1" in
                 OMNINAMES_OPTIONS="-errlog $OMNINAMES_DEBUG_LOG -logdir $OMNINAMES_DIR -start $TCPPORT $OPTIONS"
 
                 # Run it
-                su - omni -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH $OMNINAMES $OMNINAMES_OPTIONS" &> /dev/null &
-                OMNINAMES_PID=$!
+                OMNINAMES_PID=$(su - omni -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH $OMNINAMES $OMNINAMES_OPTIONS &> /dev/null & echo \$!")
 
                 # Sleep a while, and then check if omniNames is still running
                 sleep 2
@@ -81,14 +80,12 @@ case "$1" in
         killproc omniNames
         echo
 
-        rm -f $OMNIMAPPER_DIR/NameService
-
         while [ -n "`pidofproc omniNames`" ]; do
             sleep 1
         done
 
         rm -f /var/lock/subsys/omniNames
-            rm -f /var/run/omniNames.pid
+        rm -f /var/run/omniNames.pid
         ;;
 
   restart)
