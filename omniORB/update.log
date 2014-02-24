@@ -1,3 +1,11 @@
+Mon Feb 24 16:33:48 GMT 2014 dgrisby
+====================================
+
+- omniIOR leak in restricted connection creation.
+
+src/lib/omniORB/connections/omniConnectionMgmt.cc
+
+
 Mon Feb  3 10:16:24 GMT 2014 dgrisby
 ====================================
 

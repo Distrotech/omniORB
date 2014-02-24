@@ -435,7 +435,7 @@ makeRestrictedReference(CORBA::Object_ptr obj,
     return CORBA::Object::_duplicate(obj);
 
   // Get the original object reference's IOR
-  omniIOR* orig_ior = obj->_PR_getobj()->_getIOR();
+  omniIOR_var orig_ior(obj->_PR_getobj()->_getIOR());
 
   if (omniORB::trace(20)) {
     omniORB::logger log;
