@@ -13,13 +13,13 @@
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORB006.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
 <HR>
-<H1 CLASS="chapter"><A NAME="htoc73">Chapter&#XA0;5</A>&#XA0;&#XA0;The IDL compiler</H1><P>
+<H1 CLASS="chapter"><A NAME="htoc74">Chapter&#XA0;5</A>&#XA0;&#XA0;The IDL compiler</H1><P>
 <A NAME="chap:omniidl"></A></P><P>omniORB&#X2019;s IDL compiler is called omniidl. It consists of a generic
 front-end parser written in C++, and a number of back-ends written in
 Python. omniidl is very strict about IDL validity, so you may find
 that it reports errors in IDL which compiles fine with other IDL
 compilers.</P><P>The general form of an omniidl command line is:</P><BLOCKQUOTE CLASS="quote"> <TT>omniidl </TT>[<I>options</I>]<TT> -b</TT>&lt;<I>back-end</I>&gt;<TT> </TT>[<I>back-end options</I>]<TT> </TT>&lt;<I>file</I>&gt;
-</BLOCKQUOTE><H2 CLASS="section"><A NAME="toc28"></A><A NAME="htoc74">5.1</A>&#XA0;&#XA0;Common options</H2><P>The following options are common to all back-ends:</P><TABLE border=0 cellspacing=0 cellpadding=0><TR><TD ALIGN=left NOWRAP></TD></TR>
+</BLOCKQUOTE><H2 CLASS="section"><A NAME="toc28"></A><A NAME="htoc75">5.1</A>&#XA0;&#XA0;Common options</H2><P>The following options are common to all back-ends:</P><TABLE border=0 cellspacing=0 cellpadding=0><TR><TD ALIGN=left NOWRAP></TD></TR>
 <TR><TD ALIGN=left NOWRAP>
 <TT>-b</TT><I>back-end</I></TD><TD ALIGN=left NOWRAP>Run the specified back-end. For the C++ ORB, use <TT>-bcxx</TT>.</TD></TR>
 <TR><TD ALIGN=left NOWRAP>
@@ -62,7 +62,7 @@ preprocessor.</TD></TR>
 <TR><TD ALIGN=left NOWRAP>
 </TD></TR>
 </TABLE><P>Most of these options are self explanatory, but some are not
-so obvious.</P><H3 CLASS="subsection"><A NAME="htoc75">5.1.1</A>&#XA0;&#XA0;Preprocessor interactions</H3><P>IDL is processed by the C preprocessor before omniidl parses it.
+so obvious.</P><H3 CLASS="subsection"><A NAME="htoc76">5.1.1</A>&#XA0;&#XA0;Preprocessor interactions</H3><P>IDL is processed by the C preprocessor before omniidl parses it.
 omniidl always uses the GNU C preprocessor (which it builds with the
 name omnicpp). The <TT>-D</TT>, <TT>-U</TT>, and <TT>-I</TT>
 options are just sent to the preprocessor. Note that the current
@@ -70,13 +70,13 @@ directory is not on the include search path by default&#X2014;use
 &#X2018;<TT>-I.</TT>&#X2019; for that. The <TT>-Y</TT> option can be used to
 specify a different preprocessor to omnicpp. Beware that line
 directives inserted by other preprocessors are likely to confuse
-omniidl.</P><H4 CLASS="subsubsection"><A NAME="htoc76">5.1.1.1</A>&#XA0;&#XA0;Ancient history: Windows 9x</H4><P>The output from the C preprocessor is normally fed to the omniidl
+omniidl.</P><H4 CLASS="subsubsection"><A NAME="htoc77">5.1.1.1</A>&#XA0;&#XA0;Ancient history: Windows 9x</H4><P>The output from the C preprocessor is normally fed to the omniidl
 parser through a pipe. On some Windows 98 machines (but not all!) the
 pipe does not work, and the preprocessor output is echoed to the
 screen. When this happens, the omniidl parser sees an empty file, and
 produces useless stub files with strange long names. To avoid the
 problem, use the &#X2018;<TT>-T</TT>&#X2019; option to create a temporary file
-between the two stages.</P><H3 CLASS="subsection"><A NAME="htoc77">5.1.2</A>&#XA0;&#XA0;Forward-declared interfaces</H3><P>If you have an IDL file like:</P><DIV CLASS="lstlisting"><B>interface</B> I;
+between the two stages.</P><H3 CLASS="subsection"><A NAME="htoc78">5.1.2</A>&#XA0;&#XA0;Forward-declared interfaces</H3><P>If you have an IDL file like:</P><DIV CLASS="lstlisting"><B>interface</B> I;
 <B>interface</B> J {
   <B>attribute</B> I the_I;
 };</DIV><P>then omniidl will normally issue a warning:</P><PRE CLASS="verbatim">  test.idl:1: Warning: Forward declared interface `I' was never
@@ -85,7 +85,7 @@ between the two stages.</P><H3 CLASS="subsection"><A NAME="htoc77">5.1.2</A>&#XA
 <EM>is</EM> valid to define interface <TT>I</TT> in a separate file. If
 you have a lot of IDL with this sort of construct, you will drown
 under the warning messages. Use the <TT>-nf</TT> option to suppress
-them.</P><H3 CLASS="subsection"><A NAME="htoc78">5.1.3</A>&#XA0;&#XA0;Comments</H3><P>By default, omniidl discards comments in the input IDL. However, with
+them.</P><H3 CLASS="subsection"><A NAME="htoc79">5.1.3</A>&#XA0;&#XA0;Comments</H3><P>By default, omniidl discards comments in the input IDL. However, with
 the <TT>-k</TT> and <TT>-K</TT> options, it preserves the comments
 for use by the back-ends. The C++ back-end ignores this information,
 but it is relatively easy to write new back-ends which <EM>do</EM> make
@@ -95,7 +95,7 @@ declarations within the IDL. Given IDL like:</P><DIV CLASS="lstlisting"><B>inter
   <I>// A comment</I>
   <B>void</B> op2();
 };</DIV><P>the <TT>-k</TT> flag will attach the comment to <TT>op1()</TT>;
-the <TT>-K</TT> flag will attach it to <TT>op2()</TT>.</P><H2 CLASS="section"><A NAME="toc29"></A><A NAME="htoc79">5.2</A>&#XA0;&#XA0;C++ back-end options</H2><P>
+the <TT>-K</TT> flag will attach it to <TT>op2()</TT>.</P><H2 CLASS="section"><A NAME="toc29"></A><A NAME="htoc80">5.2</A>&#XA0;&#XA0;C++ back-end options</H2><P>
 <A NAME="sec:cxx_backend"></A></P><P>When you specify the C++ back-end (with <TT>-bcxx</TT>), the
 following <TT>-Wb</TT> options are available. Note that the
 <TT>-Wb</TT> options must be specified <EM>after</EM> the
@@ -146,10 +146,10 @@ main file.</TD></TR>
 <TT>-WbF</TT></TD><TD ALIGN=left NOWRAP>Generate code fragments (only for use during omniORB build).</TD></TR>
 <TR><TD ALIGN=left NOWRAP>
 </TD></TR>
-</TABLE><H3 CLASS="subsection"><A NAME="htoc80">5.2.1</A>&#XA0;&#XA0;Optional code generation options</H3><P>By default, omniidl generates the minimum code required to provide all
+</TABLE><H3 CLASS="subsection"><A NAME="htoc81">5.2.1</A>&#XA0;&#XA0;Optional code generation options</H3><P>By default, omniidl generates the minimum code required to provide all
 the IDL-defined types and interfaces, which is sufficient for the
 majority of applications. Additional code can also be generated, for
-various purposes:</P><H4 CLASS="subsubsection"><A NAME="htoc81">5.2.1.1</A>&#XA0;&#XA0;Any and TypeCode</H4><P>To generate TypeCodes and Any insertion operators, give the
+various purposes:</P><H4 CLASS="subsubsection"><A NAME="htoc82">5.2.1.1</A>&#XA0;&#XA0;Any and TypeCode</H4><P>To generate TypeCodes and Any insertion operators, give the
 <TT>-Wba</TT> option. See chapter&#XA0;<A HREF="omniORB010.html#chap:any">10</A> for details.</P><P>By default, omniidl separates the normal stub and skeleton file (the
 <TT>SK.cc</TT> file) from these &#X2018;dynamic&#X2019; stubs (the <TT>DynSK.cc</TT>
 file), so applications that do not need support for Any and TypeCode
@@ -159,7 +159,7 @@ dynamic stubs to a single file, by simply specifying the same
 extension for both files. This command places both the normal stubs
 and the dynamic stubs in <TT>aSK.cc</TT>:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl -bcxx -Wba -Wbd=SK.cc a.idl</TT>
-</BLOCKQUOTE><H4 CLASS="subsubsection"><A NAME="htoc82">5.2.1.2</A>&#XA0;&#XA0;Tie templates</H4><P>As described in section&#XA0;<A HREF="omniORB002.html#sec:tie">2.11</A>, tie templates can be used to
+</BLOCKQUOTE><H4 CLASS="subsubsection"><A NAME="htoc83">5.2.1.2</A>&#XA0;&#XA0;Tie templates</H4><P>As described in section&#XA0;<A HREF="omniORB002.html#sec:tie">2.11</A>, tie templates can be used to
 provide servant implementations, instead of using inheritance from the
 normal skeleton classes. To generate tie templates, give the
 <TT>-Wbtp</TT> option to omniidl.</P><P>When using a pre-namespace C++ compiler, IDL modules are mapped to C++
@@ -171,16 +171,16 @@ used if <TT>POA_M</TT> is a class.</P><P>The C++ mapping has an alternative opti
 names, in which the template class is declared at global scope with
 the name <TT>POA_M_I_tie</TT>. i.e. all occurrences of &#X2018;<TT>::</TT>&#X2019;
 are replaced by &#X2018;<TT>_</TT>&#X2019;. Generate the flattened ties using the
-<TT>-Wbtf</TT> command line argument.</P><H4 CLASS="subsubsection"><A NAME="htoc83">5.2.1.3</A>&#XA0;&#XA0;Asynchronous Method Invocation</H4><P>Generate asynchronous invocation operations and the various types
+<TT>-Wbtf</TT> command line argument.</P><H4 CLASS="subsubsection"><A NAME="htoc84">5.2.1.3</A>&#XA0;&#XA0;Asynchronous Method Invocation</H4><P>Generate asynchronous invocation operations and the various types
 required by AMI by specifying <TT>-Wbami</TT>. See
-chapter&#XA0;<A HREF="omniORB012.html#chap:ami">12</A> for details.</P><H4 CLASS="subsubsection"><A NAME="htoc84">5.2.1.4</A>&#XA0;&#XA0;Example implementations</H4><P>If you use the <TT>-Wbexample</TT> flag, omniidl will generate an
+chapter&#XA0;<A HREF="omniORB012.html#chap:ami">12</A> for details.</P><H4 CLASS="subsubsection"><A NAME="htoc85">5.2.1.4</A>&#XA0;&#XA0;Example implementations</H4><P>If you use the <TT>-Wbexample</TT> flag, omniidl will generate an
 example implementation file as well as the stubs and skeletons. For
 IDL file <TT>foo.idl</TT>, the example code is written to
 <TT>foo_i.cc</TT>. The example file contains class and method
 declarations for the operations of all interfaces in the IDL file,
 along with a <TT>main()</TT> function which creates an instance of each
 object. You still have to fill in the operation implementations, of
-course.</P><H3 CLASS="subsection"><A NAME="htoc85">5.2.2</A>&#XA0;&#XA0;Include file options</H3><P>IDL files regularly <TT>#include</TT> other files. By default, if file
+course.</P><H3 CLASS="subsection"><A NAME="htoc86">5.2.2</A>&#XA0;&#XA0;Include file options</H3><P>IDL files regularly <TT>#include</TT> other files. By default, if file
 <TT>a.idl</TT> says <TT>#include &lt;b/c.idl&gt;</TT> then the generated
 header <TT>a.hh</TT> has an include of the form <TT>#include
 &lt;c.idl&gt;</TT>, and <TT>aSK.cc</TT> and <TT>aDynSK.cc</TT> contain only code
@@ -192,7 +192,7 @@ should only use that single set of files.</P><P>If <TT>-Wbuse-quotes</TT> is spe
 <TT>#include "c.idl"</TT>.</P><P>Normally any path details contained in the IDL <TT>#include</TT>
 directive are removed, leaving just the base name. If
 <TT>-Wbkeep-inc-path</TT> is specified, the directive in
-<TT>a.hh</TT> is <TT>#include &lt;b/c.idl&gt;</TT>.</P><H3 CLASS="subsection"><A NAME="htoc86">5.2.3</A>&#XA0;&#XA0;Object reference operations</H3><P>Some of the C++ mapping&#X2019;s parameter passing rules are problematic in
+<TT>a.hh</TT> is <TT>#include &lt;b/c.idl&gt;</TT>.</P><H3 CLASS="subsection"><A NAME="htoc87">5.2.3</A>&#XA0;&#XA0;Object reference operations</H3><P>Some of the C++ mapping&#X2019;s parameter passing rules are problematic in
 terms of memory management. For example, if an IDL operation has a
 parameter of type <TT>inout string</TT>, the standard mapping has a C++
 parameter of type <TT>char*&amp;</TT>. If application code passes a
@@ -212,7 +212,7 @@ reference classes, since there is no usual need to override them. The
 local interface situation also requires method overrides, so omniidl
 must be instructed to generate object references as virtual. Use
 <TT>-Wbvirtual-objref</TT> to achieve this.</P><P>More details about the local interface mapping can be found in
-section&#XA0;<A HREF="omniORB011.html#sec:LocalInterfaces">11.8</A>.</P><H3 CLASS="subsection"><A NAME="htoc87">5.2.4</A>&#XA0;&#XA0;Module splicing</H3><P>On ancient C++ compilers without namespace support, IDL modules map to
+section&#XA0;<A HREF="omniORB011.html#sec:LocalInterfaces">11.8</A>.</P><H3 CLASS="subsection"><A NAME="htoc88">5.2.4</A>&#XA0;&#XA0;Module splicing</H3><P>On ancient C++ compilers without namespace support, IDL modules map to
 C++ classes, and so cannot be reopened. For some IDL, it is possible
 to &#X2018;splice&#X2019; reopened modules on to the first occurrence of the module,
 so all module definitions are in a single class. It is possible in
@@ -245,7 +245,7 @@ option causes omniidl to put all of the definitions for module
 <TT>M1</TT> into a single C++ class. For the first case, this will work
 fine. For the second case, class <TT>M1::K</TT> will contain a reference
 to <TT>M2::J</TT>, which has not yet been defined; the C++ compiler will
-complain.</P><H2 CLASS="section"><A NAME="toc30"></A><A NAME="htoc88">5.3</A>&#XA0;&#XA0;Examples</H2><P>Generate the C++ headers and stubs for a file <TT>a.idl</TT>:</P><BLOCKQUOTE CLASS="quote">
+complain.</P><H2 CLASS="section"><A NAME="toc30"></A><A NAME="htoc89">5.3</A>&#XA0;&#XA0;Examples</H2><P>Generate the C++ headers and stubs for a file <TT>a.idl</TT>:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl -bcxx a.idl</TT>
 </BLOCKQUOTE><P>Generate with Any support:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl -bcxx -Wba a.idl</TT>

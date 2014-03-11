@@ -529,7 +529,33 @@ installSystemExceptionHandler(<B>void</B>* cookie,
 installSystemExceptionHandler(CORBA::Object_ptr obj,
                               <B>void</B>* cookie,
                               systemExceptionHandler_t fn);</DIV><P>The functions are equivalent to their counterparts for
-<TT>CORBA::TRANSIENT</TT>.</P><H2 CLASS="section"><A NAME="toc27"></A><A NAME="htoc72">4.8</A>&#XA0;&#XA0;Location forwarding</H2><P>
+<TT>CORBA::TRANSIENT</TT>.</P><H3 CLASS="subsection"><A NAME="htoc72">4.7.6</A>&#XA0;&#XA0;Extended exception handlers</H3><P>New in omniORB 4.2, each of the exception handlers described above
+also has an &#X2018;extended&#X2019; form in which the exception handler takes two
+additional parameters, the object reference being invoked upon, and a
+string containing the name of the operation invoked. e.g.:</P><DIV CLASS="lstlisting"><B>namespace</B> omniORB {
+
+  <B>typedef</B> CORBA::Boolean
+  (*transientExceptionHandlerExt_t)(<B>void</B>*                   cookie,
+                                    CORBA::ULong            n_retries,
+                                    <B>const</B> CORBA::TRANSIENT&amp; ex,
+                                    CORBA::Object_ptr       obj,
+                                    <B>const</B> <B>char</B>*             op);
+
+  <B>void</B>
+  installTransientExceptionHandlerExt(<B>void</B>* cookie,
+                                     transientExceptionHandlerExt_t fn);
+
+  <B>void</B>
+  installTransientExceptionHandlerExt(CORBA::Object_ptr obj,
+                                      <B>void</B>* cookie,
+                                      transientExceptionHandlerExt_t fn);
+}</DIV><P>Note that the operation parameter can sometimes be null. By default,
+omniORB sends a <TT>LocateRequest</TT> message prior to the first
+operation invocation on an object reference. That <TT>LocateRequest</TT>
+is subject to the same exception handling mechanism as a normal
+operation invocation, but it is represented with a null operation
+name. Exception handler code that uses the operation name must
+correctly handle a null operation name pointer.</P><H2 CLASS="section"><A NAME="toc27"></A><A NAME="htoc73">4.8</A>&#XA0;&#XA0;Location forwarding</H2><P>
 <A NAME="sec:locationForward"></A></P><P>Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
 message to the caller, indicating that it should retry the invocation
 on a new object reference. The standard allows ServantManagers to

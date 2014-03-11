@@ -2685,6 +2685,44 @@ The functions are equivalent to their counterparts for
 
 
 
+\subsection{Extended exception handlers}
+
+New in omniORB 4.2, each of the exception handlers described above
+also has an `extended' form in which the exception handler takes two
+additional parameters, the object reference being invoked upon, and a
+string containing the name of the operation invoked. e.g.:
+
+\begin{cxxlisting}
+namespace omniORB {
+  
+  typedef CORBA::Boolean 
+  (*transientExceptionHandlerExt_t)(void*                   cookie,
+                                    CORBA::ULong            n_retries,
+                                    const CORBA::TRANSIENT& ex,
+                                    CORBA::Object_ptr       obj,
+                                    const char*             op);
+
+  void 
+  installTransientExceptionHandlerExt(void* cookie,
+                                     transientExceptionHandlerExt_t fn);
+
+  void
+  installTransientExceptionHandlerExt(CORBA::Object_ptr obj,
+                                      void* cookie,
+                                      transientExceptionHandlerExt_t fn);
+}
+\end{cxxlisting}
+
+Note that the operation parameter can sometimes be null. By default,
+omniORB sends a \code{LocateRequest} message prior to the first
+operation invocation on an object reference. That \code{LocateRequest}
+is subject to the same exception handling mechanism as a normal
+operation invocation, but it is represented with a null operation
+name. Exception handler code that uses the operation name must
+correctly handle a null operation name pointer.
+
+
+
 \section{Location forwarding}
 \label{sec:locationForward}
 
