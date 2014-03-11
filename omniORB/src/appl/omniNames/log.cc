@@ -520,7 +520,6 @@ omniNameslog::init(CORBA::ORB_ptr          the_orb,
     LOG(1, "Error: parse error in data file '" << active << "' at line " <<
         line << ".");
     initf.close();
-    exit(1);
   }
 
 
