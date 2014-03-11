@@ -846,7 +846,13 @@ omniAsyncInvoker::getWorker(omniAsyncPool* pool)
     worker->remIdle();
   }
   else {
-    worker = new omniAsyncWorker(this);
+    try {
+      worker = new omniAsyncWorker(this);
+    }
+    catch (omni_thread_fatal&) {
+      omniORB::logs(5, "AsyncInvoker: failed to create new thread.");
+      return 0;
+    }
   }
 
   worker->assign(pool);
