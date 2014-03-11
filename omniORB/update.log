@@ -1,3 +1,24 @@
+Tue Mar 11 15:58:57 GMT 2014 dgrisby
+====================================
+
+- Tolerate broken omniNames data files at startup.
+
+src/appl/omniNames/log.cc
+
+- Properly handle failure to start new thread in invoker.
+
+src/lib/omniORB/orbcore/invoker.cc
+
+- Extended exception handler API.
+
+include/omniORB4/CORBA.h
+include/omniORB4/internal/excepthandler.h
+include/omniORB4/omniORB.h
+include/omniORB4/omniObjRef.h
+src/lib/omniORB/orbcore/exception.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+
+
 Mon Feb 24 16:33:48 GMT 2014 dgrisby
 ====================================
 

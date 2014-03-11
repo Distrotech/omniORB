@@ -357,15 +357,15 @@ omniObjRef::_remote_non_existent()
 ////////////////////////////////////////////////////////////////////////////
 
 void*
-omniObjRef::_transientExceptionHandler(void*& cookie)
+omniObjRef::_transientExceptionHandler(void*& cookie, _CORBA_Boolean& ext)
 {
   if (pd_flags.transient_exception_handler) {
     omniExHandlers_iterator iter;
     omniExHandlers* hp = iter.find(this);
     if (hp != 0) {
       cookie = hp->transient_cookie;
-      void* result = hp->transient_hdr;
-      return result;
+      ext    = hp->transient_ext;
+      return   hp->transient_hdr;
     }
   }
   return 0;
@@ -373,26 +373,30 @@ omniObjRef::_transientExceptionHandler(void*& cookie)
 
 
 void
-omniObjRef::_transientExceptionHandler(void* new_handler,void* cookie)
+omniObjRef::_transientExceptionHandler(void* new_handler, void* cookie,
+                                       _CORBA_Boolean ext)
 {
   omniExHandlers_iterator iter;
   omniExHandlers* hp = iter.find_or_create(this);
+
   hp->transient_cookie = cookie;
-  hp->transient_hdr = new_handler;
+  hp->transient_ext    = ext;
+  hp->transient_hdr    = new_handler;
+
   pd_flags.transient_exception_handler = 1;
 }
 
 
 void*
-omniObjRef::_timeoutExceptionHandler(void*& cookie)
+omniObjRef::_timeoutExceptionHandler(void*& cookie, _CORBA_Boolean& ext)
 {
   if (pd_flags.timeout_exception_handler) {
     omniExHandlers_iterator iter;
     omniExHandlers* hp = iter.find(this);
     if (hp != 0) {
       cookie = hp->timeout_cookie;
-      void* result = hp->timeout_hdr;
-      return result;
+      ext    = hp->timeout_ext;
+      return   hp->timeout_hdr;
     }
   }
   return 0;
@@ -400,26 +404,30 @@ omniObjRef::_timeoutExceptionHandler(void*& cookie)
 
 
 void
-omniObjRef::_timeoutExceptionHandler(void* new_handler,void* cookie)
+omniObjRef::_timeoutExceptionHandler(void* new_handler, void* cookie,
+                                     _CORBA_Boolean ext)
 {
   omniExHandlers_iterator iter;
   omniExHandlers* hp = iter.find_or_create(this);
+
   hp->timeout_cookie = cookie;
-  hp->timeout_hdr = new_handler;
+  hp->timeout_ext    = ext;
+  hp->timeout_hdr    = new_handler;
+
   pd_flags.timeout_exception_handler = 1;
 }
 
 
 void*
-omniObjRef::_commFailureExceptionHandler(void*& cookie)
+omniObjRef::_commFailureExceptionHandler(void*& cookie, _CORBA_Boolean& ext)
 {
   if (pd_flags.commfail_exception_handler) {
     omniExHandlers_iterator iter;
     omniExHandlers* hp = iter.find(this);
     if (hp != 0) {
       cookie = hp->commfail_cookie;
-      void* result = hp->commfail_hdr;
-      return result;
+      ext    = hp->commfail_ext;
+      return   hp->commfail_hdr;
     }
   }
   return 0;
@@ -427,26 +435,30 @@ omniObjRef::_commFailureExceptionHandler(void*& cookie)
 
 
 void
-omniObjRef::_commFailureExceptionHandler(void* new_handler, void* cookie)
+omniObjRef::_commFailureExceptionHandler(void* new_handler, void* cookie,
+                                         _CORBA_Boolean ext)
 {
   omniExHandlers_iterator iter;
   omniExHandlers* hp = iter.find_or_create(this);
+
   hp->commfail_cookie = cookie;
-  hp->commfail_hdr = new_handler;
+  hp->commfail_ext    = ext;
+  hp->commfail_hdr    = new_handler;
+
   pd_flags.commfail_exception_handler = 1;
 }
 
 
 void*
-omniObjRef::_systemExceptionHandler(void*& cookie)
+omniObjRef::_systemExceptionHandler(void*& cookie, _CORBA_Boolean& ext)
 {
   if (pd_flags.system_exception_handler) {
     omniExHandlers_iterator iter;
     omniExHandlers* hp = iter.find(this);
     if (hp != 0) {
       cookie = hp->sysexcpt_cookie;
-      void* result = hp->sysexcpt_hdr;
-      return result;
+      ext    = hp->sysexcpt_ext;
+      return   hp->sysexcpt_hdr;
     }
   }
   return 0;
@@ -454,14 +466,19 @@ omniObjRef::_systemExceptionHandler(void*& cookie)
 
 
 void
-omniObjRef::_systemExceptionHandler(void* new_handler,void* cookie)
+omniObjRef::_systemExceptionHandler(void* new_handler, void* cookie,
+                                    _CORBA_Boolean ext)
 {
   omniExHandlers_iterator iter;
   omniExHandlers* hp = iter.find_or_create(this);
+
   hp->sysexcpt_cookie = cookie;
-  hp->sysexcpt_hdr = new_handler;
+  hp->sysexcpt_ext    = ext;
+  hp->sysexcpt_hdr    = new_handler;
+
   pd_flags.system_exception_handler = 1;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////
 //             Object lifecycle                                           //
@@ -469,10 +486,8 @@ omniObjRef::_systemExceptionHandler(void* new_handler,void* cookie)
 
 omniObjRef::~omniObjRef()
 {
-  if( pd_refCount ) {
-    omniORB::logs(1, "Error: an object reference has "
-		  "been explicity deleted.");
-  }
+  if (pd_refCount)
+    omniORB::logs(1, "Error: an object reference has been explicity deleted.");
 
   if (!pd_ior) return; // Nil
 
@@ -548,15 +563,15 @@ omniObjRef::omniObjRef(const char* intfRepoId, omniIOR* ior,
     objref_list = this;
   }
 
-  pd_flags.forward_location = 0;
-  pd_flags.type_verified = 1;
-  pd_flags.object_exists = omniObjTableEntry::downcast(id) ? 1 : 0;
+  pd_flags.forward_location            = 0;
+  pd_flags.type_verified               = 1;
+  pd_flags.object_exists               = omniObjTableEntry::downcast(id) ? 1:0;
   pd_flags.transient_exception_handler = 0;
-  pd_flags.timeout_exception_handler = 0;
-  pd_flags.commfail_exception_handler = 0;
-  pd_flags.system_exception_handler = 0;
-  pd_flags.static_repoId = static_repoId;
-  pd_flags.orb_shutdown = 0;
+  pd_flags.timeout_exception_handler   = 0;
+  pd_flags.commfail_exception_handler  = 0;
+  pd_flags.system_exception_handler    = 0;
+  pd_flags.static_repoId               = static_repoId;
+  pd_flags.orb_shutdown                = 0;
 }
 
 void
@@ -600,10 +615,10 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
 #define	RECOVER_FORWARD do {\
   omni::revertToOriginalProfile(this); \
   CORBA::TRANSIENT ex2(TRANSIENT_FailedOnForwarded, ex.completed()); \
-  if( !_omni_callTransientExceptionHandler(this, retries++, ex2) ) \
+  if (!_omni_callTransientExceptionHandler(this, retries++, ex2,\
+                                           call_desc.op())) \
     throw; \
 } while(0)
-
 
   int retries = 0;
 #if defined(__DECCXX) && __DECCXX_VER < 60300000
@@ -668,7 +683,8 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
 	  omni::revertToOriginalProfile(this);
 	  CORBA::TRANSIENT ex2(TRANSIENT_FailedOnForwarded, ex.completed());
 
-	  if (!_omni_callTransientExceptionHandler(this, retries++, ex2)) {
+	  if (!_omni_callTransientExceptionHandler(this, retries++, ex2,
+                                                   call_desc.op())) {
 
 	    if (is_COMM_FAILURE_minor(ex.minor())) {
 	      OMNIORB_THROW(COMM_FAILURE,ex.minor(),ex.completed());
@@ -685,7 +701,8 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
 	else if (is_COMM_FAILURE_minor(ex.minor())) {
 
 	  CORBA::COMM_FAILURE ex2(ex.minor(), ex.completed());
-	  if (!_omni_callCommFailureExceptionHandler(this, retries++, ex2)) {
+	  if (!_omni_callCommFailureExceptionHandler(this, retries++, ex2,
+                                                     call_desc.op())) {
 	    OMNIORB_THROW(COMM_FAILURE,ex.minor(),ex.completed());
 	  }
 	}
@@ -693,14 +710,16 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
 		 ex.minor() == TRANSIENT_CallTimedout) {
 
 	  CORBA::TIMEOUT ex2(ex.minor(), ex.completed());
-	  if (!_omni_callTimeoutExceptionHandler(this, retries++, ex2)) {
+	  if (!_omni_callTimeoutExceptionHandler(this, retries++, ex2,
+                                                 call_desc.op())) {
 	    OMNIORB_THROW(TIMEOUT,ex.minor(),ex.completed());
 	  }
 	  retry_after_timeout = 1;
 	}
 	else {
 	  CORBA::TRANSIENT ex2(ex.minor(), ex.completed());
-	  if (!_omni_callTransientExceptionHandler(this, retries++, ex2)) {
+	  if (!_omni_callTransientExceptionHandler(this, retries++, ex2,
+                                                   call_desc.op())) {
 	    OMNIORB_THROW(TRANSIENT,ex.minor(),ex.completed());
 	  }
 	}
@@ -710,15 +729,18 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
       if (fwd) {
 	RECOVER_FORWARD;
       }
-      else if (!_omni_callCommFailureExceptionHandler(this, retries++, ex))
+      else if (!_omni_callCommFailureExceptionHandler(this, retries++, ex,
+                                                      call_desc.op()))
 	OMNIORB_THROW(COMM_FAILURE,ex.minor(),ex.completed());
     }
     catch (CORBA::TRANSIENT& ex) {
-      if (!_omni_callTransientExceptionHandler(this, retries++, ex))
+      if (!_omni_callTransientExceptionHandler(this, retries++, ex,
+                                               call_desc.op()))
 	OMNIORB_THROW(TRANSIENT,ex.minor(),ex.completed());
     }
     catch (CORBA::TIMEOUT& ex) {
-      if (!_omni_callTimeoutExceptionHandler(this, retries++, ex))
+      if (!_omni_callTimeoutExceptionHandler(this, retries++, ex,
+                                             call_desc.op()))
 	OMNIORB_THROW(TIMEOUT,ex.minor(),ex.completed());
       retry_after_timeout = 1;
     }
@@ -726,11 +748,13 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
       if (fwd) {
 	RECOVER_FORWARD;
       }
-      else if (!_omni_callSystemExceptionHandler(this, retries++, ex))
+      else if (!_omni_callSystemExceptionHandler(this, retries++, ex,
+                                                 call_desc.op()))
 	OMNIORB_THROW(OBJECT_NOT_EXIST,ex.minor(),ex.completed());
     }
     catch (CORBA::SystemException& ex) {
-      if (!_omni_callSystemExceptionHandler(this, retries++, ex))
+      if (!_omni_callSystemExceptionHandler(this, retries++, ex,
+                                            call_desc.op()))
 	throw;
     }
     catch (omniORB::LOCATION_FORWARD& ex) {
@@ -738,7 +762,8 @@ omniObjRef::_invoke(omniCallDescriptor& call_desc, CORBA::Boolean do_assert)
 	CORBA::TRANSIENT ex2(TRANSIENT_NoUsableProfile, CORBA::COMPLETED_NO);
 	omniORB::logs(10, "Received GIOP::LOCATION_FORWARD message that"
 		      " contains a nil object reference.");
-	if (!_omni_callTransientExceptionHandler(this, retries++, ex2))
+	if (!_omni_callTransientExceptionHandler(this, retries++, ex2,
+                                                 call_desc.op()))
 	  OMNIORB_THROW(TRANSIENT,ex2.minor(),ex2.completed());
       }
       omni::locationForward(this,ex.get_obj()->_PR_getobj(),ex.is_permanent());

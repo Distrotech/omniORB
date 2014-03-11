@@ -3,7 +3,7 @@
 // omniORB.h                  Created on: 6/2/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2011 Apasphere Ltd
+//    Copyright (C) 2002-2014 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
@@ -370,19 +370,37 @@ _CORBA_MODULE_BEG
   // an addition argument <obj> to identify the target object reference.//
   // The argument <cookie> is an opaque pointer which will be passed 	//
   // on by the ORB when it calls the exception handler.			//
-  //									//
-  typedef CORBA::Boolean (*transientExceptionHandler_t)(void* cookie,	//
-					CORBA::ULong n_retries, 	//
-					const CORBA::TRANSIENT& ex);    //
-  //								       	//
-  _CORBA_MODULE_FN void installTransientExceptionHandler(void* cookie,  //
-				 transientExceptionHandler_t fn);       //
-  //									//
-  _CORBA_MODULE_FN void installTransientExceptionHandler(               //
-				 CORBA::Object_ptr obj,                 //
-				 void* cookie,                          //
-				 transientExceptionHandler_t fn);       //
-    									//
+
+  typedef CORBA::Boolean
+  (*transientExceptionHandler_t)(void*                   cookie,
+                                 CORBA::ULong            n_retries,
+                                 const CORBA::TRANSIENT& ex);
+
+  typedef CORBA::Boolean
+  (*transientExceptionHandlerExt_t)(void*                   cookie,
+                                    CORBA::ULong            n_retries,
+                                    const CORBA::TRANSIENT& ex,
+                                    CORBA::Object_ptr       obj,
+                                    const char*             op);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandler(void* cookie,
+                                   transientExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandler(CORBA::Object_ptr           obj,
+                                   void*                       cookie,
+                                   transientExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandlerExt(void* cookie,
+                                      transientExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandlerExt(CORBA::Object_ptr              obj,
+                                      void*                          cookie,
+                                      transientExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
 
@@ -399,18 +417,37 @@ _CORBA_MODULE_BEG
   // omniORB::installTimeoutExceptionHandler. The use of these	        //
   // functions is similar to those for the TRANSIENT exception. See 	//
   // above for details.							//
-  //									//
-  typedef CORBA::Boolean (*timeoutExceptionHandler_t)(void* cookie,	//
-					CORBA::ULong n_retries,         //
-					const CORBA::TIMEOUT& ex);      //
-  //									//
-  _CORBA_MODULE_FN void installTimeoutExceptionHandler(void* cookie,    //
-				 timeoutExceptionHandler_t fn);         //
-  //									//
-  _CORBA_MODULE_FN void installTimeoutExceptionHandler(                 //
-				   CORBA::Object_ptr obj,               //
-				   void* cookie,		        //
-				   timeoutExceptionHandler_t fn);       //
+
+  typedef CORBA::Boolean
+  (*timeoutExceptionHandler_t)(void*                 cookie,
+                               CORBA::ULong          n_retries,
+                               const CORBA::TIMEOUT& ex);
+
+  typedef CORBA::Boolean
+  (*timeoutExceptionHandlerExt_t)(void*                 cookie,
+                                  CORBA::ULong          n_retries,
+                                  const CORBA::TIMEOUT& ex,
+                                  CORBA::Object_ptr     obj,
+                                  const char*           op);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandler(void* cookie,
+				 timeoutExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandler(CORBA::Object_ptr         obj,
+                                 void*                     cookie,
+                                 timeoutExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandlerExt(void* cookie,
+                                    timeoutExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandlerExt(CORBA::Object_ptr            obj,
+                                    void*                        cookie,
+                                    timeoutExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
 
@@ -427,18 +464,37 @@ _CORBA_MODULE_BEG
   // omniORB::installCommFailureExceptionHandler. The use of these	//
   // functions is similar to those for the TRANSIENT exception. See 	//
   // above for details.							//
-  //									//
-  typedef CORBA::Boolean (*commFailureExceptionHandler_t)(void* cookie,	//
-					CORBA::ULong n_retries,         //
-					const CORBA::COMM_FAILURE& ex); //
-  //									//
-  _CORBA_MODULE_FN void installCommFailureExceptionHandler(void* cookie,//
-				 commFailureExceptionHandler_t fn);     //
-  //									//
-  _CORBA_MODULE_FN void installCommFailureExceptionHandler(             //
-				   CORBA::Object_ptr obj,               //
-				   void* cookie,		        //
-				   commFailureExceptionHandler_t fn);   //
+
+  typedef CORBA::Boolean
+  (*commFailureExceptionHandler_t)(void*                      cookie,
+                                   CORBA::ULong               n_retries,
+                                   const CORBA::COMM_FAILURE& ex);
+
+  typedef CORBA::Boolean
+  (*commFailureExceptionHandlerExt_t)(void*                      cookie,
+                                      CORBA::ULong               n_retries,
+                                      const CORBA::COMM_FAILURE& ex,
+                                      CORBA::Object_ptr          obj,
+                                      const char*                op);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandler(void* cookie,
+                                     commFailureExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandler(CORBA::Object_ptr             obj,
+                                     void*                         cookie,
+                                     commFailureExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandlerExt(void* cookie,
+                                        commFailureExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandlerExt(CORBA::Object_ptr                obj,
+                                        void*                            cookie,
+                                        commFailureExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////
@@ -461,25 +517,44 @@ _CORBA_MODULE_BEG
   // exception. See above for details. Notice that the installed        //
   // exception handler will only be called when the system exception is //
   // neither CORBA::TRANSIENT nor CORBA::COMM_FAILURE.			//
-  //									//
-  typedef CORBA::Boolean (*systemExceptionHandler_t)(void* cookie,	//
-				   CORBA::ULong n_retries, 	        //
-				   const CORBA::SystemException& ex);   //
-  //									//
-  _CORBA_MODULE_FN void installSystemExceptionHandler(void* cookie,	//
-				    systemExceptionHandler_t fn);       //
-  //									//
-  _CORBA_MODULE_FN void installSystemExceptionHandler(                  //
-				    CORBA::Object_ptr obj,              //
-				    void* cookie,		        //
-				    systemExceptionHandler_t fn);       //
+
+  typedef CORBA::Boolean
+  (*systemExceptionHandler_t)(void*                         cookie,
+                              CORBA::ULong                  n_retries,
+                              const CORBA::SystemException& ex);
+
+  typedef CORBA::Boolean
+  (*systemExceptionHandlerExt_t)(void*                         cookie,
+                                 CORBA::ULong                  n_retries,
+                                 const CORBA::SystemException& ex,
+                                 CORBA::Object_ptr             obj,
+                                 const char*                   op);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandler(void* cookie,
+                                systemExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandler(CORBA::Object_ptr        obj,
+                                void*                    cookie,
+                                systemExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandlerExt(void* cookie,
+                                   systemExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandlerExt(CORBA::Object_ptr           obj,
+                                   void*                       cookie,
+                                   systemExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
 
   ////////////////////////////////////////////////////////////////////////
   // class fatalException                                               //
   //                                                                    //
-  // This exception is thrown if a bug inside the omniORB2 runtime is   //
+  // This exception is thrown if a bug inside the omniORB runtime is    //
   // detected. The exact location in the source where the exception is  //
   // thrown is indicated by file() and line().                          //
   //                                                                    //
@@ -488,7 +563,7 @@ _CORBA_MODULE_BEG
     fatalException(const char *file,int line,const char *errmsg);       //
     inline ~fatalException() {}                                         //
     inline const char *file() const   { return pd_file;   }             //
-    inline int line() const           { return pd_line;   }             //
+    inline int         line() const   { return pd_line;   }             //
     inline const char *errmsg() const { return pd_errmsg; }             //
   private:                                                              //
     const char *pd_file;                                                //

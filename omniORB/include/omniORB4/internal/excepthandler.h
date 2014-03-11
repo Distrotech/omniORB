@@ -3,7 +3,7 @@
 // excepthandler.h            Created on: 13/5/97
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2011 Apasphere Ltd
+//    Copyright (C) 2011-2014 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
@@ -43,9 +43,15 @@ public:
   void*                   commfail_cookie;
   void*                   sysexcpt_hdr;
   void*                   sysexcpt_cookie;
+  CORBA::Boolean          transient_ext;
+  CORBA::Boolean          timeout_ext;
+  CORBA::Boolean          commfail_ext;
+  CORBA::Boolean          sysexcpt_ext;
+
   static omniExHandlers** Table;
   static omni_tracedmutex TableLock;
   friend class omniExHandlers_iterator;
+
 private:
   omniExHandlers();
   omniObjRef*             objptr;

@@ -184,18 +184,25 @@ _CORBA_MODULE_END
 
 //?? These really want to be renamed and put elsewhere.
 extern CORBA::Boolean
-_omni_callTransientExceptionHandler(omniObjRef* obj, CORBA::ULong retries,
-				    const CORBA::TRANSIENT& ex);
+_omni_callTransientExceptionHandler(omniObjRef*             obj,
+                                    CORBA::ULong            retries,
+				    const CORBA::TRANSIENT& ex,
+                                    const char*             op);
 extern CORBA::Boolean
-_omni_callTimeoutExceptionHandler(omniObjRef* obj, CORBA::ULong retries,
-				  const CORBA::TIMEOUT& ex);
+_omni_callTimeoutExceptionHandler(omniObjRef*           obj,
+                                  CORBA::ULong          retries,
+				  const CORBA::TIMEOUT& ex,
+                                  const char*           op);
 extern CORBA::Boolean
-_omni_callCommFailureExceptionHandler(omniObjRef* obj,
-				      CORBA::ULong retries,
-				      const CORBA::COMM_FAILURE& ex);
+_omni_callCommFailureExceptionHandler(omniObjRef*                obj,
+				      CORBA::ULong               retries,
+				      const CORBA::COMM_FAILURE& ex,
+                                      const char*                op);
 extern CORBA::Boolean
-_omni_callSystemExceptionHandler(omniObjRef* obj, CORBA::ULong retries,
-				 const CORBA::SystemException& ex);
+_omni_callSystemExceptionHandler(omniObjRef*                   obj,
+                                 CORBA::ULong                  retries,
+				 const CORBA::SystemException& ex,
+                                 const char*                   op);
 
 
 extern void _omni_set_NameService(CORBA::Object_ptr);

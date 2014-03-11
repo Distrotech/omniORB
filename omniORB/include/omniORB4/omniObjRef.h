@@ -124,62 +124,69 @@ public:
   // not.  May throw other system exceptions.
   //  This function is thread-safe.
 
-  void* _transientExceptionHandler(void*& cookie);
+  void* _transientExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a transientExceptionHandler_t has been installed for this object
   // by _transientExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _transientExceptionHandler(void* new_handler, void* cookie);
+  void _transientExceptionHandler(void* new_handler, void* cookie,
+                                  _CORBA_Boolean ext);
   // Set the transientExceptionHandler_t of this object.  By default,
   // i.e. when this function is not called for an object, the global
-  // transientExceptionHandler_t will be invoked when a CORBA::TRANSIENT
-  // exception is caught in a remote call from a proxy object.
-  // The argument <cookie> is an opaque argument that will be passed
-  // to the exception handler.
+  // transientExceptionHandler_t will be invoked when a
+  // CORBA::TRANSIENT exception is caught in a remote call from a
+  // proxy object.  The argument <cookie> is an opaque argument that
+  // will be passed to the exception handler. ext is true if the
+  // handler has extended parameters.
   //  This function is thread-safe.
 
-  void* _timeoutExceptionHandler(void*& cookie);
+  void* _timeoutExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a timeoutExceptionHandler_t has been installed for this object
   // by _timeoutExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _timeoutExceptionHandler(void* new_handler, void* cookie);
+  void _timeoutExceptionHandler(void* new_handler, void* cookie,
+                                _CORBA_Boolean ext);
   // Set the timeoutExceptionHandler_t of this object.  By default,
   // i.e. when this function is not called for an object, the global
   // timeoutExceptionHandler_t will be invoked when a CORBA::TIMEOUT
-  // exception is caught in a remote call from a proxy object.
-  // The argument <cookie> is an opaque argument that will be passed
-  // to the exception handler.
+  // exception is caught in a remote call from a proxy object.  The
+  // argument <cookie> is an opaque argument that will be passed to
+  // the exception handler. ext is true if the handler has extended
+  // parameters.
   //  This function is thread-safe.
 
-  void* _commFailureExceptionHandler(void*& cookie);
+  void* _commFailureExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a commFailureExceptionHandler_t has been installed for this object
   // by _commFailureExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _commFailureExceptionHandler(void* new_handler, void* cookie);
-  // Set the commFailureExceptionHandler_t of this object.  By default,
-  // i.e. when this function is not called for an object, the global
-  // commFailureExceptionHandler_t will be invoked when a CORBA::COMM_FAILURE
-  // exception is caught in a remote call from a proxy object.
-  // The argument <cookie> is an opaque argument that will be passed
-  // to the exception handler.
+  void _commFailureExceptionHandler(void* new_handler, void* cookie,
+                                    _CORBA_Boolean ext);
+  // Set the commFailureExceptionHandler_t of this object.  By
+  // default, i.e. when this function is not called for an object, the
+  // global commFailureExceptionHandler_t will be invoked when a
+  // CORBA::COMM_FAILURE exception is caught in a remote call from a
+  // proxy object.  The argument <cookie> is an opaque argument that
+  // will be passed to the exception handler. ext is true if the
+  // handler has extended parameters.
   //  This function is thread-safe.
 
-  void* _systemExceptionHandler(void*& cookie);
+  void* _systemExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a systemExceptionHandler_t has been installed for this object
   // by _systemExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _systemExceptionHandler(void* new_handler, void* cookie);
+  void _systemExceptionHandler(void* new_handler, void* cookie,
+                               _CORBA_Boolean ext);
   // Set the systemExceptionHandler_t of this object.  By default,
   // i.e. when this function is not called for an object, the global
   // systemExceptionHandler_t will be invoked when a
@@ -188,8 +195,9 @@ public:
   // from a proxy object.  The handlers for CORBA::TRANSIENT,
   // CORBA::COMM_FAILURE and CORBA::TIMEOUT are installed their own
   // install functions.  The argument <cookie> is an opaque argument
-  // that will be passed to the exception handler.  This function is
-  // thread-safe.
+  // that will be passed to the exception handler. ext is true if the
+  // handler has extended parameters.
+  // This function is thread-safe.
 
   inline omniIdentity* _identity() {
     ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
