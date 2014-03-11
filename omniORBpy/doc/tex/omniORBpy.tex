@@ -1402,6 +1402,43 @@ Alternatively, you can import the stubs at run-time by calling the
 available in the Python \module{CORBA} module.
 
 
+\section{IDL attributes}
+\label{sec:attributes}
+
+The Python language mapping says that IDL attributes map to methods
+with names prefixed \code{\_get\_} and \code{\_set\_}. omniORBpy
+adheres to this standard mapping, but additionally supports access
+using properties:
+
+\begin{idllisting}
+module M {
+  interface Example {
+    attribute string attr1;
+    readonly attribute long attr2;
+  };
+};
+\end{idllisting}
+
+\begin{pylisting}
+obj = # an M::Example object reference
+obj.attr1 = "Hello"
+print obj.attr2
+\end{pylisting}
+
+Servant classes can similarly provide attribute values using simple
+Python object attributes or properties. When invoking an attribute
+getter or setter, omniORBpy first looks for a method with the standard
+\code{\_get\_} or \code{\_set\_} name. If that is not found, a simple
+attribute lookup is performed. This is therefore a complete
+implementation of the \code{M::Example} interface:
+
+\begin{pylisting}
+class Example_i (M__POA.Example):
+    def __init__(self):
+        self.attr1 = "Test"
+        self.attr2 = 1234
+\end{pylisting}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{omniORB configuration and API}

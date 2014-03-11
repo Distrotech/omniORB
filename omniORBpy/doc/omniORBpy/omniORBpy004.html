@@ -13,20 +13,20 @@
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy005.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
 <HR>
-<H1 CLASS="chapter"><A NAME="htoc39">Chapter&#XA0;4</A>&#XA0;&#XA0;omniORB configuration and API</H1><P>
+<H1 CLASS="chapter"><A NAME="htoc40">Chapter&#XA0;4</A>&#XA0;&#XA0;omniORB configuration and API</H1><P>
 <A NAME="chap:config"></A></P><P>omniORB, and thus omniORBpy, has a wide range of parameters that can
 be configured. They can be set in the configuration file / Windows
 registry, as environment variables, or on the command line. A few
 parameters can be configured at run time. This chapter lists all the
-configuration parameters, and how they are used.</P><H2 CLASS="section"><A NAME="toc13"></A><A NAME="htoc40">4.1</A>&#XA0;&#XA0;Setting parameters</H2><P>When <TT>CORBA::ORB_init()</TT> is called, the value for each configuration
+configuration parameters, and how they are used.</P><H2 CLASS="section"><A NAME="toc14"></A><A NAME="htoc41">4.1</A>&#XA0;&#XA0;Setting parameters</H2><P>When <TT>CORBA::ORB_init()</TT> is called, the value for each configuration
 parameter is searched for in the following order:</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">Command line arguments
 </LI><LI CLASS="li-enumerate">Environment variables
 </LI><LI CLASS="li-enumerate">Configuration file / Windows registry
-</LI><LI CLASS="li-enumerate">Built-in defaults</LI></OL><H3 CLASS="subsection"><A NAME="htoc41">4.1.1</A>&#XA0;&#XA0;Command line arguments</H3><P>
+</LI><LI CLASS="li-enumerate">Built-in defaults</LI></OL><H3 CLASS="subsection"><A NAME="htoc42">4.1.1</A>&#XA0;&#XA0;Command line arguments</H3><P>
 <A NAME="sec:ORBargs"></A></P><P>Command line arguments take the form
 &#X2018;<TT>-ORB</TT><I>parameter</I>&#X2019;, and usually expect another
-argument. An example is &#X2018;<TT>-ORBtraceLevel 10</TT>&#X2019;.</P><H3 CLASS="subsection"><A NAME="htoc42">4.1.2</A>&#XA0;&#XA0;Environment variables</H3><P>Environment variables consist of the parameter name prefixed with
-&#X2018;<TT>ORB</TT>&#X2019;. Using bash, for example</P><DIV CLASS="lstlisting">export ORBtraceLevel=10</DIV><H3 CLASS="subsection"><A NAME="htoc43">4.1.3</A>&#XA0;&#XA0;Configuration file</H3><P>The best way to understand the format of the configuration file is to
+argument. An example is &#X2018;<TT>-ORBtraceLevel 10</TT>&#X2019;.</P><H3 CLASS="subsection"><A NAME="htoc43">4.1.2</A>&#XA0;&#XA0;Environment variables</H3><P>Environment variables consist of the parameter name prefixed with
+&#X2018;<TT>ORB</TT>&#X2019;. Using bash, for example</P><DIV CLASS="lstlisting">export ORBtraceLevel=10</DIV><H3 CLASS="subsection"><A NAME="htoc44">4.1.3</A>&#XA0;&#XA0;Configuration file</H3><P>The best way to understand the format of the configuration file is to
 look at the <TT>sample.cfg</TT> file in the omniORB distribution. Each
 parameter is set on a single line like</P><PRE CLASS="verbatim">traceLevel = 10
 </PRE><P>Some parameters can have more than one value, in which case the
@@ -39,9 +39,9 @@ out:</P><PRE CLASS="verbatim">InitRef = NameService=corbaname::host1.example.com
 Note how command line arguments and environment variables prefix
 parameter names with &#X2018;-ORB&#X2019; and &#X2018;ORB&#X2019; respectively, but the
 configuration file does not use a prefix.
-</DD></DL><HR SIZE=2></DIV><H3 CLASS="subsection"><A NAME="htoc44">4.1.4</A>&#XA0;&#XA0;Windows registry</H3><P>On Windows, configuration parameters can be stored in the registry,
+</DD></DL><HR SIZE=2></DIV><H3 CLASS="subsection"><A NAME="htoc45">4.1.4</A>&#XA0;&#XA0;Windows registry</H3><P>On Windows, configuration parameters can be stored in the registry,
 under the key <TT>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</TT>.</P><P>The file <TT>sample.reg</TT> shows the settings that can be made. It can
-be edited and then imported into regedit.</P><H2 CLASS="section"><A NAME="toc14"></A><A NAME="htoc45">4.2</A>&#XA0;&#XA0;Tracing options</H2><P>The following options control debugging trace output.</P><P><TT>traceLevel</TT> &#XA0;&#XA0; <I>default</I> =
+be edited and then imported into regedit.</P><H2 CLASS="section"><A NAME="toc15"></A><A NAME="htoc46">4.2</A>&#XA0;&#XA0;Tracing options</H2><P>The following options control debugging trace output.</P><P><TT>traceLevel</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1</TT></P><P>omniORB can output tracing and diagnostic messages to the standard
 error stream. The following levels are defined:</P><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left NOWRAP>&nbsp;</TD></TR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>
@@ -78,14 +78,14 @@ the logging so it can be disabled.</P><P><TT>traceTime</TT> &#XA0;&#XA0; <I>defa
 prefixed with the time. This is useful, but on some platforms it adds
 a very large overhead, so it can be turned off.</P><P><TT>traceFile</TT> &#XA0;&#XA0; <I>default</I> =
 </P><P>omniORB&#X2019;s tracing is normally sent to stderr. If <TT>traceFile</TT> it
-set, the specified file name is used for trace messages.</P><H3 CLASS="subsection"><A NAME="htoc46">4.2.1</A>&#XA0;&#XA0;Tracing API</H3><P>The tracing parameters can be inspected or modified at runtime with
+set, the specified file name is used for trace messages.</P><H3 CLASS="subsection"><A NAME="htoc47">4.2.1</A>&#XA0;&#XA0;Tracing API</H3><P>The tracing parameters can be inspected or modified at runtime with
 the following functions in the <TT>omniORB</TT> module:</P><DIV CLASS="lstlisting">  traceLevel()
   traceExceptions()
   traceInvocations()
   traceInvocationReturns()
   traceThreadId()
   traceTime()</DIV><P>Calling one of the functions with no arguments returns the current
-value; calling it with a single integer argument sets the value.</P><H2 CLASS="section"><A NAME="toc15"></A><A NAME="htoc47">4.3</A>&#XA0;&#XA0;Miscellaneous global options</H2><P>These options control miscellaneous features that affect the whole ORB
+value; calling it with a single integer argument sets the value.</P><H2 CLASS="section"><A NAME="toc16"></A><A NAME="htoc48">4.3</A>&#XA0;&#XA0;Miscellaneous global options</H2><P>These options control miscellaneous features that affect the whole ORB
 runtime.</P><P><TT>dumpConfiguration</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>If set <TT>true</TT>, the ORB dumps the values of all configuration
 parameters at start-up.</P><P><TT>scanGranularity</TT> &#XA0;&#XA0; <I>default</I> =
@@ -124,7 +124,7 @@ other platforms the default is -1.</P><P><TT>validateUTF8</TT> &#XA0;&#XA0; <I>d
 <TT>0</TT></P><P>When transmitting a string that is supposed to be UTF-8, omniORB
 usually passes it directly, assuming that it is valid. With this
 parameter set <TT>true</TT>, omniORB checks that all UTF-8 strings are
-valid, and throws DATA_CONVERSION if not.</P><H2 CLASS="section"><A NAME="toc16"></A><A NAME="htoc48">4.4</A>&#XA0;&#XA0;Client side options</H2><P>
+valid, and throws DATA_CONVERSION if not.</P><H2 CLASS="section"><A NAME="toc17"></A><A NAME="htoc49">4.4</A>&#XA0;&#XA0;Client side options</H2><P>
 <A NAME="sec:clientconf"></A></P><P>These options control aspects of client-side behaviour.</P><P><TT>InitRef</TT> &#XA0;&#XA0; <I>default</I> =
 <TT><I>none</I></TT></P><P>Specify objects available from
 <TT>orb.resolve_initial_references()</TT>. The arguments take the form
@@ -209,7 +209,7 @@ contains a sequence of octets. It was never defined what it should
 mean, and its use is now deprecated; GIOP 1.2 has no such field. Some
 systems (e.g. Gnome) use the principal field as a primitive
 authentication scheme. This parameter sets the data omniORB uses in
-the principal field. The default is an empty sequence.</P><H2 CLASS="section"><A NAME="toc17"></A><A NAME="htoc49">4.5</A>&#XA0;&#XA0;Server side options</H2><P>These parameters affect server-side operations.</P><P><TT>endPoint&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;</TT> &#XA0;&#XA0; <I>default</I> = <TT>giop:tcp::</TT><BR>
+the principal field. The default is an empty sequence.</P><H2 CLASS="section"><A NAME="toc18"></A><A NAME="htoc50">4.5</A>&#XA0;&#XA0;Server side options</H2><P>These parameters affect server-side operations.</P><P><TT>endPoint&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;</TT> &#XA0;&#XA0; <I>default</I> = <TT>giop:tcp::</TT><BR>
 <TT>endPointNoListen</TT><BR>
 <TT>endPointPublish</TT><BR>
 <TT>endPointNoPublish</TT><BR>
@@ -306,7 +306,7 @@ compatibility.</P><P><TT>idleThreadTimeout</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>10</TT></P><P>When a thread created by omniORB becomes idle, it is kept alive for a
 while, in case a new thread is required. Once a thread has been idle
 for the number of seconds specified in this parameter, it exits.</P><P><TT>supportBootstrapAgent</TT> &#XA0;&#XA0; <I>default</I> =
-<TT>0</TT></P><P>If set <TT>true</TT>, servers support the Sun bootstrap agent protocol.</P><H2 CLASS="section"><A NAME="toc18"></A><A NAME="htoc50">4.6</A>&#XA0;&#XA0;GIOP and interoperability options</H2><P>These options control omniORB&#X2019;s use of GIOP, and cover some areas
+<TT>0</TT></P><P>If set <TT>true</TT>, servers support the Sun bootstrap agent protocol.</P><H2 CLASS="section"><A NAME="toc19"></A><A NAME="htoc51">4.6</A>&#XA0;&#XA0;GIOP and interoperability options</H2><P>These options control omniORB&#X2019;s use of GIOP, and cover some areas
 where omniORB can work around buggy behaviour by other ORBs.</P><P><TT>maxGIOPVersion</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1.2</TT></P><P>Choose the maximum GIOP version the ORB should support. Valid values
 are 1.0, 1.1 and 1.2.</P><P><TT>giopMaxMsgSize</TT> &#XA0;&#XA0; <I>default</I> =
@@ -330,7 +330,7 @@ Setting this flag to <TT>false</TT> prevents the use of indirections
 (and, therefore, prevents the use of recursive TypeCodes).</P><P><TT>acceptMisalignedTcIndirections</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>If <TT>true</TT>, try to fix a mis-aligned indirection in a
 typecode. This is used to work around a bug in some old versions of
-Visibroker&#X2019;s Java ORB.</P><H2 CLASS="section"><A NAME="toc19"></A><A NAME="htoc51">4.7</A>&#XA0;&#XA0;System Exception Handlers</H2><P>
+Visibroker&#X2019;s Java ORB.</P><H2 CLASS="section"><A NAME="toc20"></A><A NAME="htoc52">4.7</A>&#XA0;&#XA0;System Exception Handlers</H2><P>
 <A NAME="sec:exHandlers"></A></P><P>By default, all system exceptions that are raised during an operation
 invocation, with the exception of some cases of
 <TT>CORBA.TRANSIENT</TT>, are propagated to the application code. Some
@@ -347,14 +347,14 @@ Handlers can be installed for <TT>CORBA.TRANSIENT</TT>,
 last handler covers all system exceptions other than the two covered
 by the first two handlers. An exception handler can be installed for
 individual proxy objects, or it can be installed for all proxy objects
-in the address space.</P><H3 CLASS="subsection"><A NAME="htoc52">4.7.1</A>&#XA0;&#XA0;Minor codes</H3><P>omniORB makes extensive use of exception minor codes to indicate the
+in the address space.</P><H3 CLASS="subsection"><A NAME="htoc53">4.7.1</A>&#XA0;&#XA0;Minor codes</H3><P>omniORB makes extensive use of exception minor codes to indicate the
 specific circumstances surrounding a system exception. The C++ file
 <TT>include/omniORB4/minorCode.h</TT> contains definitions of all the
 minor codes used in omniORB, covering codes allocated in the CORBA
 specification, and ones specific to omniORB.</P><P>Applications can use minor codes to adjust their behaviour according
 to the condition. You can receive a string format of a minor code by
 calling the <TT>omniORB.minorCodeToString()</TT> function, passing an
-exception object as its argument.</P><H3 CLASS="subsection"><A NAME="htoc53">4.7.2</A>&#XA0;&#XA0;CORBA.TRANSIENT handlers</H3><P><TT>TRANSIENT</TT> exceptions can occur in many circumstances. One
+exception object as its argument.</P><H3 CLASS="subsection"><A NAME="htoc54">4.7.2</A>&#XA0;&#XA0;CORBA.TRANSIENT handlers</H3><P><TT>TRANSIENT</TT> exceptions can occur in many circumstances. One
 circumstance is as follows:</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">The client invokes on an object reference.
 </LI><LI CLASS="li-enumerate">The object replies with a <TT>LOCATION_FORWARD</TT> message.
 </LI><LI CLASS="li-enumerate">The client caches the new location and retries to the new location.
@@ -385,7 +385,7 @@ the case of a <TT>TRANSIENT</TT> exception due to a failed location
 forward, the exception propagated to the application is the
 <EM>original</EM> exception that caused the <TT>TRANSIENT</TT> (e.g. a
 <TT>COMM_FAILURE</TT> or <TT>OBJECT_NOT_EXIST</TT>), rather than the
-<TT>TRANSIENT</TT> exception<SUP><A NAME="text9" HREF="#note9">1</A></SUP>.</P><H3 CLASS="subsection"><A NAME="htoc54">4.7.3</A>&#XA0;&#XA0;CORBA.TIMEOUT</H3><P>When a call timeout occurs, by default the ORB raises
+<TT>TRANSIENT</TT> exception<SUP><A NAME="text9" HREF="#note9">1</A></SUP>.</P><H3 CLASS="subsection"><A NAME="htoc55">4.7.3</A>&#XA0;&#XA0;CORBA.TIMEOUT</H3><P>When a call timeout occurs, by default the ORB raises
 <TT>CORBA.TIMEOUT</TT>. The default behaviour of the proxy objects is
 to propagate this exception to the application. Applications can
 override the default behaviour by installing their own exception
@@ -398,7 +398,7 @@ exception, and threw <TT>CORBA.TRANSIENT</TT> instead. If the
 transient exception handler instead of the timeout exception handler.</P><P>The timeout exception handler is used when a CORBA call times out. It
 is <EM>not</EM> called when an AMI poller operation throws
 <TT>CORBA.TIMEOUT</TT>. In that situation, the exception is always
-propagated to the caller.</P><H3 CLASS="subsection"><A NAME="htoc55">4.7.4</A>&#XA0;&#XA0;CORBA.COMM_FAILURE and CORBA.SystemException</H3><P>There are two other functions for registering exception handlers: one
+propagated to the caller.</P><H3 CLASS="subsection"><A NAME="htoc56">4.7.4</A>&#XA0;&#XA0;CORBA.COMM_FAILURE and CORBA.SystemException</H3><P>There are two other functions for registering exception handlers: one
 for <TT>CORBA.COMM_FAILURE</TT>, and one for all other
 exceptions. For both these cases, the default is for there to be no
 handler, so exceptions are propagated to the application.</P><P>If the ORB has successfully contacted a server at some point, and
@@ -406,7 +406,7 @@ access to it subsequently fails (and the condition for
 <TT>TRANSIENT</TT> described above does not occur), the ORB raises a
 <TT>CORBA.COMM_FAILURE</TT> exception.</P><DIV CLASS="lstlisting">omniORB.installCommFailureExceptionHandler(cookie, function [, object])
 omniORB.installSystemExceptionHandler(cookie, function [, object])</DIV><P>In both cases, the call-back function has the same signature
-as for <TT>TRANSIENT</TT> handlers.</P><H2 CLASS="section"><A NAME="toc20"></A><A NAME="htoc56">4.8</A>&#XA0;&#XA0;Location forwarding</H2><P>
+as for <TT>TRANSIENT</TT> handlers.</P><H2 CLASS="section"><A NAME="toc21"></A><A NAME="htoc57">4.8</A>&#XA0;&#XA0;Location forwarding</H2><P>
 <A NAME="sec:locationForward"></A></P><P>Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
 message to the caller, indicating that it should retry the invocation
 on a new object reference. The standard allows ServantManagers to
@@ -414,7 +414,7 @@ trigger <TT>LOCATION_FORWARD</TT>s by raising the
 <TT>PortableServer.ForwardRequest</TT> exception, but it does not
 provide a similar mechanism for normal servants. omniORB provides the
 <TT>omniORB.LOCATION_FORWARD</TT> exception for this purpose. It
-can be thrown by any operation implementation.</P><H2 CLASS="section"><A NAME="toc21"></A><A NAME="htoc57">4.9</A>&#XA0;&#XA0;Dynamic importing of IDL</H2><P>
+can be thrown by any operation implementation.</P><H2 CLASS="section"><A NAME="toc22"></A><A NAME="htoc58">4.9</A>&#XA0;&#XA0;Dynamic importing of IDL</H2><P>
 <A NAME="sec:importIDL"></A></P><P>omniORBpy is usually used with pre-generated stubs. Since Python is a
 dynamic language, however, it is possible to compile and import new
 stubs at run-time.</P><P>Dynamic importing is achieved with <TT>omniORB.importIDL()</TT> and
@@ -453,7 +453,7 @@ modules see different definitions of the same objects. Although the
 objects appear identical, they are not, and comparisons within
 applications and within omniORBpy unexpectedly fail. You should not
 use these functions in more than one module to import the same IDL
-files.</P><H2 CLASS="section"><A NAME="toc22"></A><A NAME="htoc58">4.10</A>&#XA0;&#XA0;C++ API</H2><P>omniORBpy has a C++ API that can be used by programs that embed Python
+files.</P><H2 CLASS="section"><A NAME="toc23"></A><A NAME="htoc59">4.10</A>&#XA0;&#XA0;C++ API</H2><P>omniORBpy has a C++ API that can be used by programs that embed Python
 in C++, or by C++ extension modules to Python. The API has functions
 to convert object references between their Python representation and
 their C++ representation. For extensions to omniORBpy itself, it has a

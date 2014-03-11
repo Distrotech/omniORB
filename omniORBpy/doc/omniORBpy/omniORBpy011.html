@@ -13,7 +13,7 @@
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy012.html"><IMG SRC="next_motif.gif" ALT="Next"></A>
 <HR>
-<H1 CLASS="chapter"><A NAME="htoc121">Chapter&#XA0;11</A>&#XA0;&#XA0;Asynchronous Method Invocation</H1><P>
+<H1 CLASS="chapter"><A NAME="htoc122">Chapter&#XA0;11</A>&#XA0;&#XA0;Asynchronous Method Invocation</H1><P>
 <A NAME="chap:ami"></A></P><P>omniORB 4.2 supports Asynchronous Method Invocation, AMI, as defined
 in the CORBA Messaging specification. It supports both the polling and
 callback models of asynchronous calls. Note that omniORB does not
@@ -24,7 +24,7 @@ specification as described in the CORBA 3.1 specification, chapter
 17&#XA0;[<A HREF="omniORBpy013.html#corba31-spec">OMG08</A>]. That version of the specification is largely
 the same as the one in CORBA 2.6. The only significant difference is
 that exception replies in the callback model use a simpler
-interface-independent mapping.</P><H2 CLASS="section"><A NAME="toc50"></A><A NAME="htoc122">11.1</A>&#XA0;&#XA0;Implied IDL</H2><P>AMI works by defining some additional <I>implied IDL</I> for each
+interface-independent mapping.</P><H2 CLASS="section"><A NAME="toc51"></A><A NAME="htoc123">11.1</A>&#XA0;&#XA0;Implied IDL</H2><P>AMI works by defining some additional <I>implied IDL</I> for each
 interface in the real IDL. The implied IDL contains type and
 operation definitions that enable asynchronous calls.</P><P>As a guide to the implied IDL, there is a special <TT>ami</TT>
 back-end to omniidl that outputs the implied IDL for the given input
@@ -52,12 +52,12 @@ IDL. For example, given the Echo example IDL:</P><DIV CLASS="lstlisting"><I>// e
 output an interleaved version that shows the original IDL and the
 implied IDL together.</P><P>Note that the implied IDL output is for information only. You should
 not compile it, but rather instruct the omniidl Python back-end to
-generate the corresponding Python definitions.</P><H2 CLASS="section"><A NAME="toc51"></A><A NAME="htoc123">11.2</A>&#XA0;&#XA0;Generating AMI stubs</H2><P>To generate stub code including AMI types and operations, give the
+generate the corresponding Python definitions.</P><H2 CLASS="section"><A NAME="toc52"></A><A NAME="htoc124">11.2</A>&#XA0;&#XA0;Generating AMI stubs</H2><P>To generate stub code including AMI types and operations, give the
 <TT>-Wbami</TT> command line option to omniidl&#X2019;s <TT>python</TT>
 back-end:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl -bpython -Wbami echo.idl</TT>
 </BLOCKQUOTE><P>That generates the normal Python stubs and skeletons, plus
-all the definitions in the implied IDL.</P><H2 CLASS="section"><A NAME="toc52"></A><A NAME="htoc124">11.3</A>&#XA0;&#XA0;AMI examples</H2><P>Example AMI clients for the <TT>Example::Echo</TT> server can be found in
+all the definitions in the implied IDL.</P><H2 CLASS="section"><A NAME="toc53"></A><A NAME="htoc125">11.3</A>&#XA0;&#XA0;AMI examples</H2><P>Example AMI clients for the <TT>Example::Echo</TT> server can be found in
 <TT>examples/ami</TT>.</P><HR>
 <A HREF="omniORBpy010.html"><IMG SRC="previous_motif.gif" ALT="Previous"></A>
 <A HREF="index.html"><IMG SRC="contents_motif.gif" ALT="Up"></A>

@@ -789,7 +789,27 @@ unnecessarily increase the memory footprint and start-up time.</P><P>The Interfa
 define the <TT>OMNIORBPY_IMPORT_IR_STUBS</TT> environment variable.
 Alternatively, you can import the stubs at run-time by calling the
 <TT>omniORB.importIRStubs()</TT> function. In both cases, the stubs become
-available in the Python <TT>CORBA</TT> module.</P><!--BEGIN NOTES chapter-->
+available in the Python <TT>CORBA</TT> module.</P><!--TOC section IDL attributes-->
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc39">3.4</A>&#XA0;&#XA0;IDL attributes</H2><!--SEC END --><P>
+<A NAME="sec:attributes"></A></P><P>The Python language mapping says that IDL attributes map to methods
+with names prefixed <TT>_get_</TT> and <TT>_set_</TT>. omniORBpy
+adheres to this standard mapping, but additionally supports access
+using properties:</P><DIV CLASS="lstlisting"><B>module</B> M {
+  <B>interface</B> Example {
+    <B>attribute</B> <B>string</B> attr1;
+    <B>readonly</B> <B>attribute</B> <B>long</B> attr2;
+  };
+};</DIV><DIV CLASS="lstlisting">obj = <I># an M::Example object reference</I>
+obj.attr1 = "Hello"
+<B>print</B> obj.attr2</DIV><P>Servant classes can similarly provide attribute values using simple
+Python object attributes or properties. When invoking an attribute
+getter or setter, omniORBpy first looks for a method with the standard
+<TT>_get_</TT> or <TT>_set_</TT> name. If that is not found, a simple
+attribute lookup is performed. This is therefore a complete
+implementation of the <TT>M::Example</TT> interface:</P><DIV CLASS="lstlisting"><B>class</B> Example_i (M__POA.Example):
+    <B>def</B> __init__(self):
+        self.attr1 = "Test"
+        self.attr2 = 1234</DIV><!--BEGIN NOTES chapter-->
 <HR CLASS="footnoterule"><DL CLASS="thefootnotes"><DT CLASS="dt-thefootnotes">
 <A NAME="note6" HREF="#text6">1</A></DT><DD CLASS="dd-thefootnotes">It
 is possible to change the repository id strings associated with
@@ -802,24 +822,24 @@ deprecated as of GIOP 1.2.
 </DD></DL>
 <!--END NOTES-->
 <!--TOC chapter omniORB configuration and API-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc39">Chapter&#XA0;4</A>&#XA0;&#XA0;omniORB configuration and API</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc40">Chapter&#XA0;4</A>&#XA0;&#XA0;omniORB configuration and API</H1><!--SEC END --><P>
 <A NAME="chap:config"></A></P><P>omniORB, and thus omniORBpy, has a wide range of parameters that can
 be configured. They can be set in the configuration file / Windows
 registry, as environment variables, or on the command line. A few
 parameters can be configured at run time. This chapter lists all the
 configuration parameters, and how they are used.</P><!--TOC section Setting parameters-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc40">4.1</A>&#XA0;&#XA0;Setting parameters</H2><!--SEC END --><P>When <TT>CORBA::ORB_init()</TT> is called, the value for each configuration
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc41">4.1</A>&#XA0;&#XA0;Setting parameters</H2><!--SEC END --><P>When <TT>CORBA::ORB_init()</TT> is called, the value for each configuration
 parameter is searched for in the following order:</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">Command line arguments
 </LI><LI CLASS="li-enumerate">Environment variables
 </LI><LI CLASS="li-enumerate">Configuration file / Windows registry
 </LI><LI CLASS="li-enumerate">Built-in defaults</LI></OL><!--TOC subsection Command line arguments-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc41">4.1.1</A>&#XA0;&#XA0;Command line arguments</H3><!--SEC END --><P>
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc42">4.1.1</A>&#XA0;&#XA0;Command line arguments</H3><!--SEC END --><P>
 <A NAME="sec:ORBargs"></A></P><P>Command line arguments take the form
 &#X2018;<TT>-ORB</TT><I>parameter</I>&#X2019;, and usually expect another
 argument. An example is &#X2018;<TT>-ORBtraceLevel 10</TT>&#X2019;.</P><!--TOC subsection Environment variables-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc42">4.1.2</A>&#XA0;&#XA0;Environment variables</H3><!--SEC END --><P>Environment variables consist of the parameter name prefixed with
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc43">4.1.2</A>&#XA0;&#XA0;Environment variables</H3><!--SEC END --><P>Environment variables consist of the parameter name prefixed with
 &#X2018;<TT>ORB</TT>&#X2019;. Using bash, for example</P><DIV CLASS="lstlisting">export ORBtraceLevel=10</DIV><!--TOC subsection Configuration file-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc43">4.1.3</A>&#XA0;&#XA0;Configuration file</H3><!--SEC END --><P>The best way to understand the format of the configuration file is to
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc44">4.1.3</A>&#XA0;&#XA0;Configuration file</H3><!--SEC END --><P>The best way to understand the format of the configuration file is to
 look at the <TT>sample.cfg</TT> file in the omniORB distribution. Each
 parameter is set on a single line like</P><PRE CLASS="verbatim">traceLevel = 10
 </PRE><P>Some parameters can have more than one value, in which case the
@@ -833,10 +853,10 @@ Note how command line arguments and environment variables prefix
 parameter names with &#X2018;-ORB&#X2019; and &#X2018;ORB&#X2019; respectively, but the
 configuration file does not use a prefix.
 </DD></DL><HR SIZE=2></DIV><!--TOC subsection Windows registry-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc44">4.1.4</A>&#XA0;&#XA0;Windows registry</H3><!--SEC END --><P>On Windows, configuration parameters can be stored in the registry,
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc45">4.1.4</A>&#XA0;&#XA0;Windows registry</H3><!--SEC END --><P>On Windows, configuration parameters can be stored in the registry,
 under the key <TT>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</TT>.</P><P>The file <TT>sample.reg</TT> shows the settings that can be made. It can
 be edited and then imported into regedit.</P><!--TOC section Tracing options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc45">4.2</A>&#XA0;&#XA0;Tracing options</H2><!--SEC END --><P>The following options control debugging trace output.</P><P><TT>traceLevel</TT> &#XA0;&#XA0; <I>default</I> =
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc46">4.2</A>&#XA0;&#XA0;Tracing options</H2><!--SEC END --><P>The following options control debugging trace output.</P><P><TT>traceLevel</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1</TT></P><P>omniORB can output tracing and diagnostic messages to the standard
 error stream. The following levels are defined:</P><TABLE CELLSPACING=6 CELLPADDING=0><TR><TD VALIGN=top ALIGN=left NOWRAP>&nbsp;</TD></TR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>
@@ -874,7 +894,7 @@ prefixed with the time. This is useful, but on some platforms it adds
 a very large overhead, so it can be turned off.</P><P><TT>traceFile</TT> &#XA0;&#XA0; <I>default</I> =
 </P><P>omniORB&#X2019;s tracing is normally sent to stderr. If <TT>traceFile</TT> it
 set, the specified file name is used for trace messages.</P><!--TOC subsection Tracing API-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc46">4.2.1</A>&#XA0;&#XA0;Tracing API</H3><!--SEC END --><P>The tracing parameters can be inspected or modified at runtime with
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc47">4.2.1</A>&#XA0;&#XA0;Tracing API</H3><!--SEC END --><P>The tracing parameters can be inspected or modified at runtime with
 the following functions in the <TT>omniORB</TT> module:</P><DIV CLASS="lstlisting">  traceLevel()
   traceExceptions()
   traceInvocations()
@@ -882,7 +902,7 @@ the following functions in the <TT>omniORB</TT> module:</P><DIV CLASS="lstlistin
   traceThreadId()
   traceTime()</DIV><P>Calling one of the functions with no arguments returns the current
 value; calling it with a single integer argument sets the value.</P><!--TOC section Miscellaneous global options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc47">4.3</A>&#XA0;&#XA0;Miscellaneous global options</H2><!--SEC END --><P>These options control miscellaneous features that affect the whole ORB
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc48">4.3</A>&#XA0;&#XA0;Miscellaneous global options</H2><!--SEC END --><P>These options control miscellaneous features that affect the whole ORB
 runtime.</P><P><TT>dumpConfiguration</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>If set <TT>true</TT>, the ORB dumps the values of all configuration
 parameters at start-up.</P><P><TT>scanGranularity</TT> &#XA0;&#XA0; <I>default</I> =
@@ -922,7 +942,7 @@ other platforms the default is -1.</P><P><TT>validateUTF8</TT> &#XA0;&#XA0; <I>d
 usually passes it directly, assuming that it is valid. With this
 parameter set <TT>true</TT>, omniORB checks that all UTF-8 strings are
 valid, and throws DATA_CONVERSION if not.</P><!--TOC section Client side options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc48">4.4</A>&#XA0;&#XA0;Client side options</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc49">4.4</A>&#XA0;&#XA0;Client side options</H2><!--SEC END --><P>
 <A NAME="sec:clientconf"></A></P><P>These options control aspects of client-side behaviour.</P><P><TT>InitRef</TT> &#XA0;&#XA0; <I>default</I> =
 <TT><I>none</I></TT></P><P>Specify objects available from
 <TT>orb.resolve_initial_references()</TT>. The arguments take the form
@@ -1008,7 +1028,7 @@ mean, and its use is now deprecated; GIOP 1.2 has no such field. Some
 systems (e.g. Gnome) use the principal field as a primitive
 authentication scheme. This parameter sets the data omniORB uses in
 the principal field. The default is an empty sequence.</P><!--TOC section Server side options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc49">4.5</A>&#XA0;&#XA0;Server side options</H2><!--SEC END --><P>These parameters affect server-side operations.</P><P><TT>endPoint&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;</TT> &#XA0;&#XA0; <I>default</I> = <TT>giop:tcp::</TT><BR>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc50">4.5</A>&#XA0;&#XA0;Server side options</H2><!--SEC END --><P>These parameters affect server-side operations.</P><P><TT>endPoint&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;&#XA0;</TT> &#XA0;&#XA0; <I>default</I> = <TT>giop:tcp::</TT><BR>
 <TT>endPointNoListen</TT><BR>
 <TT>endPointPublish</TT><BR>
 <TT>endPointNoPublish</TT><BR>
@@ -1106,7 +1126,7 @@ compatibility.</P><P><TT>idleThreadTimeout</TT> &#XA0;&#XA0; <I>default</I> =
 while, in case a new thread is required. Once a thread has been idle
 for the number of seconds specified in this parameter, it exits.</P><P><TT>supportBootstrapAgent</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>0</TT></P><P>If set <TT>true</TT>, servers support the Sun bootstrap agent protocol.</P><!--TOC section GIOP and interoperability options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc50">4.6</A>&#XA0;&#XA0;GIOP and interoperability options</H2><!--SEC END --><P>These options control omniORB&#X2019;s use of GIOP, and cover some areas
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc51">4.6</A>&#XA0;&#XA0;GIOP and interoperability options</H2><!--SEC END --><P>These options control omniORB&#X2019;s use of GIOP, and cover some areas
 where omniORB can work around buggy behaviour by other ORBs.</P><P><TT>maxGIOPVersion</TT> &#XA0;&#XA0; <I>default</I> =
 <TT>1.2</TT></P><P>Choose the maximum GIOP version the ORB should support. Valid values
 are 1.0, 1.1 and 1.2.</P><P><TT>giopMaxMsgSize</TT> &#XA0;&#XA0; <I>default</I> =
@@ -1131,7 +1151,7 @@ Setting this flag to <TT>false</TT> prevents the use of indirections
 <TT>0</TT></P><P>If <TT>true</TT>, try to fix a mis-aligned indirection in a
 typecode. This is used to work around a bug in some old versions of
 Visibroker&#X2019;s Java ORB.</P><!--TOC section System Exception Handlers-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc51">4.7</A>&#XA0;&#XA0;System Exception Handlers</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc52">4.7</A>&#XA0;&#XA0;System Exception Handlers</H2><!--SEC END --><P>
 <A NAME="sec:exHandlers"></A></P><P>By default, all system exceptions that are raised during an operation
 invocation, with the exception of some cases of
 <TT>CORBA.TRANSIENT</TT>, are propagated to the application code. Some
@@ -1149,7 +1169,7 @@ last handler covers all system exceptions other than the two covered
 by the first two handlers. An exception handler can be installed for
 individual proxy objects, or it can be installed for all proxy objects
 in the address space.</P><!--TOC subsection Minor codes-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc52">4.7.1</A>&#XA0;&#XA0;Minor codes</H3><!--SEC END --><P>omniORB makes extensive use of exception minor codes to indicate the
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc53">4.7.1</A>&#XA0;&#XA0;Minor codes</H3><!--SEC END --><P>omniORB makes extensive use of exception minor codes to indicate the
 specific circumstances surrounding a system exception. The C++ file
 <TT>include/omniORB4/minorCode.h</TT> contains definitions of all the
 minor codes used in omniORB, covering codes allocated in the CORBA
@@ -1157,7 +1177,7 @@ specification, and ones specific to omniORB.</P><P>Applications can use minor co
 to the condition. You can receive a string format of a minor code by
 calling the <TT>omniORB.minorCodeToString()</TT> function, passing an
 exception object as its argument.</P><!--TOC subsection CORBA.TRANSIENT handlers-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc53">4.7.2</A>&#XA0;&#XA0;CORBA.TRANSIENT handlers</H3><!--SEC END --><P><TT>TRANSIENT</TT> exceptions can occur in many circumstances. One
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc54">4.7.2</A>&#XA0;&#XA0;CORBA.TRANSIENT handlers</H3><!--SEC END --><P><TT>TRANSIENT</TT> exceptions can occur in many circumstances. One
 circumstance is as follows:</P><OL CLASS="enumerate" type=1><LI CLASS="li-enumerate">The client invokes on an object reference.
 </LI><LI CLASS="li-enumerate">The object replies with a <TT>LOCATION_FORWARD</TT> message.
 </LI><LI CLASS="li-enumerate">The client caches the new location and retries to the new location.
@@ -1189,7 +1209,7 @@ forward, the exception propagated to the application is the
 <EM>original</EM> exception that caused the <TT>TRANSIENT</TT> (e.g. a
 <TT>COMM_FAILURE</TT> or <TT>OBJECT_NOT_EXIST</TT>), rather than the
 <TT>TRANSIENT</TT> exception<SUP><A NAME="text9" HREF="#note9">1</A></SUP>.</P><!--TOC subsection CORBA.TIMEOUT-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc54">4.7.3</A>&#XA0;&#XA0;CORBA.TIMEOUT</H3><!--SEC END --><P>When a call timeout occurs, by default the ORB raises
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc55">4.7.3</A>&#XA0;&#XA0;CORBA.TIMEOUT</H3><!--SEC END --><P>When a call timeout occurs, by default the ORB raises
 <TT>CORBA.TIMEOUT</TT>. The default behaviour of the proxy objects is
 to propagate this exception to the application. Applications can
 override the default behaviour by installing their own exception
@@ -1203,7 +1223,7 @@ transient exception handler instead of the timeout exception handler.</P><P>The 
 is <EM>not</EM> called when an AMI poller operation throws
 <TT>CORBA.TIMEOUT</TT>. In that situation, the exception is always
 propagated to the caller.</P><!--TOC subsection CORBA.COMM_FAILURE and CORBA.SystemException-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc55">4.7.4</A>&#XA0;&#XA0;CORBA.COMM_FAILURE and CORBA.SystemException</H3><!--SEC END --><P>There are two other functions for registering exception handlers: one
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc56">4.7.4</A>&#XA0;&#XA0;CORBA.COMM_FAILURE and CORBA.SystemException</H3><!--SEC END --><P>There are two other functions for registering exception handlers: one
 for <TT>CORBA.COMM_FAILURE</TT>, and one for all other
 exceptions. For both these cases, the default is for there to be no
 handler, so exceptions are propagated to the application.</P><P>If the ORB has successfully contacted a server at some point, and
@@ -1212,7 +1232,7 @@ access to it subsequently fails (and the condition for
 <TT>CORBA.COMM_FAILURE</TT> exception.</P><DIV CLASS="lstlisting">omniORB.installCommFailureExceptionHandler(cookie, function [, object])
 omniORB.installSystemExceptionHandler(cookie, function [, object])</DIV><P>In both cases, the call-back function has the same signature
 as for <TT>TRANSIENT</TT> handlers.</P><!--TOC section Location forwarding-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc56">4.8</A>&#XA0;&#XA0;Location forwarding</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc57">4.8</A>&#XA0;&#XA0;Location forwarding</H2><!--SEC END --><P>
 <A NAME="sec:locationForward"></A></P><P>Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
 message to the caller, indicating that it should retry the invocation
 on a new object reference. The standard allows ServantManagers to
@@ -1221,7 +1241,7 @@ trigger <TT>LOCATION_FORWARD</TT>s by raising the
 provide a similar mechanism for normal servants. omniORB provides the
 <TT>omniORB.LOCATION_FORWARD</TT> exception for this purpose. It
 can be thrown by any operation implementation.</P><!--TOC section Dynamic importing of IDL-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc57">4.9</A>&#XA0;&#XA0;Dynamic importing of IDL</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc58">4.9</A>&#XA0;&#XA0;Dynamic importing of IDL</H2><!--SEC END --><P>
 <A NAME="sec:importIDL"></A></P><P>omniORBpy is usually used with pre-generated stubs. Since Python is a
 dynamic language, however, it is possible to compile and import new
 stubs at run-time.</P><P>Dynamic importing is achieved with <TT>omniORB.importIDL()</TT> and
@@ -1261,7 +1281,7 @@ objects appear identical, they are not, and comparisons within
 applications and within omniORBpy unexpectedly fail. You should not
 use these functions in more than one module to import the same IDL
 files.</P><!--TOC section C++ API-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc58">4.10</A>&#XA0;&#XA0;C++ API</H2><!--SEC END --><P>omniORBpy has a C++ API that can be used by programs that embed Python
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc59">4.10</A>&#XA0;&#XA0;C++ API</H2><!--SEC END --><P>omniORBpy has a C++ API that can be used by programs that embed Python
 in C++, or by C++ extension modules to Python. The API has functions
 to convert object references between their Python representation and
 their C++ representation. For extensions to omniORBpy itself, it has a
@@ -1283,13 +1303,13 @@ therefore be available on your path.
 </DD></DL>
 <!--END NOTES-->
 <!--TOC chapter The IDL compiler-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc59">Chapter&#XA0;5</A>&#XA0;&#XA0;The IDL compiler</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc60">Chapter&#XA0;5</A>&#XA0;&#XA0;The IDL compiler</H1><!--SEC END --><P>
 <A NAME="chap:omniidl"></A></P><P>omniORBpy&#X2019;s IDL compiler is called omniidl. It consists of a generic
 front-end parser written in C++, and a number of back-ends written in
 Python. omniidl is very strict about IDL validity, so you may find
 that it reports errors in IDL which compiles fine with other IDL
 compilers.</P><P>The general form of an omniidl command line is:</P><BLOCKQUOTE CLASS="quote"> <TT>omniidl </TT>[<I>options</I>]<TT> -b</TT>&lt;<I>back-end</I>&gt;<TT> </TT>[<I>back-end options</I>]<TT> </TT>&lt;<I>file 1</I>&gt;<TT> </TT>&#X2026;</BLOCKQUOTE><!--TOC section Common options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc60">5.1</A>&#XA0;&#XA0;Common options</H2><!--SEC END --><P>The following options are common to all back-ends:</P><TABLE border=0 cellspacing=0 cellpadding=0><TR><TD ALIGN=left NOWRAP></TD></TR>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc61">5.1</A>&#XA0;&#XA0;Common options</H2><!--SEC END --><P>The following options are common to all back-ends:</P><TABLE border=0 cellspacing=0 cellpadding=0><TR><TD ALIGN=left NOWRAP></TD></TR>
 <TR><TD ALIGN=left NOWRAP>
 <TT>-b</TT><I>back-end</I></TD><TD ALIGN=left NOWRAP>Run the specified back-end. For omniORBpy, use <TT>-bpython</TT>.</TD></TR>
 <TR><TD ALIGN=left NOWRAP>
@@ -1333,7 +1353,7 @@ preprocessor.</TD></TR>
 </TD></TR>
 </TABLE><P>Most of these options are self explanatory, but some are not
 so obvious.</P><!--TOC subsection Preprocessor interactions-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc61">5.1.1</A>&#XA0;&#XA0;Preprocessor interactions</H3><!--SEC END --><P>IDL is processed by the C preprocessor before omniidl parses it.
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc62">5.1.1</A>&#XA0;&#XA0;Preprocessor interactions</H3><!--SEC END --><P>IDL is processed by the C preprocessor before omniidl parses it.
 omniidl always uses the GNU C preprocessor (which it builds with the
 name omnicpp). The <TT>-D</TT>, <TT>-U</TT>, and <TT>-I</TT>
 options are just sent to the preprocessor. Note that the current
@@ -1342,14 +1362,14 @@ directory is not on the include search path by default&#X2014;use
 specify a different preprocessor to omnicpp. Beware that line
 directives inserted by other preprocessors are likely to confuse
 omniidl.</P><!--TOC subsubsection Windows 9x-->
-<H4 CLASS="subsubsection"><!--SEC ANCHOR --><A NAME="htoc62">5.1.1.1</A>&#XA0;&#XA0;Windows 9x</H4><!--SEC END --><P>The output from the C preprocessor is normally fed to the omniidl
+<H4 CLASS="subsubsection"><!--SEC ANCHOR --><A NAME="htoc63">5.1.1.1</A>&#XA0;&#XA0;Windows 9x</H4><!--SEC END --><P>The output from the C preprocessor is normally fed to the omniidl
 parser through a pipe. On some Windows 98 machines (but not all!) the
 pipe does not work, and the preprocessor output is echoed to the
 screen. When this happens, the omniidl parser sees an empty file, and
 produces useless stub files with strange long names. To avoid the
 problem, use the &#X2018;<TT>-T</TT>&#X2019; option to create a temporary file
 between the two stages.</P><!--TOC subsection Forward-declared interfaces-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc63">5.1.2</A>&#XA0;&#XA0;Forward-declared interfaces</H3><!--SEC END --><P>If you have an IDL file like:</P><DIV CLASS="lstlisting"><B>interface</B> I;
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc64">5.1.2</A>&#XA0;&#XA0;Forward-declared interfaces</H3><!--SEC END --><P>If you have an IDL file like:</P><DIV CLASS="lstlisting"><B>interface</B> I;
 <B>interface</B> J {
   <B>attribute</B> I the_I;
 };</DIV><P>then omniidl will normally issue a warning:</P><PRE CLASS="verbatim">  test.idl:1: Warning: Forward declared interface `I' was never
@@ -1359,7 +1379,7 @@ between the two stages.</P><!--TOC subsection Forward-declared interfaces-->
 you have a lot of IDL with this sort of construct, you will drown
 under the warning messages. Use the <TT>-nf</TT> option to suppress
 them.</P><!--TOC subsection Comments-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc64">5.1.3</A>&#XA0;&#XA0;Comments</H3><!--SEC END --><P>By default, omniidl discards comments in the input IDL. However, with
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc65">5.1.3</A>&#XA0;&#XA0;Comments</H3><!--SEC END --><P>By default, omniidl discards comments in the input IDL. However, with
 the <TT>-k</TT> and <TT>-K</TT> options, it preserves the comments
 for use by the back-ends. The Python back-end ignores this
 information, but it is relatively easy to write new back-ends which
@@ -1370,7 +1390,7 @@ declarations within the IDL. Given IDL like:</P><DIV CLASS="lstlisting"><B>inter
   <B>void</B> op2();
 };</DIV><P>the <TT>-k</TT> flag will attach the comment to <TT>op1()</TT>;
 the <TT>-K</TT> flag will attach it to <TT>op2()</TT>.</P><!--TOC section Python back-end options-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc65">5.2</A>&#XA0;&#XA0;Python back-end options</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc66">5.2</A>&#XA0;&#XA0;Python back-end options</H2><!--SEC END --><P>
 <A NAME="sec:Wbglobal"></A></P><P>When you specify the Python back-end (with <TT>-bpython</TT>), the
 following <TT>-Wb</TT> options become available. Note that the
 <TT>-Wb</TT> options must be specified <EM>after</EM> the
@@ -1397,12 +1417,12 @@ file.</TD></TR>
 <TR><TD ALIGN=left NOWRAP>
 </TD></TR>
 </TABLE><!--TOC subsection Inclusion options-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc66">5.2.1</A>&#XA0;&#XA0;Inclusion options</H3><!--SEC END --><P>When you compile an IDL file which #includes other IDL files, omniidl
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc67">5.2.1</A>&#XA0;&#XA0;Inclusion options</H3><!--SEC END --><P>When you compile an IDL file which #includes other IDL files, omniidl
 normally only generates code for the main file, assuming that code for
 the included files will be generated separately. Instead, you can use
 the <TT>-Wbinline</TT> option to generate code for the main IDL file
 <EM>and</EM> all included files in a single stub file.</P><!--TOC subsection Output options-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc67">5.2.2</A>&#XA0;&#XA0;Output options</H3><!--SEC END --><P>The <TT>-Wbstdout</TT> option is not really useful if you are
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc68">5.2.2</A>&#XA0;&#XA0;Output options</H3><!--SEC END --><P>The <TT>-Wbstdout</TT> option is not really useful if you are
 invoking omniidl yourself. It is used by <TT>omniORB.importIDL()</TT>,
 described in section&#XA0;<A HREF="#sec:importIDL">4.9</A>.</P><P>Definitions declared at IDL global scope are normally placed in a
 Python module named &#X2018;<TT>_GlobalIDL</TT>&#X2019;. The <TT>-Wbglobal</TT>
@@ -1432,10 +1452,10 @@ can use the <TT>-Wbmodules</TT> and <TT>-Wbstubs</TT> options.</P><P>Note that i
 interface to the generated code is not strictly-speaking CORBA
 compliant. You may have to change your code if you ever use a Python
 ORB other than omniORBpy.</P><!--TOC subsection Asynchronous Method Invocation-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc68">5.2.3</A>&#XA0;&#XA0;Asynchronous Method Invocation</H3><!--SEC END --><P>Generate asynchronous invocation operations and the various types
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc69">5.2.3</A>&#XA0;&#XA0;Asynchronous Method Invocation</H3><!--SEC END --><P>Generate asynchronous invocation operations and the various types
 required by AMI by specifying <TT>-Wbami</TT>. See
 chapter&#XA0;<A HREF="#chap:ami">11</A> for details.</P><!--TOC section Examples-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc69">5.3</A>&#XA0;&#XA0;Examples</H2><!--SEC END --><P>Generate the Python stubs for a file <TT>a.idl</TT>:</P><BLOCKQUOTE CLASS="quote">
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc70">5.3</A>&#XA0;&#XA0;Examples</H2><!--SEC END --><P>Generate the Python stubs for a file <TT>a.idl</TT>:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl -bpython a.idl</TT>
 </BLOCKQUOTE><P>As above, but put the stubs in a package called
 &#X2018;<TT>stubs</TT>&#X2019;:</P><BLOCKQUOTE CLASS="quote">
@@ -1445,10 +1465,10 @@ chapter&#XA0;<A HREF="#chap:ami">11</A> for details.</P><!--TOC section Examples
 </BLOCKQUOTE><P>Just check the IDL files for validity, generating no output:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl a.idl b.idl</TT>
 </BLOCKQUOTE><!--TOC chapter Connection and Thread Management-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc70">Chapter&#XA0;6</A>&#XA0;&#XA0;Connection and Thread Management</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc71">Chapter&#XA0;6</A>&#XA0;&#XA0;Connection and Thread Management</H1><!--SEC END --><P>
 <A NAME="chap:connections"></A></P><P>This chapter describes how omniORB manages threads and network
 connections.</P><!--TOC section Background-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc71">6.1</A>&#XA0;&#XA0;Background</H2><!--SEC END --><P>In CORBA, the ORB is the &#X2018;middleware&#X2019; that allows a client to invoke
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc72">6.1</A>&#XA0;&#XA0;Background</H2><!--SEC END --><P>In CORBA, the ORB is the &#X2018;middleware&#X2019; that allows a client to invoke
 an operation on an object without regard to its implementation or
 location. In order to invoke an operation on an object, a client needs
 to &#X2018;bind&#X2019; to the object by acquiring its object reference. Such a
@@ -1473,7 +1493,7 @@ underlying network connections. Instead, ORBs are free to implement
 implicit binding by a variety of means.</P><P>The rest of this chapter describes how omniORB manages network
 connections and the programming interface to fine tune the management
 policy.</P><!--TOC section The model-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc72">6.2</A>&#XA0;&#XA0;The model</H2><!--SEC END --><P>omniORB is designed from the ground up to be fully multi-threaded. The
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc73">6.2</A>&#XA0;&#XA0;The model</H2><!--SEC END --><P>omniORB is designed from the ground up to be fully multi-threaded. The
 objective is to maximise the degree of concurrency and at the same
 time eliminate any unnecessary thread overhead. Another objective is
 to minimise the interference by the activities of other threads on the
@@ -1485,7 +1505,7 @@ sometimes be beneficial to conserve operating system resources such as
 threads and network connections by multiplexing at the ORB
 level. omniORB has various options that control its multiplexing
 behaviour.</P><!--TOC section Client side behaviour-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc73">6.3</A>&#XA0;&#XA0;Client side behaviour</H2><!--SEC END --><P>On the client side of a connection, the thread that invokes on a proxy
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc74">6.3</A>&#XA0;&#XA0;Client side behaviour</H2><!--SEC END --><P>On the client side of a connection, the thread that invokes on a proxy
 object drives the GIOP protocol directly and blocks on the connection
 to receive the reply. The first time the client makes a call to a
 particular address space, the ORB opens a suitable connection to the
@@ -1514,7 +1534,7 @@ to become free.</P><P>Note that some server-side ORBs, including omniORB version
 version 4.0, are unable to deal with concurrent calls multiplexed on a
 single connection, so they serialise the calls. It is usually best to
 keep to the default mode of opening multiple connections.</P><!--TOC subsection Client side timeouts-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc74">6.3.1</A>&#XA0;&#XA0;Client side timeouts</H3><!--SEC END --><P>
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc75">6.3.1</A>&#XA0;&#XA0;Client side timeouts</H3><!--SEC END --><P>
 <A NAME="sec:timeoutAPI"></A></P><P>omniORB can associate a timeout with a call, meaning that if the call
 takes too long a <TT>CORBA::TIMEOUT</TT> exception<SUP><A NAME="text12" HREF="#note12">2</A></SUP> is
 thrown. Timeouts can be set for the whole process, for a specific
@@ -1567,12 +1587,12 @@ taken on timed-out connection attempts exceeds 10 seconds, the call
 will time out.</P><P>This kind of configuration is useful where calls may take a long time
 to complete (so call timeouts are long), but a fast indication of
 connection failure is required.</P><!--TOC section Server side behaviour-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc75">6.4</A>&#XA0;&#XA0;Server side behaviour</H2><!--SEC END --><P>The server side has two primary modes of operation: thread per
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc76">6.4</A>&#XA0;&#XA0;Server side behaviour</H2><!--SEC END --><P>The server side has two primary modes of operation: thread per
 connection and thread pooling. It is able to dynamically transition
 between the two modes, and it supports a hybrid scheme that behaves
 mostly like thread pooling, but has the same fast turn-around for
 sequences of calls as thread per connection.</P><!--TOC subsection Thread per connection mode-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc76">6.4.1</A>&#XA0;&#XA0;Thread per connection mode</H3><!--SEC END --><P>In thread per connection mode (the default, and the only option in
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc77">6.4.1</A>&#XA0;&#XA0;Thread per connection mode</H3><!--SEC END --><P>In thread per connection mode (the default, and the only option in
 omniORB versions before 4.0), each connection has a single thread
 dedicated to it. The thread blocks waiting for a request. When it
 receives one, it unmarshals the arguments, makes the up-call to the
@@ -1593,7 +1613,7 @@ the number of threads that can be allocated to a single connection
 containing concurrent calls. Setting the parameter to 1 mimics the
 behaviour of omniORB versions before 4.0, that did not support
 calls multiplexed on one connection.</P><!--TOC subsection Thread pool mode-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc77">6.4.2</A>&#XA0;&#XA0;Thread pool mode</H3><!--SEC END --><P>
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc78">6.4.2</A>&#XA0;&#XA0;Thread pool mode</H3><!--SEC END --><P>
 <A NAME="sec:watchConn"></A></P><P>In thread pool mode, selected by setting the
 <TT>threadPerConnectionPolicy</TT> parameter to zero, a single thread
 watches all incoming connections. When a call arrives on one of them,
@@ -1622,7 +1642,7 @@ to the default value of 1, only the last thread servicing a connection
 will watch it when it finishes a request. Setting the parameter to a
 larger number allows the last <EM>n</EM> connections to watch the
 connection.</P><!--TOC subsection Policy transition-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc78">6.4.3</A>&#XA0;&#XA0;Policy transition</H3><!--SEC END --><P>If the server is dealing with a relatively small number of
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc79">6.4.3</A>&#XA0;&#XA0;Policy transition</H3><!--SEC END --><P>If the server is dealing with a relatively small number of
 connections, it is most efficient to use thread per connection mode.
 If the number of connections becomes too large, however, operating
 system limits on the number of threads may cause a significant
@@ -1645,7 +1665,7 @@ connections falls below 30, thread per connection is reactivated and
 new connections receive their own dedicated threads (up to the limit
 of 50 again). Once again, existing connections in thread pool mode
 stay in that mode until they are closed.</P><!--TOC section Idle connection shutdown-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc79">6.5</A>&#XA0;&#XA0;Idle connection shutdown</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc80">6.5</A>&#XA0;&#XA0;Idle connection shutdown</H2><!--SEC END --><P>
 <A NAME="sec:connShutdown"></A></P><P>It is wasteful to leave a connection open when it has been left unused
 for a considerable time. Too many idle connections could block out new
 connections when the system runs out of spare communication channels.
@@ -1664,7 +1684,7 @@ connections are considered candidates for closure immediately after
 they are opened. That can mean that the connections are closed before
 any calls have been sent through them. If oneway calls are used, such
 connection closure can result in silent loss of calls.</P><!--TOC subsection Interoperability Considerations-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc80">6.5.1</A>&#XA0;&#XA0;Interoperability Considerations</H3><!--SEC END --><P>The IIOP specification allows both the client and the server to
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc81">6.5.1</A>&#XA0;&#XA0;Interoperability Considerations</H3><!--SEC END --><P>The IIOP specification allows both the client and the server to
 shutdown a connection unilaterally. When one end is about to shutdown
 a connection, it should send a <TT>CloseConnection</TT> message to the
 other end. It should also make sure that the message will reach the
@@ -1682,7 +1702,7 @@ these ORBs seeing a <TT>COMM_FAILURE</TT> occasionally when connected
 to an omniORB server. The work-around is either to catch the exception
 in the application code and retry, or to turn off the idle connection
 shutdown inside the omniORB server.</P><!--TOC section Transports and endpoints-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc81">6.6</A>&#XA0;&#XA0;Transports and endpoints</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc82">6.6</A>&#XA0;&#XA0;Transports and endpoints</H2><!--SEC END --><P>
 <A NAME="sec:endpoints"></A></P><P>omniORB can support multiple network transports. All platforms
 (usually) have a TCP transport available. Unix platforms support a
 Unix domain socket transport. Platforms with the OpenSSL library
@@ -1719,7 +1739,7 @@ filesystem. If the filename is left blank, the ORB chooses a name
 based on the process id and a timestamp.</P><P>To listen on an endpoint without publishing it in IORs, specify it
 with the <TT>endPointNoPublish</TT> configuration parameter. See below
 for more details about endpoint publishing.</P><!--TOC subsection Port ranges-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc82">6.6.1</A>&#XA0;&#XA0;Port ranges</H3><!--SEC END --><P>Sometimes it is useful to restrict a server to listen on one of a
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc83">6.6.1</A>&#XA0;&#XA0;Port ranges</H3><!--SEC END --><P>Sometimes it is useful to restrict a server to listen on one of a
 range of ports, rather than pinning it to one particular port or
 allowing the OS to choose an ephemeral port. omniORB 4.2 introduces
 the ability to specify a range of ports using a hyphen. e.g. to
@@ -1729,7 +1749,7 @@ listen on a port between 5000 and 5010 inclusive:</P><BLOCKQUOTE CLASS="quote">
 chosen port is already occupied, it keeps trying different ports until
 it finds a free one. If all the ports in the range are occupied, it
 throws <TT>CORBA.INITIALIZE</TT>.</P><!--TOC subsection IPv6-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc83">6.6.2</A>&#XA0;&#XA0;IPv6</H3><!--SEC END --><P>On platforms where it is available, omniORB supports IPv6. On most
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc84">6.6.2</A>&#XA0;&#XA0;IPv6</H3><!--SEC END --><P>On platforms where it is available, omniORB supports IPv6. On most
 Unix platforms, IPv6 sockets accept both IPv6 and IPv4 connections, so
 omniORB&#X2019;s default <TT>giop:tcp::</TT> endpoint accepts both IPv4 and
 IPv6 connections. On Windows versions before Windows Vista, each
@@ -1751,7 +1771,7 @@ somewhat cryptic:</P><BLOCKQUOTE CLASS="quote">
 <TT>giop:tcp:[::]:</TT>
 </BLOCKQUOTE><P>To listen for both IPv4 and IPv6 connections on Windows
 versions prior to Vista, both endpoints must be explicitly provided.</P><!--TOC subsubsection Link local addresses-->
-<H4 CLASS="subsubsection"><!--SEC ANCHOR --><A NAME="htoc84">6.6.2.1</A>&#XA0;&#XA0;Link local addresses</H4><!--SEC END --><P>In IPv6, all network interfaces are assigned a <I>link local</I>
+<H4 CLASS="subsubsection"><!--SEC ANCHOR --><A NAME="htoc85">6.6.2.1</A>&#XA0;&#XA0;Link local addresses</H4><!--SEC END --><P>In IPv6, all network interfaces are assigned a <I>link local</I>
 address, starting with the digits <TT>fe80</TT>. The link local address
 is only valid on the same &#X2018;link&#X2019; as the interface, meaning directly
 connected to the interface, or possibly on the same subnet, depending
@@ -1763,7 +1783,7 @@ and in extreme circumstances may even end up contacting the wrong
 server if it picks the wrong interface, link local addresses are not
 considered valid. Servers do not publish link local addresses in their
 IORs.</P><!--TOC subsection Endpoint publishing-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc85">6.6.3</A>&#XA0;&#XA0;Endpoint publishing</H3><!--SEC END --><P>For clients to be able to connect to a server, the server publishes
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc86">6.6.3</A>&#XA0;&#XA0;Endpoint publishing</H3><!--SEC END --><P>For clients to be able to connect to a server, the server publishes
 endpoint information in its IORs (Interoperable Object References).
 Normally, omniORB publishes the first available address for each of
 the endpoints it is listening on.</P><P>The endpoint information to publish is determined by the
@@ -1805,12 +1825,12 @@ deprecated. Setting <TT>endPointPublishAllIFs</TT> to 1 is equivalent to
 setting <TT>endPointPublish</TT> to &#X2018;<TT>all(addr)</TT>&#X2019;. The
 <TT>endPointNoListen</TT> parameter is equivalent to adding endpoint
 URIs to the <TT>endPointPublish</TT> parameter.</P><!--TOC section Connection selection and acceptance-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc86">6.7</A>&#XA0;&#XA0;Connection selection and acceptance</H2><!--SEC END --><P>In the face of IORs containing details about multiple different
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc87">6.7</A>&#XA0;&#XA0;Connection selection and acceptance</H2><!--SEC END --><P>In the face of IORs containing details about multiple different
 endpoints, clients have to know how to choose the one to use to
 connect a server. Similarly, servers may wish to restrict which
 clients can connect to particular transports. This is achieved with
 <I>transport rules</I>.</P><!--TOC subsection Client transport rules-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc87">6.7.1</A>&#XA0;&#XA0;Client transport rules</H3><!--SEC END --><P>
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc88">6.7.1</A>&#XA0;&#XA0;Client transport rules</H3><!--SEC END --><P>
 <A NAME="sec:clientRule"></A></P><P>The <TT>clientTransportRule</TT> parameter is used to filter and
 prioritise the order in which transports specified in an IOR are
 tried. Each rule has the form:</P><BLOCKQUOTE CLASS="quote">
@@ -1856,7 +1876,7 @@ possible endpoints in turn, until it finds one with which it can
 contact the object. Only after it has unsuccessfully tried all
 permissible endpoints will it raise a <TT>TRANSIENT</TT> exception to
 indicate that the connect failed.</P><!--TOC subsection Server transport rules-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc88">6.7.2</A>&#XA0;&#XA0;Server transport rules</H3><!--SEC END --><P>
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc89">6.7.2</A>&#XA0;&#XA0;Server transport rules</H3><!--SEC END --><P>
 <A NAME="sec:serverRule"></A></P><P>Server transport rules have the same format as client transport
 rules. Rather than being used to select which of a set of ways to
 contact a machine, they are used to determine whether or not to accept
@@ -1871,7 +1891,7 @@ client is not on the intranet:</P><PRE CLASS="verbatim">  serverTransportRule = 
 </PRE><P>In the absence of any explicit rules, the server uses the
 implicit rule of &#X2018;<TT>* unix,ssl,tcp</TT>&#X2019;, meaning any kind of
 connection is accepted from any client.</P><!--TOC section Bidirectional GIOP-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc89">6.8</A>&#XA0;&#XA0;Bidirectional GIOP</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc90">6.8</A>&#XA0;&#XA0;Bidirectional GIOP</H2><!--SEC END --><P>
 <A NAME="sec:bidir"></A></P><P>omniORB supports bidirectional GIOP, which allows callbacks to be made
 using a connection opened by the original client, rather than the
 normal model where the server opens a new connection for the callback.
@@ -1889,7 +1909,7 @@ the <TT>bidir</TT> action.
 </LI><LI CLASS="li-itemize">The POA hosting the object contacted by the client must have
 been created with a <TT>BidirectionalPolicy</TT> value of
 <TT>BOTH</TT>.</LI></UL><!--TOC section TLS / SSL transport-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc90">6.9</A>&#XA0;&#XA0;TLS / SSL transport</H2><!--SEC END --><P>omniORB supports a TLS / SSL transport, using OpenSSL. It is only
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc91">6.9</A>&#XA0;&#XA0;TLS / SSL transport</H2><!--SEC END --><P>omniORB supports a TLS / SSL transport, using OpenSSL. It is only
 built if OpenSSL is available. On platforms using Autoconf, it is
 autodetected in many locations, or its location can be given with the
 <TT>--with-openssl=</TT> argument to <TT>configure</TT>. On other
@@ -1900,7 +1920,7 @@ parameters in the <TT>omniORB.sslTP</TT> module before calling
 <TT>certificate_authority_file()</TT>, <TT>key_file()</TT> and
 <TT>key_file_password()</TT> functions, providing the file names of the
 certificate authority and encryption keys, and the key file password.</P><!--TOC subsection Self-signed certificate authority-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc91">6.9.1</A>&#XA0;&#XA0;Self-signed certificate authority</H3><!--SEC END --><P>By default, omniORB configures OpenSSL to require both clients and
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc92">6.9.1</A>&#XA0;&#XA0;Self-signed certificate authority</H3><!--SEC END --><P>By default, omniORB configures OpenSSL to require both clients and
 servers to have certificates that are signed by a Certificate
 Authority (CA). It is possible to use a public CA to obtain keys that
 can be independently verified, but for many purposes, it is sufficient
@@ -1929,7 +1949,7 @@ suitable for use in omniORB, concatenate the key and certificate files
 together. You can skip the human-readable(ish) text in the
 certificate file before the <CODE>-----BEGIN CERTIFICATE-----</CODE> marker.</P><P>If need be, create more certificates for servers and clients in the
 same way.</P><!--TOC section ZIOP-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc92">6.10</A>&#XA0;&#XA0;ZIOP</H2><!--SEC END --><P>omniORB has support for ZIOP, which compresses transmitted
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc93">6.10</A>&#XA0;&#XA0;ZIOP</H2><!--SEC END --><P>omniORB has support for ZIOP, which compresses transmitted
 messages. To use it, import <TT>omniORB.omniZIOP</TT>.</P><P>On Unix platforms, ZIOP support is automatically enabled if the
 configure script detects zlib. To enable it on Windows, set the
 <TT>EnableZIOP</TT> make variable in the platform configuration file.</P><P>omniORB has an almost complete implementation of the ZIOP
@@ -1951,7 +1971,7 @@ examples:</P><PRE CLASS="verbatim">  ziop_srv.py -ORBserverTransportRule "* unix
   ziop_clt.py -ORBclientTransportRule "* unix,ssl,tcp,ziop" IOR:...
 </PRE><P>This allows you to enable ZIOP for WAN links, but disable it
 for LAN communication, for example.</P><!--TOC subsection Forcing ZIOP Policies-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc93">6.10.1</A>&#XA0;&#XA0;Forcing ZIOP Policies</H3><!--SEC END --><P>The fact that a server supports ZIOP is encoded in its IORs. This
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc94">6.10.1</A>&#XA0;&#XA0;Forcing ZIOP Policies</H3><!--SEC END --><P>The fact that a server supports ZIOP is encoded in its IORs. This
 means that if a client uses a <TT>corbaloc</TT> URI to reference an
 object, the object reference does not contain ZIOP details, and thus
 the communication cannot use ZIOP. If a client is absolutely certain
@@ -1962,7 +1982,7 @@ If the server does not actually support ZIOP, it will receive
 compressed messages that it cannot handle. A well-behaved server will
 throw a <TT>CORBA.MARSHAL</TT> exception in response, or perhaps just
 drop the invalid connection.</P><!--TOC section Connection Management Extension-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc94">6.11</A>&#XA0;&#XA0;Connection Management Extension</H2><!--SEC END --><P>The <TT>omniConnectionMgmt</TT> module provides an omniORB-specific
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc95">6.11</A>&#XA0;&#XA0;Connection Management Extension</H2><!--SEC END --><P>The <TT>omniConnectionMgmt</TT> module provides an omniORB-specific
 extension for application-level connection management. Its purpose is
 to allow clients and servers to negotiate private GIOP connections,
 and to control how the connections are used in multi-threaded
@@ -1980,7 +2000,7 @@ the connection management functionality. It builds an annotated object
 reference that contains information for the connection management
 system. It returns a new reference, leaving the original object
 reference unchanged.</P><!--TOC subsection Client-side parameters-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc95">6.11.1</A>&#XA0;&#XA0;Client-side parameters</H3><!--SEC END --><P>These parameters affect the client side of a connection:</P><P><TT>connection_id</TT></P><P>This number identifies the private connection set. All object
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc96">6.11.1</A>&#XA0;&#XA0;Client-side parameters</H3><!--SEC END --><P>These parameters affect the client side of a connection:</P><P><TT>connection_id</TT></P><P>This number identifies the private connection set. All object
 references with the same <TT>connection_id</TT> will share the same set
 of GIOP connections. Object references with different connection ids
 are guaranteed to use different connections from each other, and from
@@ -2004,7 +2024,7 @@ interleave calls on a single connection, issuing a new request message
 while a previous request is still waiting for a reply. If
 <TT>permit_interleaved</TT> is true, clients can interleave messages;
 if it is false, they cannot.</P><!--TOC subsection Server-side parameters-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc96">6.11.2</A>&#XA0;&#XA0;Server-side parameters</H3><!--SEC END --><P>These parameters affect the client side of a connection:</P><P><TT>max_threads</TT></P><P>This parameter overrides the global
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc97">6.11.2</A>&#XA0;&#XA0;Server-side parameters</H3><!--SEC END --><P>These parameters affect the client side of a connection:</P><P><TT>max_threads</TT></P><P>This parameter overrides the global
 <TT>maxServerThreadPerConnection</TT> configuration parameter that
 determines the maximum number of concurrent threads the server will
 use to service requests coming from a connection. Note that this
@@ -2024,7 +2044,7 @@ will potentially be lost. By setting the <TT>server_hold_open</TT>
 parameter to true, the server will not close the connection, relying
 on the client to do so. In that case, oneway calls will not be lost
 unless there is a network problem that breaks the GIOP connection.</P><!--TOC subsection Usage-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc97">6.11.3</A>&#XA0;&#XA0;Usage</H3><!--SEC END --><P>The omniConnectionMgmt extension is very easy to use&#X2014;simply call the
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc98">6.11.3</A>&#XA0;&#XA0;Usage</H3><!--SEC END --><P>The omniConnectionMgmt extension is very easy to use&#X2014;simply call the
 <TT>init()</TT> method in all processes involved, then restrict references
 as required. The <TT>makeRestrictedReference()</TT> function adds profile
 information to the object reference&#X2019;s IOR, meaning that the parameters
@@ -2043,15 +2063,15 @@ receives, in order to change its own behaviour.</P><!--BEGIN NOTES chapter-->
 </DD></DL>
 <!--END NOTES-->
 <!--TOC chapter Interoperable Naming Service-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc98">Chapter&#XA0;7</A>&#XA0;&#XA0;Interoperable Naming Service</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc99">Chapter&#XA0;7</A>&#XA0;&#XA0;Interoperable Naming Service</H1><!--SEC END --><P>
 <A NAME="chap:ins"></A></P><P>omniORB supports the Interoperable Naming Service (INS). The following
 is a summary of its facilities.</P><!--TOC section Object URIs-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc99">7.1</A>&#XA0;&#XA0;Object URIs</H2><!--SEC END --><P>As well as accepting IOR-format strings, <TT>orb.string_to_object()</TT>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc100">7.1</A>&#XA0;&#XA0;Object URIs</H2><!--SEC END --><P>As well as accepting IOR-format strings, <TT>orb.string_to_object()</TT>
 now also supports two new Uniform Resource Identifier
 (URI)&#XA0;[<A HREF="#rfc2396">BLFIM98</A>] formats, which can be used to specify objects in
 a convenient human-readable form. The existing IOR-format strings are
 now also considered URIs.</P><!--TOC subsection corbaloc-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc100">7.1.1</A>&#XA0;&#XA0;corbaloc</H3><!--SEC END --><P><TT>corbaloc</TT> URIs allow you to specify object references which
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc101">7.1.1</A>&#XA0;&#XA0;corbaloc</H3><!--SEC END --><P><TT>corbaloc</TT> URIs allow you to specify object references which
 can be contacted by IIOP, or found through
 <TT>ORB::resolve_initial_references()</TT>. To specify an IIOP object
 reference, you use a URI of the form:</P><BLOCKQUOTE CLASS="quote">
@@ -2087,7 +2107,7 @@ other object references.</P><P>Alternatively, to use <TT>resolve_initial_referen
 use a URI of the form:</P><BLOCKQUOTE CLASS="quote">
 <TT>corbaloc:rir:/NameService</TT>
 </BLOCKQUOTE><!--TOC subsection corbaname-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc101">7.1.2</A>&#XA0;&#XA0;corbaname</H3><!--SEC END --><P>
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc102">7.1.2</A>&#XA0;&#XA0;corbaname</H3><!--SEC END --><P>
 <A NAME="sec:corbaname"></A></P><P><TT>corbaname</TT> URIs cause <TT>string_to_object()</TT> to look-up a
 name in a CORBA Naming service. They are an extension of the
 <TT>corbaloc</TT> syntax:</P><BLOCKQUOTE CLASS="quote">
@@ -2108,10 +2128,10 @@ have been used for a look-up:</P><BLOCKQUOTE CLASS="quote">
 <TT>corbaname:rir:</TT>
 </BLOCKQUOTE><P>The first of these examples is the easiest way of specifying
 the location of a naming service.</P><!--TOC section Configuring resolve_initial_references-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc102">7.2</A>&#XA0;&#XA0;Configuring resolve_initial_references</H2><!--SEC END --><P>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc103">7.2</A>&#XA0;&#XA0;Configuring resolve_initial_references</H2><!--SEC END --><P>
 <A NAME="sec:insargs"></A></P><P>The INS specifies two standard command line arguments which provide a
 portable way of configuring <TT>ORB::resolve_initial_references()</TT>:</P><!--TOC subsection ORBInitRef-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc103">7.2.1</A>&#XA0;&#XA0;ORBInitRef</H3><!--SEC END --><P><TT>-ORBInitRef</TT> takes an argument of the form
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc104">7.2.1</A>&#XA0;&#XA0;ORBInitRef</H3><!--SEC END --><P><TT>-ORBInitRef</TT> takes an argument of the form
 &lt;<I>ObjectId</I>&gt;<TT>=</TT>&lt;<I>ObjectURI</I>&gt;. So, for example,
 with command line arguments of:</P><BLOCKQUOTE CLASS="quote">
 <TT>-ORBInitRef NameService=corbaname::myhost.example.com</TT>
@@ -2121,7 +2141,7 @@ myhost.example.com, port 2809. Since IOR-format strings are considered
 URIs, you can also say things like:</P><BLOCKQUOTE CLASS="quote">
 <TT>-ORBInitRef NameService=IOR:00ff...</TT>
 </BLOCKQUOTE><!--TOC subsection ORBDefaultInitRef-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc104">7.2.2</A>&#XA0;&#XA0;ORBDefaultInitRef</H3><!--SEC END --><P><TT>-ORBDefaultInitRef</TT> provides a prefix string which is used to
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc105">7.2.2</A>&#XA0;&#XA0;ORBDefaultInitRef</H3><!--SEC END --><P><TT>-ORBDefaultInitRef</TT> provides a prefix string which is used to
 resolve otherwise unknown names. When
 <TT>resolve_initial_references()</TT> is unable to resolve a name which
 has been specifically configured (with <TT>-ORBInitRef</TT>), it
@@ -2138,8 +2158,8 @@ impossible to specify a look-up in the root context of the naming
 service&#X2014;you have to use a sub-context, like:</P><BLOCKQUOTE CLASS="quote">
 <TT>-ORBDefaultInitRef corbaname::myhost.example.com#services</TT>
 </BLOCKQUOTE><!--TOC section omniNames-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc105">7.3</A>&#XA0;&#XA0;omniNames</H2><!--SEC END --><!--TOC subsection NamingContextExt-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc106">7.3.1</A>&#XA0;&#XA0;NamingContextExt</H3><!--SEC END --><P>omniNames supports the <TT>CosNaming::NamingContextExt</TT> interface:</P><DIV CLASS="lstlisting"><B>module</B> CosNaming {
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc106">7.3</A>&#XA0;&#XA0;omniNames</H2><!--SEC END --><!--TOC subsection NamingContextExt-->
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc107">7.3.1</A>&#XA0;&#XA0;NamingContextExt</H3><!--SEC END --><P>omniNames supports the <TT>CosNaming::NamingContextExt</TT> interface:</P><DIV CLASS="lstlisting"><B>module</B> CosNaming {
   <B>interface</B> NamingContextExt : NamingContext {
     <B>typedef</B> <B>string</B> StringName;
     <B>typedef</B> <B>string</B> Address;
@@ -2180,10 +2200,10 @@ address part contains escapable characters. The local function
 <TT>omniORB.URI.addrAndNameToURI()</TT> is equivalent.</P><P><TT>resolve_str()</TT> is equivalent to calling <TT>to_name()</TT> followed by
 the inherited <TT>resolve()</TT> operation. There are no string-based
 equivalents of the various bind operations.</P><!--TOC subsection Use with corbaname-->
-<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc107">7.3.2</A>&#XA0;&#XA0;Use with corbaname</H3><!--SEC END --><P>To make it easy to use omniNames with <TT>corbaname</TT> URIs, it
+<H3 CLASS="subsection"><!--SEC ANCHOR --><A NAME="htoc108">7.3.2</A>&#XA0;&#XA0;Use with corbaname</H3><!--SEC END --><P>To make it easy to use omniNames with <TT>corbaname</TT> URIs, it
 starts with the default port of 2809, and an object key of
 &#X2018;<TT>NameService</TT>&#X2019; for the root naming context.</P><!--TOC section omniMapper-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc108">7.4</A>&#XA0;&#XA0;omniMapper</H2><!--SEC END --><P>omniMapper is a simple daemon which listens on port 2809 (or any other
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc109">7.4</A>&#XA0;&#XA0;omniMapper</H2><!--SEC END --><P>omniMapper is a simple daemon which listens on port 2809 (or any other
 port), and redirects IIOP requests for configured object keys to
 associated persistent IORs. It can be used to make a naming service
 (even an old non-INS aware version of omniNames or other ORB&#X2019;s naming
@@ -2211,7 +2231,7 @@ configuration file. That way, each machine&#X2019;s omniORB configuration
 file could contain the line:</P><BLOCKQUOTE CLASS="quote">
 <PRE CLASS="verbatim">ORBDefaultInitRef corbaloc::localhost
 </PRE></BLOCKQUOTE><!--TOC section Creating objects with simple object keys-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc109">7.5</A>&#XA0;&#XA0;Creating objects with simple object keys</H2><!--SEC END --><P>In normal use, omniORB creates object keys containing various
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc110">7.5</A>&#XA0;&#XA0;Creating objects with simple object keys</H2><!--SEC END --><P>In normal use, omniORB creates object keys containing various
 information including POA names and various non-ASCII characters.
 Since object keys are supposed to be opaque, this is not usually a
 problem. The INS breaks this opacity and requires servers to create
@@ -2238,7 +2258,7 @@ printed in [<A HREF="#inschapters">OMG00</A>]!
 </DD></DL>
 <!--END NOTES-->
 <!--TOC chapter Code set conversion-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc110">Chapter&#XA0;8</A>&#XA0;&#XA0;Code set conversion</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc111">Chapter&#XA0;8</A>&#XA0;&#XA0;Code set conversion</H1><!--SEC END --><P>
 <A NAME="chap:codesets"></A></P><P>omniORB supports full code set negotiation, used to select and
 translate between different character sets, for the transmission of
 chars, strings, wchars and wstrings. The support is mostly transparent
@@ -2246,7 +2266,7 @@ to application code, but there are a number of options that can be
 selected. This chapter covers the options, and also gives some
 pointers about how to implement your own code sets, in case the ones
 that come with omniORB are not sufficient.</P><!--TOC section Native code set-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc111">8.1</A>&#XA0;&#XA0;Native code set</H2><!--SEC END --><P>For the ORB to know how to handle strings given to it by the
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc112">8.1</A>&#XA0;&#XA0;Native code set</H2><!--SEC END --><P>For the ORB to know how to handle strings given to it by the
 application, it must know what code set they are represented with, so
 it can properly translate them if need be. The default is ISO 8859-1
 (Latin 1). A different code sets can be chosen at initialisation time
@@ -2257,13 +2277,13 @@ to set the native char code set to UTF-8, allowing the full Unicode
 range to be supported in strings.</P><P>In omniORBpy, wchar and wstring are always represented by the Python
 Unicode type, so there is no need to select a native code set for
 wchar.</P><!--TOC section Code set library-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc112">8.2</A>&#XA0;&#XA0;Code set library</H2><!--SEC END --><P>To save space in the main ORB core library, most of the code set
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc113">8.2</A>&#XA0;&#XA0;Code set library</H2><!--SEC END --><P>To save space in the main ORB core library, most of the code set
 implementations are in a separate library. To load it from Python, you
 must import the <TT>omniORB.codesets</TT> module before calling
 <TT>CORBA.ORB_init()</TT>.</P><!--TOC section Implementing new code sets-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc113">8.3</A>&#XA0;&#XA0;Implementing new code sets</H2><!--SEC END --><P>Code sets must currently be implemented in C++. See the omniORB for
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc114">8.3</A>&#XA0;&#XA0;Implementing new code sets</H2><!--SEC END --><P>Code sets must currently be implemented in C++. See the omniORB for
 C++ documentation for details.</P><!--TOC chapter Interceptors-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc114">Chapter&#XA0;9</A>&#XA0;&#XA0;Interceptors</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc115">Chapter&#XA0;9</A>&#XA0;&#XA0;Interceptors</H1><!--SEC END --><P>
 <A NAME="chap:interceptors"></A></P><P>omniORBpy has limited interceptor support. Interceptors permit the
 application to insert processing at various points along the call
 chain, as requests are processed. The Portable Interceptors API is not
@@ -2292,18 +2312,18 @@ above, by appending to the list. Encapsulations are created with
 <TT>omniORB.cdrMarshal()</TT>.</P><P>Interceptor registration functions may only be called before the ORB
 is initialised. Attempting to call them later results in a
 <TT>BAD_INV_ORDER</TT> exception.</P><!--TOC chapter Objects by value-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc115">Chapter&#XA0;10</A>&#XA0;&#XA0;Objects by value</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc116">Chapter&#XA0;10</A>&#XA0;&#XA0;Objects by value</H1><!--SEC END --><P>
 <A NAME="chap:valuetype"></A></P><P>omniORBpy supports objects by value, declared with the
 <TT>valuetype</TT> keyword in IDL. This chapter outlines some issues to
 do with using valuetypes in omniORB. You are assumed to have read the
 relevant parts of the CORBA specification, specifically chapters 4 and
 5 of the CORBA 2.6 specification, and section 1.3.10 of the Python
 language mapping, version 1.2.</P><!--TOC section Features-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc116">10.1</A>&#XA0;&#XA0;Features</H2><!--SEC END --><P>omniORB supports the complete objects by value specification, with the
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc117">10.1</A>&#XA0;&#XA0;Features</H2><!--SEC END --><P>omniORB supports the complete objects by value specification, with the
 exception of custom valuetypes. All other features including value
 boxes, value sharing semantics, abstract valuetypes, and abstract
 interfaces are supported.</P><!--TOC section Value sharing and local calls-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc117">10.2</A>&#XA0;&#XA0;Value sharing and local calls</H2><!--SEC END --><P>When valuetypes are passed as parameters in CORBA calls (i.e. calls
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc118">10.2</A>&#XA0;&#XA0;Value sharing and local calls</H2><!--SEC END --><P>When valuetypes are passed as parameters in CORBA calls (i.e. calls
 on CORBA objects declared with <TT>interface</TT> in IDL), the structure
 of related values is maintained. Consider, for example, the following
 IDL definitions (which are from the example code in
@@ -2335,7 +2355,7 @@ values it passes as parameters (and similarly, the object
 implementation will see any changes the client makes to returned
 values). To choose this option, set the <TT>copyValuesInLocalCalls</TT>
 configuration parameter to zero.</P><!--TOC section Value factories-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc118">10.3</A>&#XA0;&#XA0;Value factories</H2><!--SEC END --><P>As specified in section 1.3.10 of the Python language mapping (version
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc119">10.3</A>&#XA0;&#XA0;Value factories</H2><!--SEC END --><P>As specified in section 1.3.10 of the Python language mapping (version
 1.2), factories are automatically registered for values with no
 operations. This means that in common usage where values are just used
 to hold state, the application code does not need to implement and
@@ -2350,10 +2370,10 @@ instance with a <TT>__call__</TT> method taking no arguments&#X201D;.
 omniORBpy is less restrictive than that, and permits the use of
 <EM>any</EM> callable object, in particular the value implementation
 class itself.</P><!--TOC section Standard value boxes-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc119">10.4</A>&#XA0;&#XA0;Standard value boxes</H2><!--SEC END --><P>The standard <TT>CORBA.StringValue</TT> and <TT>CORBA.WStringValue</TT>
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc120">10.4</A>&#XA0;&#XA0;Standard value boxes</H2><!--SEC END --><P>The standard <TT>CORBA.StringValue</TT> and <TT>CORBA.WStringValue</TT>
 value boxes are available to application code. To make the definitions
 available in IDL, #include the standard <TT>orb.idl</TT>.</P><!--TOC section Values inside Anys-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc120">10.5</A>&#XA0;&#XA0;Values inside Anys</H2><!--SEC END --><P>Valuetypes inserted into Anys cause a number of interesting issues.
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc121">10.5</A>&#XA0;&#XA0;Values inside Anys</H2><!--SEC END --><P>Valuetypes inserted into Anys cause a number of interesting issues.
 Even when inside Anys, values are required to support complete sharing
 semantics. Take this IDL for example:</P><DIV CLASS="lstlisting"><B>module</B> ValueTest {
   <B>valuetype</B> One {
@@ -2399,7 +2419,7 @@ set to the constructed <TT>Two</TT> type, rather than being truncated to
 an instance of the application&#X2019;s registered <TT>One</TT> type.</P><P>Because of these issues, it is best to avoid defining interfaces that
 mix valuetypes and Anys in a single operation, and certainly to avoid
 trying to share plain values with values inside Anys.</P><!--TOC chapter Asynchronous Method Invocation-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc121">Chapter&#XA0;11</A>&#XA0;&#XA0;Asynchronous Method Invocation</H1><!--SEC END --><P>
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc122">Chapter&#XA0;11</A>&#XA0;&#XA0;Asynchronous Method Invocation</H1><!--SEC END --><P>
 <A NAME="chap:ami"></A></P><P>omniORB 4.2 supports Asynchronous Method Invocation, AMI, as defined
 in the CORBA Messaging specification. It supports both the polling and
 callback models of asynchronous calls. Note that omniORB does not
@@ -2411,7 +2431,7 @@ specification as described in the CORBA 3.1 specification, chapter
 the same as the one in CORBA 2.6. The only significant difference is
 that exception replies in the callback model use a simpler
 interface-independent mapping.</P><!--TOC section Implied IDL-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc122">11.1</A>&#XA0;&#XA0;Implied IDL</H2><!--SEC END --><P>AMI works by defining some additional <I>implied IDL</I> for each
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc123">11.1</A>&#XA0;&#XA0;Implied IDL</H2><!--SEC END --><P>AMI works by defining some additional <I>implied IDL</I> for each
 interface in the real IDL. The implied IDL contains type and
 operation definitions that enable asynchronous calls.</P><P>As a guide to the implied IDL, there is a special <TT>ami</TT>
 back-end to omniidl that outputs the implied IDL for the given input
@@ -2440,15 +2460,15 @@ output an interleaved version that shows the original IDL and the
 implied IDL together.</P><P>Note that the implied IDL output is for information only. You should
 not compile it, but rather instruct the omniidl Python back-end to
 generate the corresponding Python definitions.</P><!--TOC section Generating AMI stubs-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc123">11.2</A>&#XA0;&#XA0;Generating AMI stubs</H2><!--SEC END --><P>To generate stub code including AMI types and operations, give the
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc124">11.2</A>&#XA0;&#XA0;Generating AMI stubs</H2><!--SEC END --><P>To generate stub code including AMI types and operations, give the
 <TT>-Wbami</TT> command line option to omniidl&#X2019;s <TT>python</TT>
 back-end:</P><BLOCKQUOTE CLASS="quote">
 <TT>omniidl -bpython -Wbami echo.idl</TT>
 </BLOCKQUOTE><P>That generates the normal Python stubs and skeletons, plus
 all the definitions in the implied IDL.</P><!--TOC section AMI examples-->
-<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc124">11.3</A>&#XA0;&#XA0;AMI examples</H2><!--SEC END --><P>Example AMI clients for the <TT>Example::Echo</TT> server can be found in
+<H2 CLASS="section"><!--SEC ANCHOR --><A NAME="htoc125">11.3</A>&#XA0;&#XA0;AMI examples</H2><!--SEC END --><P>Example AMI clients for the <TT>Example::Echo</TT> server can be found in
 <TT>examples/ami</TT>.</P><!--TOC chapter Resources-->
-<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc125">Chapter&#XA0;12</A>&#XA0;&#XA0;Resources</H1><!--SEC END --><P>There are a number of useful online resources related to omniORB:</P><UL CLASS="itemize"><LI CLASS="li-itemize"><A HREF="http://omniorb.sourceforge.net/"><TT>http://omniorb.sourceforge.net/</TT></A> is the main omniORB web
+<H1 CLASS="chapter"><!--SEC ANCHOR --><A NAME="htoc126">Chapter&#XA0;12</A>&#XA0;&#XA0;Resources</H1><!--SEC END --><P>There are a number of useful online resources related to omniORB:</P><UL CLASS="itemize"><LI CLASS="li-itemize"><A HREF="http://omniorb.sourceforge.net/"><TT>http://omniorb.sourceforge.net/</TT></A> is the main omniORB web
 site.</LI><LI CLASS="li-itemize">The omniORB FAQ is at <A HREF="http://omniorb.sourceforge.net/faq.html"><TT>http://omniorb.sourceforge.net/faq.html</TT></A></LI><LI CLASS="li-itemize">The omniORB mailing list is the first port of call for questions
 that are not answered in this document or in the FAQ. Subscription
 information and archives are at

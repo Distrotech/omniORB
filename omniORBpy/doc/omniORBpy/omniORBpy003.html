@@ -199,7 +199,26 @@ unnecessarily increase the memory footprint and start-up time.</P><P>The Interfa
 define the <TT>OMNIORBPY_IMPORT_IR_STUBS</TT> environment variable.
 Alternatively, you can import the stubs at run-time by calling the
 <TT>omniORB.importIRStubs()</TT> function. In both cases, the stubs become
-available in the Python <TT>CORBA</TT> module.</P><HR CLASS="footnoterule"><DL CLASS="thefootnotes"><DT CLASS="dt-thefootnotes">
+available in the Python <TT>CORBA</TT> module.</P><H2 CLASS="section"><A NAME="toc13"></A><A NAME="htoc39">3.4</A>&#XA0;&#XA0;IDL attributes</H2><P>
+<A NAME="sec:attributes"></A></P><P>The Python language mapping says that IDL attributes map to methods
+with names prefixed <TT>_get_</TT> and <TT>_set_</TT>. omniORBpy
+adheres to this standard mapping, but additionally supports access
+using properties:</P><DIV CLASS="lstlisting"><B>module</B> M {
+  <B>interface</B> Example {
+    <B>attribute</B> <B>string</B> attr1;
+    <B>readonly</B> <B>attribute</B> <B>long</B> attr2;
+  };
+};</DIV><DIV CLASS="lstlisting">obj = <I># an M::Example object reference</I>
+obj.attr1 = "Hello"
+<B>print</B> obj.attr2</DIV><P>Servant classes can similarly provide attribute values using simple
+Python object attributes or properties. When invoking an attribute
+getter or setter, omniORBpy first looks for a method with the standard
+<TT>_get_</TT> or <TT>_set_</TT> name. If that is not found, a simple
+attribute lookup is performed. This is therefore a complete
+implementation of the <TT>M::Example</TT> interface:</P><DIV CLASS="lstlisting"><B>class</B> Example_i (M__POA.Example):
+    <B>def</B> __init__(self):
+        self.attr1 = "Test"
+        self.attr2 = 1234</DIV><HR CLASS="footnoterule"><DL CLASS="thefootnotes"><DT CLASS="dt-thefootnotes">
 <A NAME="note6" HREF="#text6">1</A></DT><DD CLASS="dd-thefootnotes">It
 is possible to change the repository id strings associated with
 particular interfaces using the <TT>ID</TT>, <TT>version</TT> and
