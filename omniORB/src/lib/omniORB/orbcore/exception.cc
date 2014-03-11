@@ -93,9 +93,13 @@ omni_defaultTransientExcHandler(void*,
   if (ex.minor() == TRANSIENT_FailedOnForwarded) {
     if (omniORB::trace(10)) {
       omniORB::logger log;
-      log << "Invocation '" << op
-          << "' on a location forwarded object has failed. "
-	  << n_retries << " retries.\n";
+      if (op)
+        log << "Invocation '" << op << "'";
+      else
+        log << "LocateRequest";
+
+      log << " on a location forwarded object has failed. "
+          << n_retries << " retries.\n";
     }
     unsigned long secs;
     secs = ((n_retries < 30) ? n_retries : 30);
