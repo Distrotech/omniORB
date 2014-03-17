@@ -1003,8 +1003,8 @@ giopImpl12::getInputData(giopStream* g,omni::alignment_t align,size_t sz) {
     if (extra != sz) {
       if (omniORB::trace(25)) {
         omniORB::logger log;
-        log << "getInputData requires invalid size " << extra <<
-          " bytes to satisfy input size " << sz << ".\n";
+        log << "getInputData requires invalid size " << (unsigned long)extra
+            << " bytes to satisfy input size " << (unsigned long)sz << ".\n";
       }
       if (!(g->inputFragmentToCome() || g->inputExpectAnotherFragment()) ) {
 	// The full message is already in the buffer. The unmarshalling
