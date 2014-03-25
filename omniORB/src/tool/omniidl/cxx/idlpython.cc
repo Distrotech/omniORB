@@ -3,7 +3,7 @@
 // idlpython.cc             Created on: 1999/10/27
 //			    Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2014 Apasphere Ltd
 //    Copyright (C) 1999      AT&T Laboratories Cambridge
 //
 //  This file is part of omniidl.
@@ -89,6 +89,18 @@ static inline char* PyString_AsString(PyObject* obj)
   char* str;
   PyArg_Parse(obj, (char*)"s", &str);
   return str;
+}
+
+static inline PyObject* PyString_FromChar(unsigned char c)
+{
+  return Py_BuildValue((char*)"C", (int)c);
+}
+
+#else
+
+static inline PyObject* PyString_FromChar(unsigned char c)
+{
+  return Py_BuildValue((char*)"c", c);
 }
 
 #endif
@@ -410,7 +422,7 @@ visitConst(Const* c)
   case IdlType::tk_boolean:
     pyv = PyInt_FromLong(c->constAsBoolean()); break;
 
-  case IdlType::tk_char:  pyv = Py_BuildValue((char*)"c", c->constAsChar());
+  case IdlType::tk_char:  pyv = PyString_FromChar(c->constAsChar());
     break;
   case IdlType::tk_octet: pyv = PyInt_FromLong(c->constAsOctet()); break;
 
@@ -647,7 +659,7 @@ visitCaseLabel(CaseLabel* l)
     pyv = PyLong_FromUnsignedLong(l->labelAsULong()); break;
 
   case IdlType::tk_boolean: pyv = PyInt_FromLong(l->labelAsBoolean());  break;
-  case IdlType::tk_char:    pyv = Py_BuildValue((char*)"c", l->labelAsChar());
+  case IdlType::tk_char:    pyv = PyString_FromChar(l->labelAsChar());
     break;
 #ifdef HAS_LongLong
   case IdlType::tk_longlong:
@@ -1542,6 +1554,9 @@ extern "C" {
     PyObject* m = PyModule_Create(&omniidlmodule);
     if (!m)
       return 0;
+
+    PyObject_SetAttrString(m, (char*)"version",
+			   PyString_FromString(IDLMODULE_VERSION));
     return m;
   }
 

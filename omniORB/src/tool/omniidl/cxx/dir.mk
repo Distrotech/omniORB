@@ -78,6 +78,7 @@ PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.version[:3])
 PYINCDIR  := $(PYPREFIX)/include
 PYINCFILE := "<python$(PYVERSION)/Python.h>"
 DIR_CPPFLAGS += -I$(PYINCDIR)/python$(PYVERSION) \
+		-I$(PYINCDIR)/python$(PYVERSION)mu \
 		-I$(PYINCDIR) \
 		-DPYTHON_INCLUDE="<Python.h>"
 endif

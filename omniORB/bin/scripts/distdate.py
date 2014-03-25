@@ -16,7 +16,7 @@ while line == "\n":
 
 try:
     line = string.strip(line)
-except NameError:
+except AttributeError:
     # Python 3 has no string.strip()
     line = line.strip()
 

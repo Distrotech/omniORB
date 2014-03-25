@@ -241,6 +241,7 @@ dnl ** Output
 
 AC_CONFIG_FILES(mk/beforeauto.mk mk/afterauto.mk GNUmakefile)
 AC_CONFIG_FILES(src/tool/omniidl/python/scripts/omniidl)
+AC_CONFIG_FILES(src/tool/omniidl/python3/scripts/omniidl)
 AC_CONFIG_FILES(src/appl/GNUmakefile
                 src/appl/omniMapper/GNUmakefile
                 src/appl/omniNames/GNUmakefile
@@ -274,12 +275,20 @@ AC_CONFIG_FILES(src/appl/GNUmakefile
                 src/lib/omniORB/codesets/GNUmakefile
                 src/lib/omniORB/GNUmakefile
                 src/lib/omniORB/dynamic/GNUmakefile
-                src/lib/omniORB/omniidl_be/cxx/GNUmakefile
-                src/lib/omniORB/omniidl_be/cxx/dynskel/GNUmakefile
-                src/lib/omniORB/omniidl_be/cxx/header/GNUmakefile
-                src/lib/omniORB/omniidl_be/cxx/impl/GNUmakefile
-                src/lib/omniORB/omniidl_be/cxx/skel/GNUmakefile
-                src/lib/omniORB/omniidl_be/GNUmakefile
+                src/lib/omniORB/python/omniidl_be/cxx/GNUmakefile
+                src/lib/omniORB/python/omniidl_be/cxx/dynskel/GNUmakefile
+                src/lib/omniORB/python/omniidl_be/cxx/header/GNUmakefile
+                src/lib/omniORB/python/omniidl_be/cxx/impl/GNUmakefile
+                src/lib/omniORB/python/omniidl_be/cxx/skel/GNUmakefile
+                src/lib/omniORB/python/omniidl_be/GNUmakefile
+                src/lib/omniORB/python/GNUmakefile
+                src/lib/omniORB/python3/omniidl_be/cxx/GNUmakefile
+                src/lib/omniORB/python3/omniidl_be/cxx/dynskel/GNUmakefile
+                src/lib/omniORB/python3/omniidl_be/cxx/header/GNUmakefile
+                src/lib/omniORB/python3/omniidl_be/cxx/impl/GNUmakefile
+                src/lib/omniORB/python3/omniidl_be/cxx/skel/GNUmakefile
+                src/lib/omniORB/python3/omniidl_be/GNUmakefile
+                src/lib/omniORB/python3/GNUmakefile
                 src/lib/omniORB/orbcore/GNUmakefile
                 src/lib/omniORB/orbcore/ssl/GNUmakefile
                 src/lib/omniORB/connections/GNUmakefile
@@ -300,6 +309,10 @@ AC_CONFIG_FILES(src/appl/GNUmakefile
                 src/tool/omniidl/python/omniidl_be/GNUmakefile
                 src/tool/omniidl/python/omniidl/GNUmakefile
                 src/tool/omniidl/python/scripts/GNUmakefile
+                src/tool/omniidl/python3/GNUmakefile
+                src/tool/omniidl/python3/omniidl_be/GNUmakefile
+                src/tool/omniidl/python3/omniidl/GNUmakefile
+                src/tool/omniidl/python3/scripts/GNUmakefile
                )
 
 AC_CONFIG_FILES(include/GNUmakefile
@@ -323,4 +336,6 @@ contrib/pkgconfig/omniDynamic4.pc
 contrib/pkgconfig/omniCOS4.pc
 contrib/pkgconfig/omniCOSDynamic4.pc
 contrib/pkgconfig/omniConnectionMgmt4.pc
+contrib/pkgconfig/omniZIOP4.pc
+contrib/pkgconfig/omniZIOPDynamic4.pc
 ])

@@ -4,6 +4,7 @@
 # omniidl.in                Created on: 1999/10/29
 #			    Author    : Duncan Grisby (dpg1)
 #
+#    Copyright (C) 2014 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -101,23 +102,10 @@ paths = [ "@exec_prefix@/lib/python" + sys.version[:3] + "/site-packages",
           "@pyexecdir@" ]
 
 
-# Implement a string replace function for all Python versions. We
-# can't use the version in idlstring.py, since we're trying to work
-# out the path to find modules including that one.
-
-import string
-try:
-    replace = string.replace
-
-except NameError:
-    def replace(s, old, new):
-        return s.replace(old, new)
-
-
 # Autoconf insists on making our life difficult...
 for path in paths:
-    path = replace(path, "${exec_prefix}", "@exec_prefix@")
-    path = replace(path, "${prefix}", "@prefix@")
+    path = path.replace("${exec_prefix}", "@exec_prefix@")
+    path = path.replace("${prefix}", "@prefix@")
     sys.path.append(path)
 
 try:

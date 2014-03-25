@@ -293,13 +293,15 @@ def my_import(name):
 def be_import(name):
     try:
         return my_import("omniidl_be." + name)
-    except ImportError, ex:
-        if sys.modules.has_key("omniidl_be." + name):
-            # The first import found the module, but some nested
-            # import failed.
-            raise ex
 
-        return my_import(name)
+    except ImportError, ex:
+        try:
+            # Try to import from just "name" rather than "omniidl_be.name"
+            return my_import(name)
+
+        except ImportError:
+            # Raise the original exception
+            raise ex
 
 def main(argv=None):
     global preprocessor_args, preprocessor_only, preprocessor_cmd
