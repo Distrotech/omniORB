@@ -46,6 +46,43 @@ OMNI_EXPORT_LINK_FORCE_SYMBOL(sslConnection);
 
 OMNI_NAMESPACE_BEGIN(omni)
 
+/////////////////////////////////////////////////////////////////////////
+static inline CORBA::Boolean
+handleErrorSyscall(int ret, int ssl_err, const char* peer, const char* kind)
+{
+  int errno_val = ERRNO;
+  if (RC_TRY_AGAIN(errno_val))
+    return 1;
+
+  int err_err = ERR_get_error();
+  if (err_err) {
+    while (err_err) {
+      if (omniORB::trace(10)) {
+        char buf[128];
+        ERR_error_string_n(err_err, buf, 128);
+
+        omniORB::logger log;
+        log << peer << " " << kind << " error: " << (const char*)buf << "\n";
+      }
+      err_err = ERR_get_error();
+    }
+  }
+  else if (omniORB::trace(10)) {
+    omniORB::logger log;
+    log << peer << " " << kind;
+
+    if (ssl_err == SSL_ERROR_ZERO_RETURN)
+      log << " connection has been closed.\n";
+    else if (ret == 0)
+      log << " observed an EOF that violates the protocol.\n";
+    else if (ret == -1)
+      log << " received an I/O error (" << errno_val << ").\n";
+    else
+      log << " unexepctedly returned " << ret << ".\n";
+  }
+  return 0;
+}
+
 
 /////////////////////////////////////////////////////////////////////////
 int
@@ -61,7 +98,7 @@ sslConnection::Send(void* buf, size_t sz,
     sz = orbParameters::maxSocketSend;
 
   int tx;
-  int rc;
+  int ssl_err;
 
   do {
     struct timeval t;
@@ -102,28 +139,24 @@ sslConnection::Send(void* buf, size_t sz,
     tx = SSL_write(pd_ssl,(char*)buf,sz);
 #endif
 
-    rc = SSL_get_error(pd_ssl, tx);
+    ssl_err = SSL_get_error(pd_ssl, tx);
 
-    switch(rc) {
+    switch (ssl_err) {
     case SSL_ERROR_NONE:
       break;
-
-    case SSL_ERROR_SSL:
-    case SSL_ERROR_ZERO_RETURN:
-      return -1;
 
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       continue;
 
+    case SSL_ERROR_SSL:
+    case SSL_ERROR_ZERO_RETURN:
     case SSL_ERROR_SYSCALL:
-      {
-        int err = ERRNO;
-        if (RC_TRY_AGAIN(err))
-          continue;
-        else
-          return -1;
-      }
+      if (handleErrorSyscall(tx, ssl_err, pd_peeraddress, "send"))
+        continue;
+      else
+        return -1;
+
     default:
       OMNIORB_ASSERT(0);
     }
@@ -143,7 +176,7 @@ sslConnection::Recv(void* buf, size_t sz,
 		    const omni_time_t& deadline) {
 
   if (!pd_handshake_ok) {
-    omniORB::logs(25, "Send failed because SSL handshake not yet completed.");
+    omniORB::logs(25, "Recv failed because SSL handshake not yet completed.");
     return -1;
   }
 
@@ -151,7 +184,7 @@ sslConnection::Recv(void* buf, size_t sz,
     sz = orbParameters::maxSocketRecv;
 
   int rx;
-  int rc;
+  int ssl_err;
 
   do {
     if (pd_shutdown)
@@ -197,28 +230,24 @@ sslConnection::Recv(void* buf, size_t sz,
     rx = SSL_read(pd_ssl,(char*)buf,sz);
 #endif
 
-    rc = SSL_get_error(pd_ssl, rx);
+    ssl_err = SSL_get_error(pd_ssl, rx);
 
-    switch(rc) {
+    switch (ssl_err) {
     case SSL_ERROR_NONE:
       break;
-
-    case SSL_ERROR_SSL:
-    case SSL_ERROR_ZERO_RETURN:
-      return -1;
 
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       continue;
 
+    case SSL_ERROR_SSL:
+    case SSL_ERROR_ZERO_RETURN:
     case SSL_ERROR_SYSCALL:
-      {
-        int err = ERRNO;
-        if (RC_TRY_AGAIN(err))
-          continue;
-        else
-          return -1;
-      }
+      if (handleErrorSyscall(rx, ssl_err, pd_peeraddress, "recv"))
+        continue;
+      else
+        return -1;
+
     default:
       OMNIORB_ASSERT(0);
     }

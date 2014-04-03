@@ -1,3 +1,11 @@
+Thu Apr  3 11:57:57 BST 2014 dgrisby
+====================================
+
+- Log more detail about SSL errors.
+
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+
+
 Tue Mar 25 15:17:34 GMT 2014 dgrisby
 ====================================
 
