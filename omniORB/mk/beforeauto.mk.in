@@ -585,7 +585,7 @@ define MakeCXXSharedLibrary
  soname=$(SharedLibrarySoNameTemplate); \
  set -x; \
  $(RM) $@; \
- $(CXX) $(SharedLibraryPlatformLinkFlagsTemplate) -o $@ \
+ $(CXX) @LDFLAGS@ $(SharedLibraryPlatformLinkFlagsTemplate) -o $@ \
  $(IMPORT_LIBRARY_FLAGS) $(filter-out $(LibSuffixPattern),$^) $$extralibs;
 endef
 
