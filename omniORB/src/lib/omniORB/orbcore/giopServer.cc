@@ -39,6 +39,7 @@
 #include <giopStreamImpl.h>
 #include <initialiser.h>
 #include <omniORB4/omniInterceptors.h>
+#include <SocketCollection.h>
 #include <orbOptions.h>
 #include <orbParameters.h>
 
@@ -106,6 +107,8 @@ CORBA::Boolean orbParameters::connectionWatchImmediate      = 0;
 //   Note that this setting has no effect on Windows, since it has no
 //   mechanism for signalling the connection watching thread.
 
+CORBA::ULong orbParameters::listenBacklog      = SOMAXCONN;
+//   A high rate of incoming connections may require a longer listen backlog.
 
 ////////////////////////////////////////////////////////////////////////////
 static const char* plural(CORBA::ULong val)
@@ -1532,6 +1535,35 @@ static connectionWatchImmediateHandler connectionWatchImmediateHandler_;
 
 
 /////////////////////////////////////////////////////////////////////////////
+class listenBacklogHandler : public orbOptions::Handler {
+public:
+
+  listenBacklogHandler() : 
+    orbOptions::Handler("listenBacklog",
+			"listenBacklog = n >= 1",
+			1,
+			"-ORBlistenBacklog < n >= 1 >") {}
+
+  void visit(const char* value,orbOptions::Source) throw (orbOptions::BadParam) {
+
+    CORBA::ULong v;
+    if (!orbOptions::getULong(value,v) || v < 1) {
+      throw orbOptions::BadParam(key(),value,
+				 orbOptions::expect_greater_than_zero_ulong_msg);
+    }
+    orbParameters::listenBacklog = v;
+  }
+
+  void dump(orbOptions::sequenceString& result) {
+    orbOptions::addKVULong(key(),orbParameters::listenBacklog,
+			   result);
+  }
+};
+
+static listenBacklogHandler listenBacklogHandler_;
+
+
+/////////////////////////////////////////////////////////////////////////////
 //            Module initialiser                                           //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1545,6 +1577,7 @@ public:
     orbOptions::singleton().registerHandler(maxServerThreadPerConnectionHandler_);
     orbOptions::singleton().registerHandler(threadPoolWatchConnectionHandler_);
     orbOptions::singleton().registerHandler(connectionWatchImmediateHandler_);
+	orbOptions::singleton().registerHandler(listenBacklogHandler_);
   }
 
   void attach() {

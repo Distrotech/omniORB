@@ -498,6 +498,9 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean connectionWatchImmediate;
 //  handled; otherwise, they are not watched until the
 //  SocketCollection next scans the connection list.
 
+_CORBA_MODULE_VAR _core_attr CORBA::ULong listenBacklog;
+//  Allows setting of listen backlog size. The default value is SOMAXCONN.
+
 _CORBA_MODULE_END
 
 OMNI_NAMESPACE_END(omni)

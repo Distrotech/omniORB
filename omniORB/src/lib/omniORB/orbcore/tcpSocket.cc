@@ -324,7 +324,7 @@ tcpSocket::Bind(const char*   	      	 host,
   //
   // Listen...
   
-  if (listen(sock, SOMAXCONN) == RC_SOCKET_ERROR) {
+  if (listen(sock, orbParameters::listenBacklog) == RC_SOCKET_ERROR) {
     CLOSESOCKET(sock);
     omniORB::logs(1, "Failed to listen on socket.");
     return RC_INVALID_SOCKET;
