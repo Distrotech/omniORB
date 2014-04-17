@@ -86,6 +86,9 @@ public:
   virtual _CORBA_Boolean inThisAddressSpace();
   // Override omniIdentity.
 
+  void disconnect();
+  // Override omniIdentity.
+  
 
   virtual void* ptrToClass(int* cptr);
   static inline omniRemoteIdentity* downcast(omniIdentity* i) {

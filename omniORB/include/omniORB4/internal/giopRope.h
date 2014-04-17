@@ -123,6 +123,13 @@ public:
   //    Caller must not hold omniTransportLock, it is used internally for
   //    synchronisation.
 
+  void disconnect();
+  // Forcibly disconnect all strands.
+  //
+  // Thread Safety preconditions:
+  //    Caller must not hold omniTransportLock, it is used internally for
+  //    synchronisation.
+
   CORBA::Boolean hasAddress(const giopAddress*);
   // Returns true if the address is in this rope's address list; false
   // otherwise.

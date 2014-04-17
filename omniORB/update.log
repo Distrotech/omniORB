@@ -1,3 +1,23 @@
+Thu Apr 17 16:39:31 BST 2014 dgrisby
+====================================
+
+- Propagate LDFLAGS into shared library build.
+
+mk/beforeauto.mk.in
+
+- New _NP_disconnect method on object references.
+
+include/omniORB4/internal/giopRope.h
+include/omniORB4/internal/omniIdentity.h
+include/omniORB4/internal/remoteIdentity.h
+include/omniORB4/omniObjRef.h
+include/omniORB4/omniTransport.h
+src/lib/omniORB/orbcore/giopRope.cc
+src/lib/omniORB/orbcore/omniIdentity.cc
+src/lib/omniORB/orbcore/omniObjRef.cc
+src/lib/omniORB/orbcore/remoteIdentity.cc
+
+
 Thu Apr  3 11:57:57 BST 2014 dgrisby
 ====================================
 

@@ -289,6 +289,10 @@ public:
     pd_timeout.assign(secs, ns);
   }
 
+  void _NP_disconnect();
+  // Forcibly disconnect all connections associated with this object
+  // reference.
+
 protected:
   virtual ~omniObjRef();
   // Must not hold <omni::internalLock>.

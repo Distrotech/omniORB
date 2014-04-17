@@ -91,6 +91,11 @@ public:
   // space.
 
 
+  virtual void disconnect();
+  // Disconnect any associated network connections.
+  //  Caller must hold <omni::internalLock>. On return the lock is released.
+
+
   static void waitForLastIdentity();
   // Block until all traced omniIdentity objects have been deleted.
   //  Must not hold <omni::internalLock>

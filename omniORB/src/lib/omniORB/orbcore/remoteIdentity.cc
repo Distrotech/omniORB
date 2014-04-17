@@ -308,6 +308,16 @@ omniRemoteIdentity::inThisAddressSpace()
 }
 
 
+void
+omniRemoteIdentity::disconnect()
+{
+  ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
+
+  omniRemoteIdentity_RefHolder rh(this);
+  // omni::internalLock has been released by RefHolder constructor
+
+  pd_rope->disconnect();
+}
 
 
 void*

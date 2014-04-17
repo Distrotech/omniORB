@@ -1152,6 +1152,15 @@ omniObjRef::_enableShortcut(omniServant*, const _CORBA_Boolean*)
 //            Handlers for Configuration Options                           //
 /////////////////////////////////////////////////////////////////////////////
 
+
+void
+omniObjRef::_NP_disconnect()
+{
+  omni::internalLock->lock();
+  _identity()->disconnect();
+}
+
+
 OMNI_NAMESPACE_BEGIN(omni)
 
 /////////////////////////////////////////////////////////////////////////////

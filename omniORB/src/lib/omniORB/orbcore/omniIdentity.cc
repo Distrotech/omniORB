@@ -68,6 +68,15 @@ omniIdentity::lastIdentityHasBeenDeleted()
     cond->signal();
 }
 
+void
+omniIdentity::disconnect()
+{
+  // Default implementation does nothing except release
+  // omni::internalLock to satisfy the locking scheme.
+  omni::internalLock->unlock();
+}
+
+
 void*
 omniIdentity::ptrToClass(int* cptr)
 {

@@ -120,7 +120,7 @@ public:
   virtual void incrRefCount() = 0;
   virtual void decrRefCount() = 0;
 
-
+  virtual void disconnect() = 0;
 
   friend class Strand;
 

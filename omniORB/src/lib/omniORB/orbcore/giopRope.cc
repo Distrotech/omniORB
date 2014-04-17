@@ -491,6 +491,29 @@ giopRope::decrRefCount()
 
 
 ////////////////////////////////////////////////////////////////////////
+void
+giopRope::disconnect()
+{
+  omni_tracedmutex_lock sync(*omniTransportLock);
+
+  RopeLink* p = pd_strands.next;
+  for (; p != &pd_strands; p = p->next) {
+    giopStrand* s = (giopStrand*)p;
+
+    if (s->state() != giopStrand::DYING) {
+      if (s->connection) {
+        if (omniORB::trace(10)) {
+          omniORB::logger log;
+          log << "Force disconnect connection to "
+              << s->connection->peeraddress() << "\n";
+        }
+        s->connection->Shutdown();
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////
 CORBA::Boolean
 giopRope::hasAddress(const giopAddress* addr)
 {
