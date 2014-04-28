@@ -5,9 +5,6 @@ This script builds a list of minor code values from the omniORB
 minorCode.h header.
 """
 
-# This code should work with Python 1.5.2, for people using the
-# minimal omnipython distribution.
-
 import sys, re, os.path
 
 def main(argv):

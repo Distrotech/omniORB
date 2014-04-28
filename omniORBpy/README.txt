@@ -1,7 +1,7 @@
 omniORBpy 4.2
 =============
 
-This is the omniORBpy 4.2 development branch.
+This is omniORBpy 4.2.0.
 
 omniORBpy is a robust high-performance CORBA ORB for Python.
 

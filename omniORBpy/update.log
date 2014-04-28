@@ -1,3 +1,17 @@
+Mon Apr 28 17:48:32 BST 2014 dgrisby
+====================================
+
+- This is omniORBpy 4.2.0.
+
+README.txt
+ReleaseNotes.txt
+THIS_IS_OMNIORBPY_4_2_0
+THIS_IS_OMNIORBPY_DEVELOPMENT_BRANCH
+bin/scripts/distdate.py
+bin/scripts/makeminors.py
+mk/version.mk
+
+
 Tue Mar 11 16:30:46 GMT 2014 dgrisby
 ====================================
 

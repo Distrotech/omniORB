@@ -6,7 +6,7 @@ omniORB on Win32 and Win64 platforms.
 
 omniORB has been tested with the following software configuration:
 
-- Operating System  : Windows NT 4.0, 9x, 2000, XP, 2003, Vista, 7
+- Operating System  : Windows NT 4.0 or any later version
 - Architecture      : x86, x86-64 (and alpha in earlier versions)
 - Compiler          : Visual C++ 6, 7, 8, 9, 10. VC++ 5 may still work.
 
@@ -41,11 +41,11 @@ When the omniORB4 distribution is unpacked, the following are created:
 Installation
 ============
 
-If you downloaded the Win32 binary distribution of omniORB,
-ready-built binaries are provided. The binaries are compiled with VC++
-9 or 10, depending on the version you downloaded. If you are using any
-other version of VC++, the binaries will not work, and you must
-compile omniORB from source.
+If you downloaded a Win32 binary distribution of omniORB, ready-built
+binaries are provided. The binaries are compiled with VC++ 9 or 10,
+depending on the version you downloaded. If you are using any other
+version of VC++, the binaries will not work, and you must compile
+omniORB from source.
 
 Note that although there are many references to "win32", everything
 works on 64 bit Windows platforms. There is no separate "win64"
@@ -279,6 +279,10 @@ still work with Visual C++ 5 but that has not been tested.
     Python distribution from:
 
        http://www.python.org/download/download_windows.html
+
+
+    Previous omniORB versions supported the use of a minimal version
+    of Python 1.5.2, named omnipython. That is no longer supported.
 
 
   B. Choose the right platform configuration file

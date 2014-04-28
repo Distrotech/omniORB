@@ -5,26 +5,10 @@ Unless specified otherwise, the information applies to all Unix
 platforms. Platform specific information is also available in separate
 files.
 
-omniORB has been tested on the following Unix platforms:
+The primary Unix platforms tested during omniORB development are Linux
+and Mac OS X. It is known to work on the vast majority of other Unix
+platforms.
 
-  o Linux on x86, Alpha, Sparc, IBM zSeries.
-  o Solaris 2.{5,6,7,8,9}/ Sun SparcCompiler C++ version 4.2, 5.x, gcc.
-  o HPUX 11.00/ aC++
-  o SGI Irix 6.x/SGI C++ compiler 7.2
-
-It has also been tested by external contributors on the following platforms:
-
-  o IBM AIX 4.2/ IBM C Set++ 3.1.4
-  o HPUX 10.20/ aC++ (B3910 A.01.04)
-  o NextStep 3.3/ gcc-2.7.2
-  o Reliant Unix 5.43/CDS++
-  o SCO OpenServer 5/g++
-  o SCO Unixware 7
-  o Linux 2.x powerpc/Debian
-  o Digital Unix 3.2/ DEC C++ compiler version 5.5
-  o Digital Unix 4.0D/ DEC C++ compiler version 6.0
-
-And probably quite a few others.
 
 Roadmap
 =======
@@ -63,7 +47,7 @@ reason, manual configuration based on platform files is possible.
 Autoconf configuration
 ======================
 
-On most Unix platforms, omniORB can be configured using the common
+On most Unix platforms, omniORB should be configured using the
 Autoconf configure script, that tries to figure out the specifics of
 your machine.
 
@@ -98,11 +82,11 @@ compilers and Python. It will always choose gcc over the platform's
 native compiler if it is available. To change the choices it makes,
 use variables CC, CXX and PYTHON, e.g.:
 
-  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.3
+  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.7
 
 There are various omniORB specific options:
 
-  --disable-static   disables the build of static libraries, which
+  --disable-static   Disables the build of static libraries, which
                      shortens the build process.
 
   --enable-thread-tracing
@@ -113,9 +97,19 @@ There are various omniORB specific options:
                      In some beta releases, thread tracing is turned
                      on by default, so you may wish to turn it off
                      with --disable-thread-tracing.
+  
+  --disable-ipv6     Disables support for IPv6.
 
-  --with-openssl=    Specify a location to find the OpenSSL
-                     installation, required by the SSL transport.
+  --disable-longdouble
+                     Disables the CORBA::LongDouble type.
+
+  --disable-atomic   Disables the use of atomic operations, using
+                     mutexes instead.
+
+  --with-openssl     Enable the SSL transport. If the configure script
+                     does not find the OpenSSL libraries of its own
+                     accord, you can specify the root directory of the
+                     OpenSSL implementation: --with-openssl=/install/path
 
   --with-omniORB-config=
                      Location to look for the omniORB configuration
@@ -137,9 +131,9 @@ You also have to configure the omniORB runtime and the naming service,
 consult the user guides in ./doc for details. For a quick start,
 follow these steps:
 
-    o Set the environment variable OMNINAMES_LOGDIR to a directory where
+    o Set the environment variable OMNINAMES_DATADIR to a directory where
       the naming service omniNames can store its data. For example:
-          OMNINAMES_LOGDIR=/wib/wob; export OMNINAMES_LOGDIR
+          OMNINAMES_DATADIR=/wib/wob; export OMNINAMES_DATADIR
 
     o Start omniNames.
          $ omniNames -start &
@@ -211,7 +205,7 @@ libomnithread.so    - omnithread shared library
 libomniORB4.so      - omniORB runtime shared library
 libomniDynamic4.so  - omniORB runtime shared library for dynamic features
 libomniCodeSets4.so - extra code sets for string transformation
-libomnisslTP.so     - SSL transport (built if OpenSSL is available)
+libomnisslTP4.so    - SSL transport (built if OpenSSL is available)
 libCOS4.so          - stubs and skeletons for the COS service interfaces
 libCOSDynamic4.so   - dynamic stubs for the COS service interfaces
 
@@ -272,7 +266,7 @@ To build using the old omniORB build environment, follow these steps:
   Uncomment the 'PYTHON =' line, and set it to the path of your Python
   interpreter.
 
-  If you do not have Python 1.5.2 or higher, you can download the full
+  If you do not have Python 2.5 or higher, you can download the full
   source distribution from
 
    http://www.python.org/download/

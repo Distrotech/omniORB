@@ -1,3 +1,18 @@
+Mon Apr 28 17:48:32 BST 2014 dgrisby
+====================================
+
+- This is omniORB 4.2.0.
+
+README.FIRST.txt
+README.unix.txt
+README.unix
+README.win32.txt
+ReleaseNotes.txt
+THIS_IS_OMNIORB_4_2_0
+THIS_IS_OMNIORB_DEVELOPMENT_BRANCH
+bin/scripts/distdate.py
+
+
 Mon 28 Apr 17:43:32 BST 2014 dgrisby
 ====================================
 

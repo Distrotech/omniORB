@@ -2,7 +2,7 @@
 
 # Script to extract the distribution date from update.log
 
-import sys, string
+import sys
 
 if len(sys.argv) > 1:
     package = sys.argv[1]
@@ -14,11 +14,7 @@ line = sys.stdin.readline()
 while line == "\n":
     line = sys.stdin.readline()
 
-try:
-    line = string.strip(line)
-except AttributeError:
-    # Python 3 has no string.strip()
-    line = line.strip()
+line = line.strip()
 
 output = """\
 // distdate.hh -- Automatically generated file

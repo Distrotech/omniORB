@@ -1,6 +1,6 @@
 READ ME FIRST!
 
-This is the omniORB 4.2 development branch.
+This is omniORB 4.2.0.
 
 omniORB is copyright Apasphere Ltd, AT&T Laboratories Cambridge and
 others. It is free software. The programs in omniORB are distributed
@@ -21,8 +21,8 @@ README files
 README.win32.txt - contains important information on building and
                    using omniORB on Windows NT and Windows 95.
 
-README.unix -      contains important information on building and
-                   using omniORB on Unix platforms.
+README.unix.txt  - contains important information on building and
+                   using omniORB on Unix / Linux platforms.
 
 Other readmes live the the readmes/ subdirectory. See if there is one
 for your platform.
@@ -91,7 +91,7 @@ Installation
 
 Installation instructions are provided in the following files:
 
-- README.unix      for all unix platforms
+- README.unix.txt  for all Unix / Linux platforms
 - README.win32.txt for Windows, both 32 and 64 bit.
 
 
