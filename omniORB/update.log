@@ -1,3 +1,12 @@
+Wed Jul 23 10:07:17 BST 2014 dgrisby
+====================================
+
+- Improved Python 3 support.
+
+mk/python.mk
+src/tool/omniidl/cxx/dir.mk
+
+
 Mon Apr 28 17:48:32 BST 2014 dgrisby
 ====================================
 
