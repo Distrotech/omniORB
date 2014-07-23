@@ -32,15 +32,16 @@
 #  define DLL_EXPORT
 #endif
 
-#include <omniORB4/CORBA.h>
-#include <omniORB4/sslContext.h>
-
 #if defined(__VMS)
 #  include <Python.h>
 #else
 #  include PYTHON_INCLUDE
 #endif
 
+#include <omniORB4/CORBA.h>
+#include <omniORB4/sslContext.h>
+
+#include "../omnipy_sysdep.h"
 
 extern "C" {
 
@@ -55,7 +56,7 @@ extern "C" {
   {
     if (PyTuple_GET_SIZE(args) == 0) {
       if (sslContext::certificate_authority_file)
-	return PyString_FromString(sslContext::certificate_authority_file);
+	return String_FromString(sslContext::certificate_authority_file);
       else {
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -81,7 +82,7 @@ extern "C" {
   {
     if (PyTuple_GET_SIZE(args) == 0) {
       if (sslContext::key_file)
-	return PyString_FromString(sslContext::key_file);
+	return String_FromString(sslContext::key_file);
       else {
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -107,7 +108,7 @@ extern "C" {
   {
     if (PyTuple_GET_SIZE(args) == 0) {
       if (sslContext::key_file_password)
-	return PyString_FromString(sslContext::key_file_password);
+	return String_FromString(sslContext::key_file_password);
       else {
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -139,8 +140,32 @@ extern "C" {
     {0,0}
   };
 
+#if (PY_VERSION_HEX < 0x03000000)
+
   void DLL_EXPORT init_omnisslTP()
   {
     PyObject* m = Py_InitModule((char*)"_omnisslTP", omnisslTP_methods);
   }
+
+#else
+
+  static struct PyModuleDef omnisslTPmodule = {
+    PyModuleDef_HEAD_INIT,
+    "_omnisslTP",
+    "omniORBpy SSL transport",
+    -1,
+    omnisslTP_methods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+  };
+
+  PyMODINIT_FUNC
+  PyInit__omnisslTP(void)
+  {
+    return PyModule_Create(&omnisslTPmodule);
+  }
+
+#endif
 };

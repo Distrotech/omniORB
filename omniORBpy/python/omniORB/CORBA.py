@@ -3,7 +3,7 @@
 # CORBA.py                   Created on: 1999/06/08
 #                            Author    : Duncan Grisby (dpg1)
 #
-#    Copyright (C) 2002-2013 Apasphere Ltd
+#    Copyright (C) 2002-2014 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -35,7 +35,7 @@ Main omniORB CORBA module
 import _omnipy
 import omniORB
 
-import threading, types, time, exceptions, string
+import threading, types, time
 
 try:
     property
@@ -66,7 +66,9 @@ except NameError:
 #                                                                           #
 #############################################################################
 
-class Exception (exceptions.Exception):
+__base_Exception = Exception
+
+class Exception (__base_Exception):
     pass
 
 OMGVMCID = 0x4f4d0000
@@ -84,7 +86,7 @@ completion_status = omniORB.Enum("IDL:omg.org/CORBA/completion_status:1.0",
 class SystemException (Exception):
     def __init__(self, minor=0, completed=COMPLETED_NO, info=None):
         self.minor = minor
-        if type(completed) == types.IntType:
+        if isinstance(completed, int):
             self.completed = completion_status._item(completed)
         else:
             self.completed = completed
@@ -139,7 +141,7 @@ class UserException (Exception):
             except AttributeError:
                 vals.append("%s=<not set>" % attr)
 
-        return "%s(%s)" % (cname, string.join(vals, ", "))
+        return "%s(%s)" % (cname, ", ".join(vals))
 
     def __str__(self):
         return self.__repr__()
@@ -268,6 +270,9 @@ class TypeCode(object):
     def member_visibility(self, index): return self._t.member_visibility(index)
     def type_modifier(self):            return self._t.type_modifier()
     def concrete_base_type(self):       return self._t.concrete_base_type()
+
+
+omniORB._CORBA_dict = globals()
 
 import tcInternal
 _d_TypeCode = tcInternal.tv_TypeCode
@@ -735,7 +740,7 @@ class ValueBase(object):
                     except AttributeError:
                         vals.append("%s=<not set>" % attr)
 
-            return "%s(%s)" % (cname, string.join(vals, ", "))
+            return "%s(%s)" % (cname, ", ".join(vals))
         finally:
             try:
                 del self.__in_repr
@@ -835,26 +840,24 @@ class Context (Object):
             self.__values = {}
 
     def set_one_value(self, name, val):
-        if type(name) is not types.StringType or \
-           type(val) is not types.StringType:
+        if not (isinstance(name, str) and isinstance(val, str)):
             raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
         
         self.__values[name] = val
 
     def set_values(self, values):
-        if type(values) is not types.DictType:
+        if not isinstance(values, dict):
             raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
         
-        for k,v in values.items():
-            if type(k) is not types.StringType or \
-               type(v) is not types.StringType:
+        for k,v in values.iteritems():
+            if not (isinstance(k, str) and isinstance(v, str)):
                 raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType,
                                 COMPLETED_NO)
 
         self.__values.update(values)
 
     def get_values(self, pattern, start_scope=None):
-        if type(pattern) is not types.StringType:
+        if not isinstance(pattern, str):
             raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
         
         ctxt = self
@@ -871,7 +874,7 @@ class Context (Object):
         return r
 
     def delete_values(self, pattern):
-        if type(pattern) is not types.StringType or pattern == "":
+        if not isinstance(pattern, str) or pattern == "":
             raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
         found = 0
@@ -881,7 +884,7 @@ class Context (Object):
                 # Wildcard
                 pattern = pattern[:-1]
                 pl = len(pattern)
-                for k in self.__values.keys():
+                for k in self.__values.iterkeys():
                     if k[:pl] == pattern:
                         found = 1
                         del self.__values[k]
@@ -932,12 +935,12 @@ class Context (Object):
                 # Wildcard
                 pattern = pattern[:-1]
                 pl = len(pattern)
-                for k,v in self.__values.items():
-                    if k[:pl] == pattern and not values.has_key(k):
+                for k,v in self.__values.iteritems():
+                    if k[:pl] == pattern and k not in values:
                         values[k] = v
             else:
                 # Not a wildcard
-                if not values.has_key(pattern):
+                if pattern not in values:
                     v = self.__values.get(pattern)
                     if v:
                         values[pattern] = v
@@ -967,18 +970,12 @@ fixed = omniORB.fixed
 
 #############################################################################
 #                                                                           #
-# Wide character things (only for Pythons with Unicode support)             #
+# Wide character things for compatibility with standard Python mapping      #
 #                                                                           #
 #############################################################################
 
-try:
-    wstr = unichr
-    word = ord
-except NameError:
-    def wstr(c):
-        raise NO_IMPLEMENT(omniORB.NO_IMPLEMENT_Unsupported, COMPLETED_NO)
-    def word(c):
-        raise NO_IMPLEMENT(omniORB.NO_IMPLEMENT_Unsupported, COMPLETED_NO)
+wstr = unichr
+word = ord
 
 
 #############################################################################

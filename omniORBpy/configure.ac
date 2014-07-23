@@ -148,10 +148,14 @@ AC_CONFIG_FILES(
                 modules/sslTP/GNUmakefile
                 modules/connections/GNUmakefile
                 modules/ziop/GNUmakefile
-                omniidl_be/GNUmakefile
                 python/GNUmakefile
+                python/omniidl_be/GNUmakefile
                 python/COS/GNUmakefile
                 python/omniORB/GNUmakefile
+                python3/GNUmakefile
+                python3/omniidl_be/GNUmakefile
+                python3/COS/GNUmakefile
+                python3/omniORB/GNUmakefile
 		include/GNUmakefile
                )
 
