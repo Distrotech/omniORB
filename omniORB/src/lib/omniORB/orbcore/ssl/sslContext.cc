@@ -52,6 +52,7 @@ OMNI_USING_NAMESPACE(omni)
 static void report_error();
 
 const char* sslContext::certificate_authority_file = 0;
+const char* sslContext::certificate_authority_path = 0;
 const char* sslContext::key_file = 0;
 const char* sslContext::key_file_password = 0;
 int         sslContext::verify_mode = (SSL_VERIFY_PEER |
@@ -151,27 +152,14 @@ sslContext::set_supported_versions() {
 void
 sslContext::set_CA() {
 
-  {
-    struct stat buf;
-    if (!pd_cafile || stat(pd_cafile,&buf) < 0) {
-      if (omniORB::trace(1)) {
-	omniORB::logger log;
-	log << "Error: sslContext CA file is not set "
-	    << "or cannot be found\n";
-      }
-      OMNIORB_THROW(INITIALIZE,INITIALIZE_TransportError,
-		    CORBA::COMPLETED_NO);
-    }
-  }
-
-  if (!(SSL_CTX_load_verify_locations(pd_ctx,pd_cafile,0))) {
+  if (!(SSL_CTX_load_verify_locations(pd_ctx, pd_cafile,
+                                      certificate_authority_path))) {
     report_error();
     OMNIORB_THROW(INITIALIZE,INITIALIZE_TransportError,CORBA::COMPLETED_NO);
   }
 
   // We no longer set the verify depth to 1, to use the default of 9.
   //  SSL_CTX_set_verify_depth(pd_ctx,1);
-
 }
 
 /////////////////////////////////////////////////////////////////////////

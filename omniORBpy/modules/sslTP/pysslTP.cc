@@ -71,6 +71,32 @@ extern "C" {
     Py_INCREF(Py_None); return Py_None;
   }
 
+  static char certificate_authority_path_doc[] =
+  "certificate_authority_path(path)\n"
+  "\n"
+  "Set the path for certificate authority files for SSL validation.\n"
+  "Call with no argument to retrieve the current value.\n";
+
+  static PyObject* pysslTP_certificate_authority_path(PyObject* self,
+						      PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      if (sslContext::certificate_authority_path)
+	return String_FromString(sslContext::certificate_authority_path);
+      else {
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    char *name;
+    if (!PyArg_ParseTuple(args, (char*)"s", &name)) return 0;
+
+    // Leak here, but we can't do anything else about it.
+    sslContext::certificate_authority_path = CORBA::string_dup(name);
+
+    Py_INCREF(Py_None); return Py_None;
+  }
+
   static char key_file_doc[] =
   "key_file(PEM filename)\n"
   "\n"
@@ -128,6 +154,10 @@ extern "C" {
     {(char*)"certificate_authority_file",
      pysslTP_certificate_authority_file, METH_VARARGS,
      certificate_authority_file_doc},
+
+    {(char*)"certificate_authority_path",
+     pysslTP_certificate_authority_path, METH_VARARGS,
+     certificate_authority_path_doc},
 
     {(char*)"key_file",
      pysslTP_key_file, METH_VARARGS,

@@ -1,3 +1,11 @@
+Fri Aug  8 18:17:22 BST 2014 dgrisby
+====================================
+
+- Option to set SSL CA path.
+
+modules/sslTP/pysslTP.cc
+
+
 Wed Jul 23 10:07:17 BST 2014 dgrisby
 ====================================
 

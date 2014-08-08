@@ -63,6 +63,7 @@ class sslContext {
   // These three parameters must be set or else the default way to
   // initialise a sslContext singleton will not be used.
   static _core_attr const char* certificate_authority_file; // In PEM format
+  static _core_attr const char* certificate_authority_path; // Path
   static _core_attr const char* key_file;                   // In PEM format
   static _core_attr const char* key_file_password;
 

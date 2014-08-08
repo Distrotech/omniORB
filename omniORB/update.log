@@ -1,3 +1,14 @@
+Fri Aug  8 18:17:22 BST 2014 dgrisby
+====================================
+
+- Option to set SSL CA path.
+
+include/omniORB4/sslContext.h
+sample.cfg
+src/lib/omniORB/orbcore/ssl/sslContext.cc
+src/lib/omniORB/orbcore/ssl/sslTransportImpl.cc
+
+
 Wed Jul 23 10:07:17 BST 2014 dgrisby
 ====================================
 
