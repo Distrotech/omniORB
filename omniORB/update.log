@@ -1,3 +1,24 @@
+Tue Sep  2 12:02:48 BST 2014 dgrisby
+====================================
+
+- Expand valuetracker hash table on demand.
+
+include/omniORB4/internal/valueTrackerImpl.h
+src/lib/omniORB/dynamic/valueTracker.cc
+
+- Optionally return more details about SSL peer.
+
+include/omniORB4/sslContext.h
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.h
+src/lib/omniORB/orbcore/ssl/sslContext.cc
+
+- Operation accessor in interceptors.
+
+include/omniORB4/omniInterceptors.h
+src/lib/omniORB/orbcore/interceptors.cc
+
+
 Fri Aug  8 18:17:22 BST 2014 dgrisby
 ====================================
 
