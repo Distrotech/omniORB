@@ -291,7 +291,16 @@ sslConnection::peeridentity() {
 /////////////////////////////////////////////////////////////////////////
 void*
 sslConnection::peerdetails() {
-  return (void*)pd_peercert;
+
+  if (sslContext::full_peerdetails) {
+    return (void*)pd_peerdetails;
+  }
+  else if (pd_peerdetails && pd_peerdetails->verified()) {
+    return (void*)pd_peerdetails->cert();
+  }
+  else {
+    return 0;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -380,7 +389,7 @@ sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
 /////////////////////////////////////////////////////////////////////////
 sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl, 
 			     SocketCollection* belong_to) : 
-  SocketHolder(sock), pd_ssl(ssl), pd_handshake_ok(0), pd_peercert(0)
+  SocketHolder(sock), pd_ssl(ssl), pd_handshake_ok(0), pd_peerdetails(0)
 {
   OMNI_SOCKADDR_STORAGE addr;
   SOCKNAME_SIZE_T l;
@@ -407,13 +416,11 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
   belong_to->addSocket(this);
 
   // Determine our peer identity, if there is one
-  X509 *peer_cert = SSL_get_peer_certificate(pd_ssl);
+  X509           *peer_cert = SSL_get_peer_certificate(pd_ssl);
+  CORBA::Boolean  verified  = 0;
 
   if (peer_cert) {
-    if (SSL_get_verify_result(pd_ssl) != X509_V_OK) {
-      X509_free(peer_cert);
-      return;
-    }
+    verified = SSL_get_verify_result(pd_ssl) == X509_V_OK;
 
     int lastpos = -1;
 
@@ -452,8 +459,6 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
       stream.marshalOctet(0);
     }
 
-    pd_peercert = peer_cert;
-
     try {
       pd_peeridentity = stream.unmarshalString();
     }
@@ -465,6 +470,7 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
       }
     }
   }
+  pd_peerdetails = new sslContext::PeerDetails(pd_ssl, peer_cert, verified);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -473,9 +479,9 @@ sslConnection::~sslConnection() {
   clearSelectable();
   pd_belong_to->removeSocket(this);
 
-  if (pd_peercert) {
-    X509_free(pd_peercert);
-    pd_peercert = 0;
+  if (pd_peerdetails) {
+    delete pd_peerdetails;
+    pd_peerdetails = 0;
   }
 
   if (pd_ssl != 0) {

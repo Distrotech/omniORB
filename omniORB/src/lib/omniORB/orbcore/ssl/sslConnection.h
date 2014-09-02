@@ -83,8 +83,8 @@ private:
   CORBA::String_var pd_peeridentity;
 
 protected:
-  _CORBA_Boolean    pd_handshake_ok;
-  X509*             pd_peercert;
+  CORBA::Boolean           pd_handshake_ok;
+  sslContext::PeerDetails* pd_peerdetails;
 };
 
 

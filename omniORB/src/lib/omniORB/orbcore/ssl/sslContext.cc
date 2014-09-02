@@ -51,16 +51,17 @@ OMNI_USING_NAMESPACE(omni)
 
 static void report_error();
 
-const char* sslContext::certificate_authority_file = 0;
-const char* sslContext::certificate_authority_path = 0;
-const char* sslContext::key_file = 0;
-const char* sslContext::key_file_password = 0;
-int         sslContext::verify_mode = (SSL_VERIFY_PEER |
-				       SSL_VERIFY_FAIL_IF_NO_PEER_CERT);
-int       (*sslContext::verify_callback)(int,X509_STORE_CTX *) = 0;
-void      (*sslContext::info_callback)(const SSL *s, int where, int ret) = 0;
+const char*    sslContext::certificate_authority_file = 0;
+const char*    sslContext::certificate_authority_path = 0;
+const char*    sslContext::key_file = 0;
+const char*    sslContext::key_file_password = 0;
+int            sslContext::verify_mode = (SSL_VERIFY_PEER |
+                                          SSL_VERIFY_FAIL_IF_NO_PEER_CERT);
+int          (*sslContext::verify_callback)(int,X509_STORE_CTX *) = 0;
+void         (*sslContext::info_callback)(const SSL *s, int where, int ret) = 0;
+CORBA::Boolean sslContext::full_peerdetails = 0;
 
-sslContext* sslContext::singleton = 0;
+sslContext*    sslContext::singleton = 0;
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -134,6 +135,12 @@ sslContext::~sslContext() {
   }
   if (pd_ssl_owner)
     thread_cleanup();
+}
+
+/////////////////////////////////////////////////////////////////////////
+sslContext::PeerDetails::~PeerDetails() {
+  if (pd_cert)
+    X509_free(pd_cert);
 }
 
 /////////////////////////////////////////////////////////////////////////
