@@ -803,6 +803,19 @@ extern "C" {
     }
   }
 
+  static PyObject*
+  pyObjRef_disconnect(PyObjRefObject* self, PyObject* args)
+  {
+    try {
+      omniObjRef* oo = self->obj->_PR_getobj();
+      if (oo)
+        oo->_NP_disconnect();
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
   static PyMethodDef pyObjRef_methods[] = {
     {(char*)"invoke",
@@ -823,7 +836,7 @@ extern "C" {
 
     {(char*)"nonExistent",
      (PyCFunction)pyObjRef_nonExistent,
-     METH_VARARGS},
+     METH_NOARGS},
 
     {(char*)"isEquivalent",
      (PyCFunction)pyObjRef_isEquivalent,
@@ -836,6 +849,10 @@ extern "C" {
     {(char*)"narrow",
      (PyCFunction)pyObjRef_narrow,
      METH_VARARGS},
+
+    {(char*)"disconnect",
+     (PyCFunction)pyObjRef_disconnect,
+     METH_NOARGS},
 
     {NULL,NULL}
   };
