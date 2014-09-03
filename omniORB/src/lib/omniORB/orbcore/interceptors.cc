@@ -164,6 +164,7 @@ omniInterceptors::interceptor##_T::info_T::operation() \
   return g.operation(); \
 }
 
+OPERATION_ACCESSOR(clientOpenConnection, giop_c)
 OPERATION_ACCESSOR(clientSendRequest,    giop_c)
 OPERATION_ACCESSOR(clientReceiveReply,   giop_c)
 OPERATION_ACCESSOR(serverReceiveRequest, giop_s)

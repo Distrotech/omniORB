@@ -77,6 +77,8 @@ public:
 
 
 private:
+  void setPeerDetails();
+
   ::SSL*            pd_ssl;
   CORBA::String_var pd_myaddress;
   CORBA::String_var pd_peeraddress;

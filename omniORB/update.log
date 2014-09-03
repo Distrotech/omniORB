@@ -1,3 +1,15 @@
+Wed Sep  3 10:32:46 BST 2014 dgrisby
+====================================
+
+- Add operation() to clientOpenConnection interceptor; ensure SSL peer
+  details are always set.
+
+include/omniORB4/omniInterceptors.h
+src/lib/omniORB/orbcore/interceptors.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+src/lib/omniORB/orbcore/ssl/sslConnection.h
+
+
 Tue Sep  2 12:02:48 BST 2014 dgrisby
 ====================================
 

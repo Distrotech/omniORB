@@ -341,6 +341,7 @@ sslConnection::gatekeeperCheckSpecific(giopStrand* strand)
     case SSL_ERROR_NONE:
       tcpSocket::setBlocking(pd_socket);
       pd_handshake_ok = 1;
+      setPeerDetails();
       return 1;
 
     case SSL_ERROR_WANT_READ:
@@ -414,8 +415,42 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
   tcpSocket::setCloseOnExec(sock);
 
   belong_to->addSocket(this);
+  setPeerDetails();
+}
+
+/////////////////////////////////////////////////////////////////////////
+sslConnection::~sslConnection() {
+
+  clearSelectable();
+  pd_belong_to->removeSocket(this);
+
+  if (pd_peerdetails) {
+    delete pd_peerdetails;
+    pd_peerdetails = 0;
+  }
+
+  if (pd_ssl != 0) {
+    if (SSL_get_shutdown(pd_ssl) == 0) {
+      SSL_set_shutdown(pd_ssl, SSL_SENT_SHUTDOWN | SSL_RECEIVED_SHUTDOWN);
+      SSL_shutdown(pd_ssl);
+    }
+    SSL_free(pd_ssl);
+    pd_ssl = 0;
+  }
+
+  CLOSESOCKET(pd_socket);
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+void
+sslConnection::setPeerDetails() {
 
   // Determine our peer identity, if there is one
+
+  if (pd_peerdetails)
+    return;
+
   X509           *peer_cert = SSL_get_peer_certificate(pd_ssl);
   CORBA::Boolean  verified  = 0;
 
@@ -469,32 +504,10 @@ sslConnection::sslConnection(SocketHandle_t sock,::SSL* ssl,
 	    << ex._name() << ")\n";
       }
     }
+    pd_peerdetails = new sslContext::PeerDetails(pd_ssl, peer_cert, verified);
   }
-  pd_peerdetails = new sslContext::PeerDetails(pd_ssl, peer_cert, verified);
 }
 
-/////////////////////////////////////////////////////////////////////////
-sslConnection::~sslConnection() {
-
-  clearSelectable();
-  pd_belong_to->removeSocket(this);
-
-  if (pd_peerdetails) {
-    delete pd_peerdetails;
-    pd_peerdetails = 0;
-  }
-
-  if (pd_ssl != 0) {
-    if (SSL_get_shutdown(pd_ssl) == 0) {
-      SSL_set_shutdown(pd_ssl, SSL_SENT_SHUTDOWN | SSL_RECEIVED_SHUTDOWN);
-      SSL_shutdown(pd_ssl);
-    }
-    SSL_free(pd_ssl);
-    pd_ssl = 0;
-  }
-
-  CLOSESOCKET(pd_socket);
-}
 
 /////////////////////////////////////////////////////////////////////////
 void

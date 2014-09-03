@@ -118,6 +118,7 @@ public:
         giop_c(c), reject(0), why(0) {}
 
       // Accessors for connection details
+      const char* operation();
       const char* myaddress();
       const char* peeraddress();
       const char* peeridentity();
