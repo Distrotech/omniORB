@@ -1,3 +1,11 @@
+Wed Sep  3 17:20:06 BST 2014 dgrisby
+====================================
+
+- Keep peer details even if name is empty.
+
+src/lib/omniORB/orbcore/ssl/sslConnection.cc
+
+
 Wed Sep  3 10:32:46 BST 2014 dgrisby
 ====================================
 

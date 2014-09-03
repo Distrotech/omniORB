@@ -455,17 +455,16 @@ sslConnection::setPeerDetails() {
   CORBA::Boolean  verified  = 0;
 
   if (peer_cert) {
-    verified = SSL_get_verify_result(pd_ssl) == X509_V_OK;
+    verified       = SSL_get_verify_result(pd_ssl) == X509_V_OK;
+    pd_peerdetails = new sslContext::PeerDetails(pd_ssl, peer_cert, verified);
 
     int lastpos = -1;
 
     X509_NAME* name = X509_get_subject_name(peer_cert);
     lastpos = X509_NAME_get_index_by_NID(name, NID_commonName, lastpos);
 
-    if (lastpos == -1) {
-      X509_free(peer_cert);
+    if (lastpos == -1)
       return;
-    }
 
     X509_NAME_ENTRY* ne       = X509_NAME_get_entry(name, lastpos);
     ASN1_STRING*     asn1_str = X509_NAME_ENTRY_get_data(ne);
@@ -478,10 +477,9 @@ sslConnection::setPeerDetails() {
     if (ASN1_STRING_type(asn1_str) != V_ASN1_UTF8STRING) {
       unsigned char* s = 0;
       int len = ASN1_STRING_to_UTF8(&s, asn1_str);
-      if (len == -1) {
-	X509_free(peer_cert);
+      if (len == -1)
         return;
-      }
+
       CORBA::ULong(len+1) >>= stream;
       stream.put_octet_array(s, len);
       stream.marshalOctet(0);
@@ -504,7 +502,6 @@ sslConnection::setPeerDetails() {
 	    << ex._name() << ")\n";
       }
     }
-    pd_peerdetails = new sslContext::PeerDetails(pd_ssl, peer_cert, verified);
   }
 }
 
