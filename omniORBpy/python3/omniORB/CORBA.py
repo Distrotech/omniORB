@@ -595,6 +595,15 @@ class Object(object):
 
         return self._obj.narrow(repoId, 0)
 
+    def _NP_disconnect(self):
+        """_NP_disconnect()
+
+        Forcibly disconnect all connections associated with this
+        object reference.
+        """
+        self._obj.disconnect()
+
+
     def _dynamic_op(self, name, in_args=[], out_args=[], excs=[]):
         """_dynamic_op(name, in_args=[], out_args=[], excs=[])
 

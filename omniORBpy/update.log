@@ -1,3 +1,12 @@
+Wed Sep  3 10:35:01 BST 2014 dgrisby
+====================================
+
+- _NP_Disconnect method on object references for Python 3.
+
+python3/omniORB/CORBA.py
+update.log
+
+
 Tue Sep  2 12:06:05 BST 2014 dgrisby
 ====================================
 
