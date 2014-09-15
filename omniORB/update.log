@@ -1,3 +1,12 @@
+Mon Sep 15 11:42:45 BST 2014 dgrisby
+====================================
+
+- Fix race between thread startup and orb destroy.
+
+include/omniORB4/omniAsyncInvoker.h
+src/lib/omniORB/orbcore/invoker.cc
+
+
 Wed Sep  3 17:20:06 BST 2014 dgrisby
 ====================================
 
