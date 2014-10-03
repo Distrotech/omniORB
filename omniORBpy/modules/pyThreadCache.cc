@@ -290,8 +290,8 @@ run_undetached(void*)
   workerThread_ = PyEval_CallObject(omniPy::pyWorkerThreadClass,
 				    omniPy::pyEmptyTuple);
   if (!workerThread_) {
-    if (omniORB::trace(1)) {
-      omniORB::logs(1, "Exception trying to create WorkerThread for thread "
+    if (omniORB::trace(2)) {
+      omniORB::logs(2, "Exception trying to create WorkerThread for thread "
                     "state scavenger.");
       PyErr_Print();
     }

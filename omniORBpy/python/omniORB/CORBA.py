@@ -383,16 +383,16 @@ class ORB(object):
         return self._obj.register_initial_reference(identifier, obj)
 
     def list_initial_services(self):
-        return self._obj.list_initial_services(self)
+        return self._obj.list_initial_services()
 
     def resolve_initial_references(self, identifier):
         return self._obj.resolve_initial_references(identifier)
 
     def work_pending(self):
-        return self._obj.work_pending(self)
+        return self._obj.work_pending()
 
     def perform_work(self):
-        self._obj.perform_work(self)
+        self._obj.perform_work()
 
     def run(self):
         # We have to use a timeout rather than just blocking in run(),

@@ -1,3 +1,16 @@
+Fri Oct  3 16:50:25 BST 2014 dgrisby
+====================================
+
+- Avoid log message in shutdown race with startup.
+
+modules/pyThreadCache.cc
+
+- Fix methods broken by twin type refactor.
+
+python/omniORB/CORBA.py
+python3/omniORB/CORBA.py
+
+
 Wed Sep  3 10:35:01 BST 2014 dgrisby
 ====================================
 
