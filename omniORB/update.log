@@ -1,3 +1,11 @@
+Wed Oct 22 23:49:04 BST 2014 dgrisby
+====================================
+
+- Immediately set strands dying in _NP_disconnect.
+
+src/lib/omniORB/orbcore/giopRope.cc
+
+
 Mon Sep 15 11:42:45 BST 2014 dgrisby
 ====================================
 

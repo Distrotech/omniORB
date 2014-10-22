@@ -508,6 +508,7 @@ giopRope::disconnect()
               << s->connection->peeraddress() << "\n";
         }
         s->connection->Shutdown();
+        s->state(giopStrand::DYING);
       }
     }
   }
