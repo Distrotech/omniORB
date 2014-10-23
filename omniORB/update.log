@@ -1,3 +1,13 @@
+Thu Oct 23 09:45:43 BST 2014 dgrisby
+====================================
+
+- Windows Python 3 changes.
+
+mk/python.mk
+src/tool/omniidl/cxx/dir.mk
+src/tool/omniidl/cxx/idlpython.cc
+
+
 Wed Oct 22 23:49:04 BST 2014 dgrisby
 ====================================
 
