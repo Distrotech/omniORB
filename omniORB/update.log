@@ -1,3 +1,13 @@
+Tue Nov 25 12:42:40 GMT 2014 dgrisby
+====================================
+
+- Build patches from Peter Klotz.
+
+include/omniORB4/internal/GNUmakefile.in
+include/omniORB4/tracedthread.h
+src/lib/dir.mk
+
+
 Tue Nov 25 12:34:02 GMT 2014 dgrisby
 ====================================
 
