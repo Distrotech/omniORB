@@ -1,3 +1,16 @@
+Tue Nov 25 12:34:02 GMT 2014 dgrisby
+====================================
+
+- Self-assignment safety.
+
+include/omniORB4/CORBA_Any_vartypes.h
+include/omniORB4/seqTemplatedecls.h
+src/lib/omniORB/python/omniidl_be/cxx/header/template.py
+src/lib/omniORB/python/omniidl_be/cxx/skel/template.py
+src/lib/omniORB/python3/omniidl_be/cxx/header/template.py
+src/lib/omniORB/python3/omniidl_be/cxx/skel/template.py
+
+
 Tue Nov 25 11:21:17 GMT 2014 dgrisby
 ====================================
 
