@@ -1,3 +1,11 @@
+Tue Nov 25 11:21:17 GMT 2014 dgrisby
+====================================
+
+- Avoid zero timeout.
+
+include/omniORB4/internal/tcpSocket.h
+
+
 Thu Oct 23 09:45:43 BST 2014 dgrisby
 ====================================
 
