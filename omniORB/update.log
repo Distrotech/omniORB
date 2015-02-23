@@ -1,3 +1,11 @@
+Mon 23 Feb 11:37:55 GMT 2015 dgrisby
+====================================
+
+- Race condition if application code changes log function. Thanks Peter Klotz.
+
+src/lib/omniORB/orbcore/logIOstream.cc
+
+
 Tue Nov 25 12:42:40 GMT 2014 dgrisby
 ====================================
 
