@@ -1,3 +1,12 @@
+Fri Apr 10 17:42:58 BST 2015 dgrisby
+====================================
+
+- Locking bug in rope matching; misclassification of connection as
+  supporting ZIOP.
+
+src/lib/omniORB/orbcore/giopRope.cc
+
+
 Mon 23 Feb 11:37:55 GMT 2015 dgrisby
 ====================================
 

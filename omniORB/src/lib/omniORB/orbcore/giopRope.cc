@@ -159,10 +159,8 @@ giopRope::acquireClient(const omniIOR*      ior,
     }
     else {
       pd_filtering = 1;
-      {
-        omni_tracedmutex_unlock ul(*omniTransportLock);
-        filterAndSortAddressList();
-      }
+      filterAndSortAddressList();
+
       pd_filtering      = 0;
       pd_addrs_filtered = 1;
 
@@ -670,6 +668,10 @@ giopRope::filterAndSortAddressList()
     const char*  host = ga->host();
 
     if (host && !LibcWrapper::isipaddr(host)) {
+
+      // Unlock omniTransportLock while resolving the name.
+      omni_tracedmutex_unlock ul(*omniTransportLock);
+
       if (omniORB::trace(25)) {
         omniORB::logger log;
         log << "Resolve name '" << host << "'...\n";
@@ -752,7 +754,7 @@ giopRope::filterAndSortAddressList()
           flags |= GIOPSTRAND_BIDIR;
 	}
         else if (strcmp(actions[i],"ziop") == 0) {
-          flags |= GIOPSTRAND_COMPRESSION;
+          flags |= pd_ior_flags & GIOPSTRAND_COMPRESSION;
         }
       }
       if (matched) {
