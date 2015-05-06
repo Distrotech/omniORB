@@ -1027,8 +1027,10 @@ public:
   }
   
   @unionname@(const @unionname@& _value) : _pd__initialised(0) {
-    @copy_constructor@
-    _pd__initialised = _value._pd__initialised;
+    if (_value._pd__initialised) {
+      @copy_constructor@
+      _pd__initialised = _value._pd__initialised;
+    }
   }
 
   ~@unionname@() {
@@ -1037,8 +1039,13 @@ public:
 
   @unionname@& operator=(const @unionname@& _value) {
     if (&_value != this) {
-      @copy_constructor@
-      _pd__initialised = _value._pd__initialised;
+      if (_value._pd__initialised) {
+        @copy_constructor@
+        _pd__initialised = _value._pd__initialised;
+      }
+      else {
+        _release_member();
+      }
     }
     return *this;
   }
