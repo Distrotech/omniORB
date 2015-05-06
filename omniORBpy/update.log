@@ -1,3 +1,12 @@
+Wed  6 May 14:54:14 BST 2015 dgrisby
+====================================
+
+- Add uclinux to platform list.
+
+configure.ac
+configure
+
+
 Fri Oct  3 16:50:25 BST 2014 dgrisby
 ====================================
 
