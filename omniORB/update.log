@@ -1,3 +1,16 @@
+Wed May  6 12:07:16 BST 2015 dgrisby
+====================================
+
+- Avoid issues in use of uninitialised unions. Thanks Michael Teske.
+
+src/lib/omniORB/python/omniidl_be/cxx/header/template.py
+
+- Missing constructor in _var type for fixed length struct. Thanks
+  Daniel Krügler.
+
+include/omniORB4/templatedecls.h
+
+
 Fri Apr 10 17:42:58 BST 2015 dgrisby
 ====================================
 
