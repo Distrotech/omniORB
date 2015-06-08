@@ -1,3 +1,15 @@
+Mon Jun  8 12:36:27 BST 2015 dgrisby
+====================================
+
+- Properly handle SystemExceptions thrown in deferred synchronous DII.
+
+src/lib/omniORB/dynamic/request.cc
+
+- Handle POLLHUP as if it was POLLIN.
+
+src/lib/omniORB/orbcore/SocketCollection.cc
+
+
 Wed  6 May 14:54:14 BST 2015 dgrisby
 ====================================
 
