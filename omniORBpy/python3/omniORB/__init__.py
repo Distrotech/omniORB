@@ -817,7 +817,12 @@ class fixedConstructor(object):
 # *** Depends on threading module internals ***
 
 _thr_init = threading.Thread.__init__
-_thr_id   = threading._get_ident
+
+try:
+    _thr_id = threading._get_ident
+except AttributeError:
+    _thr_id = threading.get_ident
+
 _thr_act  = threading._active
 _thr_acq  = threading._active_limbo_lock.acquire
 _thr_rel  = threading._active_limbo_lock.release
